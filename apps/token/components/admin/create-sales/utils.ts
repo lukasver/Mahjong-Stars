@@ -2,6 +2,7 @@ import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { Sale } from '@/common/schemas/generated';
 import { FormInputProps } from '@mjs/ui/primitives/form-input';
 import { useTranslations } from 'next-intl';
+import { type JSONContent } from '@mjs/ui/components/editor/advanced-editor';
 import z from 'zod';
 
 type SaleKeys = Partial<
@@ -285,9 +286,9 @@ export const InformationSchema = z.object({
 });
 
 export const SaftSchema = z.object({
-  content: z.string(),
-  name: z.string(),
-  description: z.string(),
+  content: z.custom<JSONContent>(),
+  name: z.string().default(''),
+  description: z.string().default(''),
 });
 
 export const SaleSchemas = {

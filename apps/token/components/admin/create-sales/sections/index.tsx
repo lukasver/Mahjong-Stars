@@ -18,6 +18,7 @@ import { Icons } from '@mjs/ui/components/icons';
 import { EditableFormField } from '@mjs/ui/primitives/form-input/editable-field';
 import { CardContainer } from '@mjs/ui/components/cards';
 import { cn } from '@mjs/ui/lib/utils';
+import { useSale } from '@/lib/services/api';
 
 const getInputProps = (
   key: keyof typeof formSchemaShape,
@@ -34,9 +35,26 @@ const getInputProps = (
   };
 };
 
-export const TokenInformation = ({ className }: { className?: string }) => {
+export const TokenInformation = ({
+  saleId,
+  className,
+}: {
+  saleId?: string;
+  className?: string;
+}) => {
   const t = useTranslations('admin.sales.create.basic');
+  const { data, isLoading } = useSale(saleId);
+
+  console.debug('🚀 ~ index.tsx:48 ~ data, isLoading:', data, isLoading);
+  const form = useFormContext() as unknown as UseAppForm;
   const { options } = useInputOptionsContext();
+
+  useEffect(() => {
+    if (data && !isLoading) {
+      const sale = data.sale;
+      form.reset(sale);
+    }
+  }, [data, isLoading]);
 
   return (
     <motion.div {...animation}>

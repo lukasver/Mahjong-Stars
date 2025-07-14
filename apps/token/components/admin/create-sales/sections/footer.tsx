@@ -26,7 +26,7 @@ export const FormFooter = ({
         Back
       </Button>
       <form.SubmitButton className='min-w-32'>
-        {step === steps.length - 1 ? 'Finish' : 'Next'}
+        {step === steps.length ? 'Finish' : 'Next'}
       </form.SubmitButton>
     </div>
   );

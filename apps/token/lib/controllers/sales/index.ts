@@ -523,9 +523,6 @@ class SalesController {
       const data = await prisma.sale.findUniqueOrThrow({
         where: {
           id,
-          saftContract: {
-            isCurrent: true,
-          },
         },
         select: {
           id: true,
@@ -533,7 +530,7 @@ class SalesController {
         },
       });
 
-      const saft = data.saftContract || null;
+      const saft = data.saftContract?.isCurrent ? data.saftContract : null;
       let versions: SaftContract[] = [];
       if (saft && saft.version > 1) {
         versions = await prisma.saftContract.findMany({

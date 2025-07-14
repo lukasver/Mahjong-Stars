@@ -49,19 +49,24 @@ export const CreateSaleForm = () => {
       onSubmit: SaleSchemas[step as keyof typeof SaleSchemas] || SaleFormSchema,
     },
     defaultValues: {},
-    onSubmit: async ({ value }) => {
+
+    onSubmitInvalid: ({ formApi }) => {
+      const { form, fields } = formApi.getAllErrors();
+      const allErrors: string[] = [];
+      Object.values(fields)?.forEach((field) => {
+        field.errors.forEach(({ errors }: { errors: string[] }) => {
+          allErrors.push(errors?.join(', '));
+        });
+      });
+      toast.error(allErrors.join(', '));
+    },
+    onSubmit: async ({ value, formApi }) => {
       console.debug('SUBMITTING', value);
       try {
         if (step === 1) {
           const vals = SaleSchemas[1].parse(value);
-
-          console.debug('🚀 ~ index.tsx:120 ~ onSubmit: ~ vals:', vals);
-
           //Create sale and update query params to reflect the current saleId
           const res = await saleAction.executeAsync(vals);
-
-          console.debug('🚀 ~ index.tsx:77 ~ res:', res);
-
           if (res?.data) {
             setSaleId(res.data.sale.id);
             // Go to next step
@@ -69,12 +74,22 @@ export const CreateSaleForm = () => {
           }
         }
         if (step === 2) {
-          const stepValues = SaleSchemas[2].parse(value);
+          const vals = SaleSchemas[2].parse(value);
+          const f = formApi.getFieldMeta('content');
+
+          console.debug('🚀 ~ index.tsx:80 ~ onSubmit: ~ f:', f);
+
+          if (f?.isPristine) {
+            toast.error('Please fill in the Saft contract');
+            return;
+          }
+
+          return;
           // Create Saft in DB and move no the next step
           await saftAction.executeAsync({
-            content: stepValues.content,
-            name: stepValues.name,
-            description: stepValues.description,
+            content: vals.content,
+            name: vals.name,
+            description: vals.description,
             saleId,
           });
           setStep((pv) => pv + 1);
@@ -123,8 +138,6 @@ export const CreateSaleForm = () => {
             value: string;
             label: string;
           }[] = [...nonFileValues, ...uploadedFiles];
-
-          console.debug('🚀 ~ index.tsx:178 ~ submitValues:', submitValues);
 
           const result = await informationAction.executeAsync({
             data: { information: submitValues },
@@ -213,7 +226,7 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
     <ErrorBoundary fallback={<div>Error with creating sale section</div>}>
       <div className='flex flex-col gap-4 min-h-[300px] h-full'>
         <AnimatePresence>
-          {step === 1 && <TokenInformation key={1} />}
+          {step === 1 && <TokenInformation key={1} saleId={saleId} />}
           {step === 2 && <SaftInformation key={2} saleId={saleId} />}
           {step === 3 && <ProjectInformation key={3} saleId={saleId} />}
         </AnimatePresence>

@@ -67,7 +67,7 @@ export const useActiveSale = () => {
   return { data: data?.data?.sales[0], error: e, status };
 };
 
-export const useSale = (id: string) => {
+export const useSale = (id: string | undefined) => {
   const { data, status, error, isLoading } = useQuery({
     queryKey: ['sales', id],
     queryFn: ({ queryKey }) => getSale(queryKey[1] as string),
