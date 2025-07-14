@@ -14,6 +14,7 @@ import {
 } from '@/common/schemas/generated';
 import { prisma } from '@/db';
 import contractController from '@/lib/controllers/contract';
+import documentsController from '@/lib/controllers/documents';
 import ratesController from '@/lib/controllers/feeds/rates';
 import salesController from '@/lib/controllers/sales';
 import transactionsController from '@/lib/controllers/transactions';
@@ -413,6 +414,20 @@ export const getInputOptions = authActionClient.action(async ({ ctx }) => {
   }
   return result;
 });
+
+export const getFileUploadPresignedUrl = authActionClient
+  .schema(
+    z.object({
+      key: z.string().min(1),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const result = await documentsController.getPresignedUrl(parsedInput.key);
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result.data;
+  });
 
 /**
  * =====================================

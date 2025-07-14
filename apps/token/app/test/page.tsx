@@ -19,6 +19,8 @@ import {
 import { Icons } from '@mjs/ui/components/icons';
 import { EditableFormField } from '@mjs/ui/primitives/form-input/editable-field';
 import { createSaftContract } from '@/lib/actions/admin';
+import { getFileUploadPresignedUrl } from '@/lib/actions';
+import { uploadFile } from '@/lib/utils/files';
 
 const FormSchema = z.object({
   // content: z.coerce.string(),
@@ -27,6 +29,38 @@ const FormSchema = z.object({
   // saleId: z.string().trim(),
   information: z.record(z.string(), z.string()).array(),
 });
+
+const DiscriminatedUnion = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('textarea'),
+    value: z.string(),
+    label: z.string(),
+  }),
+  z.object({
+    type: z.literal('text'),
+    value: z.string(),
+    label: z.string(),
+  }),
+  z.object({
+    type: z.literal('file'),
+    value: z.instanceof(File),
+    label: z.string(),
+  }),
+]);
+
+const schemas = {
+  1: z.any(),
+  2: z.object({
+    content: z.string(),
+    name: z.string(),
+    description: z.string(),
+  }),
+  3: z.object({
+    information: z.array(DiscriminatedUnion),
+  }),
+} as const;
+
+type FileType = Extract<z.infer<typeof DiscriminatedUnion>, { type: 'file' }>;
 
 export default function Page() {
   const { execute, result, isExecuting } = useAction(createSaftContract);
@@ -37,7 +71,7 @@ export default function Page() {
   const saleId = 'cmcyrf1kt000r8o72ess9y14u';
 
   const form = useAppForm({
-    validators: { onSubmit: FormSchema },
+    // validators: { onSubmit: FormSchema },
     defaultValues: {
       // content: '',
       // name: '',
@@ -51,9 +85,32 @@ export default function Page() {
         },
       ],
     },
-    onSubmit: ({ value }) => {
-      console.log('VALL', value);
-      execute(value);
+    onSubmit: async ({ value }) => {
+      const values = schemas[3].parse(value);
+      const fileValues = values.information.filter(
+        (item) => item.type === 'file'
+      ) as unknown as FileType[];
+
+      try {
+        const res = await Promise.all(
+          fileValues.map(async ({ value }) => {
+            const fileName = `${saleId}/${value.name}`;
+            return getFileUploadPresignedUrl({ key: fileName }).then(
+              async (url) => {
+                if (url?.data) {
+                  return uploadFile(value, url.data.url);
+                } else {
+                  throw new Error('Error getting presigned url');
+                }
+              }
+            );
+          })
+        );
+        console.log('RES', res);
+      } catch (e) {
+        console.log('ERROR', e);
+      }
+      // execute(value);
     },
     // transform: useTransform((baseForm) => mergeForm(baseForm, state!), [state]),
   });
@@ -184,6 +241,9 @@ const ProjectInformation = ({
             }}
           </form.Field>
         </ul>
+        <Button type='submit' className='w-full mb-4'>
+          SUBMIT
+        </Button>
         <Button type='button' onClick={handleCheck} className='w-full'>
           check
         </Button>
@@ -191,23 +251,6 @@ const ProjectInformation = ({
     </CardContainer>
   );
 };
-
-const recommendedInputs = [
-  {
-    type: 'textarea',
-    label: 'Summary',
-  },
-  {
-    type: 'textarea',
-    label: 'Token Utility',
-  },
-  {
-    type: 'textarea',
-    label: 'Tokenomics',
-  },
-] as const;
-
-const saleInfoInputs: SaleInfoInput[] = [...recommendedInputs];
 
 type SaleInfoInput = {
   type: 'text' | 'textarea' | 'file';

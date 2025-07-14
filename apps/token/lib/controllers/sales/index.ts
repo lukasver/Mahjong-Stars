@@ -396,9 +396,7 @@ class SalesController {
     const updateData: Prisma.SaleUpdateInput = {
       ...rest,
       ...(information && {
-        information: {
-          set: information,
-        },
+        information,
       }),
       //TODO! amend rest of info
     };
@@ -412,7 +410,7 @@ class SalesController {
         where: { id: sale.id },
         data: updateData,
       });
-      return Success({ sale: updatedSale });
+      return Success({ sale: this.decimalsToString(updatedSale) });
     } catch (error) {
       logger(error);
       return Failure(error);

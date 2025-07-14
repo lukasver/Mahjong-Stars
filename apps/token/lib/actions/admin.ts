@@ -122,7 +122,7 @@ export const updateProjectInformation = adminClient
   .action(async ({ ctx, parsedInput }) => {
     const { saleId, ...rest } = parsedInput;
 
-    const sales = await salesInformationController.updateSaleInformation(
+    const sales = await salesController.updateSaleInformation(
       saleId,
       rest,
       ctx

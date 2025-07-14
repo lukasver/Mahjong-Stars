@@ -49,6 +49,10 @@ export const env = createEnv({
     THIRDWEB_ADMIN_PRIVATE_KEY: z.string().min(1),
     THIRDWEB_API_SECRET: z.string().min(1),
     DOCUMENSO_API_KEY: z.string().min(1),
+    R2_ACCESS_KEY_ID: z.string().min(1),
+    R2_SECRET_ACCESS_KEY: z.string().min(1),
+    R2_ACCOUNT_ID: z.string().min(1),
+    R2_BUCKET: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_THIRDWEB_CLIENT_ID: z.string().min(1),
@@ -83,6 +87,10 @@ export const env = createEnv({
     THIRDWEB_ADMIN_PRIVATE_KEY: process.env.THIRDWEB_ADMIN_PRIVATE_KEY,
     THIRDWEB_API_SECRET: process.env.THIRDWEB_API_SECRET,
     DOCUMENSO_API_KEY: process.env.DOCUMENSO_API_KEY,
+    R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
+    R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
+    R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
+    R2_BUCKET: process.env.R2_BUCKET,
   },
 });
 

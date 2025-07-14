@@ -77,6 +77,14 @@ export default () => {
           protocol: 'https',
           hostname: '*.ipfscdn.io',
         },
+        {
+          protocol: 'https',
+          hostname: 'res.cloudinary.com',
+        },
+        {
+          protocol: 'https',
+          hostname: '*.r2.cloudflarestorage.com',
+        },
       ],
     },
     experimental: {

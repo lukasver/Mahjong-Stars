@@ -13,11 +13,24 @@ import Handlebars from 'handlebars';
 import { invariant } from '@epic-web/invariant';
 import { DateTime } from 'luxon';
 
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
 class DocumentsController {
   private documenso: DocumensoSdk;
+  private s3: S3Client;
+  private bucket: string = env.R2_BUCKET;
 
   constructor() {
     this.documenso = new DocumensoSdk(env);
+    this.s3 = new S3Client({
+      region: 'auto',
+      endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: env.R2_ACCESS_KEY_ID,
+        secretAccessKey: env.R2_SECRET_ACCESS_KEY,
+      },
+    });
   }
 
   // this.service.getDocumentPresignedUrl(user, payload)
@@ -121,6 +134,35 @@ class DocumentsController {
   // this.service.sendForDocumentSigning(user, uid, payload)
   // this.service.downloadDocument(uid)
   // this.service.sendRecipientReminder(user, uid)
+
+  /**
+   *
+   * @param key - file name with extension.
+   * @param expiresIn
+   * @returns
+   */
+  async getPresignedUrl(
+    key: string,
+    expiresIn: number = 3600,
+    metadata?: Record<string, string>
+  ) {
+    try {
+      const res = await getSignedUrl(
+        this.s3,
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+          Metadata: metadata,
+        }),
+        { expiresIn }
+      );
+
+      return Success({ url: res });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
 
   private generateHTMLFromJSONContent = (content: JSONContent) => {
     if (!content || typeof content !== 'object') {

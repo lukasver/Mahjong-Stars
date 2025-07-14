@@ -1,6 +1,7 @@
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { Sale } from '@/common/schemas/generated';
 import { FormInputProps } from '@mjs/ui/primitives/form-input';
+import { useTranslations } from 'next-intl';
 import z from 'zod';
 
 type SaleKeys = Partial<
@@ -14,6 +15,7 @@ type SaleKeys = Partial<
     | 'createdBy'
     | 'tokenId'
     | 'tokenTotalSupply'
+    | 'information'
   >
 >;
 
@@ -254,3 +256,47 @@ export const saleInformationInputProps = {
     },
   },
 } as InputProps<keyof typeof saleInformationSchema>;
+
+export const getSteps = (_t: ReturnType<typeof useTranslations>) => [
+  { id: 1, name: 'Create', description: 'Basic information' },
+  { id: 2, name: 'Contract', description: 'Contract details' },
+  { id: 3, name: 'Additional Information', description: 'Final details' },
+];
+
+const DiscriminatedUnion = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('textarea'),
+    value: z.string(),
+    label: z.string(),
+  }),
+  z.object({
+    type: z.literal('text'),
+    value: z.string(),
+    label: z.string(),
+  }),
+  z.object({
+    type: z.literal('file'),
+    value: z.instanceof(File),
+    label: z.string(),
+  }),
+]);
+export const InformationSchema = z.object({
+  information: z.array(DiscriminatedUnion),
+});
+
+export const SaftSchema = z.object({
+  content: z.string(),
+  name: z.string(),
+  description: z.string(),
+});
+
+export const SaleSchemas = {
+  1: SaleFormSchema,
+  2: SaftSchema,
+  3: InformationSchema,
+} as const;
+
+export type FileType = Extract<
+  z.infer<typeof DiscriminatedUnion>,
+  { type: 'file' }
+>;
