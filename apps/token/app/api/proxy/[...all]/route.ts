@@ -11,12 +11,6 @@ export const GET = withAuth(async (req, context, auth) => {
   const qParams = req.nextUrl.searchParams;
   const qParamsObject = Object.fromEntries(qParams.entries());
 
-  console.debug('🚀 ~ route.ts:13 ~ qParams:', qParamsObject);
-
-  const path = all.join('/');
-
-  console.debug('🚀 ~ route.ts:13 ~ path:', path);
-
   const controller = all[0];
   const identifier = all[1];
   const subIdentifier = all[2];

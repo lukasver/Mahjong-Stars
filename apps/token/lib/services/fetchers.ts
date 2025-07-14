@@ -121,8 +121,8 @@ export const getSales = async (params?: { active?: boolean }) => {
 
 export const getSale = async (id: string) => {
   try {
-    const data = await fetcher<Sale>(`/sales/${id}`);
-    return { data: data, error: null };
+    const data = await fetcher<{ sale: Sale }>(`/sales/${id}`);
+    return { data, error: null };
   } catch (e) {
     return { data: null, error: e };
   }

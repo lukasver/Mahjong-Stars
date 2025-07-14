@@ -12,16 +12,12 @@ import {
   UpdateSaleDto,
   UpdateSaleStatusDto,
 } from '@/common/schemas/dtos/sales';
-import {
-  CreateSaleInformationDto,
-  UpdateSaleInformationDto,
-} from '@/common/schemas/dtos/sales/information';
+
 import {
   CancelAllTransactionsDto,
   UpdateTransactionDto,
 } from '@/common/schemas/dtos/transactions';
 import salesController from '@/lib/controllers/sales';
-import salesInformationController from '@/lib/controllers/salesInformation';
 import transactionsController from '@/lib/controllers/transactions';
 import { TransactionStatus } from '@prisma/client';
 import { z } from 'zod';
@@ -110,26 +106,17 @@ export const updateSale = adminClient
 /**
  * @warning ADMIN REQUIRED
  */
-export const createSaleInformation = adminClient
-  .schema(CreateSaleInformationDto.extend({ saleId: z.string() }))
-  .action(async ({ ctx, parsedInput }) => {
-    const sales = await salesInformationController.upsertSaleInformation(
-      parsedInput,
-      ctx
-    );
-    if (!sales.success) {
-      throw new Error(sales.message);
-    }
-    return sales.data;
-  });
-
-/**
- * @warning ADMIN REQUIRED
- */
-export const updateSaleInformation = adminClient
+export const updateProjectInformation = adminClient
   .schema(
-    UpdateSaleInformationDto.extend({
+    z.object({
       saleId: z.string(),
+      information: z.array(
+        z.object({
+          label: z.string(),
+          type: z.string(),
+          value: z.string(),
+        })
+      ),
     })
   )
   .action(async ({ ctx, parsedInput }) => {

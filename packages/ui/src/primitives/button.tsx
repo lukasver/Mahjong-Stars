@@ -66,12 +66,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           'grid [&>*]:col-span-full [&>*]:row-span-full'
         )}
         ref={ref}
+        {...(!asChild && { type: 'button' })}
         {...props}
       >
         <Icons.loader
           className={cn(loading ? 'text-foreground animate-spin' : 'hidden')}
         />
-        <span className={cn('contents', loading && 'sr-only hidden!')}>
+        <span
+          className={cn(
+            'flex items-center gap-2',
+            loading && 'sr-only hidden!'
+          )}
+        >
           {props.children}
         </span>
       </Comp>

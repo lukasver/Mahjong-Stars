@@ -15,7 +15,8 @@ import { Separator } from '@mjs/ui/primitives/separator';
 import { Copy, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
 import { copyToClipboard } from '@mjs/utils/client';
 import { useSale } from '@/lib/services/api';
-import { invariant } from '@epic-web/invariant';
+import { Prisma } from '@prisma/client';
+import { Skeleton } from '@mjs/ui/primitives/skeleton';
 
 interface SaleDetailsModalProps {
   open: boolean;
@@ -65,9 +66,12 @@ function formatDate(dateString: string) {
   });
 }
 
-function formatNumber(num: number) {
-  if (isNaN(num)) return 'N/A';
-  return new Intl.NumberFormat('en-US').format(num);
+function formatNumber(num: number | string, locale: string = 'en-US') {
+  if (!num) return 'N/A';
+  const decimal = new Prisma.Decimal(num);
+  const asNum = decimal.toNumber();
+  if (isNaN(asNum)) return 'N/A';
+  return new Intl.NumberFormat(locale).format(asNum);
 }
 
 function formatCurrency(amount: number, currency: string) {
@@ -116,13 +120,20 @@ export function SaleDetailsModal({
   onOpenChange,
   id,
 }: SaleDetailsModalProps) {
-  const { data, isLoading } = useSale(id);
+  const { data, isLoading, error } = useSale(id);
 
   if (!id) return null;
-  if (isLoading) return <div>Loading...</div>;
   const sale = data?.sale;
+  // If error, Error boundary should handle
+  if (error) {
+    throw new Error(error);
+  }
+  // If we are not loading and sale is null, throw error
+  if (!sale && !isLoading) {
+    throw new Error('Sale not found');
+  }
 
-  invariant(sale, 'Sale not found');
+  if (!sale) return null;
 
   const progress =
     ((sale.initialTokenQuantity - sale.availableTokenQuantity) /
@@ -138,13 +149,17 @@ export function SaleDetailsModal({
           <div className='flex items-start justify-between'>
             <div>
               <DialogTitle className='text-xl font-semibold'>
-                {sale.name}
+                {isLoading ? <Skeleton className='w-40 h-6' /> : sale.name}
               </DialogTitle>
               <DialogDescription className='mt-1'>
-                Detailed information about this token sale
+                {isLoading ? (
+                  <Skeleton className='w-52 h-4' />
+                ) : (
+                  'Detailed information about this token sale'
+                )}
               </DialogDescription>
             </div>
-            {getStatusBadge(sale.status)}
+            {!isLoading && getStatusBadge(sale.status)}
           </div>
         </DialogHeader>
 
@@ -167,6 +182,22 @@ export function SaleDetailsModal({
           <div>
             <h3 className='text-lg font-semibold mb-3'>Token Information</h3>
             <div className='space-y-1'>
+              {sale.information &&
+                Array.isArray(sale.information) &&
+                sale.information.map((item) => {
+                  const info = item as unknown as {
+                    label: string;
+                    value: string | number | boolean | null;
+                    type: string;
+                  };
+                  return (
+                    <DetailRow
+                      key={info.label}
+                      label={info.label}
+                      value={info.value}
+                    />
+                  );
+                })}
               <DetailRow label='Token Name' value={sale.tokenName} />
               <DetailRow label='Token Symbol' value={sale.tokenSymbol} />
               <DetailRow label='Token ID' value={sale.tokenId} />

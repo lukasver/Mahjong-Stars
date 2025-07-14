@@ -190,11 +190,11 @@ model Sale {
   createdBy              String
   saftCheckbox           Boolean       @default(false)
   saftContract           SaftContract?
+  information            Json?
 
-  user            User               @relation(fields: [createdBy], references: [id])
-  transactions    SaleTransactions[]
-  saleInformation SaleInformation?
-  documents       Document[]
+  user         User               @relation(fields: [createdBy], references: [id])
+  transactions SaleTransactions[]
+  documents    Document[]
 
   vestingSchedules VestingSchedule[]
 
@@ -333,29 +333,6 @@ model TokenDistribution {
   status           String
 
   @@map("token_distributions")
-}
-
-model SaleInformation {
-  id        String    @id @default(cuid()) @db.Text
-  createdAt DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
-  deletedAt DateTime? @db.Timestamptz(6)
-
-  summary           String?
-  tokenUtility      String?
-  tokenDistribution String?
-  otherInformation  String?
-  tokenLifecycle    String?
-  liquidityPool     String?
-  futurePlans       String?
-  useOfProceeds     String?
-  imageSale         String?
-  imageToken        String?
-  contactEmail      String?
-  sale              Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  saleId            String  @unique
-
-  @@map("sales_information")
 }
 
 model SaleTransactions {

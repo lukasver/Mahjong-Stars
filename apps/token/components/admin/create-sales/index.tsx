@@ -17,7 +17,7 @@ import {
 } from '@mjs/ui/primitives/form/index';
 import { useTranslations } from 'next-intl';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { formSchemaShape, InputProps, SaleFormSchema } from './utils';
 import { SaftEditor } from '../saft-editor';
 import { useAction } from 'next-safe-action/hooks';
@@ -30,6 +30,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@mjs/ui/primitives/card';
+import { Icons } from '@mjs/ui/components/icons';
+import { EditableFormField } from '@mjs/ui/primitives/form-input/editable-field';
 
 const getInputProps = (
   key: keyof typeof formSchemaShape,
@@ -55,7 +57,7 @@ const steps = [
 const schemas = {
   1: SaleFormSchema,
   2: z.object({}),
-  3: z.object({}),
+  3: z.record(z.string(), z.string()),
 } as const;
 
 export const CreateSaleForm = () => {
@@ -70,6 +72,7 @@ export const CreateSaleForm = () => {
 
   const saleAction = useAction(createSale);
   const saftAction = useAction(createSaftContract);
+  const informationAction = useAction(updateProjectInformation);
 
   const form = useAppForm({
     validators: {
@@ -79,7 +82,7 @@ export const CreateSaleForm = () => {
     onSubmit: async ({ value }) => {
       if (step === 1) {
         //Create sale and update query params to reflect the current saleId
-        const res = await saleAction.executeAsync(value);
+        const res = await saleAction.executeAsync(value as (typeof schemas)[1]);
 
         console.debug('🚀 ~ index.tsx:77 ~ res:', res);
 
@@ -90,16 +93,22 @@ export const CreateSaleForm = () => {
         }
       }
       if (step === 2) {
+        const stepValues = value as (typeof schemas)[2];
         // Create Saft in DB and move no the next step
         const res = await saftAction.executeAsync({
-          content: value.content,
-          name: value.name,
-          description: value.description,
+          content: stepValues.content,
+          name: stepValues.name,
+          description: stepValues.description,
           saleId,
         });
+
+        console.debug('🚀 ~ index.tsx:104 ~ onSubmit: ~ res:', res);
+
         setStep((pv) => pv + 1);
       }
       if (step === 3) {
+        console.debug('🚀 ~ index.tsx:108 ~ onSubmit: ~ step:', step);
+        informationAction.executeAsync(value as (typeof schemas)[3]);
         //Update project information and finish
         // setStep((pv) => pv + 1);
       }
@@ -181,6 +190,7 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
         {step === 2 && <SaftInformation key={2} saleId={saleId} />}
         {step === 3 && <ProjectInformation key={3} saleId={saleId} />}
       </AnimatePresence>
+      {children}
     </div>
   );
 };
@@ -239,18 +249,24 @@ const CardContainer = ({
   title,
   description,
   className,
+  header,
 }: {
   children?: React.ReactNode;
   title?: string;
   description?: string;
   className?: string;
+  header?: React.ReactNode;
 }) => {
   return (
     <Card className={className}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
+      {header ? (
+        header
+      ) : (
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+      )}
       <CardContent className='space-y-6'>{children}</CardContent>
     </Card>
   );
@@ -292,18 +308,83 @@ const ProjectInformation = ({
   saleId?: string;
   className?: string;
 }) => {
+  const form = useFormContext() as unknown as UseAppForm;
+  const stepValue = form.getFieldValue('information');
+
+  const handleAddField = () => {
+    const value = form.getFieldValue('information') as unknown[];
+    form.setFieldValue(
+      'information',
+      value.concat([
+        {
+          label: 'New Field',
+          type: 'textarea',
+          value: '',
+        },
+      ])
+    );
+  };
+
+  useEffect(() => {
+    console.debug('🚀 ~ index.tsx:334 ~ useEffect ~ stepValue:', stepValue);
+  }, [stepValue]);
+
   if (!saleId) {
     //TODO! improve
     return <div>No saleId</div>;
   }
+
   return (
     <motion.div {...animation}>
       <CardContainer
-        title='Project Information'
-        description='Manage project information'
         className={className}
+        header={
+          <CardHeader>
+            <div className='flex items-center justify-between'>
+              <CardTitle className='flex-1'>Project Information</CardTitle>
+              <Button
+                variant='outline'
+                size='icon'
+                className='shrink-0'
+                onClick={handleAddField}
+                type='button'
+              >
+                <Icons.plus className='w-4 h-4' />
+                <span className='sr-only'>Add information field</span>
+              </Button>
+            </div>
+            <CardDescription>Manage project information</CardDescription>
+          </CardHeader>
+        }
       >
-        <div>TODO</div>
+        <div className='flex flex-col gap-4'>
+          <ul className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+            <form.Field name='information' mode='array'>
+              {(field) => {
+                return (
+                  <>
+                    {(field.state.value as unknown[])?.map((_, index) => (
+                      <form.Field key={index} name={`information[${index}]`}>
+                        {(itemField) => (
+                          <EditableFormField
+                            field={itemField}
+                            index={index}
+                            onRemove={(idx) => field.removeValue(idx)}
+                          />
+                        )}
+                      </form.Field>
+                    ))}
+                    {(field.state.value as unknown[]).length === 0 && (
+                      <div className='text-center py-12 text-muted-foreground'>
+                        No fields yet. Click the + sign to.
+                      </div>
+                    )}
+                  </>
+                );
+              }}
+            </form.Field>
+          </ul>
+        </div>
       </CardContainer>
     </motion.div>
   );
@@ -332,4 +413,26 @@ const FormFooter = () => {
       </form.SubmitButton>
     </div>
   );
+};
+const recommendedInputs = [
+  {
+    type: 'textarea',
+    label: 'Summary',
+  },
+  {
+    type: 'textarea',
+    label: 'Token Utility',
+  },
+  {
+    type: 'textarea',
+    label: 'Tokenomics',
+  },
+] as const;
+
+const saleInfoInputs: SaleInfoInput[] = [...recommendedInputs];
+
+type SaleInfoInput = {
+  type: 'text' | 'textarea' | 'file';
+  value?: string;
+  label: string;
 };

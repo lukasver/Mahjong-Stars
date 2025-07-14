@@ -10,6 +10,7 @@ import {
 } from '@mjs/ui/primitives/card';
 import { Input } from '@mjs/ui/primitives/input';
 import {
+  AlertCircle,
   ChevronDown,
   Edit,
   Eye,
@@ -41,6 +42,13 @@ import { cn } from '@mjs/ui/lib/utils';
 import { Badge } from '@mjs/ui/primitives/badge';
 import { SaleDetailsModal } from './sale-details-modal';
 import Link from 'next/link';
+import ErrorBoundary from '@mjs/ui/components/error-boundary';
+import {
+  Dialog,
+  DialogHeader,
+  DialogContent,
+  DialogTitle,
+} from '@mjs/ui/primitives/dialog';
 
 export function ListSales({
   children,
@@ -269,7 +277,7 @@ export function ListSales({
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                               <Link
-                                href={`/admin/sales/create?edit=${sale.id}`}
+                                href={`/admin/sales/create?saleId=${sale.id}&step=1`}
                               >
                                 <Edit className='mr-2 h-4 w-4' />
                                 Edit Sale
@@ -305,11 +313,24 @@ export function ListSales({
         </CardContent>
       </Card>
       {selectedSale && (
-        <SaleDetailsModal
-          id={selectedSale.id}
-          open={isDetailsModalOpen}
-          onOpenChange={setIsDetailsModalOpen}
-        />
+        <ErrorBoundary
+          fallback={
+            <Dialog defaultOpen>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Error loading sale details</DialogTitle>
+                </DialogHeader>
+                <AlertCircle className='h-16 w-16 text-destructive mx-auto mb-4' />
+              </DialogContent>
+            </Dialog>
+          }
+        >
+          <SaleDetailsModal
+            id={selectedSale.id}
+            open={isDetailsModalOpen}
+            onOpenChange={setIsDetailsModalOpen}
+          />
+        </ErrorBoundary>
       )}
     </div>
   );

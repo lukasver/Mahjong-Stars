@@ -61,22 +61,7 @@ const QUERY_MAPPING: { active: Prisma.SaleFindFirstArgs } = {
           },
         },
       },
-      saleInformation: {
-        select: {
-          summary: true,
-          tokenUtility: true,
-          tokenDistribution: true,
-          otherInformation: true,
-          tokenLifecycle: true,
-          liquidityPool: true,
-          futurePlans: true,
-          useOfProceeds: true,
-          imageSale: true,
-          imageToken: true,
-          contactEmail: true,
-          saleId: true,
-        },
-      },
+      information: true,
     },
   },
 };
@@ -186,7 +171,6 @@ class SalesController {
   ): Promise<
     | Success<{
         sale: Sale;
-        saleInformation: unknown;
       }>
     | Failure
   > {
@@ -198,10 +182,10 @@ class SalesController {
         where: { id: String(id) },
       });
       invariant(sale, 'Sale not found in DB');
-      const saleInformation = await prisma.saleInformation.findUnique({
-        where: { saleId: sale.id },
+
+      return Success({
+        sale: this.decimalsToString(sale),
       });
-      return Success({ sale, saleInformation });
     } catch (error) {
       logger(error);
       return Failure(error);
@@ -398,6 +382,27 @@ class SalesController {
         'Invalid request parameters'
       );
     }
+
+    const {
+      currency,
+      tokenContractChainId,
+      tokenId,
+      tokenSymbol,
+      createdBy,
+      information,
+      ...rest
+    } = data;
+
+    const updateData: Prisma.SaleUpdateInput = {
+      ...rest,
+      ...(information && {
+        information: {
+          set: information,
+        },
+      }),
+      //TODO! amend rest of info
+    };
+
     try {
       const sale = await prisma.sale.findFirst({
         where: { id: String(id) },
@@ -405,7 +410,7 @@ class SalesController {
       invariant(sale, 'Sale not found in DB');
       const updatedSale = await prisma.sale.update({
         where: { id: sale.id },
-        data,
+        data: updateData,
       });
       return Success({ sale: updatedSale });
     } catch (error) {

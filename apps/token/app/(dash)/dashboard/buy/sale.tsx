@@ -42,8 +42,10 @@ function isImageKey(
 export const TokenSale = () => {
   const { data: sale } = useActiveSale();
 
+  console.debug('🚀 ~ sale.tsx:45 ~ TokenSale ~ sale:', sale);
+
   invariant(sale, 'Sale not found');
-  const saleInformations = sale?.saleInformation;
+  const information = sale?.information;
   return (
     <div className='flex flex-col gap-6'>
       <div className='flex flex-col items-start py-8 gap-4'>
@@ -62,13 +64,12 @@ export const TokenSale = () => {
         <OverviewFormInvest sale={sale} />
       </div>
       {/* Sale information accordions */}
-      {saleInformations && (
+      {information && (
         <div className='mt-4'>
           <Accordion type='multiple' className='w-full'>
-            {Object.keys(saleInformations).map((key) => {
+            {Object.keys(information).map((key) => {
               const title = saleInformationValues[key];
-              const content =
-                saleInformations[key as keyof typeof saleInformations];
+              const content = information[key as keyof typeof information];
               if (!title || !content || isImageKey(key, saleInformationValues))
                 return null;
               return (

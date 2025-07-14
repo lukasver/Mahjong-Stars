@@ -2,6 +2,15 @@
 
 import { cn } from '@mjs/ui/lib/utils';
 import { Check } from 'lucide-react';
+import {
+  Stepper as _Stepper,
+  StepperDescription,
+  StepperIndicator,
+  StepperItem,
+  StepperSeparator,
+  StepperTitle,
+  StepperTrigger,
+} from '@mjs/ui/primitives/stepper';
 
 type Step = {
   id: number;
@@ -26,7 +35,7 @@ export function Stepper({
     <div className={cn('w-full py-6', className)}>
       <div className='flex items-center justify-between px-4 py-2'>
         {steps.map((step, index) => (
-          <div key={step.id} className='flex items-center'>
+          <div key={step.id} className='flex not-last:flex-1 items-center'>
             <div className='flex flex-col items-center'>
               <button
                 onClick={() => onStepClick?.(step.id)}
@@ -80,3 +89,35 @@ export function Stepper({
     </div>
   );
 }
+
+export const Stepper2 = ({
+  currentStep,
+  steps,
+  onStepClick,
+  className,
+}: StepperProps) => {
+  return (
+    <_Stepper
+      value={currentStep}
+      onValueChange={onStepClick}
+      className={className}
+    >
+      {steps.map((step) => (
+        <StepperItem key={step.id} step={step.id} className='not-last:flex-1'>
+          <StepperTrigger className='flex-col gap-3 rounded'>
+            <StepperIndicator />
+            <div className='space-y-0.5 px-2'>
+              <StepperTitle>{step.name}</StepperTitle>
+              <StepperDescription className='max-sm:hidden'>
+                {step.description}
+              </StepperDescription>
+            </div>
+          </StepperTrigger>
+          {step.id < steps.length && (
+            <StepperSeparator className='absolute inset-x-0 top-3 left-[calc(50%+0.75rem+0.125rem)] -order-1 m-0 -translate-y-1/2 group-data-[orientation=horizontal]/stepper:w-[calc(100%-1.5rem-0.25rem)] group-data-[orientation=horizontal]/stepper:flex-none' />
+          )}
+        </StepperItem>
+      ))}
+    </_Stepper>
+  );
+};

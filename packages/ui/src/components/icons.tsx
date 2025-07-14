@@ -22,6 +22,7 @@ import {
   YoutubeIcon,
   Check,
   ChevronDown,
+  Plus,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -48,6 +49,7 @@ export const Icons = {
   linkedin: LinkedinIcon,
   youtube: YoutubeIcon,
   home: Home,
+  plus: Plus,
   arrowLeft: ArrowLeft,
   refreshCw: RefreshCw,
   alertTriangle: AlertTriangle,

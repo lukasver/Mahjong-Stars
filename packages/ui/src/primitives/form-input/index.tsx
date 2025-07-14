@@ -11,6 +11,7 @@ import { cn } from '@mjs/ui/lib/utils';
 import { SelectInput } from './select-input';
 import { isObject } from 'motion/react';
 import { DateInput, DateInputProps } from './date-input';
+import { UseAppForm } from '../form';
 
 interface DefaultInputProps extends ComponentProps<typeof Input> {
   options?: never;
@@ -35,7 +36,6 @@ export type FormInputProps = {
   inputProps?: Partial<InputUnionProps> & {
     required?: boolean;
   };
-  children?: React.ReactNode;
 };
 
 // // Base interface with common properties
@@ -95,15 +95,13 @@ export function FormInput({
   className,
   ...props
 }: FormInputProps) {
-  const form = useFormContext();
+  const form = useFormContext() as unknown as UseAppForm;
   if (!form) {
     throw new Error('FormInput must be used within a Form');
   }
 
   return (
-    // @ts-expect-error fixme
     <form.AppField name={name}>
-      {/* @ts-expect-error fixme */}
       {(field) => (
         <field.FormItem className={cn(className)}>
           <div
@@ -159,7 +157,6 @@ export function FormInput({
           {message && <field.FormMessage className='text-secondary-100' />}
         </field.FormItem>
       )}
-      {/* @ts-expect-error fixme */}
     </form.AppField>
   );
 }

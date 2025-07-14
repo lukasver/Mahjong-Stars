@@ -133,8 +133,8 @@ export const SaleFormSchema = z
     }
   });
 
-export type InputProps = {
-  [key in keyof typeof formSchemaShape]: Omit<FormInputProps, 'name'> & {
+export type InputProps<T extends string> = {
+  [key in T]: Omit<FormInputProps, 'name'> & {
     optionKey?: string;
   };
 };
@@ -186,4 +186,71 @@ export const InputProps = {
     inputProps: { inputMode: 'decimal', autoComplete: 'off' },
   },
   saftCheckbox: { type: 'checkbox' },
-} as InputProps;
+} as InputProps<keyof typeof formSchemaShape>;
+
+export const saleInformationSchema = {
+  summary: z.string().min(1, 'Summary is required'),
+  tokenUtility: z.string().min(1, 'Token utility is required'),
+  tokenDistribution: z.string().min(1, 'Token distribution is required'),
+  futurePlans: z.string().min(1, 'Roadmap is required'),
+  contactEmail: z.string().email('Invalid email address'),
+  imageSale: z
+    .instanceof(File, { message: 'Sale image is required' })
+    .refine((file) => file.type.startsWith('image/'), 'File must be an image'),
+  imageToken: z
+    .instanceof(File, { message: 'Token image is required' })
+    .refine((file) => file.type.startsWith('image/'), 'File must be an image'),
+} as const;
+
+export const saleInformationInputProps = {
+  summary: {
+    type: 'textarea',
+    inputProps: {
+      size: 'small' as const,
+      multiline: true,
+      rows: 1,
+    },
+  },
+  tokenUtility: {
+    type: 'textarea',
+    inputProps: {
+      size: 'small' as const,
+      multiline: true,
+      rows: 1,
+    },
+  },
+  tokenDistribution: {
+    type: 'textarea',
+    inputProps: {
+      placeholder: 'Smat Public Sale',
+      size: 'small' as const,
+      multiline: true,
+      rows: 1,
+    },
+  },
+  futurePlans: {
+    type: 'textarea',
+    inputProps: {
+      placeholder: 'Smat Public Sale',
+      size: 'small' as const,
+      multiline: true,
+      rows: 1,
+    },
+  },
+  contactEmail: {
+    type: 'email',
+    inputProps: {},
+  },
+  imageSale: {
+    type: 'file',
+    inputProps: {
+      accept: ['image/*'],
+    },
+  },
+  imageToken: {
+    type: 'file',
+    inputProps: {
+      accept: ['image/*'],
+    },
+  },
+} as InputProps<keyof typeof saleInformationSchema>;

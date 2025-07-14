@@ -3,7 +3,7 @@ import { createSaleInformation } from '@/lib/actions';
 import { Button } from '@mjs/ui/primitives/button';
 import { FormInput } from '@mjs/ui/primitives/form-input';
 import { toast } from '@mjs/ui/primitives/sonner';
-import { useAppForm } from '../../../../../../packages/ui/dist/primitives/form/tanstack-form';
+import { useAppForm } from '@mjs/ui/primitives/form';
 import { Check, Pencil, X } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 import { z } from 'zod';
