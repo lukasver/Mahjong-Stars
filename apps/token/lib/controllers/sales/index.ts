@@ -537,10 +537,10 @@ class SalesController {
           where: {
             OR: [
               {
-                parentId: null,
+                parentId: saft?.parentId || saft?.id,
               },
               {
-                parentId: saft.id,
+                parentId: null,
               },
             ],
           },

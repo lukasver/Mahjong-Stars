@@ -1,9 +1,6 @@
 import 'server-only';
 import { env } from '@/common/config/env';
 import { DocumensoSdk } from '@/lib/documents/documenso';
-import { generateHTML } from '@tiptap/html';
-import { JSONContent } from './types';
-import { editorExtensions } from './extensions';
 import sanitizeHtml from 'sanitize-html';
 import { ActionCtx } from '@/common/schemas/dtos/sales';
 import { prisma } from '@/db';
@@ -12,6 +9,11 @@ import logger from '@/lib/services/logger.server';
 import Handlebars from 'handlebars';
 import { invariant } from '@epic-web/invariant';
 import { DateTime } from 'luxon';
+import {
+  extensions,
+  JSONContent,
+  generateHTML,
+} from '@mjs/utils/server/tiptap';
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -51,6 +53,9 @@ class DocumentsController {
     _ctx: ActionCtx
   ) {
     console.debug('🚀 ~ index.ts:41 ~ dto:', dto);
+    console.group('content');
+    console.log(JSON.stringify(dto.content));
+    console.groupEnd();
 
     try {
       invariant(dto.saleId, 'Sale ID is required');
@@ -77,6 +82,7 @@ class DocumentsController {
         // Create saft in Database
 
         const newVersion = (existingSaft?.version || 0) + 1;
+        const variables = this.extractHandlebarsVariables(dto.content);
         const newSaft = await prisma.saftContract.create({
           data: {
             name:
@@ -98,7 +104,7 @@ class DocumentsController {
                 id: dto.saleId,
               },
             },
-            variables: this.extractHandlebarsVariables(dto.content),
+            variables,
           },
         });
 
@@ -169,7 +175,7 @@ class DocumentsController {
       return '';
     }
     try {
-      return generateHTML(content, editorExtensions);
+      return generateHTML(content, extensions);
     } catch (error) {
       console.error('Error generating HTML from JSON content:', error);
       return '';
@@ -223,7 +229,6 @@ class DocumentsController {
       }
     }
 
-    // Handle triple mustache {{{variable}}}
     if (node.type === 'ContentStatement' && node.value) {
       // No variable here, just content
     }

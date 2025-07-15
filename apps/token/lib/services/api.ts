@@ -68,11 +68,11 @@ export const useActiveSale = () => {
 };
 
 export const useSale = (id: string | undefined) => {
-  const { data, status, error, isLoading } = useQuery({
+  const { data, status, error, isLoading } = useSuspenseQuery({
     queryKey: ['sales', id],
     queryFn: ({ queryKey }) => getSale(queryKey[1] as string),
     staleTime: DEFAULT_STALE_TIME,
-    enabled: !!id,
+    // enabled: !!id,
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, status, isLoading };

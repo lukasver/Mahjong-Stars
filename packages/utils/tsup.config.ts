@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   clean: true,
   splitting: true,
-  entry: ['index.ts', 'client/index.ts'],
+  entry: ['index.ts', 'client/index.ts', 'server/tiptap.ts'],
   format: ['esm'], // Add 'cjs' for CommonJS support
   dts: true,
   minify: true,

@@ -42,7 +42,7 @@
 						"label": "Price per Unit",
 						"description": "Price the token will be sold in this sale"
 					},
-					"saleCurrency": {
+					"currency": {
 						"label": "Currency",
 						"description": "FIAT Currency to be used in this sale for the PPU"
 					},

@@ -6,7 +6,8 @@
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js",
-		"./client": "./dist/client/index.js"
+		"./client": "./dist/client/index.js",
+		"./server/tiptap": "./dist/server/tiptap.js"
 	},
 	"scripts": {
 		"build": "tsup"
@@ -26,6 +27,21 @@
 		"@ai-sdk/google": "^1.2.19",
 		"ai": "^4.3.16",
 		"handlebars": "^4.7.8",
-		"luxon": "^3.7.1"
+		"luxon": "^3.7.1",
+		"@tiptap/core": "^2.11.2",
+		"@tiptap/extension-color": "^2.11.2",
+		"@tiptap/extension-highlight": "^2.11.2",
+		"@tiptap/extension-horizontal-rule": "^2.11.2",
+		"@tiptap/extension-image": "^2.11.2",
+		"@tiptap/extension-link": "^2.11.2",
+		"@tiptap/extension-placeholder": "^2.11.2",
+		"@tiptap/extension-strike": "^2.11.2",
+		"@tiptap/extension-task-item": "^2.11.2",
+		"@tiptap/extension-task-list": "^2.11.2",
+		"@tiptap/extension-text-align": "^2.11.2",
+		"@tiptap/extension-text-style": "^2.11.2",
+		"@tiptap/extension-underline": "^2.11.2",
+		"@tiptap/html": "^2.11.2",
+		"@tiptap/starter-kit": "^2.11.2"
 	}
 }

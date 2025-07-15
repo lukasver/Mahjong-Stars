@@ -95,11 +95,9 @@ export const login = loginActionClient
   .schema(LoginParams)
   .action(async ({ parsedInput }) => {
     const verifiedPayload = await verifyAuthPayload(parsedInput);
-
     if (!verifiedPayload.valid) {
       redirect('/?error=invalid_payload');
     }
-
     const { payload } = verifiedPayload;
 
     // Here should go the JWT logic

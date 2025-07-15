@@ -6,8 +6,14 @@ import log from './lib/services/logger.server';
 const PUBLIC_ROUTES: string[] = ['/', '/onboarding', '/test'];
 const _PRIVATE_ROUTES: string[] = ['/dashboard'];
 
+const isE2ETest = process.env.E2E_TEST_MODE === 'true';
+
 export default async (req: NextRequest) => {
   log('[MIDDLEWARE]', req.nextUrl.pathname);
+
+  if (isE2ETest) {
+    return NextResponse.next();
+  }
 
   // if (PUBLIC_ROUTES.includes(req.nextUrl.pathname)) {
   //   return NextResponse.next();

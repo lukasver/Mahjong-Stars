@@ -8,7 +8,12 @@ import {
   logout,
 } from '../actions';
 
+const isE2ETest = process.env.E2E_TEST_MODE === 'true';
+
 export const isLoggedIn = async (address: string) => {
+  if (isE2ETest) {
+    return true;
+  }
   const authResult = await isLoggedInAction(address);
   return !!authResult;
 };

@@ -10,6 +10,8 @@ import { User } from '@/common/schemas/generated';
 import { prisma } from '@/db';
 import { authCache } from '../auth/cache';
 
+const isE2ETest = process.env.E2E_TEST_MODE === 'true';
+
 export const loginActionClient = createSafeActionClient({
   // Can also be an async function.
   handleServerError(e, _utils) {
@@ -41,17 +43,24 @@ export const authActionClient = createSafeActionClient({
   },
 })
   .use(async ({ next }) => {
-    const token = await getSessionCookie();
-    invariant(token, 'Forbidden');
-    const verified = await verifyJwt(token);
-    invariant(verified.valid, 'Invalid jwt');
+    let address = '';
+    if (isE2ETest) {
+      address = process.env.E2E_TEST_USER_ADDRESS!;
+    } else {
+      const token = await getSessionCookie();
+      invariant(token, 'Forbidden');
+      const verified = await verifyJwt(token);
+      invariant(verified.valid, 'Invalid jwt');
+      address = verified.parsedJWT.sub;
+    }
+
     let user: Pick<User, 'id' | 'walletAddress' | 'email'> | undefined =
-      await authCache.get(verified.parsedJWT.sub);
+      await authCache.get(address);
     if (!user) {
       user =
         (await prisma.user.findUnique({
           where: {
-            walletAddress: verified.parsedJWT.sub,
+            walletAddress: address,
           },
           select: {
             id: true,
@@ -60,7 +69,7 @@ export const authActionClient = createSafeActionClient({
           },
         })) || undefined;
       invariant(user, 'User not found');
-      await authCache.set(verified.parsedJWT.sub, user);
+      await authCache.set(address, user);
     }
 
     return next({
@@ -68,7 +77,6 @@ export const authActionClient = createSafeActionClient({
         address: user.walletAddress,
         email: user.email,
         userId: user.id,
-        jwtContent: verified.parsedJWT.ctx,
       },
     });
   })

@@ -1,4 +1,3 @@
-import 'server-only';
 import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
@@ -12,7 +11,9 @@ import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import { StarterKit } from '@tiptap/starter-kit';
 
-export const editorExtensions = [
+export * from '@tiptap/html';
+export { type JSONContent, type HTMLContent } from '@tiptap/core';
+export const extensions = [
   StarterKit.configure({
     bulletList: {
       HTMLAttributes: {

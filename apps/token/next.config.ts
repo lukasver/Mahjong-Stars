@@ -131,8 +131,11 @@ export default () => {
     },
     // productionBrowserSourceMaps: !!(process.env.NODE_ENV === "production"),
     // fixes wallet connect dependency issue https://docs.walletconnect.com/web3modal/nextjs/about#extra-configuration
-    webpack: (config) => {
+    webpack: (config, { isServer }) => {
       config.externals.push('pino-pretty', 'lokijs', 'encoding');
+      if (!isServer) {
+        config.resolve.alias['handlebars'] = false;
+      }
       return config;
     },
   } as NextConfig);

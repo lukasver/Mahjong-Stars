@@ -8,7 +8,7 @@ import { UseAppForm, useFormContext } from '@mjs/ui/primitives/form/index';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { formSchemaShape, InputProps } from '../utils';
-import { SaftEditor } from '../../saft-editor';
+import { SaftEditor } from '../saft-editor';
 import {
   CardDescription,
   CardHeader,
@@ -142,11 +142,14 @@ export const ProjectInformation = ({
 
   useEffect(() => {
     if (!stepValue) {
-      handleAddField({
-        label: 'Summary',
-        type: 'textarea',
-        value: '',
-      });
+      const value = form.getFieldValue('information') as unknown[];
+      if (!value?.length) {
+        handleAddField({
+          label: 'Summary',
+          type: 'textarea',
+          value: '',
+        });
+      }
     }
   }, [stepValue]);
 

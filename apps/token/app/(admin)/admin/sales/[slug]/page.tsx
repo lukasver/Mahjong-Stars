@@ -1,5 +1,7 @@
 import { CreateSaleForm } from '@/components/admin/create-sales';
 import AdminTransactions from '@/components/admin/transactions';
+import { getSale } from '@/lib/actions';
+import { QueryClient } from '@tanstack/react-query';
 
 /**
  * AdminPage provides tabbed navigation for admin actions: Sales, New Sale, Transactions.
@@ -11,15 +13,23 @@ const ADMIN_TAB_VALUES = {
 
 export default async function AdminPage({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: { saleId: string };
 }) {
-  const tab = (await params)?.slug;
+  const [{ slug }, { saleId }] = await Promise.all([params, searchParams]);
 
-  if (tab === ADMIN_TAB_VALUES.Create) {
+  if (slug === ADMIN_TAB_VALUES.Create && saleId) {
+    const queryClient = new QueryClient();
+    queryClient.prefetchQuery({
+      queryKey: ['sales', saleId],
+      queryFn: ({ queryKey }) => getSale({ id: queryKey[1] as string }),
+    });
+
     return <CreateSaleForm />;
   }
-  if (tab === ADMIN_TAB_VALUES.Transactions) {
+  if (slug === ADMIN_TAB_VALUES.Transactions) {
     return <AdminTransactions />;
   }
 

@@ -1,11 +1,11 @@
 'use server';
+import 'server-only';
 import documentsController from '@/lib/controllers/documents';
 import { ROLES } from '@/common/config/constants';
 import { prisma } from '@/db';
 import { adminCache } from '@/lib/auth/cache';
 import { User } from '@prisma/client';
 import { authActionClient } from './config';
-import 'server-only';
 import {
   CreateSaleDto,
   DeleteSaleDto,
@@ -21,7 +21,7 @@ import salesController from '@/lib/controllers/sales';
 import transactionsController from '@/lib/controllers/transactions';
 import { TransactionStatus } from '@prisma/client';
 import { z } from 'zod';
-import { JSONContent } from '../controllers/documents/types';
+import { type JSONContent } from '@mjs/utils/server/tiptap';
 
 const isAdmin = adminCache.wrap(async (walletAddress: string) => {
   return await prisma.user.findUniqueOrThrow({
@@ -80,7 +80,7 @@ const adminClient = authActionClient.use(adminMiddleware);
 /**
  * @warning ADMIN REQUIRED
  */
-export const createSale = adminClient
+const createSale = adminClient
   .schema(CreateSaleDto)
   .action(async ({ ctx, parsedInput }) => {
     const sales = await salesController.createSale(parsedInput, ctx);
@@ -88,6 +88,25 @@ export const createSale = adminClient
       throw new Error(sales.message);
     }
     return sales.data;
+  });
+
+export const upsertSale = adminClient
+  .schema(CreateSaleDto.extend({ id: z.string().optional() }))
+  .action(async ({ ctx, parsedInput }) => {
+    let sale:
+      | Awaited<ReturnType<typeof salesController.updateSale>>
+      | Awaited<ReturnType<typeof salesController.createSale>>
+      | null = null;
+    if (parsedInput.id) {
+      const { id, ...rest } = parsedInput;
+      sale = await salesController.updateSale({ id, data: rest }, ctx);
+    } else {
+      sale = await salesController.createSale(parsedInput, ctx);
+    }
+    if (!sale.success) {
+      throw new Error(sale.message);
+    }
+    return sale.data;
   });
 
 /**
@@ -103,35 +122,35 @@ export const updateSale = adminClient
     return sales.data;
   });
 
-/**
- * @warning ADMIN REQUIRED
- */
-export const updateProjectInformation = adminClient
-  .schema(
-    z.object({
-      saleId: z.string(),
-      information: z.array(
-        z.object({
-          label: z.string(),
-          type: z.string(),
-          value: z.string(),
-        })
-      ),
-    })
-  )
-  .action(async ({ ctx, parsedInput }) => {
-    const { saleId, ...rest } = parsedInput;
+// /**
+//  * @warning ADMIN REQUIRED
+//  */
+// export const updateProjectInformation = adminClient
+//   .schema(
+//     z.object({
+//       saleId: z.string(),
+//       information: z.array(
+//         z.object({
+//           label: z.string(),
+//           type: z.string(),
+//           value: z.string(),
+//         })
+//       ),
+//     })
+//   )
+//   .action(async ({ ctx, parsedInput }) => {
+//     const { saleId, ...rest } = parsedInput;
 
-    const sales = await salesController.updateSaleInformation(
-      saleId,
-      rest,
-      ctx
-    );
-    if (!sales.success) {
-      throw new Error(sales.message);
-    }
-    return sales.data;
-  });
+//     const sales = await salesController.updateSaleInformation(
+//       saleId,
+//       rest,
+//       ctx
+//     );
+//     if (!sales.success) {
+//       throw new Error(sales.message);
+//     }
+//     return sales.data;
+//   });
 
 /**
  * @warning ADMIN REQUIRED

@@ -48,8 +48,6 @@ const useFieldContext = (): {
   const { name, store, ...fieldContext } = _useFieldContext();
   const errors = useStore(store, (state) => state.meta.errors);
 
-  console.debug('🚀 ~ tanstack-form.tsx:51 ~ errors:', errors);
-
   if (!fieldContext) {
     throw new Error('useFieldContext should be used within <FormItem>');
   }
