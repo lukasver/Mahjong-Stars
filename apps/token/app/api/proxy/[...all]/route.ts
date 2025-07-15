@@ -26,11 +26,16 @@ export const GET = withAuth(async (req, context, auth) => {
           const data = await sales.getSaleSaftContract(identifier);
           return NextResponse.json(data);
         }
+        if (subIdentifier === 'documents') {
+          const data = await sales.getSaleDocuments(identifier);
+          return NextResponse.json(data);
+        }
 
         const data = await sales.getSale(
           { id: identifier },
           { address: auth.address }
         );
+
         return NextResponse.json(data);
       }
 
@@ -38,6 +43,9 @@ export const GET = withAuth(async (req, context, auth) => {
         { active: qParamsObject.active === 'true' },
         { address: auth.address }
       );
+
+      console.debug('🚀 ~ route.ts:39 ~ GET ~ data:', data);
+
       return NextResponse.json(data);
     }
 

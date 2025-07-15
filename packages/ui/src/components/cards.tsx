@@ -92,12 +92,14 @@ export const CardContainer = ({
   description,
   className,
   header,
+  contentClassName,
 }: {
   children?: React.ReactNode;
   title?: string;
   description?: string;
   className?: string;
   header?: React.ReactNode;
+  contentClassName?: string;
 }) => {
   return (
     <CardPrimitive className={className}>
@@ -109,7 +111,9 @@ export const CardContainer = ({
           <CardDescription>{description}</CardDescription>
         </CardHeader>
       )}
-      <CardContent className='space-y-6'>{children}</CardContent>
+      <CardContent className={cn('space-y-6', contentClassName)}>
+        {children}
+      </CardContent>
     </CardPrimitive>
   );
 };

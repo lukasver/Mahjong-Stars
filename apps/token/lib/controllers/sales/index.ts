@@ -3,6 +3,7 @@ import {
   ActionCtx,
   GetSaleDto,
   GetSalesDto,
+  SaleInformationItem,
 } from '@/common/schemas/dtos/sales';
 import {
   CreateSaleDto,
@@ -22,6 +23,8 @@ import {
   checkSaleDateIsNotExpired,
 } from './functions';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
+import mime from 'mime-types';
+import { Document } from '@/common/schemas/generated';
 
 const QUERY_MAPPING: { active: Prisma.SaleFindFirstArgs } = {
   active: {
@@ -405,11 +408,77 @@ class SalesController {
       const sale = await prisma.sale.findFirst({
         where: { id: String(id) },
       });
+
       invariant(sale, 'Sale not found in DB');
-      const updatedSale = await prisma.sale.update({
-        where: { id: sale.id },
-        data: updateData,
+
+      // Find if there are any documents inside information
+      const docs: {
+        documents: Array<
+          SaleInformationItem & { fileName: string; mimeType: string }
+        >;
+        images: Array<
+          SaleInformationItem & { fileName: string; mimeType: string }
+        >;
+      } = { documents: [], images: [] };
+
+      if (information) {
+        const pInformation = SaleInformationItem.array().parse(information);
+
+        const { documents, images } = pInformation.reduce((acc, item) => {
+          if (item.type === 'file') {
+            const fileName = item.value.split('/').pop() || '';
+            const mimeType = mime.lookup(fileName);
+
+            if (mimeType && mimeType?.startsWith('image/')) {
+              acc.images.push({ ...item, fileName, mimeType });
+            } else {
+              acc.documents.push({
+                ...item,
+                fileName,
+                mimeType: mimeType || 'application/octet-stream',
+              });
+            }
+          }
+          return acc;
+        }, docs);
+
+        if (images.length) {
+        }
+        if (documents.length) {
+        }
+      }
+
+      const updatedSale = await prisma.$transaction(async (tx) => {
+        await Promise.all([
+          docs.images?.length
+            ? tx.document.createMany({
+                data: docs.images.map((image) => ({
+                  name: image.label,
+                  url: image.value,
+                  type: image.mimeType,
+                  fileName: image.fileName,
+                  saleId: sale.id,
+                })),
+              })
+            : Promise.resolve(),
+          docs.documents?.length
+            ? tx.document.createMany({
+                data: docs.documents.map((doc) => ({
+                  name: doc.label,
+                  url: doc.value,
+                  type: doc.mimeType,
+                  fileName: doc.fileName,
+                  saleId: sale.id,
+                })),
+              })
+            : Promise.resolve(),
+        ]);
+        return tx.sale.update({
+          where: { id: sale.id },
+          data: updateData,
+        });
       });
+
       return Success({ sale: this.decimalsToString(updatedSale) });
     } catch (error) {
       logger(error);
@@ -553,6 +622,35 @@ class SalesController {
         saft,
         versions,
       });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async getSaleDocuments(id: string) {
+    try {
+      invariant(id, 'Sale id is required');
+      const data = await prisma.sale.findUniqueOrThrow({
+        where: { id },
+        select: {
+          documents: true,
+        },
+      });
+
+      const documents = data.documents.reduce(
+        (acc: { images: Document[]; documents: Document[] }, doc) => {
+          if (doc.type.startsWith('image/')) {
+            acc.images.push(doc);
+          } else {
+            acc.documents.push(doc);
+          }
+          return acc;
+        },
+        { images: [], documents: [] }
+      );
+
+      return Success(documents);
     } catch (e) {
       logger(e);
       return Failure(e);

@@ -26,6 +26,21 @@ async function main() {
     log(`Not implemented: ${environment}`);
     switch (environment) {
       case 'development': {
+        const tables = [
+          'users',
+          'sales',
+          'tokens',
+          'blockchain',
+          'sales_transactions',
+        ];
+        await Promise.all(
+          tables.map((table) =>
+            prisma.$executeRawUnsafe(`TRUNCATE TABLE ${table} CASCADE;`)
+          )
+        );
+        await prisma.$executeRawUnsafe(
+          `TRUNCATE TABLE ${tables.join(', ')} CASCADE;`
+        );
         await seedCurrencies(prisma);
         await seedRoles(prisma);
         await seedUsers(

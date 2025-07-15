@@ -77,18 +77,18 @@ const adminClient = authActionClient.use(adminMiddleware);
  * =====================================
  */
 
-/**
- * @warning ADMIN REQUIRED
- */
-const createSale = adminClient
-  .schema(CreateSaleDto)
-  .action(async ({ ctx, parsedInput }) => {
-    const sales = await salesController.createSale(parsedInput, ctx);
-    if (!sales.success) {
-      throw new Error(sales.message);
-    }
-    return sales.data;
-  });
+// /**
+//  * @warning ADMIN REQUIRED
+//  */
+// const createSale = adminClient
+//   .schema(CreateSaleDto)
+//   .action(async ({ ctx, parsedInput }) => {
+//     const sales = await salesController.createSale(parsedInput, ctx);
+//     if (!sales.success) {
+//       throw new Error(sales.message);
+//     }
+//     return sales.data;
+//   });
 
 export const upsertSale = adminClient
   .schema(CreateSaleDto.extend({ id: z.string().optional() }))

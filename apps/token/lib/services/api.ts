@@ -17,6 +17,7 @@ import {
   getActiveSale,
   getCurrentUser,
   getSale,
+  getSaleDocuments,
   getSales,
   getSaleSaft,
 } from './fetchers';
@@ -217,6 +218,20 @@ export const useSaleSaft = (id: string | undefined) => {
   const { data, isLoading, refetch, error } = useQuery({
     queryKey: ['sale', 'saft', id],
     queryFn: ({ queryKey }) => getSaleSaft(queryKey[2] as string),
+    staleTime: DEFAULT_STALE_TIME,
+    enabled: !!id,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, isLoading, refetch };
+};
+
+/**
+ * @description NOT SUSPENDED: Clienside ussage only.
+ */
+export const useSaleDocuments = (id: string | undefined) => {
+  const { data, isLoading, refetch, error } = useQuery({
+    queryKey: ['sale', 'documents', id],
+    queryFn: ({ queryKey }) => getSaleDocuments(queryKey[2] as string),
     staleTime: DEFAULT_STALE_TIME,
     enabled: !!id,
   });

@@ -22,7 +22,7 @@ const buttonVariants = cva(
         outlineSecondary:
           'border border-secondary-300 dark:border-secondary-900  hover:bg-secondary-100/50 dark:hover:bg-secondary-900',
         primary:
-          'bg-primary text-primary-foreground hover:bg-primary-300/90 dark:bg-primary-700 dark:hover:bg-primary-700/90',
+          'bg-primary text-primary-foreground hover:bg-secondary-300/90 dark:bg-primary-700 dark:hover:bg-secondary-700/90',
         secondary:
           'bg-secondary-300/70 text-secondary-foreground hover:bg-secondary-300/90 dark:bg-secondary-700 dark:hover:bg-secondary-700/90',
         accent:

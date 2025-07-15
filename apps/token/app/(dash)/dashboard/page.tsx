@@ -2,7 +2,6 @@ import { FundraisingProgressLoading } from '@/components/skeletons/fundraising-p
 import { TokenDetails } from '@/components/token-details';
 import { VisuallyHidden } from '@mjs/ui/primitives/visually-hidden';
 import { QueryClient } from '@tanstack/react-query';
-import Image from 'next/image';
 import { Suspense } from 'react';
 import { FundraisingProgress } from '../../../components/dashboard/fundraising-progress';
 import { IcoPhases } from '../../../components/dashboard/ico-phases';
@@ -10,6 +9,7 @@ import { RecentTransactions } from '../../../components/dashboard/recent-transac
 import { TokenMetrics } from '../../../components/dashboard/token-metrics';
 import { TokenStats } from '../../../components/dashboard/token-stats';
 import { getActiveSale } from '@/lib/actions';
+import { cn } from '@mjs/ui/lib/utils';
 
 export default async function DashboardPage(_props: PageProps) {
   const queryClient = new QueryClient();
@@ -21,8 +21,17 @@ export default async function DashboardPage(_props: PageProps) {
   // const t = await getTranslations();
 
   return (
-    <main className='p-4 relative'>
-      <div className='mx-auto max-w-7xl space-y-8'>
+    <main
+      className={cn(
+        'bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center w-full h-full'
+      )}
+    >
+      <div
+        className={cn(
+          'p-4 relative mx-auto max-w-7xl space-y-8',
+          'bg-gradient-to-b from-primary to-5% to-transparent'
+        )}
+      >
         <VisuallyHidden>
           <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
             Dashboard
@@ -74,7 +83,7 @@ export default async function DashboardPage(_props: PageProps) {
 
         <RecentTransactions />
       </div>
-      <Image
+      {/* <Image
         src='/static/images/bg2.webp'
         alt=''
         priority
@@ -84,7 +93,7 @@ export default async function DashboardPage(_props: PageProps) {
           objectFit: 'cover',
           zIndex: -1,
         }}
-      />
+      /> */}
     </main>
   );
 }

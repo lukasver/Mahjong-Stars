@@ -33,24 +33,7 @@ export const GetSaleDto = z.object({
 export type GetSaleDto = z.infer<typeof GetSaleDto>;
 
 export const CreateSaleDto = z.object(formSchemaShape);
-// SaleSchema.pick({
-// 	name: true,
-// 	tokenName: true,
-// 	tokenSymbol: true,
-// 	tokenContractAddress: true,
-// 	tokenPricePerUnit: true,
-// 	toWalletsAddress: true,
-// 	saleCurrency: true,
-// 	saleStartDate: true,
-// 	saleClosingDate: true,
-// 	initialTokenQuantity: true,
-// 	availableTokenQuantity: true,
-// 	minimumTokenBuyPerUser: true,
-// 	maximumTokenBuyPerUser: true,
-// 	saftCheckbox: true,
-// 	saftContract: true,
-// 	tokenId: true,
-// });
+
 export type CreateSaleDto = z.infer<typeof CreateSaleDto>;
 
 export const UpdateSaleDto = z.object({
@@ -69,3 +52,11 @@ export const DeleteSaleDto = z.object({
   id: z.string(),
 });
 export type DeleteSaleDto = z.infer<typeof DeleteSaleDto>;
+
+export const SaleInformationItem = z.object({
+  type: z.enum(['textarea', 'text', 'file']),
+  value: z.string(),
+  label: z.string(),
+});
+
+export type SaleInformationItem = z.infer<typeof SaleInformationItem>;

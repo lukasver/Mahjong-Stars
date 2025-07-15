@@ -5,6 +5,8 @@ import { DateTime } from 'luxon';
 import { defineChain } from 'thirdweb';
 import { bscTestnet } from 'thirdweb/chains';
 import sales from '../../data/sales.json';
+import { faker } from '@faker-js/faker';
+import { SaleInformationItem } from '@/common/schemas/dtos/sales';
 
 export async function seedOpenSale(prisma: PrismaClient) {
   invariant(
@@ -80,6 +82,7 @@ export async function seedOpenSale(prisma: PrismaClient) {
           id: token.blockchain.id,
         },
       },
+      information: getSaleInformation(),
       user: {
         connect: {
           id: user.id!,
@@ -89,7 +92,7 @@ export async function seedOpenSale(prisma: PrismaClient) {
         create: {
           name: 'Cover Picture',
           fileName: 'coverPicture.png',
-          url: token.token.image || '',
+          url: token.token.image || '/static/images/banner.png',
           type: 'image/png',
           user: {
             connect: {
@@ -209,3 +212,17 @@ export async function seedOpenSale(prisma: PrismaClient) {
 
   console.debug(`Sale created: ${response?.name} - ${response.id}`);
 }
+
+const getSaleInformation = (): Array<SaleInformationItem> => {
+  return Array.from({ length: faker.number.int({ min: 3, max: 15 }) }, () => {
+    const type = faker.helpers.arrayElement(['text', 'textarea']);
+    return {
+      label: faker.commerce.productName(),
+      value:
+        type === 'textarea'
+          ? faker.lorem.paragraphs(faker.number.int({ min: 1, max: 4 }))
+          : faker.lorem.sentence(),
+      type,
+    };
+  });
+};

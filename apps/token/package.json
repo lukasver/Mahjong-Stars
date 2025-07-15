@@ -8,6 +8,8 @@
 		"start": "next start",
 		"lint": "next lint",
 		"clean": "rimraf .next node_modules",
+		"build-deps": "turbo run build --filter @mjs/utils",
+		"generate": "pnpm run build-deps && pnpm run db:generate",
 		"db:better-auth:migrate": "dotenv -e .env.local  -- npx @better-auth/cli@latest generate",
 		"db:generate": "dotenv -e .env.local -- npx prisma generate",
 		"db:studio": "dotenv -e .env.local -- npx prisma studio",

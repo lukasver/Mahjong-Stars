@@ -264,7 +264,7 @@ export const getSteps = (_t: ReturnType<typeof useTranslations>) => [
   { id: 3, name: 'Additional Information', description: 'Final details' },
 ];
 
-const DiscriminatedUnion = z.discriminatedUnion('type', [
+const SaleInformationItem = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('textarea'),
     value: z.string(),
@@ -281,8 +281,9 @@ const DiscriminatedUnion = z.discriminatedUnion('type', [
     label: z.string(),
   }),
 ]);
+
 export const InformationSchema = z.object({
-  information: z.array(DiscriminatedUnion),
+  information: z.array(SaleInformationItem),
 });
 
 export const SaftSchema = z.object({
@@ -298,6 +299,6 @@ export const SaleSchemas = {
 } as const;
 
 export type FileType = Extract<
-  z.infer<typeof DiscriminatedUnion>,
+  z.infer<typeof SaleInformationItem>,
   { type: 'file' }
 >;
