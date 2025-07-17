@@ -167,8 +167,11 @@ model Sale {
   updatedAt DateTime  @updatedAt @db.Timestamptz(6)
   deletedAt DateTime? @db.Timestamptz(6)
 
-  name                   String
-  catchPhrase            String?
+  name        String
+  catchPhrase String?
+  banner      Document? @relation(fields: [bannerId], references: [id], name: "banner")
+  bannerId    String?   @unique
+
   status                 SaleStatus    @default(CREATED)
   saleCurrency           Currency      @relation(fields: [currency], references: [symbol])
   currency               String
@@ -195,7 +198,7 @@ model Sale {
 
   user         User               @relation(fields: [createdBy], references: [id])
   transactions SaleTransactions[]
-  documents    Document[]
+  documents    Document[]         @relation("sale")
 
   vestingSchedules VestingSchedule[]
 
@@ -293,12 +296,15 @@ model Document {
   url      String
   type     String
 
-  sale   Sale?   @relation(fields: [saleId], references: [id])
-  saleId String?
-
   user   User?   @relation(fields: [userId], references: [id])
   userId String?
 
+  sale   Sale?   @relation(fields: [saleId], references: [id], name: "sale")
+  saleId String?
+
+  saleBanner Sale? @relation("banner")
+
+  @@unique([id, url])
   @@map("documents")
 }
 

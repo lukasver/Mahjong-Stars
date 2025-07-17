@@ -123,7 +123,9 @@ export const getSales = async (params?: { active?: boolean }) => {
     const queryParams = params
       ? `?${new URLSearchParams({ active: params.active ? 'true' : 'false' })}`
       : '';
-    const data = await fetcher<SaleWithToken[]>(`/sales${queryParams}`);
+    const data = await fetcher<{ sales: SaleWithToken[]; quantity: number }>(
+      `/sales${queryParams}`
+    );
     return { data: data, error: null };
   } catch (e) {
     return { data: null, error: e };

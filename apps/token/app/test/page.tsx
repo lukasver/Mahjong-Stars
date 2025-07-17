@@ -1,28 +1,15 @@
 'use client';
 
-import { Button } from '@mjs/ui/primitives/button';
-import {
-  UseAppForm,
-  useAppForm,
-  useFormContext,
-} from '@mjs/ui/primitives/form/index';
+import { useAppForm } from '@mjs/ui/primitives/form/index';
 import { useCallback } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { z } from 'zod';
-import {
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@mjs/ui/primitives/card';
-import { Icons } from '@mjs/ui/components/icons';
-import { EditableFormField } from '@mjs/ui/primitives/form-input/editable-field';
 import { createSaftContract } from '@/lib/actions/admin';
 import { getFileUploadPresignedUrl } from '@/lib/actions';
 import { uploadFile } from '@/lib/utils/files';
 import { useLocale } from 'next-intl';
 import { Invest } from '../(dash)/dashboard/buy/invest';
 import { useActiveSale } from '@/lib/services/api';
-import { CardContainer } from '@mjs/ui/components/cards';
 import { InputOptionsProvider } from '@/components/hooks/use-input-options';
 
 const FormSchema = z.object({
@@ -168,96 +155,3 @@ export default function Page() {
           <FormInput name='test' type='date' />
         </div> */
 }
-
-const ProjectInformation = ({
-  saleId,
-  className,
-}: {
-  saleId?: string;
-  className?: string;
-}) => {
-  const form = useFormContext() as unknown as UseAppForm;
-
-  if (!saleId) {
-    //TODO! improve
-    return <div>No saleId</div>;
-  }
-
-  // Helper to add a new field to the information array
-  const handleAddField = () => {
-    const value = form.getFieldValue('information') as unknown[];
-    form.setFieldValue(
-      'information',
-      value.concat([
-        {
-          label: 'New Field',
-          type: 'textarea',
-          value: '',
-        },
-      ])
-    );
-  };
-
-  const handleCheck = () => {
-    console.log('form', form.getFieldValue('information'));
-  };
-
-  return (
-    <CardContainer
-      className={className}
-      header={
-        <CardHeader>
-          <div className='flex items-center justify-between'>
-            <CardTitle className='flex-1'>Project Information</CardTitle>
-            <Button
-              variant='outline'
-              size='icon'
-              className='shrink-0'
-              onClick={handleAddField}
-              type='button'
-            >
-              <Icons.plus className='w-4 h-4' />
-              <span className='sr-only'>Add information field</span>
-            </Button>
-          </div>
-          <CardDescription>Manage project information</CardDescription>
-        </CardHeader>
-      }
-    >
-      <div className='flex flex-col gap-4'>
-        <ul className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
-          <form.Field name='information' mode='array'>
-            {(field) => {
-              return (
-                <>
-                  {(field.state.value as unknown[]).map((_, index) => (
-                    <form.Field key={index} name={`information[${index}]`}>
-                      {(itemField) => (
-                        <EditableFormField
-                          field={itemField}
-                          index={index}
-                          onRemove={(idx) => field.removeValue(idx)}
-                        />
-                      )}
-                    </form.Field>
-                  ))}
-                  {(field.state.value as unknown[]).length === 0 && (
-                    <div className='text-center py-12 text-muted-foreground'>
-                      No fields yet. Click the + sign to.
-                    </div>
-                  )}
-                </>
-              );
-            }}
-          </form.Field>
-        </ul>
-        <Button type='submit' className='w-full mb-4'>
-          SUBMIT
-        </Button>
-        <Button type='button' onClick={handleCheck} className='w-full'>
-          check
-        </Button>
-      </div>
-    </CardContainer>
-  );
-};

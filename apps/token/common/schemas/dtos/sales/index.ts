@@ -1,6 +1,7 @@
 import { formSchemaShape } from '@/components/admin/create-sales/utils';
 import { SaleSchema, SaleStatusSchema } from '@/schemas';
 import { z } from 'zod';
+import { InformationSchemaAsStrings } from './information';
 
 const BaseCtx = z.object({
   jwtContent: z.unknown(),
@@ -38,7 +39,7 @@ export type CreateSaleDto = z.infer<typeof CreateSaleDto>;
 
 export const UpdateSaleDto = z.object({
   id: z.string(),
-  data: SaleSchema.partial(),
+  data: SaleSchema.merge(InformationSchemaAsStrings).partial(),
 });
 export type UpdateSaleDto = z.infer<typeof UpdateSaleDto>;
 
@@ -52,11 +53,3 @@ export const DeleteSaleDto = z.object({
   id: z.string(),
 });
 export type DeleteSaleDto = z.infer<typeof DeleteSaleDto>;
-
-export const SaleInformationItem = z.object({
-  type: z.enum(['textarea', 'text', 'file']),
-  value: z.string(),
-  label: z.string(),
-});
-
-export type SaleInformationItem = z.infer<typeof SaleInformationItem>;

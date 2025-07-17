@@ -68,6 +68,7 @@ export const env = createEnv({
     NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: z.string().min(1),
     NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS: z.string().min(1),
     NEXT_PUBLIC_MAIN_WALLET: z.string().min(1),
+    NEXT_PUBLIC_BUCKET_PUBLIC_URL: z.string().url().min(1),
   },
   runtimeEnv: {
     NEXT_PUBLIC_DOMAIN: getPublicUrl(),
@@ -96,6 +97,7 @@ export const env = createEnv({
     EXCHANGE_RATES_API_KEY: process.env.EXCHANGE_RATES_API_KEY,
     EXCHANGE_RATES_API_URL_BACKUP: process.env.EXCHANGE_RATES_API_URL_BACKUP,
     EXCHANGE_RATES_API_KEY_BACKUP: process.env.EXCHANGE_RATES_API_KEY_BACKUP,
+    NEXT_PUBLIC_BUCKET_PUBLIC_URL: process.env.NEXT_PUBLIC_BUCKET_PUBLIC_URL,
   },
 });
 

@@ -11,7 +11,6 @@ import {
 import { Input } from '@mjs/ui/primitives/input';
 import {
   AlertCircle,
-  ChevronDown,
   Edit,
   Eye,
   MoreHorizontal,
@@ -34,7 +33,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@mjs/ui/primitives/dropdown-menu';
 import { Button } from '@mjs/ui/primitives/button';
@@ -53,6 +56,21 @@ import { formatCurrency, formatDate } from '@mjs/utils/client';
 import { useLocale } from 'next-intl';
 import { SaleWithToken } from '@/common/types/sales';
 import { DateTime } from 'luxon';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@mjs/ui/primitives/alert-dialog';
+import { useAction } from 'next-safe-action/hooks';
+import { updateSaleStatus } from '@/lib/actions/admin';
+import { toast } from '@mjs/ui/primitives/sonner';
+import { getQueryClient } from '@/app/providers';
+import { SaleStatusType } from '@/common/schemas/generated';
 
 export function ListSales({
   children,
@@ -66,13 +84,18 @@ export function ListSales({
   description?: ReactNode;
 }) {
   const { data: salesData } = useSales();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedSale, setSelectedSale] = useState<SaleWithToken | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isOpenDialogOpen, setIsOpenDialogOpen] = useState(false);
+  const [pendingOpenSaleId, setPendingOpenSaleId] = useState<string | null>(
+    null
+  );
 
   const filteredSales =
-    salesData?.filter((sale) => {
+    salesData?.sales.filter((sale) => {
       const matchesSearch =
         sale.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         sale.tokenName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -88,6 +111,34 @@ export function ListSales({
   };
 
   const locale = useLocale();
+
+  const { executeAsync, isExecuting, result, hasErrored } =
+    useAction(updateSaleStatus);
+
+  const handleUpdateStatus = async (saleId: string, status: SaleStatusType) => {
+    console.log('handleUpdateStatus', saleId, status, isExecuting);
+    if (!saleId || isExecuting || !status) return;
+    const res = await executeAsync({
+      id: saleId,
+      status,
+    });
+
+    if (res?.data) {
+      const queryClient = getQueryClient();
+      await queryClient.invalidateQueries({
+        queryKey: ['sales'],
+      });
+      setIsOpenDialogOpen(false);
+      setPendingOpenSaleId(null);
+      toast.success(`Sale status changed to ${status}`);
+    } else {
+      toast.error(
+        result.serverError ||
+          result.validationErrors?._errors?.join(',') ||
+          'Unknown error ocurred'
+      );
+    }
+  };
 
   return (
     <div className={cn('flex-1 space-y-4 p-4', className)}>
@@ -185,7 +236,7 @@ export function ListSales({
                   { label: 'Open', value: 'OPEN' },
                   { label: 'Created', value: 'CREATED' },
                   { label: 'Closed', value: 'CLOSED' },
-                  { label: 'Paused', value: 'PAUSED' },
+                  { label: 'Finished', value: 'FINISHED' },
                 ]}
                 onSearch={setSearchTerm}
               />
@@ -197,7 +248,7 @@ export function ListSales({
           <div className='rounded-md border bg-primary'>
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className='text-secondary'>
                   <TableHead>Sale Name</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Token</TableHead>
@@ -306,10 +357,35 @@ export function ListSales({
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              Change Status
-                              <ChevronDown className='ml-2 h-4 w-4' />
-                            </DropdownMenuItem>
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger>
+                                Change Status
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuPortal>
+                                <DropdownMenuSubContent>
+                                  <DropdownMenuItem
+                                    disabled={sale.status === 'OPEN'}
+                                    className='bg-green-500'
+                                    onClick={() => {
+                                      setPendingOpenSaleId(sale.id);
+                                      setIsOpenDialogOpen(true);
+                                    }}
+                                  >
+                                    Open
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleUpdateStatus(sale.id, 'CLOSED')
+                                    }
+                                    disabled={['CLOSED', 'FINISHED'].includes(
+                                      sale.status
+                                    )}
+                                  >
+                                    Close
+                                  </DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                              </DropdownMenuPortal>
+                            </DropdownMenuSub>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className='text-destructive'>
                               <Trash2 className='mr-2 h-4 w-4' />
@@ -354,9 +430,56 @@ export function ListSales({
           />
         </ErrorBoundary>
       )}
+
+      {/* AlertDialog for opening a sale */}
+      <AlertDialog open={isOpenDialogOpen} onOpenChange={setIsOpenDialogOpen}>
+        {pendingOpenSaleId && (
+          <SaleStatusDialog
+            saleId={pendingOpenSaleId}
+            onConfirm={handleUpdateStatus}
+          />
+        )}
+      </AlertDialog>
     </div>
   );
 }
+
+const SaleStatusDialog = ({
+  saleId,
+  onConfirm,
+}: {
+  saleId: string;
+  onConfirm: (saleId: string, status: SaleStatusType) => Promise<void>;
+}) => {
+  return (
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Open Sale Confirmation</AlertDialogTitle>
+        <AlertDialogDescription className='text-foreground'>
+          <ul className='list-disc pl-5 space-y-1'>
+            <li>
+              Only <b>one</b> sale can be open at a time. Opening this sale will
+              close any currently open sale.
+            </li>
+            <li>
+              Once open, this sale will be available for public investment.
+            </li>
+          </ul>
+          Are you sure you want to open this sale?
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction
+          onClick={() => onConfirm(saleId, 'OPEN')}
+          className='bg-accent'
+        >
+          Yes, Open Sale
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  );
+};
 
 function getStatusBadge(status: string) {
   const statusConfig = {

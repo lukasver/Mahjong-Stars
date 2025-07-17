@@ -6,7 +6,8 @@ import { defineChain } from 'thirdweb';
 import { bscTestnet } from 'thirdweb/chains';
 import sales from '../../data/sales.json';
 import { faker } from '@faker-js/faker';
-import { SaleInformationItem } from '@/common/schemas/dtos/sales';
+import { SaleInformationItem } from '@/common/schemas/dtos/sales/information';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 export async function seedOpenSale(prisma: PrismaClient) {
   invariant(
@@ -82,7 +83,7 @@ export async function seedOpenSale(prisma: PrismaClient) {
           id: token.blockchain.id,
         },
       },
-      information: getSaleInformation(),
+      information: getSaleInformation() as unknown as InputJsonValue,
       user: {
         connect: {
           id: user.id!,

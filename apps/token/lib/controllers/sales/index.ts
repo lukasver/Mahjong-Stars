@@ -3,7 +3,6 @@ import {
   ActionCtx,
   GetSaleDto,
   GetSalesDto,
-  SaleInformationItem,
 } from '@/common/schemas/dtos/sales';
 import {
   CreateSaleDto,
@@ -27,6 +26,8 @@ import mime from 'mime-types';
 import { Document } from '@/common/schemas/generated';
 import { DEFAULT_SALE_SELECT, TOKEN_QUERY } from './queries';
 import { SaleWithRelations, SaleWithToken } from '@/common/types/sales';
+import { z } from 'zod';
+import { SaleInformationItem } from '@/common/schemas/dtos/sales/information';
 
 const QUERY_MAPPING: { active: Prisma.SaleFindFirstArgs } = {
   active: {
@@ -392,20 +393,31 @@ class SalesController {
           SaleInformationItem & { fileName: string; mimeType: string }
         >;
         images: Array<
-          SaleInformationItem & { fileName: string; mimeType: string }
+          SaleInformationItem & {
+            fileName: string;
+            mimeType: string;
+            isBanner?: boolean;
+            isTokenImage?: boolean;
+          }
         >;
       } = { documents: [], images: [] };
 
       if (information) {
-        const pInformation = SaleInformationItem.array().parse(information);
+        const pInformation = z.array(SaleInformationItem).parse(information);
 
         pInformation.reduce((acc, item) => {
           if (item.type === 'file') {
-            const fileName = item.value.split('/').pop() || '';
+            const fileName = (item.value as string).split('/').pop() || '';
             const mimeType = mime.lookup(fileName);
 
             if (mimeType && mimeType?.startsWith('image/')) {
-              acc.images.push({ ...item, fileName, mimeType });
+              acc.images.push({
+                ...item,
+                fileName,
+                mimeType,
+                isBanner: item.props?.isBanner,
+                isTokenImage: item.props?.isTokenImage,
+              });
             } else {
               acc.documents.push({
                 ...item,
@@ -419,30 +431,97 @@ class SalesController {
       }
 
       const updatedSale = await prisma.$transaction(async (tx) => {
-        await Promise.all([
-          docs.images?.length
-            ? tx.document.createMany({
-                data: docs.images.map((image) => ({
-                  name: image.label,
-                  url: image.value,
-                  type: image.mimeType,
-                  fileName: image.fileName,
-                  saleId: sale.id,
-                })),
+        // handle banner and token image creation individually
+        let individualPromises: Promise<any>[] = [];
+        if (docs.images?.length) {
+          const separated = docs.images.filter(
+            (image) => image.isBanner || image.isTokenImage
+          );
+          docs.images = docs.images.filter(
+            (image) => !image.isBanner && !image.isTokenImage
+          );
+          if (separated?.length) {
+            individualPromises = separated
+              .map((doc) => {
+                if (doc.isBanner) {
+                  return tx.document.create({
+                    data: {
+                      name: doc.label,
+                      url: doc.value as string,
+                      type: doc.mimeType,
+                      fileName: doc.fileName,
+                      sale: {
+                        connect: {
+                          id: sale.id,
+                        },
+                      },
+                      saleBanner: {
+                        connect: {
+                          id: sale.id,
+                        },
+                      },
+                    },
+                  });
+                }
+                if (doc.isTokenImage) {
+                  return tx.document
+                    .create({
+                      data: {
+                        name: doc.label,
+                        url: doc.value as string,
+                        type: doc.mimeType,
+                        fileName: doc.fileName,
+                        sale: {
+                          connect: {
+                            id: sale.id,
+                          },
+                        },
+                      },
+                    })
+                    .then(async (d) => {
+                      await tx.token.update({
+                        where: {
+                          id: sale.tokenId,
+                        },
+                        data: {
+                          image: d.url,
+                        },
+                      });
+                      return d;
+                    });
+                }
               })
-            : Promise.resolve(),
-          docs.documents?.length
-            ? tx.document.createMany({
-                data: docs.documents.map((doc) => ({
-                  name: doc.label,
-                  url: doc.value,
-                  type: doc.mimeType,
-                  fileName: doc.fileName,
-                  saleId: sale.id,
-                })),
-              })
-            : Promise.resolve(),
-        ]);
+              .filter(Boolean);
+          }
+        }
+
+        await Promise.allSettled(
+          individualPromises.concat([
+            docs.images?.length
+              ? tx.document.createMany({
+                  data: docs.images.map((image) => ({
+                    name: image.label,
+                    url: image.value as string,
+                    type: image.mimeType,
+                    fileName: image.fileName,
+                    saleId: sale.id,
+                  })),
+                })
+              : Promise.resolve(),
+            docs.documents?.length
+              ? tx.document.createMany({
+                  data: docs.documents.map((doc) => ({
+                    name: doc.label,
+                    url: doc.value as string,
+                    type: doc.mimeType,
+                    fileName: doc.fileName,
+                    saleId: sale.id,
+                  })),
+                })
+              : Promise.resolve(),
+          ])
+        );
+
         return tx.sale.update({
           where: { id: sale.id },
           data: updateData,
@@ -684,15 +763,14 @@ class SalesController {
   }
 
   private parseTokenData(data: Partial<SaleWithRelations>): SaleWithToken {
-    const cloned = structuredClone(data) as unknown as SaleWithToken;
-    cloned.token = {
+    const tokenData = {
       chainId: data?.token?.TokensOnBlockchains?.[0]?.chainId,
       contractAddress: data?.token?.TokensOnBlockchains?.[0]?.contractAddress,
       decimals: data?.token?.TokensOnBlockchains?.[0]?.decimals,
       symbol: data?.token?.symbol,
       image: data?.token?.image,
     };
-    return cloned;
+    return Object.assign(data, { token: tokenData }) as SaleWithToken;
   }
 }
 

@@ -4,10 +4,10 @@ import { useActiveSale } from '@/lib/services/api';
 import { OverviewProject } from '../../../../components/buy/overview';
 import { Coins } from 'lucide-react';
 import { ProjectInformation } from './information';
-import Loading from './loading';
 import { SaleCoverImage } from './cover-image';
 import { Invest } from './invest';
 import { SaleWithToken } from '@/common/types/sales';
+import { invariant } from '@epic-web/invariant';
 
 export const TokenSale = () => {
   const { data: sale, status } = useActiveSale();
@@ -15,11 +15,7 @@ export const TokenSale = () => {
   console.debug('🚀 ~ sale.tsx:17 ~ TokenSale ~ sale:', status, sale);
 
   // invariant(!error, 'Sale not found');
-  // invariant(sale, 'Sale not found');
-
-  if (!sale) {
-    return <Loading />;
-  }
+  invariant(sale, 'Sale not found');
 
   return (
     <div className='h-full w-full px-4 py-8'>
@@ -29,7 +25,7 @@ export const TokenSale = () => {
           <ProjectInformation sale={sale}>
             <div id='hero'>
               <SaleCoverImage
-                src={sale?.token?.image}
+                src={sale?.banner?.url}
                 className='overflow-hidden rounded-t-lg shadow'
               />
             </div>

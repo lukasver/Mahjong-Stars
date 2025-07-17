@@ -56,7 +56,7 @@ export default async function AdminLayout({
                 </Suspense>
               </DashboardHeader>
               <InputOptionsProvider>
-                <main className='p-6'>{children}</main>
+                <main className='p-6 container mx-auto'>{children}</main>
               </InputOptionsProvider>
               <Footer
                 siteConfig={metadata}

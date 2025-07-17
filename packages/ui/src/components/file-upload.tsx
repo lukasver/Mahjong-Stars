@@ -29,6 +29,7 @@ const isImage = (fileName: string | null) => {
 type FileUploadProps = Partial<FileUploadOptions> & {
   className?: string;
   type?: 'image' | 'document' | 'all';
+  maxSizeMB?: number;
 };
 
 const imageTypes =
@@ -43,7 +44,7 @@ const typeMapping = {
 };
 
 export function FileUpload({ type = 'all', ...props }: FileUploadProps) {
-  const maxSizeMB = 2;
+  const maxSizeMB = props.maxSizeMB || 2;
   const maxSize = maxSizeMB * 1024 * 1024; // 2MB default
 
   const [

@@ -1,3 +1,5 @@
+import { env } from '@/common/config/env';
+
 /**
  * Uploads a file to a specified AWS S3-compatible bucket URL using a PUT request.
  *
@@ -41,3 +43,18 @@ export async function uploadFile(
     url: response.url,
   };
 }
+
+export const getBucketUrl = (url: string) => {
+  const base = env.NEXT_PUBLIC_BUCKET_PUBLIC_URL;
+
+  if (url.startsWith(base)) {
+    return url;
+  }
+  if (url?.startsWith('/')) {
+    return `${base}${url}`;
+  }
+  if (!url?.startsWith('http') && !url?.startsWith('/')) {
+    return `${base}/${url}`;
+  }
+  return url;
+};

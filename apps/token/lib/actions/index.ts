@@ -66,9 +66,7 @@ export const isLoggedIn = loginActionClient
   .schema(z.string())
   .action(async ({ parsedInput }) => {
     const data = await getSessionCookie();
-    console.log('IS LOGGED IN CALLED', data);
     if (!data) return false;
-
     const hasSession = await hasActiveSession(parsedInput, data);
     return hasSession;
   });

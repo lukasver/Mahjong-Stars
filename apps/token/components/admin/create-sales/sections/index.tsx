@@ -20,6 +20,13 @@ import { CardContainer } from '@mjs/ui/components/cards';
 import { cn } from '@mjs/ui/lib/utils';
 import { useSale } from '@/lib/services/api';
 
+type ProjectInfoField = {
+  label: string;
+  type: string;
+  value: string;
+  props?: Record<string, unknown>;
+};
+
 const getInputProps = (
   key: keyof typeof formSchemaShape,
   t: ReturnType<typeof useTranslations>
@@ -130,25 +137,24 @@ export const ProjectInformation = ({
   const stepValue = form.getFieldValue('information');
 
   const handleAddField = (
-    field: { label: string; type: string; value: string } = {
+    field: ProjectInfoField | ProjectInfoField[] = {
       label: 'New Field',
       type: 'textarea',
       value: '',
     }
   ) => {
     const value = (form.getFieldValue('information') as unknown[]) || [];
-    form.setFieldValue('information', value.concat([field]));
+    form.setFieldValue(
+      'information',
+      value.concat(Array.isArray(field) ? field : [field])
+    );
   };
 
   useEffect(() => {
     if (!stepValue) {
       const value = form.getFieldValue('information') as unknown[];
       if (!value?.length) {
-        handleAddField({
-          label: 'Summary',
-          type: 'textarea',
-          value: '',
-        });
+        handleAddField(initialFields);
       }
     }
   }, [stepValue]);
@@ -237,3 +243,33 @@ const animation = {
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: 40 },
 };
+
+const initialFields = [
+  {
+    label: 'Banner image',
+    type: 'file',
+    value: '',
+    props: {
+      required: true,
+      type: 'image',
+      maxSizeMB: 10,
+      isBanner: true,
+    },
+  },
+  {
+    label: 'Token image',
+    type: 'file',
+    value: '',
+    props: {
+      required: true,
+      type: 'image',
+      maxSizeMB: 10,
+      isTokenImage: true,
+    },
+  },
+  {
+    label: 'Summary',
+    type: 'textarea',
+    value: '',
+  },
+] satisfies ProjectInfoField[];

@@ -2,7 +2,7 @@ import { TOKEN_QUERY } from '@/lib/controllers/sales/queries';
 import { Prisma } from '@prisma/client';
 
 const saleWithRelations = Prisma.validator<Prisma.SaleDefaultArgs>()({
-  include: { token: TOKEN_QUERY },
+  include: { token: TOKEN_QUERY, banner: { select: { url: true } } },
 });
 
 export type SaleWithRelations = Prisma.SaleGetPayload<typeof saleWithRelations>;

@@ -4,6 +4,10 @@ import { FormInputProps } from '@mjs/ui/primitives/form-input';
 import { useTranslations } from 'next-intl';
 import { type JSONContent } from '@mjs/ui/components/editor/advanced-editor';
 import z from 'zod';
+import {
+  InformationSchema,
+  SaleInformationItem,
+} from '@/common/schemas/dtos/sales/information';
 
 type SaleKeys = Partial<
   keyof Omit<
@@ -18,6 +22,7 @@ type SaleKeys = Partial<
     | 'tokenId'
     | 'tokenTotalSupply'
     | 'information'
+    | 'bannerId'
   >
 >;
 
@@ -265,28 +270,6 @@ export const getSteps = (_t: ReturnType<typeof useTranslations>) => [
   { id: 3, name: 'Additional Information', description: 'Final details' },
 ];
 
-const SaleInformationItem = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('textarea'),
-    value: z.string(),
-    label: z.string(),
-  }),
-  z.object({
-    type: z.literal('text'),
-    value: z.string(),
-    label: z.string(),
-  }),
-  z.object({
-    type: z.literal('file'),
-    value: z.instanceof(File),
-    label: z.string(),
-  }),
-]);
-
-export const InformationSchema = z.object({
-  information: z.array(SaleInformationItem),
-});
-
 export const SaftSchema = z.object({
   content: z.custom<JSONContent>(),
   name: z.string().default(''),
@@ -299,7 +282,4 @@ export const SaleSchemas = {
   3: InformationSchema,
 } as const;
 
-export type FileType = Extract<
-  z.infer<typeof SaleInformationItem>,
-  { type: 'file' }
->;
+export type FileType = Extract<SaleInformationItem, { type: 'file' }>;
