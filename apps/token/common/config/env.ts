@@ -42,8 +42,7 @@ export const env = createEnv({
       (val) => val === 'true' || val === '1',
       z.boolean().optional().default(false)
     ),
-    BETTER_AUTH_SECRET: z.string().min(1),
-    BETTER_AUTH_URL: z.string().url().min(1),
+
     EMAIL_API_KEY: z.string().min(1),
     EMAIL_FROM: z.string().min(1),
     THIRDWEB_ADMIN_PRIVATE_KEY: z.string().min(1),
@@ -84,8 +83,6 @@ export const env = createEnv({
     IS_DEV: process.env.NODE_ENV === 'development',
     IS_TEST: process.env.NODE_ENV === 'test',
     DEBUG: process.env.DEBUG,
-    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
-    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     EMAIL_API_KEY: process.env.EMAIL_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     THIRDWEB_ADMIN_PRIVATE_KEY: process.env.THIRDWEB_ADMIN_PRIVATE_KEY,
