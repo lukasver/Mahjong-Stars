@@ -7,7 +7,6 @@ import {
 } from '@mjs/ui/primitives/accordion';
 
 import { FieldDescription } from '@/components/buy/fields';
-import { Sale } from '@/common/schemas/generated';
 import { SaleInformationItem } from '@/common/schemas/dtos/sales';
 
 import { useSaleDocuments } from '@/lib/services/api';
@@ -18,7 +17,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@mjs/ui/primitives/tabs';
-import { FileText, FileX, ImageIcon, ImagesIcon, Info } from 'lucide-react';
+import { FileText, ImageIcon, ImagesIcon, Info } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -27,12 +26,14 @@ import {
 } from '@mjs/ui/primitives/card';
 import { VisuallyHidden } from '@mjs/ui/primitives/visually-hidden';
 import { cn } from '@mjs/ui/lib/utils';
+import { Placeholder } from '@/components/placeholder';
+import { SaleWithToken } from '@/common/types/sales';
 
 export const ProjectInformation = ({
   sale,
   children,
 }: {
-  sale: Sale;
+  sale: SaleWithToken;
   children?: React.ReactNode;
 }) => {
   const { data: docs, isLoading } = useSaleDocuments(sale.id);
@@ -99,7 +100,7 @@ export const ProjectInformation = ({
   );
 };
 
-const ProjectInfoTab = ({ sale }: { sale: Sale }) => {
+const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
   const information =
     sale?.information as unknown as Array<SaleInformationItem>;
   if (!information) return null;
@@ -134,7 +135,7 @@ const ProjectInfoTab = ({ sale }: { sale: Sale }) => {
   );
 };
 
-const DocumentsTab = ({ sale }: { sale: Sale }) => {
+const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
   const { data: docs, isLoading } = useSaleDocuments(sale.id);
   console.debug('🚀 ~ overview.tsx:138 ~ DocumentsTab ~ docs:', docs);
   if (isLoading) return <div>Loading...</div>;
@@ -152,7 +153,7 @@ const DocumentsTab = ({ sale }: { sale: Sale }) => {
   );
 };
 
-const GalleryTab = ({ sale }: { sale: Sale }) => {
+const GalleryTab = ({ sale }: { sale: SaleWithToken }) => {
   const { data: docs, isLoading } = useSaleDocuments(sale.id);
   if (isLoading) return <div>Loading...</div>;
   if (!docs)
@@ -170,29 +171,3 @@ const GalleryTab = ({ sale }: { sale: Sale }) => {
     </div>
   );
 };
-
-export function Placeholder({
-  icon: Icon = FileX,
-  title = 'No documents found',
-  description = 'There are no documents to display in this section.',
-  className = '',
-}: {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`flex flex-col items-center justify-center py-8 px-4 text-center ${className}`}
-    >
-      <div className='rounded-full bg-muted p-3 mb-4'>
-        <Icon className='h-6 w-6 text-muted-foreground' />
-      </div>
-      <h3 className='font-medium text-sm text-foreground mb-1'>{title}</h3>
-      <p className='text-xs text-muted-foreground max-w-[250px]'>
-        {description}
-      </p>
-    </div>
-  );
-}

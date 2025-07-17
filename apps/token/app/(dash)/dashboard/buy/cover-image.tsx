@@ -13,7 +13,7 @@ import { cn } from '@mjs/ui/lib/utils';
  * @returns The cover image component
  */
 type SaleCoverImageProps = {
-  src: string;
+  src?: string | null;
   alt?: string;
   width?: number;
   height?: number;

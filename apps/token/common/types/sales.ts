@@ -1,106 +1,18 @@
-import {
-  ContractStatus,
-  Profile,
-  Sale,
-  SaleInformation,
-  SaleTransactions,
-  User,
-} from '@prisma/client';
-import HttpStatusCode from '../controllers/httpStatusCodes';
+import { TOKEN_QUERY } from '@/lib/controllers/sales/queries';
+import { Prisma } from '@prisma/client';
 
-export interface GetTransactionsRes {
-  transactions: SaleTransactions[];
-  quantity: number;
-  success: true;
-}
+const saleWithRelations = Prisma.validator<Prisma.SaleDefaultArgs>()({
+  include: { token: TOKEN_QUERY },
+});
 
-export type TransactionsWithUserAndSale = SaleTransactions & {
-  user: User & { profile: { email: Profile['email'] } };
-  sale: Sale;
-};
+export type SaleWithRelations = Prisma.SaleGetPayload<typeof saleWithRelations>;
 
-export interface getAdminTransactions {
-  transactions: TransactionsWithUserAndSale[];
-  quantity: number;
-}
-
-export interface UpdateAdminTransactionRes {
-  transaction: TransactionsWithUserAndSale;
-  success: true;
-}
-
-export interface GetTransactionRes {
-  transactions: SaleTransactions[];
-  success: true;
-}
-
-export interface UpdateTransactionRes {
-  transaction: SaleTransactions;
-  success: true;
-}
-export interface DeleteTransactionRes {
-  success: true;
-}
-
-export interface CreateTransactionRes {
-  agreement?: string;
-  urlSign?: string;
-  isSign?: boolean;
-  transaction: SaleTransactions;
-  success: true;
-  status: HttpStatusCode;
-}
-
-export interface UpdateContractStatusRes {
-  contractStatus: ContractStatus;
-  success: true;
-}
-
-export interface ContractStatusRes {
-  isSign: boolean | null;
-  urlSign: string | null;
-}
-
-export interface GetSalesRes {
-  sales: Sale[];
-  quantity: number;
-  success: true;
-}
-
-export interface GetSaleRes {
-  sale: Sale;
-  saleInformation: SaleInformation;
-  success: true;
-}
-
-export interface ActiveSaleRes {
-  sales: (Sale & {
-    saleInformation: Omit<SaleInformation, 'uuid' | 'createdAt' | 'updatedAt'>;
-  })[];
-  success: true;
-}
-
-export type ActiveSale = ActiveSaleRes['sales'][number];
-
-export interface CreateSaleRes {
-  sale: Sale;
-  success: true;
-}
-export interface CreateSaleInformationRes {
-  saleInformation: SaleInformation;
-  success: true;
-}
-
-export interface UpdateSaleRes {
-  sale: Sale;
-  success: true;
-}
-
-export interface DeleteSaleRes {
-  uuid: string;
-  success: true;
-}
-export interface PageInfo {
-  pageNumber: number;
-  limit: number;
+export interface SaleWithToken extends Omit<SaleWithRelations, 'token'> {
+  token: {
+    chainId: number | undefined;
+    contractAddress: string | undefined | null;
+    decimals: number | undefined;
+    symbol: string | undefined;
+    image: string | undefined | null;
+  };
 }

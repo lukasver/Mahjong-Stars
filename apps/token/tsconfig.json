@@ -1,34 +1,36 @@
 {
-	"extends": "@mjs/typescript-config/nextjs.json",
-	"compilerOptions": {
-		"plugins": [
-			{
-				"name": "next"
-			}
-		],
-		"paths": {
-			"@mjs/ui/*": ["../../packages/ui/src/*"],
-			"@mjs/emails": ["../../packages/transactional/emails/index.tsx"],
-			"@/public/*": ["./public/*"],
-			"@/common/*": ["./common/*"],
-			"@/lib/*": ["./lib/*"],
-			"@/components/*": ["./components/*"],
-			"@/app/*": ["./app/*"],
-			"@/messages/*": ["./messages/*"],
-			"@/db": ["./lib/db/prisma.ts"],
-			"@/controllers/*": ["./lib/controllers/*"],
-			"@/services/*": ["./lib/services/*"],
-			"@/schemas": ["./common/schemas/generated/index.ts"],
-			"@/utils/*": ["./lib/utils/*"]
-		}
-	},
-	"include": [
-		"**/*.ts",
-		"**/*.tsx",
-		"next-env.d.ts",
-		"next.config.ts",
-		".next/types/**/*.ts",
-		"reset.d.ts"
-	],
-	"exclude": ["node_modules"]
+  "extends": "@mjs/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/token_tsbuildinfo",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@mjs/ui/*": ["../../packages/ui/src/*"],
+      "@mjs/emails": ["../../packages/transactional/emails/index.tsx"],
+      "@/public/*": ["./public/*"],
+      "@/common/*": ["./common/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/components/*": ["./components/*"],
+      "@/app/*": ["./app/*"],
+      "@/messages/*": ["./messages/*"],
+      "@/db": ["./lib/db/prisma.ts"],
+      "@/controllers/*": ["./lib/controllers/*"],
+      "@/services/*": ["./lib/services/*"],
+      "@/schemas": ["./common/schemas/generated/index.ts"],
+      "@/utils/*": ["./lib/utils/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "next.config.ts",
+    ".next/types/**/*.ts",
+    "reset.d.ts"
+  ],
+  "exclude": ["node_modules", "__tests__"]
 }

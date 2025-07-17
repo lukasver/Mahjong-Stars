@@ -3,12 +3,13 @@
 
 import { invariant } from '@epic-web/invariant';
 import { createSafeActionClient } from 'next-safe-action';
-import { getSessionCookie, verifyJwt } from '../auth/thirdweb';
 import log from '../services/logger.server';
 
 import { User } from '@/common/schemas/generated';
 import { prisma } from '@/db';
 import { authCache } from '../auth/cache';
+import { getSessionCookie } from '../auth/cookies';
+import { verifyJwt } from '../auth/thirdweb';
 
 const isE2ETest = process.env.E2E_TEST_MODE === 'true';
 

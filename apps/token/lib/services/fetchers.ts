@@ -1,6 +1,15 @@
+import { ROLES } from '@/common/config/constants';
 import { publicUrl } from '@/common/config/env';
+import { GetExchangeRate } from '@/common/schemas/dtos/rates';
 import { Failure, Success } from '@/common/schemas/dtos/utils';
-import { Document, SaftContract, Sale, User } from '@/common/schemas/generated';
+import {
+  Blockchain,
+  Currency,
+  Document,
+  SaftContract,
+  User,
+} from '@/common/schemas/generated';
+import { SaleWithToken } from '@/common/types/sales';
 
 export type FetcherOptions = Omit<RequestInit, 'body'> & {
   baseUrl?: string;
@@ -100,7 +109,9 @@ const { fetcher } = Fetcher.create({
 
 export const getCurrentUser = async () => {
   try {
-    const data = await fetcher<User>(`/users/me`);
+    const data = await fetcher<
+      User & { roles: Record<keyof typeof ROLES, string> }
+    >(`/users/me`);
     return { data: data, error: null };
   } catch (e) {
     return { data: null, error: e };
@@ -112,7 +123,7 @@ export const getSales = async (params?: { active?: boolean }) => {
     const queryParams = params
       ? `?${new URLSearchParams({ active: params.active ? 'true' : 'false' })}`
       : '';
-    const data = await fetcher<Sale[]>(`/sales${queryParams}`);
+    const data = await fetcher<SaleWithToken[]>(`/sales${queryParams}`);
     return { data: data, error: null };
   } catch (e) {
     return { data: null, error: e };
@@ -121,7 +132,7 @@ export const getSales = async (params?: { active?: boolean }) => {
 
 export const getSale = async (id: string) => {
   try {
-    const data = await fetcher<{ sale: Sale }>(`/sales/${id}`);
+    const data = await fetcher<{ sale: SaleWithToken }>(`/sales/${id}`);
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };
@@ -131,7 +142,9 @@ export const getSale = async (id: string) => {
 export const getActiveSale = async () => {
   try {
     const queryParams = new URLSearchParams({ active: 'true' });
-    const data = await fetcher<{ sales: Sale[] }>(`/sales?${queryParams}`);
+    const data = await fetcher<{ sales: SaleWithToken[] }>(
+      `/sales?${queryParams}`
+    );
     return { data: data, error: null };
   } catch (e) {
     return { data: null, error: e };
@@ -157,6 +170,57 @@ export const getSaleDocuments = async (id: string) => {
       documents: Document[];
     }>(`/sales/${id}/documents`);
     return { data: data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getSaleInvestInfo = async (id: string) => {
+  try {
+    const data = await fetcher<{
+      sale: Pick<
+        SaleWithToken,
+        | 'id'
+        | 'tokenPricePerUnit'
+        | 'tokenContractAddress'
+        | 'status'
+        | 'initialTokenQuantity'
+        | 'availableTokenQuantity'
+        | 'maximumTokenBuyPerUser'
+        | 'minimumTokenBuyPerUser'
+        | 'saleStartDate'
+        | 'saleClosingDate'
+        | 'saftCheckbox'
+        | 'currency'
+        | 'token'
+      > & {
+        blockchain: Pick<Blockchain, 'chainId' | 'name'>;
+      };
+    }>(`/sales/${id}/invest`);
+
+    return { data: data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getExchangeRate = async (from: string, to: string) => {
+  try {
+    const data = await fetcher<GetExchangeRate>(
+      `/feeds/rates?from=${from}&to=${to}`
+    );
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getCurrencies = async () => {
+  try {
+    const data = await fetcher<{
+      currencies: Pick<Currency, 'symbol' | 'name' | 'type'>[];
+    }>(`/feeds/currencies`);
+    return { data, error: null };
   } catch (e) {
     return { data: null, error: e };
   }

@@ -11,21 +11,18 @@ const ADMIN_TAB_VALUES = {
   Transactions: 'transactions',
 } as const;
 
-export default async function AdminPage({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { saleId: string };
-}) {
+export default async function AdminPage({ params, searchParams }: PageProps) {
   const [{ slug }, { saleId }] = await Promise.all([params, searchParams]);
 
-  if (slug === ADMIN_TAB_VALUES.Create && saleId) {
-    const queryClient = new QueryClient();
-    queryClient.prefetchQuery({
-      queryKey: ['sales', saleId],
-      queryFn: ({ queryKey }) => getSale({ id: queryKey[1] as string }),
-    });
+  if (slug === ADMIN_TAB_VALUES.Create) {
+    if (saleId) {
+      // If we have info about the sale in the params, prefetch it
+      const queryClient = new QueryClient();
+      queryClient.prefetchQuery({
+        queryKey: ['sales', saleId],
+        queryFn: ({ queryKey }) => getSale({ id: queryKey[1] as string }),
+      });
+    }
 
     return <CreateSaleForm />;
   }

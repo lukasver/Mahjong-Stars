@@ -1,8 +1,10 @@
+// @ts-nocheck
 import { FOP, PrismaClient, TransactionStatus } from '@prisma/client';
 
 import crypto from 'crypto';
-import { isCryptoCurrencyType } from '@/services/crypto/config';
 import { faker } from '@faker-js/faker';
+import { FIAT_CURRENCIES } from '@/common/config/constants';
+import { Sale } from '@/common/schemas/generated';
 
 const saleStartDate = new Date('2022-02-01T00:00:00Z');
 const saleClosingDate = new Date('2022-03-01T23:59:59Z');
@@ -15,7 +17,7 @@ const SMAT_WALLET_ADDRESS = IS_DEVELOPMENT
   : process.env.NEXT_PUBLIC_SMAT_WALLET;
 
 export async function seedTransactions(prisma: PrismaClient) {
-  let commonSale;
+  let commonSale: Sale;
 
   console.log(
     `Seeding transactions in 5s for ${
@@ -96,9 +98,9 @@ export async function seedTransactions(prisma: PrismaClient) {
           create: [
             {
               tokenSymbol: 'SMAT',
-              formOfPayment: isCryptoCurrencyType(user.currency)
-                ? FOP.CRYPTO
-                : FOP.TRANSFER,
+              formOfPayment: FIAT_CURRENCIES.includes(user.currency)
+                ? FOP.TRANSFER
+                : FOP.CRYPTO,
               receivingWallet: user.publicCryptoAddress,
               amountPaid: '-',
               status: TransactionStatus.CONFIRMED,

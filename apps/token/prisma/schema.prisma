@@ -168,6 +168,7 @@ model Sale {
   deletedAt DateTime? @db.Timestamptz(6)
 
   name                   String
+  catchPhrase            String?
   status                 SaleStatus    @default(CREATED)
   saleCurrency           Currency      @relation(fields: [currency], references: [symbol])
   currency               String

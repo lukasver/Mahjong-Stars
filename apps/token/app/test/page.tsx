@@ -10,8 +10,6 @@ import { useCallback } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { z } from 'zod';
 import {
-  Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -21,6 +19,11 @@ import { EditableFormField } from '@mjs/ui/primitives/form-input/editable-field'
 import { createSaftContract } from '@/lib/actions/admin';
 import { getFileUploadPresignedUrl } from '@/lib/actions';
 import { uploadFile } from '@/lib/utils/files';
+import { useLocale } from 'next-intl';
+import { Invest } from '../(dash)/dashboard/buy/invest';
+import { useActiveSale } from '@/lib/services/api';
+import { CardContainer } from '@mjs/ui/components/cards';
+import { InputOptionsProvider } from '@/components/hooks/use-input-options';
 
 const FormSchema = z.object({
   // content: z.coerce.string(),
@@ -65,11 +68,9 @@ type FileType = Extract<z.infer<typeof DiscriminatedUnion>, { type: 'file' }>;
 export default function Page() {
   const { execute, result, isExecuting } = useAction(createSaftContract);
 
-  console.debug('🚀 ~ page.tsx:21 ~ result:', result);
-
   // const [state, action] = useActionState(createSaftContract, initialFormState);
-  const saleId = 'cmcyrf1kt000r8o72ess9y14u';
 
+  const { data: sale } = useActiveSale();
   const form = useAppForm({
     // validators: { onSubmit: FormSchema },
     defaultValues: {
@@ -94,7 +95,7 @@ export default function Page() {
       try {
         const res = await Promise.all(
           fileValues.map(async ({ value }) => {
-            const fileName = `${saleId}/${value.name}`;
+            const fileName = `${sale?.id}/${value.name}`;
             return getFileUploadPresignedUrl({ key: fileName }).then(
               async (url) => {
                 if (url?.data) {
@@ -125,12 +126,18 @@ export default function Page() {
     },
     [form]
   );
+  const locale = useLocale();
+
+  if (!sale) {
+    return <div>NO SALEEE</div>;
+  }
 
   return (
-    <div className='container mx-auto'>
-      <form.AppForm>
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          {/* <div className='max-w-lg'>
+    <InputOptionsProvider>
+      <div className='container mx-auto'>
+        {/* <form.AppForm>
+          <form onSubmit={handleSubmit} className='space-y-4'> */}
+        {/* <div className='max-w-lg'>
             <SaftEditor saleId={saleId} placeholder={initialText} />
             <div className='flex justify-end'>
               <Button
@@ -147,10 +154,13 @@ export default function Page() {
             </div>
           </div> */}
 
-          <ProjectInformation saleId={saleId} />
-        </form>
-      </form.AppForm>
-    </div>
+        {/* <ProjectInformation saleId={saleId} /> */}
+
+        {/* </form>
+        </form.AppForm> */}
+        <Invest sale={sale} />
+      </div>
+    </InputOptionsProvider>
   );
 }
 {
@@ -249,39 +259,5 @@ const ProjectInformation = ({
         </Button>
       </div>
     </CardContainer>
-  );
-};
-
-type SaleInfoInput = {
-  type: 'text' | 'textarea' | 'file';
-  value?: string;
-  label: string;
-};
-
-const CardContainer = ({
-  children,
-  title,
-  description,
-  className,
-  header,
-}: {
-  children?: React.ReactNode;
-  title?: string;
-  description?: string;
-  className?: string;
-  header?: React.ReactNode;
-}) => {
-  return (
-    <Card className={className}>
-      {header ? (
-        header
-      ) : (
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-      )}
-      <CardContent className='space-y-6'>{children}</CardContent>
-    </Card>
   );
 };

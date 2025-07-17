@@ -1,5 +1,6 @@
 'use client';
 export * from './dates';
+export * from './currencies';
 
 export const copyToClipboard = (text: string) => {
   try {

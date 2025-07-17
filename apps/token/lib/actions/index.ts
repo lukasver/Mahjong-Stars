@@ -27,17 +27,19 @@ import { erc20Abi } from 'viem';
 import { z } from 'zod';
 import { authCache } from '../auth/cache';
 import {
-  deleteSessionCookie,
   generateAuthPayload,
   generateJWT,
-  getSessionCookie,
   serverClient,
-  setSessionCookie,
   verifyAuthPayload,
   verifyJwt,
 } from '../auth/thirdweb';
 import { authActionClient, loginActionClient } from './config';
 import { JWT_EXPIRATION_TIME } from '@/common/config/constants';
+import {
+  deleteSessionCookie,
+  getSessionCookie,
+  setSessionCookie,
+} from '../auth/cookies';
 
 export const hasActiveSession = async (address: string, token: string) => {
   const sessions = await prisma.session.findMany({

@@ -1,13 +1,13 @@
 'use client';
 import { useActiveSale } from '@/lib/services/api';
 // import { EditImage, FieldDescription } from './components';
-import { OverviewProject } from './overview';
-import { Sale } from '@/common/schemas/generated';
-import { cn } from '@mjs/ui/lib/utils';
+import { OverviewProject } from '../../../../components/buy/overview';
 import { Coins } from 'lucide-react';
 import { ProjectInformation } from './information';
 import Loading from './loading';
 import { SaleCoverImage } from './cover-image';
+import { Invest } from './invest';
+import { SaleWithToken } from '@/common/types/sales';
 
 export const TokenSale = () => {
   const { data: sale, status } = useActiveSale();
@@ -22,44 +22,40 @@ export const TokenSale = () => {
   }
 
   return (
-    <main
-      className={cn('bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center')}
-    >
-      <div className='h-full w-full px-4 py-8 bg-gradient-to-b from-primary to-5% to-transparent'>
-        <Header sale={sale} />
-        <section className='grid grid-cols-1 lg:grid-cols-[1fr_375px] gap-4 '>
-          <div id='information'>
-            <ProjectInformation sale={sale}>
-              <div id='hero'>
-                <SaleCoverImage
-                  src={sale.token.image}
-                  className='overflow-hidden rounded-t-lg shadow'
-                />
-              </div>
-            </ProjectInformation>
-          </div>
-          <div id='overview'>
-            <OverviewFormInvest sale={sale} />
-          </div>
+    <div className='h-full w-full px-4 py-8'>
+      <Header sale={sale} />
+      <div className='grid grid-cols-1 lg:grid-cols-[1fr_375px] gap-4 '>
+        <section id='information'>
+          <ProjectInformation sale={sale}>
+            <div id='hero'>
+              <SaleCoverImage
+                src={sale?.token?.image}
+                className='overflow-hidden rounded-t-lg shadow'
+              />
+            </div>
+          </ProjectInformation>
+        </section>
+        <section id='overview'>
+          <OverviewFormInvest sale={sale} />
         </section>
       </div>
-    </main>
-  );
-};
-
-const OverviewFormInvest = ({ sale }: { sale: Sale }) => {
-  return (
-    <div className='flex flex-col gap-4'>
-      <OverviewProject sale={sale} />
-      {/* TODO ADD invest-form.tsx component */}
-      <div className='mt-4 p-4'>INVEST FORM</div>
     </div>
   );
 };
 
-const Header = ({ sale }: { sale: Sale }) => {
+const OverviewFormInvest = ({ sale }: { sale: SaleWithToken }) => {
+  return (
+    <div className='flex flex-col gap-4'>
+      <OverviewProject sale={sale} />
+      {/* TODO ADD invest-form.tsx component */}
+      <Invest sale={sale} />
+    </div>
+  );
+};
+
+const Header = ({ sale }: { sale: SaleWithToken }) => {
   const description =
-    sale?.description ||
+    sale?.catchPhrase ||
     'Join our exclusive presale and be part of the future of decentralized finance';
   return (
     <div className='text-center mb-8'>

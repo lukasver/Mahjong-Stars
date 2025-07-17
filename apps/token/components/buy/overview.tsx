@@ -1,6 +1,5 @@
-import { Sale } from '@/common/schemas/generated';
 import { PercentBar } from '@/components/percent-bar';
-import { formatNumToIntlString, thousandSeparator } from '@/utils/FormatNumber';
+
 import { percentCalculator } from '@/utils/percentCalculator';
 import {
   Card,
@@ -9,9 +8,12 @@ import {
   CardTitle,
 } from '@mjs/ui/primitives/card';
 import { Separator } from '@mjs/ui/primitives/separator';
+import { formatCurrency } from '@mjs/utils/client';
 import { DateTime } from 'luxon';
+import { useLocale } from 'next-intl';
+import { SaleWithToken } from '@/common/types/sales';
 
-export const OverviewProject = ({ sale }: { sale: Sale }) => {
+export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
   const {
     initialTokenQuantity,
     currency,
@@ -21,7 +23,15 @@ export const OverviewProject = ({ sale }: { sale: Sale }) => {
     saleClosingDate,
     saleStartDate,
   } = sale || {};
+
+  console.debug(
+    '🚀 ~ overview.tsx:26 ~ OverviewProject ~ tokenPricePerUnit:',
+    tokenPricePerUnit,
+    currency
+  );
+
   const availableTokenQuantity = sale?.availableTokenQuantity || 0;
+  const locale = useLocale();
   return (
     <Card className='w-full shadow-lg rounded-xl p-6'>
       <CardHeader className='pb-2 gap-4 p-0 mb-4'>
@@ -31,22 +41,22 @@ export const OverviewProject = ({ sale }: { sale: Sale }) => {
       <CardContent className='flex flex-col gap-4 p-0'>
         <Row
           title='Tokens available'
-          value={thousandSeparator(String(availableTokenQuantity))}
+          value={formatCurrency(availableTokenQuantity, { locale })}
         />
         <div className='mt-2'>
           <Row
             render={!!initialTokenQuantity}
             title={' '}
-            value={`${formatNumToIntlString({
-              value: sale && percentCalculator(sale),
-            })} % Sold`}
+            value={`${formatCurrency(sale && percentCalculator(sale), {
+              locale,
+            })}% Sold`}
           />
           <div className='w-full mt-1'>
             <PercentBar
               caption={'Total Tokens'}
               value={sale && percentCalculator(sale)}
-              textValue={formatNumToIntlString({
-                value: initialTokenQuantity,
+              textValue={formatCurrency(initialTokenQuantity, {
+                locale,
               })}
             />
           </div>
@@ -56,12 +66,19 @@ export const OverviewProject = ({ sale }: { sale: Sale }) => {
         <Row title='Symbol' value={tokenSymbol} render={!!tokenSymbol} />
         <Row
           title='Total supply'
-          value={thousandSeparator(String(initialTokenQuantity))}
+          value={formatCurrency(initialTokenQuantity, {
+            locale,
+          })}
           render={!!initialTokenQuantity}
         />
         <Row
           title='Price'
-          value={`${tokenPricePerUnit} ${currency}`}
+          value={formatCurrency(tokenPricePerUnit, {
+            currency,
+            locale,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 6,
+          })}
           render={!!tokenPricePerUnit && !!currency}
         />
         <Row

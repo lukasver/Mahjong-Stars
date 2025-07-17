@@ -1,9 +1,7 @@
+import { env } from '@/common/config/env';
 import { hasActiveSession } from '@/lib/actions';
-import {
-  deleteSessionCookie,
-  getSessionCookie,
-  verifyJwt,
-} from '@/lib/auth/thirdweb';
+import { deleteSessionCookie, getSessionCookie } from '@/lib/auth/cookies';
+import { verifyJwt } from '@/lib/auth/thirdweb';
 import { NextRequest, NextResponse } from 'next/server';
 
 export function withAuth(
@@ -41,17 +39,14 @@ export function withAuth(
       // Call the handler with auth info
       return handler(req, context, { address, jwt });
     } catch (e) {
-      console.debug(
-        '_auth.ts:44 ~ catch ~ error:',
-        e instanceof Error ? e.message : e
-      );
-      return new NextResponse(
-        JSON.stringify({ error: 'Internal server error' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      let error = 'Internal server error';
+      if (e instanceof Error && env.IS_DEV) {
+        error += ': ' + e.message;
+      }
+      return new NextResponse(JSON.stringify({ error }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
   };
 }

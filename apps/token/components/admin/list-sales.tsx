@@ -49,6 +49,10 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mjs/ui/primitives/dialog';
+import { formatCurrency, formatDate } from '@mjs/utils/client';
+import { useLocale } from 'next-intl';
+import { SaleWithToken } from '@/common/types/sales';
+import { DateTime } from 'luxon';
 
 export function ListSales({
   children,
@@ -64,13 +68,11 @@ export function ListSales({
   const { data: salesData } = useSales();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedSale, setSelectedSale] = useState<
-    (typeof salesData)[0] | null
-  >(null);
+  const [selectedSale, setSelectedSale] = useState<SaleWithToken | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const filteredSales =
-    salesData?.sales?.filter((sale) => {
+    salesData?.filter((sale) => {
       const matchesSearch =
         sale.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         sale.tokenName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,10 +82,12 @@ export function ListSales({
       return matchesSearch && matchesStatus;
     }) || [];
 
-  const handleViewDetails = (sale: (typeof salesData)[0]) => {
+  const handleViewDetails = (sale: SaleWithToken) => {
     setSelectedSale(sale);
     setIsDetailsModalOpen(true);
   };
+
+  const locale = useLocale();
 
   return (
     <div className={cn('flex-1 space-y-4 p-4', className)}>
@@ -206,7 +210,7 @@ export function ListSales({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSales.map((sale) => {
+                {filteredSales?.map((sale) => {
                   const progress =
                     ((sale.initialTokenQuantity - sale.availableTokenQuantity) /
                       sale.initialTokenQuantity) *
@@ -232,15 +236,23 @@ export function ListSales({
                         </div>
                       </TableCell>
                       <TableCell>
-                        {formatCurrency(sale.tokenPricePerUnit, sale.currency)}
+                        {formatCurrency(sale.tokenPricePerUnit, {
+                          currency: sale.currency,
+                          locale,
+                        })}
                       </TableCell>
                       <TableCell>
                         <div>
                           <div className='font-medium'>
-                            {formatNumber(sale.availableTokenQuantity)}
+                            {formatCurrency(sale.availableTokenQuantity, {
+                              locale,
+                            })}
                           </div>
                           <div className='text-sm text-muted-foreground'>
-                            of {formatNumber(sale.initialTokenQuantity)}
+                            of{' '}
+                            {formatCurrency(sale.initialTokenQuantity, {
+                              locale,
+                            })}
                           </div>
                         </div>
                       </TableCell>
@@ -257,8 +269,18 @@ export function ListSales({
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>{formatDate(sale.saleStartDate)}</TableCell>
-                      <TableCell>{formatDate(sale.saleClosingDate)}</TableCell>
+                      <TableCell>
+                        {formatDate(sale.saleStartDate, {
+                          locale,
+                          format: DateTime.DATE_MED,
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        {formatDate(sale.saleClosingDate, {
+                          locale,
+                          format: DateTime.DATE_MED,
+                        })}
+                      </TableCell>
                       <TableCell className='text-right'>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -352,20 +374,4 @@ function getStatusBadge(status: string) {
       {status}
     </Badge>
   );
-}
-
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-function formatNumber(num: number) {
-  return new Intl.NumberFormat('en-US').format(num);
-}
-
-function formatCurrency(amount: number, currency: string) {
-  return `${amount} ${currency}`;
 }

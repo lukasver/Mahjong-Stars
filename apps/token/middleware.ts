@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { COOKIE_PREFIX } from './common/config/constants';
-import { getSessionCookie } from './lib/auth/thirdweb';
 import log from './lib/services/logger.server';
+import { getSessionCookie } from './lib/auth/cookies';
 
 const PUBLIC_ROUTES: string[] = ['/', '/onboarding', '/test'];
 const _PRIVATE_ROUTES: string[] = ['/dashboard'];

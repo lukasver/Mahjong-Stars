@@ -49,15 +49,18 @@ export async function TokenStats({ address }: { address: string }) {
 
 const TokenPriceCard = async () => {
   const data = await sleep(3000);
+  //@ts-expect-error TODO! do actual data fetching
   return <TokenStatCard data={data} title='Token Price' icon='dollar' />;
 };
 
 const TokenMarketCapCard = async () => {
   const data = await sleep(3000);
+  //@ts-expect-error TODO! do actual data fetching
   return <TokenStatCard data={data} title='Market Cap' icon='dollar' />;
 };
 
 const TokenTotalHoldersCard = async () => {
   const data = await sleep(4000);
+  //@ts-expect-error TODO! do actual data fetching
   return <TokenStatCard data={data} title='Total Holders' icon='users' />;
 };

@@ -122,7 +122,7 @@ export const CreateSaleForm = () => {
           if (res?.data) {
             setStep((pv) => pv + 1);
             queryClient.invalidateQueries({
-              queryKey: ['sale', 'saft', saleId],
+              queryKey: ['sales', saleId, 'saft'],
             });
           } else {
             throw new Error(

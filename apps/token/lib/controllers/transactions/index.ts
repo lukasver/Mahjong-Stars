@@ -144,7 +144,7 @@ class TransactionsController {
         saleId,
         comment,
         amountPaid,
-        amountPaidCurrency,
+        paidCurrency,
       } = dto;
       invariant(userId, 'User id missing');
       invariant(saleId, 'Sale id missing');
@@ -193,7 +193,7 @@ class TransactionsController {
             comment,
             status: TransactionStatus.PENDING,
             amountPaid,
-            amountPaidCurrency,
+            paidCurrency,
             saleId,
             userId,
             rawPrice: '0', // TODO: calculate
@@ -367,7 +367,8 @@ class TransactionsController {
       invariant(pendingTransaction, 'There are no pending transactions');
       let responseData = {};
       if (pendingTransaction.agreementId) {
-        const data = await urlContract(pendingTransaction.agreementId);
+        // const data = await urlContract(pendingTransaction.agreementId);
+        const data = { isSign: false, urlSign: null };
         responseData = {
           isSign: data.isSign || null,
           urlSign: data.urlSign || null,
@@ -399,9 +400,10 @@ class TransactionsController {
         },
       });
       const transaction = transactions[0];
-      let contract: UrlContract = { isSign: false, urlSign: null };
+      let contract = { isSign: false, urlSign: null };
       if (transaction?.agreementId) {
-        contract = await urlContract(transaction.agreementId);
+        contract = { isSign: false, urlSign: null };
+        // contract = await urlContract(transaction.agreementId);
       }
       return Success({
         totalCount: transactions?.length,
@@ -414,7 +416,10 @@ class TransactionsController {
     }
   }
 
-  private checkMaxAllowanceWithoutKYC(boughtTokenQuantity: string, sale: Sale) {
+  private checkMaxAllowanceWithoutKYC(
+    boughtTokenQuantity: string,
+    sale: Pick<Sale, 'tokenPricePerUnit' | 'currency'>
+  ) {
     if (
       !boughtTokenQuantity ||
       isNaN(parseInt(boughtTokenQuantity)) ||
@@ -426,12 +431,13 @@ class TransactionsController {
       );
     }
     if (
-      parseInt(boughtTokenQuantity) * sale.tokenPricePerUnit >
-      MAX_ALLOWANCE_WITHOUT_KYC
+      new Prisma.Decimal(boughtTokenQuantity)
+        .mul(sale.tokenPricePerUnit)
+        .greaterThan(MAX_ALLOWANCE_WITHOUT_KYC)
     ) {
       invariant(
         false,
-        `SIWE users are entitled to make transactions up to ${MAX_ALLOWANCE_WITHOUT_KYC}${sale.saleCurrency} without KYC`
+        `SIWE users are entitled to make transactions up to ${MAX_ALLOWANCE_WITHOUT_KYC}${sale.currency} without KYC`
       );
     }
   }

@@ -10,7 +10,7 @@ import {
   useFormContext,
   useFieldContext,
 } from './tanstack-form';
-import { mergeForm, useTransform } from '@tanstack/react-form';
+import { mergeForm, useTransform, useStore } from '@tanstack/react-form';
 
 import { SubmitButton } from './buttons';
 import { formOptions } from '@tanstack/react-form/nextjs';
@@ -42,6 +42,7 @@ export {
   initialFormState,
   useTransform,
   mergeForm,
+  useStore,
   type UseAppForm,
   type AnyFieldApi,
 };

@@ -9,6 +9,7 @@ type SaleKeys = Partial<
   keyof Omit<
     Sale,
     | 'status'
+    | 'catchPhrase'
     | 'id'
     | 'createdAt'
     | 'updatedAt'

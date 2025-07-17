@@ -19,14 +19,14 @@ export const TextButtons = () => {
     {
       name: 'bold',
       isActive: (editor) => editor.isActive('bold'),
-      // @ts-expect-error fixme?
+
       command: (editor) => editor.chain().focus().toggleBold().run(),
       icon: BoldIcon,
     },
     {
       name: 'italic',
       isActive: (editor) => editor.isActive('italic'),
-      // @ts-expect-error fixme?
+
       command: (editor) => editor.chain().focus().toggleItalic().run(),
       icon: ItalicIcon,
     },
@@ -39,14 +39,14 @@ export const TextButtons = () => {
     {
       name: 'strike',
       isActive: (editor) => editor.isActive('strike'),
-      // @ts-expect-error fixme?
+
       command: (editor) => editor.chain().focus().toggleStrike().run(),
       icon: StrikethroughIcon,
     },
     {
       name: 'code',
       isActive: (editor) => editor.isActive('code'),
-      // @ts-expect-error fixme?
+
       command: (editor) => editor.chain().focus().toggleCode().run(),
       icon: CodeIcon,
     },

@@ -11,6 +11,8 @@ export const ONE_WEEK = 7 * ONE_DAY;
 export const ONE_MONTH = 30 * ONE_DAY;
 export const ONE_YEAR = 365 * ONE_DAY;
 export const DEFAULT_STALE_TIME = 1000 * 60 * 5; // 5 minutes
+export const ERC20_DECIMALS = 18;
+export const STABLECOIN_DECIMALS = 6;
 /**
  * Duration in seconds
  */
@@ -19,13 +21,7 @@ export const JWT_EXPIRATION_TIME = Duration.fromObject({ days: 1 }).as(
 );
 
 export const FIAT_CURRENCIES = ['CHF', 'EUR', 'USD', 'GBP'] as const;
-export const CRYPTO_CURRENCIES = [
-  'ETH',
-  'USDC',
-  'MATIC',
-  'LINK',
-  'BNB',
-] as const;
+export const CRYPTO_CURRENCIES = ['ETH', 'BTC', 'USDC', 'BNB'] as const;
 
 export const ROLES = {
   SUPER_ADMIN: 'SUPER_ADMIN',

@@ -12,6 +12,7 @@ import { SelectInput } from './select-input';
 import { isObject } from 'motion/react';
 import { DateInput, DateInputProps } from './date-input';
 import { UseAppForm } from '../form';
+import { CurrencyInput, CurrencyInputProps } from './currency-input';
 
 interface DefaultInputProps extends ComponentProps<typeof Input> {
   options?: never;
@@ -22,7 +23,11 @@ interface SelectorInputProps extends ComponentProps<typeof SelectInput> {
   options: SelectOption[];
 }
 
-type InputUnionProps = DefaultInputProps | SelectorInputProps | DateInputProps;
+type InputUnionProps =
+  | DefaultInputProps
+  | SelectorInputProps
+  | DateInputProps
+  | CurrencyInputProps;
 
 export type FormInputProps = {
   id?: string;
@@ -36,6 +41,8 @@ export type FormInputProps = {
   inputProps?: Partial<InputUnionProps> & {
     required?: boolean;
   };
+  listeners?: React.ComponentProps<UseAppForm['AppField']>['listeners'];
+  validators?: React.ComponentProps<UseAppForm['AppField']>['validators'];
 };
 
 // // Base interface with common properties
@@ -93,6 +100,8 @@ export function FormInput({
   message = true,
   description,
   className,
+  listeners,
+  validators,
   ...props
 }: FormInputProps) {
   const form = useFormContext() as unknown as UseAppForm;
@@ -101,7 +110,7 @@ export function FormInput({
   }
 
   return (
-    <form.AppField name={name}>
+    <form.AppField name={name} listeners={listeners} validators={validators}>
       {(field) => (
         <field.FormItem className={cn(className)}>
           <div
@@ -137,9 +146,9 @@ export function FormInput({
                   }
                   if (isObject(e) && 'target' in e) {
                     if (e.target instanceof HTMLInputElement) {
-                      field.handleChange(
-                        type === 'checkbox' ? e.target.checked : e.target.value
-                      );
+                      const value =
+                        type === 'checkbox' ? e.target.checked : e.target.value;
+                      field.handleChange(value);
                     }
                     return;
                   }
@@ -179,6 +188,8 @@ function InputWrapper({ type, ...props }: InputWrapperProps) {
       return <SelectInput {...(props as SelectorInputProps)} />;
     case 'date':
       return <DateInput {...(props as DateInputProps)} />;
+    case 'currency':
+      return <CurrencyInput {...(props as CurrencyInputProps)} />;
     default:
       return <Input {...props} />;
   }

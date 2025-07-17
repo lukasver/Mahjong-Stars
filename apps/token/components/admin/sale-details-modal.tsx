@@ -13,10 +13,12 @@ import {
 } from '@mjs/ui/primitives/dialog';
 import { Separator } from '@mjs/ui/primitives/separator';
 import { Copy, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
-import { copyToClipboard } from '@mjs/utils/client';
+import { copyToClipboard, formatCurrency, formatDate } from '@mjs/utils/client';
 import { useSale } from '@/lib/services/api';
 import { Prisma } from '@prisma/client';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
+import { useLocale } from 'next-intl';
+import { DateTime } from 'luxon';
 
 interface SaleDetailsModalProps {
   open: boolean;
@@ -54,29 +56,12 @@ function getStatusBadge(status: string) {
   );
 }
 
-function formatDate(dateString: string) {
-  if (!dateString) return 'N/A';
-  return new Date(dateString).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZoneName: 'short',
-  });
-}
-
-function formatNumber(num: number | string, locale: string = 'en-US') {
+function formatNumber(num?: number | string | null, locale: string = 'en-US') {
   if (!num) return 'N/A';
   const decimal = new Prisma.Decimal(num);
   const asNum = decimal.toNumber();
   if (isNaN(asNum)) return 'N/A';
   return new Intl.NumberFormat(locale).format(asNum);
-}
-
-function formatCurrency(amount: number, currency: string) {
-  if (!amount || isNaN(amount)) return 'N/A';
-  return `${amount} ${currency}`;
 }
 
 function formatAddress(address: string) {
@@ -121,6 +106,7 @@ export function SaleDetailsModal({
   id,
 }: SaleDetailsModalProps) {
   const { data, isLoading, error } = useSale(id);
+  const locale = useLocale();
 
   if (!id) return null;
   const sale = data?.sale;
@@ -207,20 +193,25 @@ export function SaleDetailsModal({
               />
               <DetailRow
                 label='Price per Unit'
-                value={formatCurrency(sale.tokenPricePerUnit, sale.currency)}
+                value={formatCurrency(sale.tokenPricePerUnit, {
+                  locale: 'en-US',
+                  currency: sale.currency,
+                })}
               />
               <DetailRow
                 label='Contract Address'
                 value={
                   <div className='flex items-center gap-2'>
                     <span className='font-mono text-xs'>
-                      {formatAddress(sale.tokenContractAddress)}
+                      {formatAddress(sale.tokenContractAddress || '')}
                     </span>
                     <Button
                       variant='ghost'
                       size='sm'
                       className='h-6 w-6 p-0'
-                      onClick={() => copyToClipboard(sale.tokenContractAddress)}
+                      onClick={() =>
+                        copyToClipboard(sale.tokenContractAddress || '')
+                      }
                     >
                       <Copy className='h-3 w-3' />
                     </Button>
@@ -287,7 +278,10 @@ export function SaleDetailsModal({
             <div className='space-y-1'>
               <DetailRow
                 label='Start Date'
-                value={formatDate(sale.saleStartDate)}
+                value={formatDate(sale.saleStartDate, {
+                  locale,
+                  format: DateTime.DATE_MED,
+                })}
               />
               <DetailRow
                 label='End Date'
@@ -346,7 +340,8 @@ export function SaleDetailsModal({
                   </div>
                 }
               />
-              {sale.saftContract && (
+              {/* //TODO! add information for the saft here */}
+              {/* {sale.saftContract && (
                 <DetailRow
                   label='SAFT Contract'
                   value={
@@ -368,7 +363,7 @@ export function SaleDetailsModal({
                     </div>
                   }
                 />
-              )}
+              )} */}
             </div>
           </div>
 
@@ -382,8 +377,13 @@ export function SaleDetailsModal({
                 <div className='text-sm text-muted-foreground'>Total Value</div>
                 <div className='text-2xl font-bold'>
                   {formatCurrency(
-                    sale.initialTokenQuantity * sale.tokenPricePerUnit,
-                    sale.currency
+                    new Prisma.Decimal(sale.initialTokenQuantity)
+                      .mul(sale.tokenPricePerUnit)
+                      .toString(),
+                    {
+                      locale,
+                      currency: sale.currency,
+                    }
                   )}
                 </div>
               </div>
@@ -393,8 +393,13 @@ export function SaleDetailsModal({
                 </div>
                 <div className='text-2xl font-bold'>
                   {formatCurrency(
-                    soldTokens * sale.tokenPricePerUnit,
-                    sale.currency
+                    new Prisma.Decimal(soldTokens)
+                      .mul(sale.tokenPricePerUnit)
+                      .toString(),
+                    {
+                      locale,
+                      currency: sale.currency,
+                    }
                   )}
                 </div>
               </div>

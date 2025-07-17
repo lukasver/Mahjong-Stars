@@ -15,9 +15,11 @@ import { FOP, TransactionStatus } from '@prisma/client';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import {
   getActiveSale,
+  getCurrencies,
   getCurrentUser,
   getSale,
   getSaleDocuments,
+  getSaleInvestInfo,
   getSales,
   getSaleSaft,
 } from './fetchers';
@@ -216,8 +218,8 @@ export const useExchangeRate = ({
  */
 export const useSaleSaft = (id: string | undefined) => {
   const { data, isLoading, refetch, error } = useQuery({
-    queryKey: ['sale', 'saft', id],
-    queryFn: ({ queryKey }) => getSaleSaft(queryKey[2] as string),
+    queryKey: ['sales', id, 'saft'],
+    queryFn: ({ queryKey }) => getSaleSaft(queryKey[1] as string),
     staleTime: DEFAULT_STALE_TIME,
     enabled: !!id,
   });
@@ -230,10 +232,40 @@ export const useSaleSaft = (id: string | undefined) => {
  */
 export const useSaleDocuments = (id: string | undefined) => {
   const { data, isLoading, refetch, error } = useQuery({
-    queryKey: ['sale', 'documents', id],
-    queryFn: ({ queryKey }) => getSaleDocuments(queryKey[2] as string),
+    queryKey: ['sales', id, 'documents'],
+    queryFn: ({ queryKey }) => getSaleDocuments(queryKey[1] as string),
     staleTime: DEFAULT_STALE_TIME,
     enabled: !!id,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, isLoading, refetch };
+};
+
+/**
+ * @description NOT SUSPENDED: Clienside ussage only.
+ */
+export const useSaleInvestInfo = (
+  id: string | undefined,
+  staleTime = 1000 * 60 * 1
+) => {
+  const { data, isLoading, refetch, error } = useQuery({
+    queryKey: ['sales', id, 'invest'],
+    queryFn: ({ queryKey }) => getSaleInvestInfo(queryKey[1] as string),
+    staleTime, // Refetch every minute to have updated information
+    enabled: !!id,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, isLoading, refetch };
+};
+
+/**
+ * @description NOT SUSPENDED: Clienside ussage only.
+ */
+export const useCurrencies = () => {
+  const { data, isLoading, refetch, error } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => getCurrencies(),
+    staleTime: DEFAULT_STALE_TIME,
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, isLoading, refetch };

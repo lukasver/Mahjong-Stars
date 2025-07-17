@@ -4,7 +4,7 @@ import documentsController from '@/lib/controllers/documents';
 import { ROLES } from '@/common/config/constants';
 import { prisma } from '@/db';
 import { adminCache } from '@/lib/auth/cache';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { authActionClient } from './config';
 import {
   CreateSaleDto,
@@ -99,7 +99,17 @@ export const upsertSale = adminClient
       | null = null;
     if (parsedInput.id) {
       const { id, ...rest } = parsedInput;
-      sale = await salesController.updateSale({ id, data: rest }, ctx);
+
+      sale = await salesController.updateSale(
+        {
+          id,
+          data: {
+            ...rest,
+            tokenPricePerUnit: new Prisma.Decimal(rest.tokenPricePerUnit),
+          },
+        },
+        ctx
+      );
     } else {
       sale = await salesController.createSale(parsedInput, ctx);
     }

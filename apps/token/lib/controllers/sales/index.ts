@@ -25,47 +25,15 @@ import {
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import mime from 'mime-types';
 import { Document } from '@/common/schemas/generated';
+import { DEFAULT_SALE_SELECT, TOKEN_QUERY } from './queries';
+import { SaleWithRelations, SaleWithToken } from '@/common/types/sales';
 
 const QUERY_MAPPING: { active: Prisma.SaleFindFirstArgs } = {
   active: {
     where: {
       status: SaleStatus.OPEN,
     },
-    select: {
-      name: true,
-      status: true,
-      availableTokenQuantity: true,
-      saleCurrency: true,
-      initialTokenQuantity: true,
-      maximumTokenBuyPerUser: true,
-      minimumTokenBuyPerUser: true,
-      saleStartDate: true,
-      tokenContractAddress: true,
-      tokenName: true,
-      tokenTotalSupply: true,
-      tokenPricePerUnit: true,
-      tokenSymbol: true,
-      toWalletsAddress: true,
-      saleClosingDate: true,
-      createdBy: true,
-      saftCheckbox: true,
-      saftContract: true,
-      token: {
-        select: {
-          TokensOnBlockchains: {
-            select: {
-              id: true,
-              blockchain: {
-                select: {
-                  chainId: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      information: true,
-    },
+    select: DEFAULT_SALE_SELECT,
   },
 };
 
@@ -75,7 +43,7 @@ class SalesController {
     _ctx?: ActionCtx
   ): Promise<
     | Success<{
-        sales: Sale[];
+        sales: SaleWithToken[];
         quantity: number;
       }>
     | Failure
@@ -120,7 +88,9 @@ class SalesController {
       }
 
       return Success({
-        sales: sales.map((sale) => this.decimalsToString(sale)),
+        sales: sales.map((sale) =>
+          this.decimalsToString(this.parseTokenData(sale))
+        ),
         quantity: sales?.length,
       });
     } catch (e) {
@@ -173,7 +143,7 @@ class SalesController {
     _ctx: ActionCtx
   ): Promise<
     | Success<{
-        sale: Sale;
+        sale: SaleWithToken;
       }>
     | Failure
   > {
@@ -187,7 +157,7 @@ class SalesController {
       invariant(sale, 'Sale not found in DB');
 
       return Success({
-        sale: this.decimalsToString(sale),
+        sale: this.decimalsToString(this.parseTokenData(sale)),
       });
     } catch (error) {
       logger(error);
@@ -309,6 +279,9 @@ class SalesController {
             },
           },
         },
+        select: {
+          ...DEFAULT_SALE_SELECT,
+        },
       });
       if (!sale) {
         return Failure(
@@ -364,7 +337,9 @@ class SalesController {
         where: { id: sale.id },
         data: { status: status as SaleStatus },
       });
-      return Success({ sale: updatedSale });
+      return Success({
+        sale: this.decimalsToString(updatedSale),
+      });
     } catch (error) {
       logger(error);
       return Failure(error);
@@ -377,7 +352,7 @@ class SalesController {
   async updateSale(
     { id, data }: UpdateSaleDto,
     _ctx: ActionCtx
-  ): Promise<Success<{ sale: Sale }> | Failure> {
+  ): Promise<Success<{ sale: SaleWithToken }> | Failure> {
     if (!id || !data || data === undefined) {
       return Failure(
         'Invalid request parameters',
@@ -424,7 +399,7 @@ class SalesController {
       if (information) {
         const pInformation = SaleInformationItem.array().parse(information);
 
-        const { documents, images } = pInformation.reduce((acc, item) => {
+        pInformation.reduce((acc, item) => {
           if (item.type === 'file') {
             const fileName = item.value.split('/').pop() || '';
             const mimeType = mime.lookup(fileName);
@@ -441,11 +416,6 @@ class SalesController {
           }
           return acc;
         }, docs);
-
-        if (images.length) {
-        }
-        if (documents.length) {
-        }
       }
 
       const updatedSale = await prisma.$transaction(async (tx) => {
@@ -479,7 +449,9 @@ class SalesController {
         });
       });
 
-      return Success({ sale: this.decimalsToString(updatedSale) });
+      return Success({
+        sale: this.decimalsToString(this.parseTokenData(updatedSale)),
+      });
     } catch (error) {
       logger(error);
       return Failure(error);
@@ -555,17 +527,33 @@ class SalesController {
           },
         }),
       ]);
+
+      type SelectOption = {
+        meta?: Record<string, unknown>;
+        id: string;
+        value: string;
+        label: string;
+      };
       return Success({
-        fiatCurrencies: currencies
-          .filter(({ type }) => type === 'FIAT')
-          .map(({ symbol, type }) => ({
-            meta: {
-              type,
-            },
-            id: symbol,
-            value: symbol,
-            label: symbol,
-          })),
+        ...currencies.reduce(
+          (agg, c) => {
+            const recipient =
+              c.type === 'FIAT' ? 'fiatCurrencies' : 'cryptoCurrencies';
+            agg[recipient].push({
+              meta: {
+                type: c.type,
+              },
+              id: c.symbol,
+              value: c.symbol,
+              label: c.symbol,
+            });
+            return agg;
+          },
+          {
+            fiatCurrencies: [] as SelectOption[],
+            cryptoCurrencies: [] as SelectOption[],
+          }
+        ),
         blockchain: blockchains.map(({ chainId, name, id }) => ({
           id,
           value: chainId,
@@ -655,6 +643,56 @@ class SalesController {
       logger(e);
       return Failure(e);
     }
+  }
+
+  async getSaleInvestInfo(id: string) {
+    try {
+      const data = await prisma.sale.findUniqueOrThrow({
+        where: { id },
+        select: {
+          id: true,
+          blockchain: {
+            select: {
+              chainId: true,
+              name: true,
+            },
+          },
+          token: TOKEN_QUERY,
+          tokenPricePerUnit: true,
+          tokenContractAddress: true,
+          status: true,
+          currency: true,
+          initialTokenQuantity: true,
+          availableTokenQuantity: true,
+          maximumTokenBuyPerUser: true,
+          minimumTokenBuyPerUser: true,
+          saleStartDate: true,
+          tokenSymbol: true,
+          saleClosingDate: true,
+          saftCheckbox: true,
+        },
+      });
+
+      const parsedToken = this.parseTokenData(data);
+      return Success({
+        sale: this.decimalsToString({ ...data, token: parsedToken }),
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  private parseTokenData(data: Partial<SaleWithRelations>): SaleWithToken {
+    const cloned = structuredClone(data) as unknown as SaleWithToken;
+    cloned.token = {
+      chainId: data?.token?.TokensOnBlockchains?.[0]?.chainId,
+      contractAddress: data?.token?.TokensOnBlockchains?.[0]?.contractAddress,
+      decimals: data?.token?.TokensOnBlockchains?.[0]?.decimals,
+      symbol: data?.token?.symbol,
+      image: data?.token?.image,
+    };
+    return cloned;
   }
 }
 

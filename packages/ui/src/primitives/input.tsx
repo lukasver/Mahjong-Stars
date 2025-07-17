@@ -14,7 +14,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
         className={cn(getInputClass(), className)}
         ref={ref}
         onWheel={(e) => {
-          e.preventDefault();
+          // e.preventDefault();
           // Fix to involuntary number change when scrolling
           if (type === 'number') {
             (document?.activeElement as HTMLElement)?.blur();
