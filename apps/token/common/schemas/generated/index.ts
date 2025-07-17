@@ -6,6 +6,50 @@ import Decimal from 'decimal.js';
 // HELPER FUNCTIONS
 /////////////////////////////////////////
 
+// JSON
+//------------------------------------------------------
+
+export type NullableJsonInput = Prisma.JsonValue | null | 'JsonNull' | 'DbNull' | Prisma.NullTypes.DbNull | Prisma.NullTypes.JsonNull;
+
+export const transformJsonNull = (v?: NullableJsonInput) => {
+  if (!v || v === 'DbNull') return Prisma.DbNull;
+  if (v === 'JsonNull') return Prisma.JsonNull;
+  return v;
+};
+
+export const JsonValueSchema: z.ZodType<Prisma.JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.literal(null),
+    z.record(z.lazy(() => JsonValueSchema.optional())),
+    z.array(z.lazy(() => JsonValueSchema)),
+  ])
+);
+
+export type JsonValueType = z.infer<typeof JsonValueSchema>;
+
+export const NullableJsonValue = z
+  .union([JsonValueSchema, z.literal('DbNull'), z.literal('JsonNull')])
+  .nullable()
+  .transform((v) => transformJsonNull(v));
+
+export type NullableJsonValueType = z.infer<typeof NullableJsonValue>;
+
+export const InputJsonValueSchema: z.ZodType<Prisma.InputJsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.object({ toJSON: z.function(z.tuple([]), z.any()) }),
+    z.record(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
+    z.array(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
+  ])
+);
+
+export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
+
 // DECIMAL
 //------------------------------------------------------
 
@@ -46,7 +90,11 @@ export const ProfileScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt'
 
 export const AddressScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','city','zipCode','country','state','street','formattedAddress','latitude','longitude']);
 
-export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','status','saleCurrency','initialTokenQuantity','availableTokenQuantity','maximumTokenBuyPerUser','minimumTokenBuyPerUser','saleStartDate','tokenContractAddress','tokenContractChainId','tokenName','tokenTotalSupply','tokenPricePerUnit','tokenSymbol','toWalletsAddress','saleClosingDate','createdBy','saftCheckbox','saftContract','tokenId']);
+export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','catchPhrase','status','currency','initialTokenQuantity','availableTokenQuantity','maximumTokenBuyPerUser','minimumTokenBuyPerUser','saleStartDate','tokenContractAddress','tokenContractChainId','tokenId','tokenName','tokenSymbol','tokenTotalSupply','tokenPricePerUnit','toWalletsAddress','saleClosingDate','createdBy','saftCheckbox','information']);
+
+export const SaftContractScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description','url','content','variables','version','parentId','isCurrent','saleId']);
+
+export const DocumentRecipientScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','fullname','email','role','status','signatureUrl','externalId','address','saftContractId']);
 
 export const DocumentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','fileName','url','type','saleId','userId']);
 
@@ -54,9 +102,7 @@ export const VestingScheduleScalarFieldEnumSchema = z.enum(['id','createdAt','up
 
 export const TokenDistributionScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','amount','distributionDate','txHash','status']);
 
-export const SaleInformationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','summary','tokenUtility','tokenDistribution','otherInformation','tokenLifecycle','liquidityPool','futurePlans','useOfProceeds','imageSale','imageToken','contactEmail','saleId']);
-
-export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','rawPrice','price','totalAmount','formOfPayment','confirmationId','receivingWallet','status','userId','saleId','comment','amountPaid','amountPaidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidence','paymentDate']);
+export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','rawPrice','price','totalAmount','formOfPayment','confirmationId','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidence','paymentDate']);
 
 export const BlockchainScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','chainId','rpcUrl','explorerUrl','isTestnet','isEnabled']);
 
@@ -72,13 +118,27 @@ export const UserRoleScalarFieldEnumSchema = z.enum(['createdAt','updatedAt','de
 
 export const TokenScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','symbol','totalSupply','image']);
 
-export const TokensOnBlockchainsScalarFieldEnumSchema = z.enum(['id','tokenId','tokenSymbol','blockchainId','name','isNative','decimals','contractAddress']);
+export const TokensOnBlockchainsScalarFieldEnumSchema = z.enum(['id','tokenId','tokenSymbol','chainId','name','isNative','decimals','contractAddress']);
+
+export const CurrencyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','symbol','type']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
+
+export const NullableJsonNullValueInputSchema = z.enum(['DbNull','JsonNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
 
 export const NullsOrderSchema = z.enum(['first','last']);
+
+export const JsonNullValueFilterSchema = z.enum(['DbNull','JsonNull','AnyNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.JsonNull : value === 'AnyNull' ? Prisma.AnyNull : value);
+
+export const SignableDocumentRoleSchema = z.enum(['CC','SIGNER','VIEWER','APPROVER']);
+
+export type SignableDocumentRoleType = `${z.infer<typeof SignableDocumentRoleSchema>}`
+
+export const DocumentSignatureStatusSchema = z.enum(['CREATED','SENT_FOR_SIGNATURE','WAITING_FOR_COUNTERPARTY','SIGNED','EXPIRED','REJECTED','OPENED']);
+
+export type DocumentSignatureStatusType = `${z.infer<typeof DocumentSignatureStatusSchema>}`
 
 export const RegistrationStepSchema = z.enum(['REGISTRATION_NEW_ACCOUNT','REGISTRATION_PERSONAL_DETAIL','REGISTRATION_DOCUMENT_DETAIL','REGISTRATION_COMPLETED']);
 
@@ -92,9 +152,9 @@ export const SaleStatusSchema = z.enum(['CREATED','OPEN','CLOSED','FINISHED']);
 
 export type SaleStatusType = `${z.infer<typeof SaleStatusSchema>}`
 
-export const CurrencySchema = z.enum(['CHF','GBP','USD','EUR','ETH','USDC','MATIC','LINK']);
+export const CurrencyTypeSchema = z.enum(['CRYPTO','FIAT']);
 
-export type CurrencyType = `${z.infer<typeof CurrencySchema>}`
+export type CurrencyTypeType = `${z.infer<typeof CurrencyTypeSchema>}`
 
 export const TransactionStatusSchema = z.enum(['PENDING','AWAITING_PAYMENT','PAYMENT_SUBMITTED','PAYMENT_VERIFIED','REJECTED','CANCELLED','TOKENS_ALLOCATED','TOKENS_DISTRIBUTED','COMPLETED','REFUNDED']);
 
@@ -232,12 +292,13 @@ export type Address = z.infer<typeof AddressSchema>
 
 export const SaleSchema = z.object({
   status: SaleStatusSchema,
-  saleCurrency: CurrencySchema,
   id: z.string().cuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   deletedAt: z.coerce.date().nullable(),
   name: z.string(),
+  catchPhrase: z.string().nullable(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().nullable(),
@@ -245,19 +306,79 @@ export const SaleSchema = z.object({
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().nullable(),
   tokenContractChainId: z.number().int().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().nullable(),
   tokenPricePerUnit: z.instanceof(Prisma.Decimal, { message: "Field 'tokenPricePerUnit' must be a Decimal. Location: ['Models', 'Sale']"}),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean(),
-  saftContract: z.string().nullable(),
-  tokenId: z.string(),
+  information: JsonValueSchema.nullable(),
 })
 
 export type Sale = z.infer<typeof SaleSchema>
+
+/////////////////////////////////////////
+// SAFT CONTRACT SCHEMA
+/////////////////////////////////////////
+
+/**
+ * *
+ * * SaftContract model with versioning support.
+ * * - All versions are stored in this table.
+ * * - parentId: null for the original (v1), set to original id for subsequent versions.
+ * * - isLatest: true for the latest version, false for previous versions.
+ * * - Sale points to the latest version only.
+ */
+export const SaftContractSchema = z.object({
+  id: z.string().cuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  deletedAt: z.coerce.date().nullable(),
+  name: z.string(),
+  description: z.string().nullable(),
+  /**
+   * For File types
+   */
+  url: z.string().nullable(),
+  /**
+   * Text content for TEXT type
+   */
+  content: JsonValueSchema.nullable(),
+  /**
+   * Variables for TEXT type
+   */
+  variables: JsonValueSchema.array(),
+  version: z.number().int(),
+  parentId: z.string().nullable(),
+  isCurrent: z.boolean(),
+  saleId: z.string().nullable(),
+})
+
+export type SaftContract = z.infer<typeof SaftContractSchema>
+
+/////////////////////////////////////////
+// DOCUMENT RECIPIENT SCHEMA
+/////////////////////////////////////////
+
+export const DocumentRecipientSchema = z.object({
+  role: SignableDocumentRoleSchema,
+  status: DocumentSignatureStatusSchema,
+  id: z.string().cuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  deletedAt: z.coerce.date().nullable(),
+  fullname: z.string().nullable(),
+  email: z.string(),
+  signatureUrl: z.string().nullable(),
+  externalId: z.number().int().nullable(),
+  address: z.string().nullable(),
+  saftContractId: z.string().nullable(),
+})
+
+export type DocumentRecipient = z.infer<typeof DocumentRecipientSchema>
 
 /////////////////////////////////////////
 // DOCUMENT SCHEMA
@@ -317,38 +438,12 @@ export const TokenDistributionSchema = z.object({
 export type TokenDistribution = z.infer<typeof TokenDistributionSchema>
 
 /////////////////////////////////////////
-// SALE INFORMATION SCHEMA
-/////////////////////////////////////////
-
-export const SaleInformationSchema = z.object({
-  id: z.string().cuid(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-  deletedAt: z.coerce.date().nullable(),
-  summary: z.string().nullable(),
-  tokenUtility: z.string().nullable(),
-  tokenDistribution: z.string().nullable(),
-  otherInformation: z.string().nullable(),
-  tokenLifecycle: z.string().nullable(),
-  liquidityPool: z.string().nullable(),
-  futurePlans: z.string().nullable(),
-  useOfProceeds: z.string().nullable(),
-  imageSale: z.string().nullable(),
-  imageToken: z.string().nullable(),
-  contactEmail: z.string().nullable(),
-  saleId: z.string(),
-})
-
-export type SaleInformation = z.infer<typeof SaleInformationSchema>
-
-/////////////////////////////////////////
 // SALE TRANSACTIONS SCHEMA
 /////////////////////////////////////////
 
 export const SaleTransactionsSchema = z.object({
   formOfPayment: FOPSchema,
   status: TransactionStatusSchema,
-  amountPaidCurrency: CurrencySchema,
   id: z.string().cuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -364,6 +459,7 @@ export const SaleTransactionsSchema = z.object({
   saleId: z.string(),
   comment: z.string().nullable(),
   amountPaid: z.string(),
+  paidCurrency: z.string(),
   txHash: z.string().nullable(),
   blockchainId: z.string().nullable(),
   agreementId: z.string().nullable(),
@@ -502,7 +598,7 @@ export const TokensOnBlockchainsSchema = z.object({
   id: z.string().cuid(),
   tokenId: z.string(),
   tokenSymbol: z.string(),
-  blockchainId: z.string(),
+  chainId: z.number().int(),
   name: z.string(),
   isNative: z.boolean(),
   decimals: z.number().int(),
@@ -510,6 +606,22 @@ export const TokensOnBlockchainsSchema = z.object({
 })
 
 export type TokensOnBlockchains = z.infer<typeof TokensOnBlockchainsSchema>
+
+/////////////////////////////////////////
+// CURRENCY SCHEMA
+/////////////////////////////////////////
+
+export const CurrencySchema = z.object({
+  type: CurrencyTypeSchema,
+  id: z.string().cuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  deletedAt: z.coerce.date().nullable(),
+  name: z.string(),
+  symbol: z.string(),
+})
+
+export type Currency = z.infer<typeof CurrencySchema>
 
 /////////////////////////////////////////
 // SELECT & INCLUDE
@@ -529,6 +641,7 @@ export const UserIncludeSchema: z.ZodType<Prisma.UserInclude> = z.object({
   transactionApprovals: z.union([z.boolean(),z.lazy(() => SaleTransactionsFindManyArgsSchema)]).optional(),
   Document: z.union([z.boolean(),z.lazy(() => DocumentFindManyArgsSchema)]).optional(),
   WalletAddress: z.union([z.boolean(),z.lazy(() => WalletAddressFindManyArgsSchema)]).optional(),
+  DocumentRecipient: z.union([z.boolean(),z.lazy(() => DocumentRecipientFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -550,6 +663,7 @@ export const UserCountOutputTypeSelectSchema: z.ZodType<Prisma.UserCountOutputTy
   transactionApprovals: z.boolean().optional(),
   Document: z.boolean().optional(),
   WalletAddress: z.boolean().optional(),
+  DocumentRecipient: z.boolean().optional(),
 }).strict();
 
 export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
@@ -574,6 +688,7 @@ export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
   transactionApprovals: z.union([z.boolean(),z.lazy(() => SaleTransactionsFindManyArgsSchema)]).optional(),
   Document: z.union([z.boolean(),z.lazy(() => DocumentFindManyArgsSchema)]).optional(),
   WalletAddress: z.union([z.boolean(),z.lazy(() => WalletAddressFindManyArgsSchema)]).optional(),
+  DocumentRecipient: z.union([z.boolean(),z.lazy(() => DocumentRecipientFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -695,12 +810,13 @@ export const AddressSelectSchema: z.ZodType<Prisma.AddressSelect> = z.object({
 //------------------------------------------------------
 
 export const SaleIncludeSchema: z.ZodType<Prisma.SaleInclude> = z.object({
+  saleCurrency: z.union([z.boolean(),z.lazy(() => CurrencyArgsSchema)]).optional(),
   blockchain: z.union([z.boolean(),z.lazy(() => BlockchainArgsSchema)]).optional(),
+  token: z.union([z.boolean(),z.lazy(() => TokenArgsSchema)]).optional(),
+  saftContract: z.union([z.boolean(),z.lazy(() => SaftContractArgsSchema)]).optional(),
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   transactions: z.union([z.boolean(),z.lazy(() => SaleTransactionsFindManyArgsSchema)]).optional(),
-  saleInformation: z.union([z.boolean(),z.lazy(() => SaleInformationArgsSchema)]).optional(),
   documents: z.union([z.boolean(),z.lazy(() => DocumentFindManyArgsSchema)]).optional(),
-  token: z.union([z.boolean(),z.lazy(() => TokenArgsSchema)]).optional(),
   vestingSchedules: z.union([z.boolean(),z.lazy(() => VestingScheduleFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => SaleCountOutputTypeArgsSchema)]).optional(),
 }).strict()
@@ -726,8 +842,9 @@ export const SaleSelectSchema: z.ZodType<Prisma.SaleSelect> = z.object({
   updatedAt: z.boolean().optional(),
   deletedAt: z.boolean().optional(),
   name: z.boolean().optional(),
+  catchPhrase: z.boolean().optional(),
   status: z.boolean().optional(),
-  saleCurrency: z.boolean().optional(),
+  currency: z.boolean().optional(),
   initialTokenQuantity: z.boolean().optional(),
   availableTokenQuantity: z.boolean().optional(),
   maximumTokenBuyPerUser: z.boolean().optional(),
@@ -735,24 +852,96 @@ export const SaleSelectSchema: z.ZodType<Prisma.SaleSelect> = z.object({
   saleStartDate: z.boolean().optional(),
   tokenContractAddress: z.boolean().optional(),
   tokenContractChainId: z.boolean().optional(),
+  tokenId: z.boolean().optional(),
   tokenName: z.boolean().optional(),
+  tokenSymbol: z.boolean().optional(),
   tokenTotalSupply: z.boolean().optional(),
   tokenPricePerUnit: z.boolean().optional(),
-  tokenSymbol: z.boolean().optional(),
   toWalletsAddress: z.boolean().optional(),
   saleClosingDate: z.boolean().optional(),
   createdBy: z.boolean().optional(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.boolean().optional(),
-  tokenId: z.boolean().optional(),
+  information: z.boolean().optional(),
+  saleCurrency: z.union([z.boolean(),z.lazy(() => CurrencyArgsSchema)]).optional(),
   blockchain: z.union([z.boolean(),z.lazy(() => BlockchainArgsSchema)]).optional(),
+  token: z.union([z.boolean(),z.lazy(() => TokenArgsSchema)]).optional(),
+  saftContract: z.union([z.boolean(),z.lazy(() => SaftContractArgsSchema)]).optional(),
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   transactions: z.union([z.boolean(),z.lazy(() => SaleTransactionsFindManyArgsSchema)]).optional(),
-  saleInformation: z.union([z.boolean(),z.lazy(() => SaleInformationArgsSchema)]).optional(),
   documents: z.union([z.boolean(),z.lazy(() => DocumentFindManyArgsSchema)]).optional(),
-  token: z.union([z.boolean(),z.lazy(() => TokenArgsSchema)]).optional(),
   vestingSchedules: z.union([z.boolean(),z.lazy(() => VestingScheduleFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => SaleCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+// SAFT CONTRACT
+//------------------------------------------------------
+
+export const SaftContractIncludeSchema: z.ZodType<Prisma.SaftContractInclude> = z.object({
+  recipients: z.union([z.boolean(),z.lazy(() => DocumentRecipientFindManyArgsSchema)]).optional(),
+  Sale: z.union([z.boolean(),z.lazy(() => SaleArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => SaftContractCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+export const SaftContractArgsSchema: z.ZodType<Prisma.SaftContractDefaultArgs> = z.object({
+  select: z.lazy(() => SaftContractSelectSchema).optional(),
+  include: z.lazy(() => SaftContractIncludeSchema).optional(),
+}).strict();
+
+export const SaftContractCountOutputTypeArgsSchema: z.ZodType<Prisma.SaftContractCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => SaftContractCountOutputTypeSelectSchema).nullish(),
+}).strict();
+
+export const SaftContractCountOutputTypeSelectSchema: z.ZodType<Prisma.SaftContractCountOutputTypeSelect> = z.object({
+  recipients: z.boolean().optional(),
+}).strict();
+
+export const SaftContractSelectSchema: z.ZodType<Prisma.SaftContractSelect> = z.object({
+  id: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  updatedAt: z.boolean().optional(),
+  deletedAt: z.boolean().optional(),
+  name: z.boolean().optional(),
+  description: z.boolean().optional(),
+  url: z.boolean().optional(),
+  content: z.boolean().optional(),
+  variables: z.boolean().optional(),
+  version: z.boolean().optional(),
+  parentId: z.boolean().optional(),
+  isCurrent: z.boolean().optional(),
+  saleId: z.boolean().optional(),
+  recipients: z.union([z.boolean(),z.lazy(() => DocumentRecipientFindManyArgsSchema)]).optional(),
+  Sale: z.union([z.boolean(),z.lazy(() => SaleArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => SaftContractCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+// DOCUMENT RECIPIENT
+//------------------------------------------------------
+
+export const DocumentRecipientIncludeSchema: z.ZodType<Prisma.DocumentRecipientInclude> = z.object({
+  user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
+  SaftContract: z.union([z.boolean(),z.lazy(() => SaftContractArgsSchema)]).optional(),
+}).strict()
+
+export const DocumentRecipientArgsSchema: z.ZodType<Prisma.DocumentRecipientDefaultArgs> = z.object({
+  select: z.lazy(() => DocumentRecipientSelectSchema).optional(),
+  include: z.lazy(() => DocumentRecipientIncludeSchema).optional(),
+}).strict();
+
+export const DocumentRecipientSelectSchema: z.ZodType<Prisma.DocumentRecipientSelect> = z.object({
+  id: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  updatedAt: z.boolean().optional(),
+  deletedAt: z.boolean().optional(),
+  fullname: z.boolean().optional(),
+  email: z.boolean().optional(),
+  role: z.boolean().optional(),
+  status: z.boolean().optional(),
+  signatureUrl: z.boolean().optional(),
+  externalId: z.boolean().optional(),
+  address: z.boolean().optional(),
+  saftContractId: z.boolean().optional(),
+  user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
+  SaftContract: z.union([z.boolean(),z.lazy(() => SaftContractArgsSchema)]).optional(),
 }).strict()
 
 // DOCUMENT
@@ -835,44 +1024,13 @@ export const TokenDistributionSelectSchema: z.ZodType<Prisma.TokenDistributionSe
   transaction: z.union([z.boolean(),z.lazy(() => SaleTransactionsArgsSchema)]).optional(),
 }).strict()
 
-// SALE INFORMATION
-//------------------------------------------------------
-
-export const SaleInformationIncludeSchema: z.ZodType<Prisma.SaleInformationInclude> = z.object({
-  sale: z.union([z.boolean(),z.lazy(() => SaleArgsSchema)]).optional(),
-}).strict()
-
-export const SaleInformationArgsSchema: z.ZodType<Prisma.SaleInformationDefaultArgs> = z.object({
-  select: z.lazy(() => SaleInformationSelectSchema).optional(),
-  include: z.lazy(() => SaleInformationIncludeSchema).optional(),
-}).strict();
-
-export const SaleInformationSelectSchema: z.ZodType<Prisma.SaleInformationSelect> = z.object({
-  id: z.boolean().optional(),
-  createdAt: z.boolean().optional(),
-  updatedAt: z.boolean().optional(),
-  deletedAt: z.boolean().optional(),
-  summary: z.boolean().optional(),
-  tokenUtility: z.boolean().optional(),
-  tokenDistribution: z.boolean().optional(),
-  otherInformation: z.boolean().optional(),
-  tokenLifecycle: z.boolean().optional(),
-  liquidityPool: z.boolean().optional(),
-  futurePlans: z.boolean().optional(),
-  useOfProceeds: z.boolean().optional(),
-  imageSale: z.boolean().optional(),
-  imageToken: z.boolean().optional(),
-  contactEmail: z.boolean().optional(),
-  saleId: z.boolean().optional(),
-  sale: z.union([z.boolean(),z.lazy(() => SaleArgsSchema)]).optional(),
-}).strict()
-
 // SALE TRANSACTIONS
 //------------------------------------------------------
 
 export const SaleTransactionsIncludeSchema: z.ZodType<Prisma.SaleTransactionsInclude> = z.object({
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   sale: z.union([z.boolean(),z.lazy(() => SaleArgsSchema)]).optional(),
+  amountPaidCurrency: z.union([z.boolean(),z.lazy(() => CurrencyArgsSchema)]).optional(),
   blockchain: z.union([z.boolean(),z.lazy(() => BlockchainArgsSchema)]).optional(),
   approver: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   auditTrail: z.union([z.boolean(),z.lazy(() => TransactionAuditFindManyArgsSchema)]).optional(),
@@ -912,7 +1070,7 @@ export const SaleTransactionsSelectSchema: z.ZodType<Prisma.SaleTransactionsSele
   saleId: z.boolean().optional(),
   comment: z.boolean().optional(),
   amountPaid: z.boolean().optional(),
-  amountPaidCurrency: z.boolean().optional(),
+  paidCurrency: z.boolean().optional(),
   txHash: z.boolean().optional(),
   blockchainId: z.boolean().optional(),
   agreementId: z.boolean().optional(),
@@ -922,6 +1080,7 @@ export const SaleTransactionsSelectSchema: z.ZodType<Prisma.SaleTransactionsSele
   paymentDate: z.boolean().optional(),
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   sale: z.union([z.boolean(),z.lazy(() => SaleArgsSchema)]).optional(),
+  amountPaidCurrency: z.union([z.boolean(),z.lazy(() => CurrencyArgsSchema)]).optional(),
   blockchain: z.union([z.boolean(),z.lazy(() => BlockchainArgsSchema)]).optional(),
   approver: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   auditTrail: z.union([z.boolean(),z.lazy(() => TransactionAuditFindManyArgsSchema)]).optional(),
@@ -1147,13 +1306,49 @@ export const TokensOnBlockchainsSelectSchema: z.ZodType<Prisma.TokensOnBlockchai
   id: z.boolean().optional(),
   tokenId: z.boolean().optional(),
   tokenSymbol: z.boolean().optional(),
-  blockchainId: z.boolean().optional(),
+  chainId: z.boolean().optional(),
   name: z.boolean().optional(),
   isNative: z.boolean().optional(),
   decimals: z.boolean().optional(),
   contractAddress: z.boolean().optional(),
   token: z.union([z.boolean(),z.lazy(() => TokenArgsSchema)]).optional(),
   blockchain: z.union([z.boolean(),z.lazy(() => BlockchainArgsSchema)]).optional(),
+}).strict()
+
+// CURRENCY
+//------------------------------------------------------
+
+export const CurrencyIncludeSchema: z.ZodType<Prisma.CurrencyInclude> = z.object({
+  Sale: z.union([z.boolean(),z.lazy(() => SaleFindManyArgsSchema)]).optional(),
+  SaleTransactions: z.union([z.boolean(),z.lazy(() => SaleTransactionsFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => CurrencyCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+export const CurrencyArgsSchema: z.ZodType<Prisma.CurrencyDefaultArgs> = z.object({
+  select: z.lazy(() => CurrencySelectSchema).optional(),
+  include: z.lazy(() => CurrencyIncludeSchema).optional(),
+}).strict();
+
+export const CurrencyCountOutputTypeArgsSchema: z.ZodType<Prisma.CurrencyCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => CurrencyCountOutputTypeSelectSchema).nullish(),
+}).strict();
+
+export const CurrencyCountOutputTypeSelectSchema: z.ZodType<Prisma.CurrencyCountOutputTypeSelect> = z.object({
+  Sale: z.boolean().optional(),
+  SaleTransactions: z.boolean().optional(),
+}).strict();
+
+export const CurrencySelectSchema: z.ZodType<Prisma.CurrencySelect> = z.object({
+  id: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  updatedAt: z.boolean().optional(),
+  deletedAt: z.boolean().optional(),
+  name: z.boolean().optional(),
+  symbol: z.boolean().optional(),
+  type: z.boolean().optional(),
+  Sale: z.union([z.boolean(),z.lazy(() => SaleFindManyArgsSchema)]).optional(),
+  SaleTransactions: z.union([z.boolean(),z.lazy(() => SaleTransactionsFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => CurrencyCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
 
@@ -1185,7 +1380,8 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   transactions: z.lazy(() => SaleTransactionsListRelationFilterSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsListRelationFilterSchema).optional(),
   Document: z.lazy(() => DocumentListRelationFilterSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressListRelationFilterSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressListRelationFilterSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientListRelationFilterSchema).optional()
 }).strict();
 
 export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWithRelationInput> = z.object({
@@ -1209,7 +1405,8 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   transactions: z.lazy(() => SaleTransactionsOrderByRelationAggregateInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsOrderByRelationAggregateInputSchema).optional(),
   Document: z.lazy(() => DocumentOrderByRelationAggregateInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressOrderByRelationAggregateInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressOrderByRelationAggregateInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> = z.union([
@@ -1248,7 +1445,8 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   transactions: z.lazy(() => SaleTransactionsListRelationFilterSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsListRelationFilterSchema).optional(),
   Document: z.lazy(() => DocumentListRelationFilterSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressListRelationFilterSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressListRelationFilterSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientListRelationFilterSchema).optional()
 }).strict());
 
 export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderByWithAggregationInput> = z.object({
@@ -1718,8 +1916,9 @@ export const SaleWhereInputSchema: z.ZodType<Prisma.SaleWhereInput> = z.object({
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  catchPhrase: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   status: z.union([ z.lazy(() => EnumSaleStatusFilterSchema),z.lazy(() => SaleStatusSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => EnumCurrencyFilterSchema),z.lazy(() => CurrencySchema) ]).optional(),
+  currency: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   initialTokenQuantity: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   availableTokenQuantity: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
@@ -1727,22 +1926,23 @@ export const SaleWhereInputSchema: z.ZodType<Prisma.SaleWhereInput> = z.object({
   saleStartDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   tokenContractAddress: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   tokenContractChainId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenTotalSupply: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.lazy(() => DecimalFilterSchema),z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
-  tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   toWalletsAddress: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   saleClosingDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   createdBy: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   saftCheckbox: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  saftContract: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  information: z.lazy(() => JsonNullableFilterSchema).optional(),
+  saleCurrency: z.union([ z.lazy(() => CurrencyScalarRelationFilterSchema),z.lazy(() => CurrencyWhereInputSchema) ]).optional(),
   blockchain: z.union([ z.lazy(() => BlockchainNullableScalarRelationFilterSchema),z.lazy(() => BlockchainWhereInputSchema) ]).optional().nullable(),
+  token: z.union([ z.lazy(() => TokenScalarRelationFilterSchema),z.lazy(() => TokenWhereInputSchema) ]).optional(),
+  saftContract: z.union([ z.lazy(() => SaftContractNullableScalarRelationFilterSchema),z.lazy(() => SaftContractWhereInputSchema) ]).optional().nullable(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
   transactions: z.lazy(() => SaleTransactionsListRelationFilterSchema).optional(),
-  saleInformation: z.union([ z.lazy(() => SaleInformationNullableScalarRelationFilterSchema),z.lazy(() => SaleInformationWhereInputSchema) ]).optional().nullable(),
   documents: z.lazy(() => DocumentListRelationFilterSchema).optional(),
-  token: z.union([ z.lazy(() => TokenScalarRelationFilterSchema),z.lazy(() => TokenWhereInputSchema) ]).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleListRelationFilterSchema).optional()
 }).strict();
 
@@ -1752,8 +1952,9 @@ export const SaleOrderByWithRelationInputSchema: z.ZodType<Prisma.SaleOrderByWit
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  catchPhrase: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
-  saleCurrency: z.lazy(() => SortOrderSchema).optional(),
+  currency: z.lazy(() => SortOrderSchema).optional(),
   initialTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   availableTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   maximumTokenBuyPerUser: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -1761,22 +1962,23 @@ export const SaleOrderByWithRelationInputSchema: z.ZodType<Prisma.SaleOrderByWit
   saleStartDate: z.lazy(() => SortOrderSchema).optional(),
   tokenContractAddress: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   tokenContractChainId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenName: z.lazy(() => SortOrderSchema).optional(),
+  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   tokenTotalSupply: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   tokenPricePerUnit: z.lazy(() => SortOrderSchema).optional(),
-  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   toWalletsAddress: z.lazy(() => SortOrderSchema).optional(),
   saleClosingDate: z.lazy(() => SortOrderSchema).optional(),
   createdBy: z.lazy(() => SortOrderSchema).optional(),
   saftCheckbox: z.lazy(() => SortOrderSchema).optional(),
-  saftContract: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  tokenId: z.lazy(() => SortOrderSchema).optional(),
+  information: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyOrderByWithRelationInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainOrderByWithRelationInputSchema).optional(),
+  token: z.lazy(() => TokenOrderByWithRelationInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractOrderByWithRelationInputSchema).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsOrderByRelationAggregateInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationOrderByWithRelationInputSchema).optional(),
   documents: z.lazy(() => DocumentOrderByRelationAggregateInputSchema).optional(),
-  token: z.lazy(() => TokenOrderByWithRelationInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
@@ -1792,8 +1994,9 @@ export const SaleWhereUniqueInputSchema: z.ZodType<Prisma.SaleWhereUniqueInput> 
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  catchPhrase: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   status: z.union([ z.lazy(() => EnumSaleStatusFilterSchema),z.lazy(() => SaleStatusSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => EnumCurrencyFilterSchema),z.lazy(() => CurrencySchema) ]).optional(),
+  currency: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   initialTokenQuantity: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   availableTokenQuantity: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.lazy(() => IntNullableFilterSchema),z.number().int() ]).optional().nullable(),
@@ -1801,22 +2004,23 @@ export const SaleWhereUniqueInputSchema: z.ZodType<Prisma.SaleWhereUniqueInput> 
   saleStartDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   tokenContractAddress: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   tokenContractChainId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number().int() ]).optional().nullable(),
+  tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenTotalSupply: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.lazy(() => DecimalFilterSchema),z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
-  tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   toWalletsAddress: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   saleClosingDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   createdBy: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   saftCheckbox: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  saftContract: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  information: z.lazy(() => JsonNullableFilterSchema).optional(),
+  saleCurrency: z.union([ z.lazy(() => CurrencyScalarRelationFilterSchema),z.lazy(() => CurrencyWhereInputSchema) ]).optional(),
   blockchain: z.union([ z.lazy(() => BlockchainNullableScalarRelationFilterSchema),z.lazy(() => BlockchainWhereInputSchema) ]).optional().nullable(),
+  token: z.union([ z.lazy(() => TokenScalarRelationFilterSchema),z.lazy(() => TokenWhereInputSchema) ]).optional(),
+  saftContract: z.union([ z.lazy(() => SaftContractNullableScalarRelationFilterSchema),z.lazy(() => SaftContractWhereInputSchema) ]).optional().nullable(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
   transactions: z.lazy(() => SaleTransactionsListRelationFilterSchema).optional(),
-  saleInformation: z.union([ z.lazy(() => SaleInformationNullableScalarRelationFilterSchema),z.lazy(() => SaleInformationWhereInputSchema) ]).optional().nullable(),
   documents: z.lazy(() => DocumentListRelationFilterSchema).optional(),
-  token: z.union([ z.lazy(() => TokenScalarRelationFilterSchema),z.lazy(() => TokenWhereInputSchema) ]).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleListRelationFilterSchema).optional()
 }).strict());
 
@@ -1826,8 +2030,9 @@ export const SaleOrderByWithAggregationInputSchema: z.ZodType<Prisma.SaleOrderBy
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  catchPhrase: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
-  saleCurrency: z.lazy(() => SortOrderSchema).optional(),
+  currency: z.lazy(() => SortOrderSchema).optional(),
   initialTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   availableTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   maximumTokenBuyPerUser: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -1835,16 +2040,16 @@ export const SaleOrderByWithAggregationInputSchema: z.ZodType<Prisma.SaleOrderBy
   saleStartDate: z.lazy(() => SortOrderSchema).optional(),
   tokenContractAddress: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   tokenContractChainId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenName: z.lazy(() => SortOrderSchema).optional(),
+  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   tokenTotalSupply: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   tokenPricePerUnit: z.lazy(() => SortOrderSchema).optional(),
-  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   toWalletsAddress: z.lazy(() => SortOrderSchema).optional(),
   saleClosingDate: z.lazy(() => SortOrderSchema).optional(),
   createdBy: z.lazy(() => SortOrderSchema).optional(),
   saftCheckbox: z.lazy(() => SortOrderSchema).optional(),
-  saftContract: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  tokenId: z.lazy(() => SortOrderSchema).optional(),
+  information: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => SaleCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => SaleAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => SaleMaxOrderByAggregateInputSchema).optional(),
@@ -1861,8 +2066,9 @@ export const SaleScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.SaleScal
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   deletedAt: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  catchPhrase: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   status: z.union([ z.lazy(() => EnumSaleStatusWithAggregatesFilterSchema),z.lazy(() => SaleStatusSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => EnumCurrencyWithAggregatesFilterSchema),z.lazy(() => CurrencySchema) ]).optional(),
+  currency: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   initialTokenQuantity: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   availableTokenQuantity: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
@@ -1870,16 +2076,243 @@ export const SaleScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.SaleScal
   saleStartDate: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   tokenContractAddress: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   tokenContractChainId: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
+  tokenId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   tokenName: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  tokenSymbol: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   tokenTotalSupply: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.lazy(() => DecimalWithAggregatesFilterSchema),z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
-  tokenSymbol: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   toWalletsAddress: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   saleClosingDate: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   createdBy: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   saftCheckbox: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
-  saftContract: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  tokenId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  information: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional()
+}).strict();
+
+export const SaftContractWhereInputSchema: z.ZodType<Prisma.SaftContractWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => SaftContractWhereInputSchema),z.lazy(() => SaftContractWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => SaftContractWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => SaftContractWhereInputSchema),z.lazy(() => SaftContractWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  description: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  url: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  content: z.lazy(() => JsonNullableFilterSchema).optional(),
+  variables: z.lazy(() => JsonNullableListFilterSchema).optional(),
+  version: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  parentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  isCurrent: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  saleId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  recipients: z.lazy(() => DocumentRecipientListRelationFilterSchema).optional(),
+  Sale: z.union([ z.lazy(() => SaleNullableScalarRelationFilterSchema),z.lazy(() => SaleWhereInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const SaftContractOrderByWithRelationInputSchema: z.ZodType<Prisma.SaftContractOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  description: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  url: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  content: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  variables: z.lazy(() => SortOrderSchema).optional(),
+  version: z.lazy(() => SortOrderSchema).optional(),
+  parentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  isCurrent: z.lazy(() => SortOrderSchema).optional(),
+  saleId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  recipients: z.lazy(() => DocumentRecipientOrderByRelationAggregateInputSchema).optional(),
+  Sale: z.lazy(() => SaleOrderByWithRelationInputSchema).optional()
+}).strict();
+
+export const SaftContractWhereUniqueInputSchema: z.ZodType<Prisma.SaftContractWhereUniqueInput> = z.union([
+  z.object({
+    id: z.string().cuid(),
+    saleId: z.string(),
+    parentId_version: z.lazy(() => SaftContractParentIdVersionCompoundUniqueInputSchema)
+  }),
+  z.object({
+    id: z.string().cuid(),
+    saleId: z.string(),
+  }),
+  z.object({
+    id: z.string().cuid(),
+    parentId_version: z.lazy(() => SaftContractParentIdVersionCompoundUniqueInputSchema),
+  }),
+  z.object({
+    id: z.string().cuid(),
+  }),
+  z.object({
+    saleId: z.string(),
+    parentId_version: z.lazy(() => SaftContractParentIdVersionCompoundUniqueInputSchema),
+  }),
+  z.object({
+    saleId: z.string(),
+  }),
+  z.object({
+    parentId_version: z.lazy(() => SaftContractParentIdVersionCompoundUniqueInputSchema),
+  }),
+])
+.and(z.object({
+  id: z.string().cuid().optional(),
+  saleId: z.string().optional(),
+  parentId_version: z.lazy(() => SaftContractParentIdVersionCompoundUniqueInputSchema).optional(),
+  AND: z.union([ z.lazy(() => SaftContractWhereInputSchema),z.lazy(() => SaftContractWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => SaftContractWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => SaftContractWhereInputSchema),z.lazy(() => SaftContractWhereInputSchema).array() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  description: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  url: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  content: z.lazy(() => JsonNullableFilterSchema).optional(),
+  variables: z.lazy(() => JsonNullableListFilterSchema).optional(),
+  version: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  parentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  isCurrent: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  recipients: z.lazy(() => DocumentRecipientListRelationFilterSchema).optional(),
+  Sale: z.union([ z.lazy(() => SaleNullableScalarRelationFilterSchema),z.lazy(() => SaleWhereInputSchema) ]).optional().nullable(),
+}).strict());
+
+export const SaftContractOrderByWithAggregationInputSchema: z.ZodType<Prisma.SaftContractOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  description: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  url: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  content: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  variables: z.lazy(() => SortOrderSchema).optional(),
+  version: z.lazy(() => SortOrderSchema).optional(),
+  parentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  isCurrent: z.lazy(() => SortOrderSchema).optional(),
+  saleId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  _count: z.lazy(() => SaftContractCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => SaftContractAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => SaftContractMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => SaftContractMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => SaftContractSumOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const SaftContractScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.SaftContractScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => SaftContractScalarWhereWithAggregatesInputSchema),z.lazy(() => SaftContractScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => SaftContractScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => SaftContractScalarWhereWithAggregatesInputSchema),z.lazy(() => SaftContractScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
+  name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  description: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  url: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  content: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
+  variables: z.lazy(() => JsonNullableListFilterSchema).optional(),
+  version: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  parentId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  isCurrent: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  saleId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+}).strict();
+
+export const DocumentRecipientWhereInputSchema: z.ZodType<Prisma.DocumentRecipientWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => DocumentRecipientWhereInputSchema),z.lazy(() => DocumentRecipientWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => DocumentRecipientWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => DocumentRecipientWhereInputSchema),z.lazy(() => DocumentRecipientWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  fullname: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  email: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  role: z.union([ z.lazy(() => EnumSignableDocumentRoleFilterSchema),z.lazy(() => SignableDocumentRoleSchema) ]).optional(),
+  status: z.union([ z.lazy(() => EnumDocumentSignatureStatusFilterSchema),z.lazy(() => DocumentSignatureStatusSchema) ]).optional(),
+  signatureUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  externalId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  address: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  saftContractId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  user: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
+  SaftContract: z.union([ z.lazy(() => SaftContractNullableScalarRelationFilterSchema),z.lazy(() => SaftContractWhereInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DocumentRecipientOrderByWithRelationInputSchema: z.ZodType<Prisma.DocumentRecipientOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  fullname: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  role: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  signatureUrl: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  externalId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  address: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  saftContractId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
+  SaftContract: z.lazy(() => SaftContractOrderByWithRelationInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientWhereUniqueInputSchema: z.ZodType<Prisma.DocumentRecipientWhereUniqueInput> = z.object({
+  id: z.string().cuid()
+})
+.and(z.object({
+  id: z.string().cuid().optional(),
+  AND: z.union([ z.lazy(() => DocumentRecipientWhereInputSchema),z.lazy(() => DocumentRecipientWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => DocumentRecipientWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => DocumentRecipientWhereInputSchema),z.lazy(() => DocumentRecipientWhereInputSchema).array() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  fullname: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  email: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  role: z.union([ z.lazy(() => EnumSignableDocumentRoleFilterSchema),z.lazy(() => SignableDocumentRoleSchema) ]).optional(),
+  status: z.union([ z.lazy(() => EnumDocumentSignatureStatusFilterSchema),z.lazy(() => DocumentSignatureStatusSchema) ]).optional(),
+  signatureUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  externalId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number().int() ]).optional().nullable(),
+  address: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  saftContractId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  user: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
+  SaftContract: z.union([ z.lazy(() => SaftContractNullableScalarRelationFilterSchema),z.lazy(() => SaftContractWhereInputSchema) ]).optional().nullable(),
+}).strict());
+
+export const DocumentRecipientOrderByWithAggregationInputSchema: z.ZodType<Prisma.DocumentRecipientOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  fullname: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  role: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  signatureUrl: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  externalId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  address: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  saftContractId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  _count: z.lazy(() => DocumentRecipientCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => DocumentRecipientAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => DocumentRecipientMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => DocumentRecipientMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => DocumentRecipientSumOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.DocumentRecipientScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => DocumentRecipientScalarWhereWithAggregatesInputSchema),z.lazy(() => DocumentRecipientScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => DocumentRecipientScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => DocumentRecipientScalarWhereWithAggregatesInputSchema),z.lazy(() => DocumentRecipientScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
+  fullname: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  email: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  role: z.union([ z.lazy(() => EnumSignableDocumentRoleWithAggregatesFilterSchema),z.lazy(() => SignableDocumentRoleSchema) ]).optional(),
+  status: z.union([ z.lazy(() => EnumDocumentSignatureStatusWithAggregatesFilterSchema),z.lazy(() => DocumentSignatureStatusSchema) ]).optional(),
+  signatureUrl: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  externalId: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
+  address: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  saftContractId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const DocumentWhereInputSchema: z.ZodType<Prisma.DocumentWhereInput> = z.object({
@@ -2136,128 +2569,6 @@ export const TokenDistributionScalarWhereWithAggregatesInputSchema: z.ZodType<Pr
   status: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
-export const SaleInformationWhereInputSchema: z.ZodType<Prisma.SaleInformationWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => SaleInformationWhereInputSchema),z.lazy(() => SaleInformationWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => SaleInformationWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => SaleInformationWhereInputSchema),z.lazy(() => SaleInformationWhereInputSchema).array() ]).optional(),
-  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
-  summary: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenUtility: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenDistribution: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  otherInformation: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  liquidityPool: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  futurePlans: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  useOfProceeds: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  imageSale: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  imageToken: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  contactEmail: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  saleId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  sale: z.union([ z.lazy(() => SaleScalarRelationFilterSchema),z.lazy(() => SaleWhereInputSchema) ]).optional(),
-}).strict();
-
-export const SaleInformationOrderByWithRelationInputSchema: z.ZodType<Prisma.SaleInformationOrderByWithRelationInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  summary: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  tokenUtility: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  tokenDistribution: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  otherInformation: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  tokenLifecycle: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  liquidityPool: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  futurePlans: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  useOfProceeds: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  imageSale: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  imageToken: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  contactEmail: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  saleId: z.lazy(() => SortOrderSchema).optional(),
-  sale: z.lazy(() => SaleOrderByWithRelationInputSchema).optional()
-}).strict();
-
-export const SaleInformationWhereUniqueInputSchema: z.ZodType<Prisma.SaleInformationWhereUniqueInput> = z.union([
-  z.object({
-    id: z.string().cuid(),
-    saleId: z.string()
-  }),
-  z.object({
-    id: z.string().cuid(),
-  }),
-  z.object({
-    saleId: z.string(),
-  }),
-])
-.and(z.object({
-  id: z.string().cuid().optional(),
-  saleId: z.string().optional(),
-  AND: z.union([ z.lazy(() => SaleInformationWhereInputSchema),z.lazy(() => SaleInformationWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => SaleInformationWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => SaleInformationWhereInputSchema),z.lazy(() => SaleInformationWhereInputSchema).array() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
-  summary: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenUtility: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenDistribution: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  otherInformation: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  liquidityPool: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  futurePlans: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  useOfProceeds: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  imageSale: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  imageToken: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  contactEmail: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  sale: z.union([ z.lazy(() => SaleScalarRelationFilterSchema),z.lazy(() => SaleWhereInputSchema) ]).optional(),
-}).strict());
-
-export const SaleInformationOrderByWithAggregationInputSchema: z.ZodType<Prisma.SaleInformationOrderByWithAggregationInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  summary: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  tokenUtility: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  tokenDistribution: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  otherInformation: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  tokenLifecycle: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  liquidityPool: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  futurePlans: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  useOfProceeds: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  imageSale: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  imageToken: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  contactEmail: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  saleId: z.lazy(() => SortOrderSchema).optional(),
-  _count: z.lazy(() => SaleInformationCountOrderByAggregateInputSchema).optional(),
-  _max: z.lazy(() => SaleInformationMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => SaleInformationMinOrderByAggregateInputSchema).optional()
-}).strict();
-
-export const SaleInformationScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.SaleInformationScalarWhereWithAggregatesInput> = z.object({
-  AND: z.union([ z.lazy(() => SaleInformationScalarWhereWithAggregatesInputSchema),z.lazy(() => SaleInformationScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  OR: z.lazy(() => SaleInformationScalarWhereWithAggregatesInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => SaleInformationScalarWhereWithAggregatesInputSchema),z.lazy(() => SaleInformationScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  deletedAt: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
-  summary: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  tokenUtility: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  tokenDistribution: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  otherInformation: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  liquidityPool: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  futurePlans: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  useOfProceeds: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  imageSale: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  imageToken: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  contactEmail: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  saleId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-}).strict();
-
 export const SaleTransactionsWhereInputSchema: z.ZodType<Prisma.SaleTransactionsWhereInput> = z.object({
   AND: z.union([ z.lazy(() => SaleTransactionsWhereInputSchema),z.lazy(() => SaleTransactionsWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => SaleTransactionsWhereInputSchema).array().optional(),
@@ -2279,7 +2590,7 @@ export const SaleTransactionsWhereInputSchema: z.ZodType<Prisma.SaleTransactions
   saleId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   comment: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   amountPaid: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => EnumCurrencyFilterSchema),z.lazy(() => CurrencySchema) ]).optional(),
+  paidCurrency: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   txHash: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   blockchainId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   agreementId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -2289,6 +2600,7 @@ export const SaleTransactionsWhereInputSchema: z.ZodType<Prisma.SaleTransactions
   paymentDate: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
   sale: z.union([ z.lazy(() => SaleScalarRelationFilterSchema),z.lazy(() => SaleWhereInputSchema) ]).optional(),
+  amountPaidCurrency: z.union([ z.lazy(() => CurrencyScalarRelationFilterSchema),z.lazy(() => CurrencyWhereInputSchema) ]).optional(),
   blockchain: z.union([ z.lazy(() => BlockchainNullableScalarRelationFilterSchema),z.lazy(() => BlockchainWhereInputSchema) ]).optional().nullable(),
   approver: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
   auditTrail: z.lazy(() => TransactionAuditListRelationFilterSchema).optional(),
@@ -2313,7 +2625,7 @@ export const SaleTransactionsOrderByWithRelationInputSchema: z.ZodType<Prisma.Sa
   saleId: z.lazy(() => SortOrderSchema).optional(),
   comment: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   amountPaid: z.lazy(() => SortOrderSchema).optional(),
-  amountPaidCurrency: z.lazy(() => SortOrderSchema).optional(),
+  paidCurrency: z.lazy(() => SortOrderSchema).optional(),
   txHash: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   blockchainId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   agreementId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -2323,6 +2635,7 @@ export const SaleTransactionsOrderByWithRelationInputSchema: z.ZodType<Prisma.Sa
   paymentDate: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   sale: z.lazy(() => SaleOrderByWithRelationInputSchema).optional(),
+  amountPaidCurrency: z.lazy(() => CurrencyOrderByWithRelationInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainOrderByWithRelationInputSchema).optional(),
   approver: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditOrderByRelationAggregateInputSchema).optional(),
@@ -2353,7 +2666,7 @@ export const SaleTransactionsWhereUniqueInputSchema: z.ZodType<Prisma.SaleTransa
   saleId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   comment: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   amountPaid: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => EnumCurrencyFilterSchema),z.lazy(() => CurrencySchema) ]).optional(),
+  paidCurrency: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   txHash: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   blockchainId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   agreementId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -2363,6 +2676,7 @@ export const SaleTransactionsWhereUniqueInputSchema: z.ZodType<Prisma.SaleTransa
   paymentDate: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
   sale: z.union([ z.lazy(() => SaleScalarRelationFilterSchema),z.lazy(() => SaleWhereInputSchema) ]).optional(),
+  amountPaidCurrency: z.union([ z.lazy(() => CurrencyScalarRelationFilterSchema),z.lazy(() => CurrencyWhereInputSchema) ]).optional(),
   blockchain: z.union([ z.lazy(() => BlockchainNullableScalarRelationFilterSchema),z.lazy(() => BlockchainWhereInputSchema) ]).optional().nullable(),
   approver: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
   auditTrail: z.lazy(() => TransactionAuditListRelationFilterSchema).optional(),
@@ -2387,7 +2701,7 @@ export const SaleTransactionsOrderByWithAggregationInputSchema: z.ZodType<Prisma
   saleId: z.lazy(() => SortOrderSchema).optional(),
   comment: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   amountPaid: z.lazy(() => SortOrderSchema).optional(),
-  amountPaidCurrency: z.lazy(() => SortOrderSchema).optional(),
+  paidCurrency: z.lazy(() => SortOrderSchema).optional(),
   txHash: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   blockchainId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   agreementId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -2423,7 +2737,7 @@ export const SaleTransactionsScalarWhereWithAggregatesInputSchema: z.ZodType<Pri
   saleId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   comment: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   amountPaid: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => EnumCurrencyWithAggregatesFilterSchema),z.lazy(() => CurrencySchema) ]).optional(),
+  paidCurrency: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   txHash: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   blockchainId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   agreementId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
@@ -2471,18 +2785,35 @@ export const BlockchainOrderByWithRelationInputSchema: z.ZodType<Prisma.Blockcha
 export const BlockchainWhereUniqueInputSchema: z.ZodType<Prisma.BlockchainWhereUniqueInput> = z.union([
   z.object({
     id: z.string().cuid(),
-    chainId: z.number().int()
+    chainId: z.number().int(),
+    id_chainId: z.lazy(() => BlockchainIdChainIdCompoundUniqueInputSchema)
+  }),
+  z.object({
+    id: z.string().cuid(),
+    chainId: z.number().int(),
+  }),
+  z.object({
+    id: z.string().cuid(),
+    id_chainId: z.lazy(() => BlockchainIdChainIdCompoundUniqueInputSchema),
   }),
   z.object({
     id: z.string().cuid(),
   }),
   z.object({
     chainId: z.number().int(),
+    id_chainId: z.lazy(() => BlockchainIdChainIdCompoundUniqueInputSchema),
+  }),
+  z.object({
+    chainId: z.number().int(),
+  }),
+  z.object({
+    id_chainId: z.lazy(() => BlockchainIdChainIdCompoundUniqueInputSchema),
   }),
 ])
 .and(z.object({
   id: z.string().cuid().optional(),
   chainId: z.number().int().optional(),
+  id_chainId: z.lazy(() => BlockchainIdChainIdCompoundUniqueInputSchema).optional(),
   AND: z.union([ z.lazy(() => BlockchainWhereInputSchema),z.lazy(() => BlockchainWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => BlockchainWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => BlockchainWhereInputSchema),z.lazy(() => BlockchainWhereInputSchema).array() ]).optional(),
@@ -2558,11 +2889,21 @@ export const ContractStatusOrderByWithRelationInputSchema: z.ZodType<Prisma.Cont
   status: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const ContractStatusWhereUniqueInputSchema: z.ZodType<Prisma.ContractStatusWhereUniqueInput> = z.object({
-  id: z.string().cuid()
-})
+export const ContractStatusWhereUniqueInputSchema: z.ZodType<Prisma.ContractStatusWhereUniqueInput> = z.union([
+  z.object({
+    id: z.string().cuid(),
+    userId_contractId: z.lazy(() => ContractStatusUserIdContractIdCompoundUniqueInputSchema)
+  }),
+  z.object({
+    id: z.string().cuid(),
+  }),
+  z.object({
+    userId_contractId: z.lazy(() => ContractStatusUserIdContractIdCompoundUniqueInputSchema),
+  }),
+])
 .and(z.object({
   id: z.string().cuid().optional(),
+  userId_contractId: z.lazy(() => ContractStatusUserIdContractIdCompoundUniqueInputSchema).optional(),
   AND: z.union([ z.lazy(() => ContractStatusWhereInputSchema),z.lazy(() => ContractStatusWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ContractStatusWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ContractStatusWhereInputSchema),z.lazy(() => ContractStatusWhereInputSchema).array() ]).optional(),
@@ -2942,11 +3283,21 @@ export const TokenOrderByWithRelationInputSchema: z.ZodType<Prisma.TokenOrderByW
   TokensOnBlockchains: z.lazy(() => TokensOnBlockchainsOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
-export const TokenWhereUniqueInputSchema: z.ZodType<Prisma.TokenWhereUniqueInput> = z.object({
-  id: z.string().cuid()
-})
+export const TokenWhereUniqueInputSchema: z.ZodType<Prisma.TokenWhereUniqueInput> = z.union([
+  z.object({
+    id: z.string().cuid(),
+    id_symbol: z.lazy(() => TokenIdSymbolCompoundUniqueInputSchema)
+  }),
+  z.object({
+    id: z.string().cuid(),
+  }),
+  z.object({
+    id_symbol: z.lazy(() => TokenIdSymbolCompoundUniqueInputSchema),
+  }),
+])
 .and(z.object({
   id: z.string().cuid().optional(),
+  id_symbol: z.lazy(() => TokenIdSymbolCompoundUniqueInputSchema).optional(),
   AND: z.union([ z.lazy(() => TokenWhereInputSchema),z.lazy(() => TokenWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => TokenWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => TokenWhereInputSchema),z.lazy(() => TokenWhereInputSchema).array() ]).optional(),
@@ -2993,7 +3344,7 @@ export const TokensOnBlockchainsWhereInputSchema: z.ZodType<Prisma.TokensOnBlock
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  blockchainId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  chainId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   isNative: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   decimals: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
@@ -3006,7 +3357,7 @@ export const TokensOnBlockchainsOrderByWithRelationInputSchema: z.ZodType<Prisma
   id: z.lazy(() => SortOrderSchema).optional(),
   tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
-  blockchainId: z.lazy(() => SortOrderSchema).optional(),
+  chainId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   isNative: z.lazy(() => SortOrderSchema).optional(),
   decimals: z.lazy(() => SortOrderSchema).optional(),
@@ -3018,41 +3369,41 @@ export const TokensOnBlockchainsOrderByWithRelationInputSchema: z.ZodType<Prisma
 export const TokensOnBlockchainsWhereUniqueInputSchema: z.ZodType<Prisma.TokensOnBlockchainsWhereUniqueInput> = z.union([
   z.object({
     id: z.string().cuid(),
-    tokenId_blockchainId: z.lazy(() => TokensOnBlockchainsTokenIdBlockchainIdCompoundUniqueInputSchema),
-    tokenSymbol_blockchainId: z.lazy(() => TokensOnBlockchainsTokenSymbolBlockchainIdCompoundUniqueInputSchema)
+    tokenId_chainId: z.lazy(() => TokensOnBlockchainsTokenIdChainIdCompoundUniqueInputSchema),
+    tokenSymbol_chainId: z.lazy(() => TokensOnBlockchainsTokenSymbolChainIdCompoundUniqueInputSchema)
   }),
   z.object({
     id: z.string().cuid(),
-    tokenId_blockchainId: z.lazy(() => TokensOnBlockchainsTokenIdBlockchainIdCompoundUniqueInputSchema),
+    tokenId_chainId: z.lazy(() => TokensOnBlockchainsTokenIdChainIdCompoundUniqueInputSchema),
   }),
   z.object({
     id: z.string().cuid(),
-    tokenSymbol_blockchainId: z.lazy(() => TokensOnBlockchainsTokenSymbolBlockchainIdCompoundUniqueInputSchema),
+    tokenSymbol_chainId: z.lazy(() => TokensOnBlockchainsTokenSymbolChainIdCompoundUniqueInputSchema),
   }),
   z.object({
     id: z.string().cuid(),
   }),
   z.object({
-    tokenId_blockchainId: z.lazy(() => TokensOnBlockchainsTokenIdBlockchainIdCompoundUniqueInputSchema),
-    tokenSymbol_blockchainId: z.lazy(() => TokensOnBlockchainsTokenSymbolBlockchainIdCompoundUniqueInputSchema),
+    tokenId_chainId: z.lazy(() => TokensOnBlockchainsTokenIdChainIdCompoundUniqueInputSchema),
+    tokenSymbol_chainId: z.lazy(() => TokensOnBlockchainsTokenSymbolChainIdCompoundUniqueInputSchema),
   }),
   z.object({
-    tokenId_blockchainId: z.lazy(() => TokensOnBlockchainsTokenIdBlockchainIdCompoundUniqueInputSchema),
+    tokenId_chainId: z.lazy(() => TokensOnBlockchainsTokenIdChainIdCompoundUniqueInputSchema),
   }),
   z.object({
-    tokenSymbol_blockchainId: z.lazy(() => TokensOnBlockchainsTokenSymbolBlockchainIdCompoundUniqueInputSchema),
+    tokenSymbol_chainId: z.lazy(() => TokensOnBlockchainsTokenSymbolChainIdCompoundUniqueInputSchema),
   }),
 ])
 .and(z.object({
   id: z.string().cuid().optional(),
-  tokenId_blockchainId: z.lazy(() => TokensOnBlockchainsTokenIdBlockchainIdCompoundUniqueInputSchema).optional(),
-  tokenSymbol_blockchainId: z.lazy(() => TokensOnBlockchainsTokenSymbolBlockchainIdCompoundUniqueInputSchema).optional(),
+  tokenId_chainId: z.lazy(() => TokensOnBlockchainsTokenIdChainIdCompoundUniqueInputSchema).optional(),
+  tokenSymbol_chainId: z.lazy(() => TokensOnBlockchainsTokenSymbolChainIdCompoundUniqueInputSchema).optional(),
   AND: z.union([ z.lazy(() => TokensOnBlockchainsWhereInputSchema),z.lazy(() => TokensOnBlockchainsWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => TokensOnBlockchainsWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => TokensOnBlockchainsWhereInputSchema),z.lazy(() => TokensOnBlockchainsWhereInputSchema).array() ]).optional(),
   tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  blockchainId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  chainId: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   isNative: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   decimals: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
@@ -3065,7 +3416,7 @@ export const TokensOnBlockchainsOrderByWithAggregationInputSchema: z.ZodType<Pri
   id: z.lazy(() => SortOrderSchema).optional(),
   tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
-  blockchainId: z.lazy(() => SortOrderSchema).optional(),
+  chainId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   isNative: z.lazy(() => SortOrderSchema).optional(),
   decimals: z.lazy(() => SortOrderSchema).optional(),
@@ -3084,11 +3435,91 @@ export const TokensOnBlockchainsScalarWhereWithAggregatesInputSchema: z.ZodType<
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   tokenId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   tokenSymbol: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  blockchainId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  chainId: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   isNative: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   decimals: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   contractAddress: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+}).strict();
+
+export const CurrencyWhereInputSchema: z.ZodType<Prisma.CurrencyWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => CurrencyWhereInputSchema),z.lazy(() => CurrencyWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CurrencyWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CurrencyWhereInputSchema),z.lazy(() => CurrencyWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  symbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  type: z.union([ z.lazy(() => EnumCurrencyTypeFilterSchema),z.lazy(() => CurrencyTypeSchema) ]).optional(),
+  Sale: z.lazy(() => SaleListRelationFilterSchema).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsListRelationFilterSchema).optional()
+}).strict();
+
+export const CurrencyOrderByWithRelationInputSchema: z.ZodType<Prisma.CurrencyOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  symbol: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  Sale: z.lazy(() => SaleOrderByRelationAggregateInputSchema).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsOrderByRelationAggregateInputSchema).optional()
+}).strict();
+
+export const CurrencyWhereUniqueInputSchema: z.ZodType<Prisma.CurrencyWhereUniqueInput> = z.union([
+  z.object({
+    id: z.string().cuid(),
+    symbol: z.string()
+  }),
+  z.object({
+    id: z.string().cuid(),
+  }),
+  z.object({
+    symbol: z.string(),
+  }),
+])
+.and(z.object({
+  id: z.string().cuid().optional(),
+  symbol: z.string().optional(),
+  AND: z.union([ z.lazy(() => CurrencyWhereInputSchema),z.lazy(() => CurrencyWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CurrencyWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CurrencyWhereInputSchema),z.lazy(() => CurrencyWhereInputSchema).array() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  type: z.union([ z.lazy(() => EnumCurrencyTypeFilterSchema),z.lazy(() => CurrencyTypeSchema) ]).optional(),
+  Sale: z.lazy(() => SaleListRelationFilterSchema).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsListRelationFilterSchema).optional()
+}).strict());
+
+export const CurrencyOrderByWithAggregationInputSchema: z.ZodType<Prisma.CurrencyOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  symbol: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  _count: z.lazy(() => CurrencyCountOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => CurrencyMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => CurrencyMinOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const CurrencyScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.CurrencyScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => CurrencyScalarWhereWithAggregatesInputSchema),z.lazy(() => CurrencyScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CurrencyScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CurrencyScalarWhereWithAggregatesInputSchema),z.lazy(() => CurrencyScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
+  name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  symbol: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  type: z.union([ z.lazy(() => EnumCurrencyTypeWithAggregatesFilterSchema),z.lazy(() => CurrencyTypeSchema) ]).optional(),
 }).strict();
 
 export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object({
@@ -3112,7 +3543,8 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreateInput> = z.object({
@@ -3136,7 +3568,8 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreat
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.object({
@@ -3160,7 +3593,8 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.object
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdateInput> = z.object({
@@ -3184,7 +3618,8 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = z.object({
@@ -3634,8 +4069,8 @@ export const SaleCreateInputSchema: z.ZodType<Prisma.SaleCreateInput> = z.object
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -3645,17 +4080,17 @@ export const SaleCreateInputSchema: z.ZodType<Prisma.SaleCreateInput> = z.object
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
+  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
+  saftContract: z.lazy(() => SaftContractCreateNestedOneWithoutSaleInputSchema).optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
-  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
   vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
 
@@ -3665,8 +4100,9 @@ export const SaleUncheckedCreateInputSchema: z.ZodType<Prisma.SaleUncheckedCreat
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -3674,18 +4110,18 @@ export const SaleUncheckedCreateInputSchema: z.ZodType<Prisma.SaleUncheckedCreat
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
   tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
@@ -3696,8 +4132,8 @@ export const SaleUpdateInputSchema: z.ZodType<Prisma.SaleUpdateInput> = z.object
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -3707,17 +4143,17 @@ export const SaleUpdateInputSchema: z.ZodType<Prisma.SaleUpdateInput> = z.object
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
+  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractUpdateOneWithoutSaleNestedInputSchema).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
-  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
@@ -3727,8 +4163,9 @@ export const SaleUncheckedUpdateInputSchema: z.ZodType<Prisma.SaleUncheckedUpdat
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -3736,18 +4173,18 @@ export const SaleUncheckedUpdateInputSchema: z.ZodType<Prisma.SaleUncheckedUpdat
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
@@ -3758,8 +4195,9 @@ export const SaleCreateManyInputSchema: z.ZodType<Prisma.SaleCreateManyInput> = 
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -3767,16 +4205,16 @@ export const SaleCreateManyInputSchema: z.ZodType<Prisma.SaleCreateManyInput> = 
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
   tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string()
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const SaleUpdateManyMutationInputSchema: z.ZodType<Prisma.SaleUpdateManyMutationInput> = z.object({
@@ -3785,8 +4223,8 @@ export const SaleUpdateManyMutationInputSchema: z.ZodType<Prisma.SaleUpdateManyM
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -3796,11 +4234,10 @@ export const SaleUpdateManyMutationInputSchema: z.ZodType<Prisma.SaleUpdateManyM
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const SaleUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SaleUncheckedUpdateManyInput> = z.object({
@@ -3809,8 +4246,9 @@ export const SaleUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SaleUncheckedU
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -3818,16 +4256,234 @@ export const SaleUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SaleUncheckedU
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+}).strict();
+
+export const SaftContractCreateInputSchema: z.ZodType<Prisma.SaftContractCreateInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractCreatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.number().int().optional(),
+  parentId: z.string().optional().nullable(),
+  isCurrent: z.boolean().optional(),
+  recipients: z.lazy(() => DocumentRecipientCreateNestedManyWithoutSaftContractInputSchema).optional(),
+  Sale: z.lazy(() => SaleCreateNestedOneWithoutSaftContractInputSchema).optional()
+}).strict();
+
+export const SaftContractUncheckedCreateInputSchema: z.ZodType<Prisma.SaftContractUncheckedCreateInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractCreatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.number().int().optional(),
+  parentId: z.string().optional().nullable(),
+  isCurrent: z.boolean().optional(),
+  saleId: z.string().optional().nullable(),
+  recipients: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutSaftContractInputSchema).optional()
+}).strict();
+
+export const SaftContractUpdateInputSchema: z.ZodType<Prisma.SaftContractUpdateInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractUpdatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  parentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isCurrent: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  recipients: z.lazy(() => DocumentRecipientUpdateManyWithoutSaftContractNestedInputSchema).optional(),
+  Sale: z.lazy(() => SaleUpdateOneWithoutSaftContractNestedInputSchema).optional()
+}).strict();
+
+export const SaftContractUncheckedUpdateInputSchema: z.ZodType<Prisma.SaftContractUncheckedUpdateInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractUpdatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  parentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isCurrent: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  saleId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  recipients: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutSaftContractNestedInputSchema).optional()
+}).strict();
+
+export const SaftContractCreateManyInputSchema: z.ZodType<Prisma.SaftContractCreateManyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractCreatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.number().int().optional(),
+  parentId: z.string().optional().nullable(),
+  isCurrent: z.boolean().optional(),
+  saleId: z.string().optional().nullable()
+}).strict();
+
+export const SaftContractUpdateManyMutationInputSchema: z.ZodType<Prisma.SaftContractUpdateManyMutationInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractUpdatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  parentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isCurrent: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const SaftContractUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SaftContractUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractUpdatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  parentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isCurrent: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  saleId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DocumentRecipientCreateInputSchema: z.ZodType<Prisma.DocumentRecipientCreateInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  user: z.lazy(() => UserCreateNestedOneWithoutDocumentRecipientInputSchema).optional(),
+  SaftContract: z.lazy(() => SaftContractCreateNestedOneWithoutRecipientsInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientUncheckedCreateInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedCreateInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  address: z.string().optional().nullable(),
+  saftContractId: z.string().optional().nullable()
+}).strict();
+
+export const DocumentRecipientUpdateInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  user: z.lazy(() => UserUpdateOneWithoutDocumentRecipientNestedInputSchema).optional(),
+  SaftContract: z.lazy(() => SaftContractUpdateOneWithoutRecipientsNestedInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientUncheckedUpdateInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedUpdateInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  saftContractId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DocumentRecipientCreateManyInputSchema: z.ZodType<Prisma.DocumentRecipientCreateManyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  address: z.string().optional().nullable(),
+  saftContractId: z.string().optional().nullable()
+}).strict();
+
+export const DocumentRecipientUpdateManyMutationInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateManyMutationInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DocumentRecipientUncheckedUpdateManyInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  saftContractId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const DocumentCreateInputSchema: z.ZodType<Prisma.DocumentCreateInput> = z.object({
@@ -4099,138 +4755,6 @@ export const TokenDistributionUncheckedUpdateManyInputSchema: z.ZodType<Prisma.T
   status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const SaleInformationCreateInputSchema: z.ZodType<Prisma.SaleInformationCreateInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  summary: z.string().optional().nullable(),
-  tokenUtility: z.string().optional().nullable(),
-  tokenDistribution: z.string().optional().nullable(),
-  otherInformation: z.string().optional().nullable(),
-  tokenLifecycle: z.string().optional().nullable(),
-  liquidityPool: z.string().optional().nullable(),
-  futurePlans: z.string().optional().nullable(),
-  useOfProceeds: z.string().optional().nullable(),
-  imageSale: z.string().optional().nullable(),
-  imageToken: z.string().optional().nullable(),
-  contactEmail: z.string().optional().nullable(),
-  sale: z.lazy(() => SaleCreateNestedOneWithoutSaleInformationInputSchema)
-}).strict();
-
-export const SaleInformationUncheckedCreateInputSchema: z.ZodType<Prisma.SaleInformationUncheckedCreateInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  summary: z.string().optional().nullable(),
-  tokenUtility: z.string().optional().nullable(),
-  tokenDistribution: z.string().optional().nullable(),
-  otherInformation: z.string().optional().nullable(),
-  tokenLifecycle: z.string().optional().nullable(),
-  liquidityPool: z.string().optional().nullable(),
-  futurePlans: z.string().optional().nullable(),
-  useOfProceeds: z.string().optional().nullable(),
-  imageSale: z.string().optional().nullable(),
-  imageToken: z.string().optional().nullable(),
-  contactEmail: z.string().optional().nullable(),
-  saleId: z.string()
-}).strict();
-
-export const SaleInformationUpdateInputSchema: z.ZodType<Prisma.SaleInformationUpdateInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  summary: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenUtility: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenDistribution: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  otherInformation: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  liquidityPool: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  futurePlans: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  useOfProceeds: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageSale: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageToken: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  contactEmail: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  sale: z.lazy(() => SaleUpdateOneRequiredWithoutSaleInformationNestedInputSchema).optional()
-}).strict();
-
-export const SaleInformationUncheckedUpdateInputSchema: z.ZodType<Prisma.SaleInformationUncheckedUpdateInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  summary: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenUtility: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenDistribution: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  otherInformation: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  liquidityPool: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  futurePlans: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  useOfProceeds: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageSale: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageToken: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  contactEmail: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const SaleInformationCreateManyInputSchema: z.ZodType<Prisma.SaleInformationCreateManyInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  summary: z.string().optional().nullable(),
-  tokenUtility: z.string().optional().nullable(),
-  tokenDistribution: z.string().optional().nullable(),
-  otherInformation: z.string().optional().nullable(),
-  tokenLifecycle: z.string().optional().nullable(),
-  liquidityPool: z.string().optional().nullable(),
-  futurePlans: z.string().optional().nullable(),
-  useOfProceeds: z.string().optional().nullable(),
-  imageSale: z.string().optional().nullable(),
-  imageToken: z.string().optional().nullable(),
-  contactEmail: z.string().optional().nullable(),
-  saleId: z.string()
-}).strict();
-
-export const SaleInformationUpdateManyMutationInputSchema: z.ZodType<Prisma.SaleInformationUpdateManyMutationInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  summary: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenUtility: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenDistribution: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  otherInformation: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  liquidityPool: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  futurePlans: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  useOfProceeds: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageSale: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageToken: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  contactEmail: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-}).strict();
-
-export const SaleInformationUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SaleInformationUncheckedUpdateManyInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  summary: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenUtility: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenDistribution: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  otherInformation: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  liquidityPool: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  futurePlans: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  useOfProceeds: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageSale: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageToken: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  contactEmail: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
 export const SaleTransactionsCreateInputSchema: z.ZodType<Prisma.SaleTransactionsCreateInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
@@ -4247,7 +4771,6 @@ export const SaleTransactionsCreateInputSchema: z.ZodType<Prisma.SaleTransaction
   status: z.lazy(() => TransactionStatusSchema).optional(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   rejectionReason: z.string().optional().nullable(),
@@ -4255,6 +4778,7 @@ export const SaleTransactionsCreateInputSchema: z.ZodType<Prisma.SaleTransaction
   paymentDate: z.coerce.date().optional().nullable(),
   user: z.lazy(() => UserCreateNestedOneWithoutTransactionsInputSchema),
   sale: z.lazy(() => SaleCreateNestedOneWithoutTransactionsInputSchema),
+  amountPaidCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleTransactionsInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutTransactionsInputSchema).optional(),
   approver: z.lazy(() => UserCreateNestedOneWithoutTransactionApprovalsInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditCreateNestedManyWithoutTransactionInputSchema).optional(),
@@ -4279,7 +4803,7 @@ export const SaleTransactionsUncheckedCreateInputSchema: z.ZodType<Prisma.SaleTr
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -4307,7 +4831,6 @@ export const SaleTransactionsUpdateInputSchema: z.ZodType<Prisma.SaleTransaction
   status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -4315,6 +4838,7 @@ export const SaleTransactionsUpdateInputSchema: z.ZodType<Prisma.SaleTransaction
   paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
   sale: z.lazy(() => SaleUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  amountPaidCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutTransactionsNestedInputSchema).optional(),
   approver: z.lazy(() => UserUpdateOneWithoutTransactionApprovalsNestedInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditUpdateManyWithoutTransactionNestedInputSchema).optional(),
@@ -4339,7 +4863,7 @@ export const SaleTransactionsUncheckedUpdateInputSchema: z.ZodType<Prisma.SaleTr
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -4369,7 +4893,7 @@ export const SaleTransactionsCreateManyInputSchema: z.ZodType<Prisma.SaleTransac
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -4395,7 +4919,6 @@ export const SaleTransactionsUpdateManyMutationInputSchema: z.ZodType<Prisma.Sal
   status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -4421,7 +4944,7 @@ export const SaleTransactionsUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Sa
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -4991,7 +5514,6 @@ export const TokenUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TokenUnchecke
 
 export const TokensOnBlockchainsCreateInputSchema: z.ZodType<Prisma.TokensOnBlockchainsCreateInput> = z.object({
   id: z.string().cuid().optional(),
-  tokenSymbol: z.string(),
   name: z.string(),
   isNative: z.boolean().optional(),
   decimals: z.number().int(),
@@ -5004,7 +5526,7 @@ export const TokensOnBlockchainsUncheckedCreateInputSchema: z.ZodType<Prisma.Tok
   id: z.string().cuid().optional(),
   tokenId: z.string(),
   tokenSymbol: z.string(),
-  blockchainId: z.string(),
+  chainId: z.number().int(),
   name: z.string(),
   isNative: z.boolean().optional(),
   decimals: z.number().int(),
@@ -5013,7 +5535,6 @@ export const TokensOnBlockchainsUncheckedCreateInputSchema: z.ZodType<Prisma.Tok
 
 export const TokensOnBlockchainsUpdateInputSchema: z.ZodType<Prisma.TokensOnBlockchainsUpdateInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   isNative: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   decimals: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -5026,7 +5547,7 @@ export const TokensOnBlockchainsUncheckedUpdateInputSchema: z.ZodType<Prisma.Tok
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  blockchainId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  chainId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   isNative: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   decimals: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -5037,7 +5558,7 @@ export const TokensOnBlockchainsCreateManyInputSchema: z.ZodType<Prisma.TokensOn
   id: z.string().cuid().optional(),
   tokenId: z.string(),
   tokenSymbol: z.string(),
-  blockchainId: z.string(),
+  chainId: z.number().int(),
   name: z.string(),
   isNative: z.boolean().optional(),
   decimals: z.number().int(),
@@ -5046,7 +5567,6 @@ export const TokensOnBlockchainsCreateManyInputSchema: z.ZodType<Prisma.TokensOn
 
 export const TokensOnBlockchainsUpdateManyMutationInputSchema: z.ZodType<Prisma.TokensOnBlockchainsUpdateManyMutationInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   isNative: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   decimals: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -5057,11 +5577,89 @@ export const TokensOnBlockchainsUncheckedUpdateManyInputSchema: z.ZodType<Prisma
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  blockchainId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  chainId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   isNative: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   decimals: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   contractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const CurrencyCreateInputSchema: z.ZodType<Prisma.CurrencyCreateInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  symbol: z.string(),
+  type: z.lazy(() => CurrencyTypeSchema),
+  Sale: z.lazy(() => SaleCreateNestedManyWithoutSaleCurrencyInputSchema).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutAmountPaidCurrencyInputSchema).optional()
+}).strict();
+
+export const CurrencyUncheckedCreateInputSchema: z.ZodType<Prisma.CurrencyUncheckedCreateInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  symbol: z.string(),
+  type: z.lazy(() => CurrencyTypeSchema),
+  Sale: z.lazy(() => SaleUncheckedCreateNestedManyWithoutSaleCurrencyInputSchema).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutAmountPaidCurrencyInputSchema).optional()
+}).strict();
+
+export const CurrencyUpdateInputSchema: z.ZodType<Prisma.CurrencyUpdateInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  symbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => EnumCurrencyTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  Sale: z.lazy(() => SaleUpdateManyWithoutSaleCurrencyNestedInputSchema).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsUpdateManyWithoutAmountPaidCurrencyNestedInputSchema).optional()
+}).strict();
+
+export const CurrencyUncheckedUpdateInputSchema: z.ZodType<Prisma.CurrencyUncheckedUpdateInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  symbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => EnumCurrencyTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  Sale: z.lazy(() => SaleUncheckedUpdateManyWithoutSaleCurrencyNestedInputSchema).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutAmountPaidCurrencyNestedInputSchema).optional()
+}).strict();
+
+export const CurrencyCreateManyInputSchema: z.ZodType<Prisma.CurrencyCreateManyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  symbol: z.string(),
+  type: z.lazy(() => CurrencyTypeSchema)
+}).strict();
+
+export const CurrencyUpdateManyMutationInputSchema: z.ZodType<Prisma.CurrencyUpdateManyMutationInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  symbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => EnumCurrencyTypeFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const CurrencyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CurrencyUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  symbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => EnumCurrencyTypeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.object({
@@ -5178,6 +5776,12 @@ export const WalletAddressListRelationFilterSchema: z.ZodType<Prisma.WalletAddre
   none: z.lazy(() => WalletAddressWhereInputSchema).optional()
 }).strict();
 
+export const DocumentRecipientListRelationFilterSchema: z.ZodType<Prisma.DocumentRecipientListRelationFilter> = z.object({
+  every: z.lazy(() => DocumentRecipientWhereInputSchema).optional(),
+  some: z.lazy(() => DocumentRecipientWhereInputSchema).optional(),
+  none: z.lazy(() => DocumentRecipientWhereInputSchema).optional()
+}).strict();
+
 export const SortOrderInputSchema: z.ZodType<Prisma.SortOrderInput> = z.object({
   sort: z.lazy(() => SortOrderSchema),
   nulls: z.lazy(() => NullsOrderSchema).optional()
@@ -5208,6 +5812,10 @@ export const DocumentOrderByRelationAggregateInputSchema: z.ZodType<Prisma.Docum
 }).strict();
 
 export const WalletAddressOrderByRelationAggregateInputSchema: z.ZodType<Prisma.WalletAddressOrderByRelationAggregateInput> = z.object({
+  _count: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DocumentRecipientOrderByRelationAggregateInputSchema: z.ZodType<Prisma.DocumentRecipientOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -5603,13 +6211,6 @@ export const EnumSaleStatusFilterSchema: z.ZodType<Prisma.EnumSaleStatusFilter> 
   not: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => NestedEnumSaleStatusFilterSchema) ]).optional(),
 }).strict();
 
-export const EnumCurrencyFilterSchema: z.ZodType<Prisma.EnumCurrencyFilter> = z.object({
-  equals: z.lazy(() => CurrencySchema).optional(),
-  in: z.lazy(() => CurrencySchema).array().optional(),
-  notIn: z.lazy(() => CurrencySchema).array().optional(),
-  not: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => NestedEnumCurrencyFilterSchema) ]).optional(),
-}).strict();
-
 export const IntNullableFilterSchema: z.ZodType<Prisma.IntNullableFilter> = z.object({
   equals: z.number().optional().nullable(),
   in: z.number().array().optional().nullable(),
@@ -5632,19 +6233,41 @@ export const DecimalFilterSchema: z.ZodType<Prisma.DecimalFilter> = z.object({
   not: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalFilterSchema) ]).optional(),
 }).strict();
 
+export const JsonNullableFilterSchema: z.ZodType<Prisma.JsonNullableFilter> = z.object({
+  equals: InputJsonValueSchema.optional(),
+  path: z.string().array().optional(),
+  mode: z.lazy(() => QueryModeSchema).optional(),
+  string_contains: z.string().optional(),
+  string_starts_with: z.string().optional(),
+  string_ends_with: z.string().optional(),
+  array_starts_with: InputJsonValueSchema.optional().nullable(),
+  array_ends_with: InputJsonValueSchema.optional().nullable(),
+  array_contains: InputJsonValueSchema.optional().nullable(),
+  lt: InputJsonValueSchema.optional(),
+  lte: InputJsonValueSchema.optional(),
+  gt: InputJsonValueSchema.optional(),
+  gte: InputJsonValueSchema.optional(),
+  not: InputJsonValueSchema.optional()
+}).strict();
+
+export const CurrencyScalarRelationFilterSchema: z.ZodType<Prisma.CurrencyScalarRelationFilter> = z.object({
+  is: z.lazy(() => CurrencyWhereInputSchema).optional(),
+  isNot: z.lazy(() => CurrencyWhereInputSchema).optional()
+}).strict();
+
 export const BlockchainNullableScalarRelationFilterSchema: z.ZodType<Prisma.BlockchainNullableScalarRelationFilter> = z.object({
   is: z.lazy(() => BlockchainWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => BlockchainWhereInputSchema).optional().nullable()
 }).strict();
 
-export const SaleInformationNullableScalarRelationFilterSchema: z.ZodType<Prisma.SaleInformationNullableScalarRelationFilter> = z.object({
-  is: z.lazy(() => SaleInformationWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => SaleInformationWhereInputSchema).optional().nullable()
-}).strict();
-
 export const TokenScalarRelationFilterSchema: z.ZodType<Prisma.TokenScalarRelationFilter> = z.object({
   is: z.lazy(() => TokenWhereInputSchema).optional(),
   isNot: z.lazy(() => TokenWhereInputSchema).optional()
+}).strict();
+
+export const SaftContractNullableScalarRelationFilterSchema: z.ZodType<Prisma.SaftContractNullableScalarRelationFilter> = z.object({
+  is: z.lazy(() => SaftContractWhereInputSchema).optional().nullable(),
+  isNot: z.lazy(() => SaftContractWhereInputSchema).optional().nullable()
 }).strict();
 
 export const VestingScheduleListRelationFilterSchema: z.ZodType<Prisma.VestingScheduleListRelationFilter> = z.object({
@@ -5663,8 +6286,9 @@ export const SaleCountOrderByAggregateInputSchema: z.ZodType<Prisma.SaleCountOrd
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   deletedAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  catchPhrase: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
-  saleCurrency: z.lazy(() => SortOrderSchema).optional(),
+  currency: z.lazy(() => SortOrderSchema).optional(),
   initialTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   availableTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   maximumTokenBuyPerUser: z.lazy(() => SortOrderSchema).optional(),
@@ -5672,16 +6296,16 @@ export const SaleCountOrderByAggregateInputSchema: z.ZodType<Prisma.SaleCountOrd
   saleStartDate: z.lazy(() => SortOrderSchema).optional(),
   tokenContractAddress: z.lazy(() => SortOrderSchema).optional(),
   tokenContractChainId: z.lazy(() => SortOrderSchema).optional(),
+  tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenName: z.lazy(() => SortOrderSchema).optional(),
+  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   tokenTotalSupply: z.lazy(() => SortOrderSchema).optional(),
   tokenPricePerUnit: z.lazy(() => SortOrderSchema).optional(),
-  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   toWalletsAddress: z.lazy(() => SortOrderSchema).optional(),
   saleClosingDate: z.lazy(() => SortOrderSchema).optional(),
   createdBy: z.lazy(() => SortOrderSchema).optional(),
   saftCheckbox: z.lazy(() => SortOrderSchema).optional(),
-  saftContract: z.lazy(() => SortOrderSchema).optional(),
-  tokenId: z.lazy(() => SortOrderSchema).optional()
+  information: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const SaleAvgOrderByAggregateInputSchema: z.ZodType<Prisma.SaleAvgOrderByAggregateInput> = z.object({
@@ -5699,8 +6323,9 @@ export const SaleMaxOrderByAggregateInputSchema: z.ZodType<Prisma.SaleMaxOrderBy
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   deletedAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  catchPhrase: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
-  saleCurrency: z.lazy(() => SortOrderSchema).optional(),
+  currency: z.lazy(() => SortOrderSchema).optional(),
   initialTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   availableTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   maximumTokenBuyPerUser: z.lazy(() => SortOrderSchema).optional(),
@@ -5708,16 +6333,15 @@ export const SaleMaxOrderByAggregateInputSchema: z.ZodType<Prisma.SaleMaxOrderBy
   saleStartDate: z.lazy(() => SortOrderSchema).optional(),
   tokenContractAddress: z.lazy(() => SortOrderSchema).optional(),
   tokenContractChainId: z.lazy(() => SortOrderSchema).optional(),
+  tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenName: z.lazy(() => SortOrderSchema).optional(),
+  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   tokenTotalSupply: z.lazy(() => SortOrderSchema).optional(),
   tokenPricePerUnit: z.lazy(() => SortOrderSchema).optional(),
-  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   toWalletsAddress: z.lazy(() => SortOrderSchema).optional(),
   saleClosingDate: z.lazy(() => SortOrderSchema).optional(),
   createdBy: z.lazy(() => SortOrderSchema).optional(),
-  saftCheckbox: z.lazy(() => SortOrderSchema).optional(),
-  saftContract: z.lazy(() => SortOrderSchema).optional(),
-  tokenId: z.lazy(() => SortOrderSchema).optional()
+  saftCheckbox: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const SaleMinOrderByAggregateInputSchema: z.ZodType<Prisma.SaleMinOrderByAggregateInput> = z.object({
@@ -5726,8 +6350,9 @@ export const SaleMinOrderByAggregateInputSchema: z.ZodType<Prisma.SaleMinOrderBy
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   deletedAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  catchPhrase: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
-  saleCurrency: z.lazy(() => SortOrderSchema).optional(),
+  currency: z.lazy(() => SortOrderSchema).optional(),
   initialTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   availableTokenQuantity: z.lazy(() => SortOrderSchema).optional(),
   maximumTokenBuyPerUser: z.lazy(() => SortOrderSchema).optional(),
@@ -5735,16 +6360,15 @@ export const SaleMinOrderByAggregateInputSchema: z.ZodType<Prisma.SaleMinOrderBy
   saleStartDate: z.lazy(() => SortOrderSchema).optional(),
   tokenContractAddress: z.lazy(() => SortOrderSchema).optional(),
   tokenContractChainId: z.lazy(() => SortOrderSchema).optional(),
+  tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenName: z.lazy(() => SortOrderSchema).optional(),
+  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   tokenTotalSupply: z.lazy(() => SortOrderSchema).optional(),
   tokenPricePerUnit: z.lazy(() => SortOrderSchema).optional(),
-  tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
   toWalletsAddress: z.lazy(() => SortOrderSchema).optional(),
   saleClosingDate: z.lazy(() => SortOrderSchema).optional(),
   createdBy: z.lazy(() => SortOrderSchema).optional(),
-  saftCheckbox: z.lazy(() => SortOrderSchema).optional(),
-  saftContract: z.lazy(() => SortOrderSchema).optional(),
-  tokenId: z.lazy(() => SortOrderSchema).optional()
+  saftCheckbox: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const SaleSumOrderByAggregateInputSchema: z.ZodType<Prisma.SaleSumOrderByAggregateInput> = z.object({
@@ -5764,16 +6388,6 @@ export const EnumSaleStatusWithAggregatesFilterSchema: z.ZodType<Prisma.EnumSale
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedEnumSaleStatusFilterSchema).optional(),
   _max: z.lazy(() => NestedEnumSaleStatusFilterSchema).optional()
-}).strict();
-
-export const EnumCurrencyWithAggregatesFilterSchema: z.ZodType<Prisma.EnumCurrencyWithAggregatesFilter> = z.object({
-  equals: z.lazy(() => CurrencySchema).optional(),
-  in: z.lazy(() => CurrencySchema).array().optional(),
-  notIn: z.lazy(() => CurrencySchema).array().optional(),
-  not: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => NestedEnumCurrencyWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedEnumCurrencyFilterSchema).optional(),
-  _max: z.lazy(() => NestedEnumCurrencyFilterSchema).optional()
 }).strict();
 
 export const IntNullableWithAggregatesFilterSchema: z.ZodType<Prisma.IntNullableWithAggregatesFilter> = z.object({
@@ -5808,14 +6422,186 @@ export const DecimalWithAggregatesFilterSchema: z.ZodType<Prisma.DecimalWithAggr
   _max: z.lazy(() => NestedDecimalFilterSchema).optional()
 }).strict();
 
+export const JsonNullableWithAggregatesFilterSchema: z.ZodType<Prisma.JsonNullableWithAggregatesFilter> = z.object({
+  equals: InputJsonValueSchema.optional(),
+  path: z.string().array().optional(),
+  mode: z.lazy(() => QueryModeSchema).optional(),
+  string_contains: z.string().optional(),
+  string_starts_with: z.string().optional(),
+  string_ends_with: z.string().optional(),
+  array_starts_with: InputJsonValueSchema.optional().nullable(),
+  array_ends_with: InputJsonValueSchema.optional().nullable(),
+  array_contains: InputJsonValueSchema.optional().nullable(),
+  lt: InputJsonValueSchema.optional(),
+  lte: InputJsonValueSchema.optional(),
+  gt: InputJsonValueSchema.optional(),
+  gte: InputJsonValueSchema.optional(),
+  not: InputJsonValueSchema.optional(),
+  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _min: z.lazy(() => NestedJsonNullableFilterSchema).optional(),
+  _max: z.lazy(() => NestedJsonNullableFilterSchema).optional()
+}).strict();
+
+export const JsonNullableListFilterSchema: z.ZodType<Prisma.JsonNullableListFilter> = z.object({
+  equals: InputJsonValueSchema.array().optional().nullable(),
+  has: InputJsonValueSchema.optional().nullable(),
+  hasEvery: InputJsonValueSchema.array().optional(),
+  hasSome: InputJsonValueSchema.array().optional(),
+  isEmpty: z.boolean().optional()
+}).strict();
+
 export const SaleNullableScalarRelationFilterSchema: z.ZodType<Prisma.SaleNullableScalarRelationFilter> = z.object({
   is: z.lazy(() => SaleWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => SaleWhereInputSchema).optional().nullable()
 }).strict();
 
+export const SaftContractParentIdVersionCompoundUniqueInputSchema: z.ZodType<Prisma.SaftContractParentIdVersionCompoundUniqueInput> = z.object({
+  parentId: z.string(),
+  version: z.number()
+}).strict();
+
+export const SaftContractCountOrderByAggregateInputSchema: z.ZodType<Prisma.SaftContractCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  description: z.lazy(() => SortOrderSchema).optional(),
+  url: z.lazy(() => SortOrderSchema).optional(),
+  content: z.lazy(() => SortOrderSchema).optional(),
+  variables: z.lazy(() => SortOrderSchema).optional(),
+  version: z.lazy(() => SortOrderSchema).optional(),
+  parentId: z.lazy(() => SortOrderSchema).optional(),
+  isCurrent: z.lazy(() => SortOrderSchema).optional(),
+  saleId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const SaftContractAvgOrderByAggregateInputSchema: z.ZodType<Prisma.SaftContractAvgOrderByAggregateInput> = z.object({
+  version: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const SaftContractMaxOrderByAggregateInputSchema: z.ZodType<Prisma.SaftContractMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  description: z.lazy(() => SortOrderSchema).optional(),
+  url: z.lazy(() => SortOrderSchema).optional(),
+  version: z.lazy(() => SortOrderSchema).optional(),
+  parentId: z.lazy(() => SortOrderSchema).optional(),
+  isCurrent: z.lazy(() => SortOrderSchema).optional(),
+  saleId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const SaftContractMinOrderByAggregateInputSchema: z.ZodType<Prisma.SaftContractMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  description: z.lazy(() => SortOrderSchema).optional(),
+  url: z.lazy(() => SortOrderSchema).optional(),
+  version: z.lazy(() => SortOrderSchema).optional(),
+  parentId: z.lazy(() => SortOrderSchema).optional(),
+  isCurrent: z.lazy(() => SortOrderSchema).optional(),
+  saleId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const SaftContractSumOrderByAggregateInputSchema: z.ZodType<Prisma.SaftContractSumOrderByAggregateInput> = z.object({
+  version: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EnumSignableDocumentRoleFilterSchema: z.ZodType<Prisma.EnumSignableDocumentRoleFilter> = z.object({
+  equals: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  in: z.lazy(() => SignableDocumentRoleSchema).array().optional(),
+  notIn: z.lazy(() => SignableDocumentRoleSchema).array().optional(),
+  not: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => NestedEnumSignableDocumentRoleFilterSchema) ]).optional(),
+}).strict();
+
+export const EnumDocumentSignatureStatusFilterSchema: z.ZodType<Prisma.EnumDocumentSignatureStatusFilter> = z.object({
+  equals: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  in: z.lazy(() => DocumentSignatureStatusSchema).array().optional(),
+  notIn: z.lazy(() => DocumentSignatureStatusSchema).array().optional(),
+  not: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => NestedEnumDocumentSignatureStatusFilterSchema) ]).optional(),
+}).strict();
+
 export const UserNullableScalarRelationFilterSchema: z.ZodType<Prisma.UserNullableScalarRelationFilter> = z.object({
   is: z.lazy(() => UserWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => UserWhereInputSchema).optional().nullable()
+}).strict();
+
+export const DocumentRecipientCountOrderByAggregateInputSchema: z.ZodType<Prisma.DocumentRecipientCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  fullname: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  role: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  signatureUrl: z.lazy(() => SortOrderSchema).optional(),
+  externalId: z.lazy(() => SortOrderSchema).optional(),
+  address: z.lazy(() => SortOrderSchema).optional(),
+  saftContractId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DocumentRecipientAvgOrderByAggregateInputSchema: z.ZodType<Prisma.DocumentRecipientAvgOrderByAggregateInput> = z.object({
+  externalId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DocumentRecipientMaxOrderByAggregateInputSchema: z.ZodType<Prisma.DocumentRecipientMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  fullname: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  role: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  signatureUrl: z.lazy(() => SortOrderSchema).optional(),
+  externalId: z.lazy(() => SortOrderSchema).optional(),
+  address: z.lazy(() => SortOrderSchema).optional(),
+  saftContractId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DocumentRecipientMinOrderByAggregateInputSchema: z.ZodType<Prisma.DocumentRecipientMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  fullname: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  role: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  signatureUrl: z.lazy(() => SortOrderSchema).optional(),
+  externalId: z.lazy(() => SortOrderSchema).optional(),
+  address: z.lazy(() => SortOrderSchema).optional(),
+  saftContractId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DocumentRecipientSumOrderByAggregateInputSchema: z.ZodType<Prisma.DocumentRecipientSumOrderByAggregateInput> = z.object({
+  externalId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EnumSignableDocumentRoleWithAggregatesFilterSchema: z.ZodType<Prisma.EnumSignableDocumentRoleWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  in: z.lazy(() => SignableDocumentRoleSchema).array().optional(),
+  notIn: z.lazy(() => SignableDocumentRoleSchema).array().optional(),
+  not: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => NestedEnumSignableDocumentRoleWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumSignableDocumentRoleFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumSignableDocumentRoleFilterSchema).optional()
+}).strict();
+
+export const EnumDocumentSignatureStatusWithAggregatesFilterSchema: z.ZodType<Prisma.EnumDocumentSignatureStatusWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  in: z.lazy(() => DocumentSignatureStatusSchema).array().optional(),
+  notIn: z.lazy(() => DocumentSignatureStatusSchema).array().optional(),
+  not: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => NestedEnumDocumentSignatureStatusWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumDocumentSignatureStatusFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumDocumentSignatureStatusFilterSchema).optional()
 }).strict();
 
 export const DocumentCountOrderByAggregateInputSchema: z.ZodType<Prisma.DocumentCountOrderByAggregateInput> = z.object({
@@ -5986,63 +6772,6 @@ export const TokenDistributionMinOrderByAggregateInputSchema: z.ZodType<Prisma.T
   status: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const SaleInformationCountOrderByAggregateInputSchema: z.ZodType<Prisma.SaleInformationCountOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  deletedAt: z.lazy(() => SortOrderSchema).optional(),
-  summary: z.lazy(() => SortOrderSchema).optional(),
-  tokenUtility: z.lazy(() => SortOrderSchema).optional(),
-  tokenDistribution: z.lazy(() => SortOrderSchema).optional(),
-  otherInformation: z.lazy(() => SortOrderSchema).optional(),
-  tokenLifecycle: z.lazy(() => SortOrderSchema).optional(),
-  liquidityPool: z.lazy(() => SortOrderSchema).optional(),
-  futurePlans: z.lazy(() => SortOrderSchema).optional(),
-  useOfProceeds: z.lazy(() => SortOrderSchema).optional(),
-  imageSale: z.lazy(() => SortOrderSchema).optional(),
-  imageToken: z.lazy(() => SortOrderSchema).optional(),
-  contactEmail: z.lazy(() => SortOrderSchema).optional(),
-  saleId: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const SaleInformationMaxOrderByAggregateInputSchema: z.ZodType<Prisma.SaleInformationMaxOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  deletedAt: z.lazy(() => SortOrderSchema).optional(),
-  summary: z.lazy(() => SortOrderSchema).optional(),
-  tokenUtility: z.lazy(() => SortOrderSchema).optional(),
-  tokenDistribution: z.lazy(() => SortOrderSchema).optional(),
-  otherInformation: z.lazy(() => SortOrderSchema).optional(),
-  tokenLifecycle: z.lazy(() => SortOrderSchema).optional(),
-  liquidityPool: z.lazy(() => SortOrderSchema).optional(),
-  futurePlans: z.lazy(() => SortOrderSchema).optional(),
-  useOfProceeds: z.lazy(() => SortOrderSchema).optional(),
-  imageSale: z.lazy(() => SortOrderSchema).optional(),
-  imageToken: z.lazy(() => SortOrderSchema).optional(),
-  contactEmail: z.lazy(() => SortOrderSchema).optional(),
-  saleId: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const SaleInformationMinOrderByAggregateInputSchema: z.ZodType<Prisma.SaleInformationMinOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  deletedAt: z.lazy(() => SortOrderSchema).optional(),
-  summary: z.lazy(() => SortOrderSchema).optional(),
-  tokenUtility: z.lazy(() => SortOrderSchema).optional(),
-  tokenDistribution: z.lazy(() => SortOrderSchema).optional(),
-  otherInformation: z.lazy(() => SortOrderSchema).optional(),
-  tokenLifecycle: z.lazy(() => SortOrderSchema).optional(),
-  liquidityPool: z.lazy(() => SortOrderSchema).optional(),
-  futurePlans: z.lazy(() => SortOrderSchema).optional(),
-  useOfProceeds: z.lazy(() => SortOrderSchema).optional(),
-  imageSale: z.lazy(() => SortOrderSchema).optional(),
-  imageToken: z.lazy(() => SortOrderSchema).optional(),
-  contactEmail: z.lazy(() => SortOrderSchema).optional(),
-  saleId: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
 export const EnumFOPFilterSchema: z.ZodType<Prisma.EnumFOPFilter> = z.object({
   equals: z.lazy(() => FOPSchema).optional(),
   in: z.lazy(() => FOPSchema).array().optional(),
@@ -6085,7 +6814,7 @@ export const SaleTransactionsCountOrderByAggregateInputSchema: z.ZodType<Prisma.
   saleId: z.lazy(() => SortOrderSchema).optional(),
   comment: z.lazy(() => SortOrderSchema).optional(),
   amountPaid: z.lazy(() => SortOrderSchema).optional(),
-  amountPaidCurrency: z.lazy(() => SortOrderSchema).optional(),
+  paidCurrency: z.lazy(() => SortOrderSchema).optional(),
   txHash: z.lazy(() => SortOrderSchema).optional(),
   blockchainId: z.lazy(() => SortOrderSchema).optional(),
   agreementId: z.lazy(() => SortOrderSchema).optional(),
@@ -6119,7 +6848,7 @@ export const SaleTransactionsMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Sa
   saleId: z.lazy(() => SortOrderSchema).optional(),
   comment: z.lazy(() => SortOrderSchema).optional(),
   amountPaid: z.lazy(() => SortOrderSchema).optional(),
-  amountPaidCurrency: z.lazy(() => SortOrderSchema).optional(),
+  paidCurrency: z.lazy(() => SortOrderSchema).optional(),
   txHash: z.lazy(() => SortOrderSchema).optional(),
   blockchainId: z.lazy(() => SortOrderSchema).optional(),
   agreementId: z.lazy(() => SortOrderSchema).optional(),
@@ -6147,7 +6876,7 @@ export const SaleTransactionsMinOrderByAggregateInputSchema: z.ZodType<Prisma.Sa
   saleId: z.lazy(() => SortOrderSchema).optional(),
   comment: z.lazy(() => SortOrderSchema).optional(),
   amountPaid: z.lazy(() => SortOrderSchema).optional(),
-  amountPaidCurrency: z.lazy(() => SortOrderSchema).optional(),
+  paidCurrency: z.lazy(() => SortOrderSchema).optional(),
   txHash: z.lazy(() => SortOrderSchema).optional(),
   blockchainId: z.lazy(() => SortOrderSchema).optional(),
   agreementId: z.lazy(() => SortOrderSchema).optional(),
@@ -6191,6 +6920,11 @@ export const TokensOnBlockchainsListRelationFilterSchema: z.ZodType<Prisma.Token
 
 export const TokensOnBlockchainsOrderByRelationAggregateInputSchema: z.ZodType<Prisma.TokensOnBlockchainsOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const BlockchainIdChainIdCompoundUniqueInputSchema: z.ZodType<Prisma.BlockchainIdChainIdCompoundUniqueInput> = z.object({
+  id: z.string(),
+  chainId: z.number()
 }).strict();
 
 export const BlockchainCountOrderByAggregateInputSchema: z.ZodType<Prisma.BlockchainCountOrderByAggregateInput> = z.object({
@@ -6245,6 +6979,11 @@ export const EnumContractSignatureStatusFilterSchema: z.ZodType<Prisma.EnumContr
   in: z.lazy(() => ContractSignatureStatusSchema).array().optional(),
   notIn: z.lazy(() => ContractSignatureStatusSchema).array().optional(),
   not: z.union([ z.lazy(() => ContractSignatureStatusSchema),z.lazy(() => NestedEnumContractSignatureStatusFilterSchema) ]).optional(),
+}).strict();
+
+export const ContractStatusUserIdContractIdCompoundUniqueInputSchema: z.ZodType<Prisma.ContractStatusUserIdContractIdCompoundUniqueInput> = z.object({
+  userId: z.string(),
+  contractId: z.string()
 }).strict();
 
 export const ContractStatusCountOrderByAggregateInputSchema: z.ZodType<Prisma.ContractStatusCountOrderByAggregateInput> = z.object({
@@ -6446,6 +7185,11 @@ export const UserRoleMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserRoleMi
   roleId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
+export const TokenIdSymbolCompoundUniqueInputSchema: z.ZodType<Prisma.TokenIdSymbolCompoundUniqueInput> = z.object({
+  id: z.string(),
+  symbol: z.string()
+}).strict();
+
 export const TokenCountOrderByAggregateInputSchema: z.ZodType<Prisma.TokenCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
@@ -6481,21 +7225,21 @@ export const BlockchainScalarRelationFilterSchema: z.ZodType<Prisma.BlockchainSc
   isNot: z.lazy(() => BlockchainWhereInputSchema).optional()
 }).strict();
 
-export const TokensOnBlockchainsTokenIdBlockchainIdCompoundUniqueInputSchema: z.ZodType<Prisma.TokensOnBlockchainsTokenIdBlockchainIdCompoundUniqueInput> = z.object({
+export const TokensOnBlockchainsTokenIdChainIdCompoundUniqueInputSchema: z.ZodType<Prisma.TokensOnBlockchainsTokenIdChainIdCompoundUniqueInput> = z.object({
   tokenId: z.string(),
-  blockchainId: z.string()
+  chainId: z.number()
 }).strict();
 
-export const TokensOnBlockchainsTokenSymbolBlockchainIdCompoundUniqueInputSchema: z.ZodType<Prisma.TokensOnBlockchainsTokenSymbolBlockchainIdCompoundUniqueInput> = z.object({
+export const TokensOnBlockchainsTokenSymbolChainIdCompoundUniqueInputSchema: z.ZodType<Prisma.TokensOnBlockchainsTokenSymbolChainIdCompoundUniqueInput> = z.object({
   tokenSymbol: z.string(),
-  blockchainId: z.string()
+  chainId: z.number()
 }).strict();
 
 export const TokensOnBlockchainsCountOrderByAggregateInputSchema: z.ZodType<Prisma.TokensOnBlockchainsCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
-  blockchainId: z.lazy(() => SortOrderSchema).optional(),
+  chainId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   isNative: z.lazy(() => SortOrderSchema).optional(),
   decimals: z.lazy(() => SortOrderSchema).optional(),
@@ -6503,6 +7247,7 @@ export const TokensOnBlockchainsCountOrderByAggregateInputSchema: z.ZodType<Pris
 }).strict();
 
 export const TokensOnBlockchainsAvgOrderByAggregateInputSchema: z.ZodType<Prisma.TokensOnBlockchainsAvgOrderByAggregateInput> = z.object({
+  chainId: z.lazy(() => SortOrderSchema).optional(),
   decimals: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -6510,7 +7255,7 @@ export const TokensOnBlockchainsMaxOrderByAggregateInputSchema: z.ZodType<Prisma
   id: z.lazy(() => SortOrderSchema).optional(),
   tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
-  blockchainId: z.lazy(() => SortOrderSchema).optional(),
+  chainId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   isNative: z.lazy(() => SortOrderSchema).optional(),
   decimals: z.lazy(() => SortOrderSchema).optional(),
@@ -6521,7 +7266,7 @@ export const TokensOnBlockchainsMinOrderByAggregateInputSchema: z.ZodType<Prisma
   id: z.lazy(() => SortOrderSchema).optional(),
   tokenId: z.lazy(() => SortOrderSchema).optional(),
   tokenSymbol: z.lazy(() => SortOrderSchema).optional(),
-  blockchainId: z.lazy(() => SortOrderSchema).optional(),
+  chainId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   isNative: z.lazy(() => SortOrderSchema).optional(),
   decimals: z.lazy(() => SortOrderSchema).optional(),
@@ -6529,7 +7274,55 @@ export const TokensOnBlockchainsMinOrderByAggregateInputSchema: z.ZodType<Prisma
 }).strict();
 
 export const TokensOnBlockchainsSumOrderByAggregateInputSchema: z.ZodType<Prisma.TokensOnBlockchainsSumOrderByAggregateInput> = z.object({
+  chainId: z.lazy(() => SortOrderSchema).optional(),
   decimals: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EnumCurrencyTypeFilterSchema: z.ZodType<Prisma.EnumCurrencyTypeFilter> = z.object({
+  equals: z.lazy(() => CurrencyTypeSchema).optional(),
+  in: z.lazy(() => CurrencyTypeSchema).array().optional(),
+  notIn: z.lazy(() => CurrencyTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => NestedEnumCurrencyTypeFilterSchema) ]).optional(),
+}).strict();
+
+export const CurrencyCountOrderByAggregateInputSchema: z.ZodType<Prisma.CurrencyCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  symbol: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const CurrencyMaxOrderByAggregateInputSchema: z.ZodType<Prisma.CurrencyMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  symbol: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const CurrencyMinOrderByAggregateInputSchema: z.ZodType<Prisma.CurrencyMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  deletedAt: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  symbol: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EnumCurrencyTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumCurrencyTypeWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => CurrencyTypeSchema).optional(),
+  in: z.lazy(() => CurrencyTypeSchema).array().optional(),
+  notIn: z.lazy(() => CurrencyTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => NestedEnumCurrencyTypeWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumCurrencyTypeFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumCurrencyTypeFilterSchema).optional()
 }).strict();
 
 export const ProfileCreateNestedOneWithoutUserInputSchema: z.ZodType<Prisma.ProfileCreateNestedOneWithoutUserInput> = z.object({
@@ -6600,6 +7393,13 @@ export const WalletAddressCreateNestedManyWithoutAddressInputSchema: z.ZodType<P
   connect: z.union([ z.lazy(() => WalletAddressWhereUniqueInputSchema),z.lazy(() => WalletAddressWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const DocumentRecipientCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientCreateNestedManyWithoutUserInput> = z.object({
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema).array(),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DocumentRecipientCreateOrConnectWithoutUserInputSchema),z.lazy(() => DocumentRecipientCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DocumentRecipientCreateManyUserInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
 export const ProfileUncheckedCreateNestedOneWithoutUserInputSchema: z.ZodType<Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput> = z.object({
   create: z.union([ z.lazy(() => ProfileCreateWithoutUserInputSchema),z.lazy(() => ProfileUncheckedCreateWithoutUserInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => ProfileCreateOrConnectWithoutUserInputSchema).optional(),
@@ -6666,6 +7466,13 @@ export const WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema: z.
   connectOrCreate: z.union([ z.lazy(() => WalletAddressCreateOrConnectWithoutAddressInputSchema),z.lazy(() => WalletAddressCreateOrConnectWithoutAddressInputSchema).array() ]).optional(),
   createMany: z.lazy(() => WalletAddressCreateManyAddressInputEnvelopeSchema).optional(),
   connect: z.union([ z.lazy(() => WalletAddressWhereUniqueInputSchema),z.lazy(() => WalletAddressWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedCreateNestedManyWithoutUserInput> = z.object({
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema).array(),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DocumentRecipientCreateOrConnectWithoutUserInputSchema),z.lazy(() => DocumentRecipientCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DocumentRecipientCreateManyUserInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const StringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.StringFieldUpdateOperationsInput> = z.object({
@@ -6824,6 +7631,20 @@ export const WalletAddressUpdateManyWithoutAddressNestedInputSchema: z.ZodType<P
   deleteMany: z.union([ z.lazy(() => WalletAddressScalarWhereInputSchema),z.lazy(() => WalletAddressScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const DocumentRecipientUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateManyWithoutUserNestedInput> = z.object({
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema).array(),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DocumentRecipientCreateOrConnectWithoutUserInputSchema),z.lazy(() => DocumentRecipientCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => DocumentRecipientUpsertWithWhereUniqueWithoutUserInputSchema),z.lazy(() => DocumentRecipientUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DocumentRecipientCreateManyUserInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => DocumentRecipientUpdateWithWhereUniqueWithoutUserInputSchema),z.lazy(() => DocumentRecipientUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => DocumentRecipientUpdateManyWithWhereWithoutUserInputSchema),z.lazy(() => DocumentRecipientUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => DocumentRecipientScalarWhereInputSchema),z.lazy(() => DocumentRecipientScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const ProfileUncheckedUpdateOneWithoutUserNestedInputSchema: z.ZodType<Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput> = z.object({
   create: z.union([ z.lazy(() => ProfileCreateWithoutUserInputSchema),z.lazy(() => ProfileUncheckedCreateWithoutUserInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => ProfileCreateOrConnectWithoutUserInputSchema).optional(),
@@ -6956,6 +7777,20 @@ export const WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema: z.
   deleteMany: z.union([ z.lazy(() => WalletAddressScalarWhereInputSchema),z.lazy(() => WalletAddressScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedUpdateManyWithoutUserNestedInput> = z.object({
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema).array(),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DocumentRecipientCreateOrConnectWithoutUserInputSchema),z.lazy(() => DocumentRecipientCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => DocumentRecipientUpsertWithWhereUniqueWithoutUserInputSchema),z.lazy(() => DocumentRecipientUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DocumentRecipientCreateManyUserInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => DocumentRecipientUpdateWithWhereUniqueWithoutUserInputSchema),z.lazy(() => DocumentRecipientUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => DocumentRecipientUpdateManyWithWhereWithoutUserInputSchema),z.lazy(() => DocumentRecipientUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => DocumentRecipientScalarWhereInputSchema),z.lazy(() => DocumentRecipientScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const UserCreateNestedOneWithoutWalletAddressInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutWalletAddressInput> = z.object({
   create: z.union([ z.lazy(() => UserCreateWithoutWalletAddressInputSchema),z.lazy(() => UserUncheckedCreateWithoutWalletAddressInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutWalletAddressInputSchema).optional(),
@@ -7062,10 +7897,28 @@ export const ProfileUpdateOneWithoutAddressNestedInputSchema: z.ZodType<Prisma.P
   update: z.union([ z.lazy(() => ProfileUpdateToOneWithWhereWithoutAddressInputSchema),z.lazy(() => ProfileUpdateWithoutAddressInputSchema),z.lazy(() => ProfileUncheckedUpdateWithoutAddressInputSchema) ]).optional(),
 }).strict();
 
+export const CurrencyCreateNestedOneWithoutSaleInputSchema: z.ZodType<Prisma.CurrencyCreateNestedOneWithoutSaleInput> = z.object({
+  create: z.union([ z.lazy(() => CurrencyCreateWithoutSaleInputSchema),z.lazy(() => CurrencyUncheckedCreateWithoutSaleInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => CurrencyCreateOrConnectWithoutSaleInputSchema).optional(),
+  connect: z.lazy(() => CurrencyWhereUniqueInputSchema).optional()
+}).strict();
+
 export const BlockchainCreateNestedOneWithoutSaleInputSchema: z.ZodType<Prisma.BlockchainCreateNestedOneWithoutSaleInput> = z.object({
   create: z.union([ z.lazy(() => BlockchainCreateWithoutSaleInputSchema),z.lazy(() => BlockchainUncheckedCreateWithoutSaleInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => BlockchainCreateOrConnectWithoutSaleInputSchema).optional(),
   connect: z.lazy(() => BlockchainWhereUniqueInputSchema).optional()
+}).strict();
+
+export const TokenCreateNestedOneWithoutSalesInputSchema: z.ZodType<Prisma.TokenCreateNestedOneWithoutSalesInput> = z.object({
+  create: z.union([ z.lazy(() => TokenCreateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedCreateWithoutSalesInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => TokenCreateOrConnectWithoutSalesInputSchema).optional(),
+  connect: z.lazy(() => TokenWhereUniqueInputSchema).optional()
+}).strict();
+
+export const SaftContractCreateNestedOneWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractCreateNestedOneWithoutSaleInput> = z.object({
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutSaleInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SaftContractCreateOrConnectWithoutSaleInputSchema).optional(),
+  connect: z.lazy(() => SaftContractWhereUniqueInputSchema).optional()
 }).strict();
 
 export const UserCreateNestedOneWithoutSalesInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutSalesInput> = z.object({
@@ -7081,23 +7934,11 @@ export const SaleTransactionsCreateNestedManyWithoutSaleInputSchema: z.ZodType<P
   connect: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const SaleInformationCreateNestedOneWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationCreateNestedOneWithoutSaleInput> = z.object({
-  create: z.union([ z.lazy(() => SaleInformationCreateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedCreateWithoutSaleInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SaleInformationCreateOrConnectWithoutSaleInputSchema).optional(),
-  connect: z.lazy(() => SaleInformationWhereUniqueInputSchema).optional()
-}).strict();
-
 export const DocumentCreateNestedManyWithoutSaleInputSchema: z.ZodType<Prisma.DocumentCreateNestedManyWithoutSaleInput> = z.object({
   create: z.union([ z.lazy(() => DocumentCreateWithoutSaleInputSchema),z.lazy(() => DocumentCreateWithoutSaleInputSchema).array(),z.lazy(() => DocumentUncheckedCreateWithoutSaleInputSchema),z.lazy(() => DocumentUncheckedCreateWithoutSaleInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => DocumentCreateOrConnectWithoutSaleInputSchema),z.lazy(() => DocumentCreateOrConnectWithoutSaleInputSchema).array() ]).optional(),
   createMany: z.lazy(() => DocumentCreateManySaleInputEnvelopeSchema).optional(),
   connect: z.union([ z.lazy(() => DocumentWhereUniqueInputSchema),z.lazy(() => DocumentWhereUniqueInputSchema).array() ]).optional(),
-}).strict();
-
-export const TokenCreateNestedOneWithoutSalesInputSchema: z.ZodType<Prisma.TokenCreateNestedOneWithoutSalesInput> = z.object({
-  create: z.union([ z.lazy(() => TokenCreateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedCreateWithoutSalesInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => TokenCreateOrConnectWithoutSalesInputSchema).optional(),
-  connect: z.lazy(() => TokenWhereUniqueInputSchema).optional()
 }).strict();
 
 export const VestingScheduleCreateNestedManyWithoutSaleInputSchema: z.ZodType<Prisma.VestingScheduleCreateNestedManyWithoutSaleInput> = z.object({
@@ -7107,17 +7948,17 @@ export const VestingScheduleCreateNestedManyWithoutSaleInputSchema: z.ZodType<Pr
   connect: z.union([ z.lazy(() => VestingScheduleWhereUniqueInputSchema),z.lazy(() => VestingScheduleWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractUncheckedCreateNestedOneWithoutSaleInput> = z.object({
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutSaleInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SaftContractCreateOrConnectWithoutSaleInputSchema).optional(),
+  connect: z.lazy(() => SaftContractWhereUniqueInputSchema).optional()
+}).strict();
+
 export const SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema: z.ZodType<Prisma.SaleTransactionsUncheckedCreateNestedManyWithoutSaleInput> = z.object({
   create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsCreateWithoutSaleInputSchema).array(),z.lazy(() => SaleTransactionsUncheckedCreateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutSaleInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => SaleTransactionsCreateOrConnectWithoutSaleInputSchema),z.lazy(() => SaleTransactionsCreateOrConnectWithoutSaleInputSchema).array() ]).optional(),
   createMany: z.lazy(() => SaleTransactionsCreateManySaleInputEnvelopeSchema).optional(),
   connect: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
-}).strict();
-
-export const SaleInformationUncheckedCreateNestedOneWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationUncheckedCreateNestedOneWithoutSaleInput> = z.object({
-  create: z.union([ z.lazy(() => SaleInformationCreateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedCreateWithoutSaleInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SaleInformationCreateOrConnectWithoutSaleInputSchema).optional(),
-  connect: z.lazy(() => SaleInformationWhereUniqueInputSchema).optional()
 }).strict();
 
 export const DocumentUncheckedCreateNestedManyWithoutSaleInputSchema: z.ZodType<Prisma.DocumentUncheckedCreateNestedManyWithoutSaleInput> = z.object({
@@ -7138,10 +7979,6 @@ export const EnumSaleStatusFieldUpdateOperationsInputSchema: z.ZodType<Prisma.En
   set: z.lazy(() => SaleStatusSchema).optional()
 }).strict();
 
-export const EnumCurrencyFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumCurrencyFieldUpdateOperationsInput> = z.object({
-  set: z.lazy(() => CurrencySchema).optional()
-}).strict();
-
 export const NullableIntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableIntFieldUpdateOperationsInput> = z.object({
   set: z.number().optional().nullable(),
   increment: z.number().optional(),
@@ -7158,6 +7995,14 @@ export const DecimalFieldUpdateOperationsInputSchema: z.ZodType<Prisma.DecimalFi
   divide: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional()
 }).strict();
 
+export const CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema: z.ZodType<Prisma.CurrencyUpdateOneRequiredWithoutSaleNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CurrencyCreateWithoutSaleInputSchema),z.lazy(() => CurrencyUncheckedCreateWithoutSaleInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => CurrencyCreateOrConnectWithoutSaleInputSchema).optional(),
+  upsert: z.lazy(() => CurrencyUpsertWithoutSaleInputSchema).optional(),
+  connect: z.lazy(() => CurrencyWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => CurrencyUpdateToOneWithWhereWithoutSaleInputSchema),z.lazy(() => CurrencyUpdateWithoutSaleInputSchema),z.lazy(() => CurrencyUncheckedUpdateWithoutSaleInputSchema) ]).optional(),
+}).strict();
+
 export const BlockchainUpdateOneWithoutSaleNestedInputSchema: z.ZodType<Prisma.BlockchainUpdateOneWithoutSaleNestedInput> = z.object({
   create: z.union([ z.lazy(() => BlockchainCreateWithoutSaleInputSchema),z.lazy(() => BlockchainUncheckedCreateWithoutSaleInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => BlockchainCreateOrConnectWithoutSaleInputSchema).optional(),
@@ -7166,6 +8011,24 @@ export const BlockchainUpdateOneWithoutSaleNestedInputSchema: z.ZodType<Prisma.B
   delete: z.union([ z.boolean(),z.lazy(() => BlockchainWhereInputSchema) ]).optional(),
   connect: z.lazy(() => BlockchainWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => BlockchainUpdateToOneWithWhereWithoutSaleInputSchema),z.lazy(() => BlockchainUpdateWithoutSaleInputSchema),z.lazy(() => BlockchainUncheckedUpdateWithoutSaleInputSchema) ]).optional(),
+}).strict();
+
+export const TokenUpdateOneRequiredWithoutSalesNestedInputSchema: z.ZodType<Prisma.TokenUpdateOneRequiredWithoutSalesNestedInput> = z.object({
+  create: z.union([ z.lazy(() => TokenCreateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedCreateWithoutSalesInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => TokenCreateOrConnectWithoutSalesInputSchema).optional(),
+  upsert: z.lazy(() => TokenUpsertWithoutSalesInputSchema).optional(),
+  connect: z.lazy(() => TokenWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => TokenUpdateToOneWithWhereWithoutSalesInputSchema),z.lazy(() => TokenUpdateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedUpdateWithoutSalesInputSchema) ]).optional(),
+}).strict();
+
+export const SaftContractUpdateOneWithoutSaleNestedInputSchema: z.ZodType<Prisma.SaftContractUpdateOneWithoutSaleNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutSaleInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SaftContractCreateOrConnectWithoutSaleInputSchema).optional(),
+  upsert: z.lazy(() => SaftContractUpsertWithoutSaleInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => SaftContractWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => SaftContractWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => SaftContractWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => SaftContractUpdateToOneWithWhereWithoutSaleInputSchema),z.lazy(() => SaftContractUpdateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedUpdateWithoutSaleInputSchema) ]).optional(),
 }).strict();
 
 export const UserUpdateOneRequiredWithoutSalesNestedInputSchema: z.ZodType<Prisma.UserUpdateOneRequiredWithoutSalesNestedInput> = z.object({
@@ -7190,16 +8053,6 @@ export const SaleTransactionsUpdateManyWithoutSaleNestedInputSchema: z.ZodType<P
   deleteMany: z.union([ z.lazy(() => SaleTransactionsScalarWhereInputSchema),z.lazy(() => SaleTransactionsScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const SaleInformationUpdateOneWithoutSaleNestedInputSchema: z.ZodType<Prisma.SaleInformationUpdateOneWithoutSaleNestedInput> = z.object({
-  create: z.union([ z.lazy(() => SaleInformationCreateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedCreateWithoutSaleInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SaleInformationCreateOrConnectWithoutSaleInputSchema).optional(),
-  upsert: z.lazy(() => SaleInformationUpsertWithoutSaleInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => SaleInformationWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => SaleInformationWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => SaleInformationWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => SaleInformationUpdateToOneWithWhereWithoutSaleInputSchema),z.lazy(() => SaleInformationUpdateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedUpdateWithoutSaleInputSchema) ]).optional(),
-}).strict();
-
 export const DocumentUpdateManyWithoutSaleNestedInputSchema: z.ZodType<Prisma.DocumentUpdateManyWithoutSaleNestedInput> = z.object({
   create: z.union([ z.lazy(() => DocumentCreateWithoutSaleInputSchema),z.lazy(() => DocumentCreateWithoutSaleInputSchema).array(),z.lazy(() => DocumentUncheckedCreateWithoutSaleInputSchema),z.lazy(() => DocumentUncheckedCreateWithoutSaleInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => DocumentCreateOrConnectWithoutSaleInputSchema),z.lazy(() => DocumentCreateOrConnectWithoutSaleInputSchema).array() ]).optional(),
@@ -7212,14 +8065,6 @@ export const DocumentUpdateManyWithoutSaleNestedInputSchema: z.ZodType<Prisma.Do
   update: z.union([ z.lazy(() => DocumentUpdateWithWhereUniqueWithoutSaleInputSchema),z.lazy(() => DocumentUpdateWithWhereUniqueWithoutSaleInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => DocumentUpdateManyWithWhereWithoutSaleInputSchema),z.lazy(() => DocumentUpdateManyWithWhereWithoutSaleInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => DocumentScalarWhereInputSchema),z.lazy(() => DocumentScalarWhereInputSchema).array() ]).optional(),
-}).strict();
-
-export const TokenUpdateOneRequiredWithoutSalesNestedInputSchema: z.ZodType<Prisma.TokenUpdateOneRequiredWithoutSalesNestedInput> = z.object({
-  create: z.union([ z.lazy(() => TokenCreateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedCreateWithoutSalesInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => TokenCreateOrConnectWithoutSalesInputSchema).optional(),
-  upsert: z.lazy(() => TokenUpsertWithoutSalesInputSchema).optional(),
-  connect: z.lazy(() => TokenWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => TokenUpdateToOneWithWhereWithoutSalesInputSchema),z.lazy(() => TokenUpdateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedUpdateWithoutSalesInputSchema) ]).optional(),
 }).strict();
 
 export const VestingScheduleUpdateManyWithoutSaleNestedInputSchema: z.ZodType<Prisma.VestingScheduleUpdateManyWithoutSaleNestedInput> = z.object({
@@ -7236,6 +8081,16 @@ export const VestingScheduleUpdateManyWithoutSaleNestedInputSchema: z.ZodType<Pr
   deleteMany: z.union([ z.lazy(() => VestingScheduleScalarWhereInputSchema),z.lazy(() => VestingScheduleScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema: z.ZodType<Prisma.SaftContractUncheckedUpdateOneWithoutSaleNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutSaleInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SaftContractCreateOrConnectWithoutSaleInputSchema).optional(),
+  upsert: z.lazy(() => SaftContractUpsertWithoutSaleInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => SaftContractWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => SaftContractWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => SaftContractWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => SaftContractUpdateToOneWithWhereWithoutSaleInputSchema),z.lazy(() => SaftContractUpdateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedUpdateWithoutSaleInputSchema) ]).optional(),
+}).strict();
+
 export const SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema: z.ZodType<Prisma.SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInput> = z.object({
   create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsCreateWithoutSaleInputSchema).array(),z.lazy(() => SaleTransactionsUncheckedCreateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutSaleInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => SaleTransactionsCreateOrConnectWithoutSaleInputSchema),z.lazy(() => SaleTransactionsCreateOrConnectWithoutSaleInputSchema).array() ]).optional(),
@@ -7248,16 +8103,6 @@ export const SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema: z.
   update: z.union([ z.lazy(() => SaleTransactionsUpdateWithWhereUniqueWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUpdateWithWhereUniqueWithoutSaleInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => SaleTransactionsUpdateManyWithWhereWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUpdateManyWithWhereWithoutSaleInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => SaleTransactionsScalarWhereInputSchema),z.lazy(() => SaleTransactionsScalarWhereInputSchema).array() ]).optional(),
-}).strict();
-
-export const SaleInformationUncheckedUpdateOneWithoutSaleNestedInputSchema: z.ZodType<Prisma.SaleInformationUncheckedUpdateOneWithoutSaleNestedInput> = z.object({
-  create: z.union([ z.lazy(() => SaleInformationCreateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedCreateWithoutSaleInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SaleInformationCreateOrConnectWithoutSaleInputSchema).optional(),
-  upsert: z.lazy(() => SaleInformationUpsertWithoutSaleInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => SaleInformationWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => SaleInformationWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => SaleInformationWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => SaleInformationUpdateToOneWithWhereWithoutSaleInputSchema),z.lazy(() => SaleInformationUpdateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedUpdateWithoutSaleInputSchema) ]).optional(),
 }).strict();
 
 export const DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema: z.ZodType<Prisma.DocumentUncheckedUpdateManyWithoutSaleNestedInput> = z.object({
@@ -7286,6 +8131,113 @@ export const VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema: z.Z
   update: z.union([ z.lazy(() => VestingScheduleUpdateWithWhereUniqueWithoutSaleInputSchema),z.lazy(() => VestingScheduleUpdateWithWhereUniqueWithoutSaleInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => VestingScheduleUpdateManyWithWhereWithoutSaleInputSchema),z.lazy(() => VestingScheduleUpdateManyWithWhereWithoutSaleInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => VestingScheduleScalarWhereInputSchema),z.lazy(() => VestingScheduleScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaftContractCreatevariablesInputSchema: z.ZodType<Prisma.SaftContractCreatevariablesInput> = z.object({
+  set: InputJsonValueSchema.array()
+}).strict();
+
+export const DocumentRecipientCreateNestedManyWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientCreateNestedManyWithoutSaftContractInput> = z.object({
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema).array(),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DocumentRecipientCreateManySaftContractInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaleCreateNestedOneWithoutSaftContractInputSchema: z.ZodType<Prisma.SaleCreateNestedOneWithoutSaftContractInput> = z.object({
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaftContractInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaftContractInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SaleCreateOrConnectWithoutSaftContractInputSchema).optional(),
+  connect: z.lazy(() => SaleWhereUniqueInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientUncheckedCreateNestedManyWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedCreateNestedManyWithoutSaftContractInput> = z.object({
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema).array(),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DocumentRecipientCreateManySaftContractInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaftContractUpdatevariablesInputSchema: z.ZodType<Prisma.SaftContractUpdatevariablesInput> = z.object({
+  set: InputJsonValueSchema.array().optional(),
+  push: z.union([ InputJsonValueSchema,InputJsonValueSchema.array() ]).optional(),
+}).strict();
+
+export const DocumentRecipientUpdateManyWithoutSaftContractNestedInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateManyWithoutSaftContractNestedInput> = z.object({
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema).array(),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => DocumentRecipientUpsertWithWhereUniqueWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUpsertWithWhereUniqueWithoutSaftContractInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DocumentRecipientCreateManySaftContractInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => DocumentRecipientUpdateWithWhereUniqueWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUpdateWithWhereUniqueWithoutSaftContractInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => DocumentRecipientUpdateManyWithWhereWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUpdateManyWithWhereWithoutSaftContractInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => DocumentRecipientScalarWhereInputSchema),z.lazy(() => DocumentRecipientScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaleUpdateOneWithoutSaftContractNestedInputSchema: z.ZodType<Prisma.SaleUpdateOneWithoutSaftContractNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaftContractInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaftContractInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SaleCreateOrConnectWithoutSaftContractInputSchema).optional(),
+  upsert: z.lazy(() => SaleUpsertWithoutSaftContractInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => SaleWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => SaleWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => SaleWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => SaleUpdateToOneWithWhereWithoutSaftContractInputSchema),z.lazy(() => SaleUpdateWithoutSaftContractInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutSaftContractInputSchema) ]).optional(),
+}).strict();
+
+export const DocumentRecipientUncheckedUpdateManyWithoutSaftContractNestedInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedUpdateManyWithoutSaftContractNestedInput> = z.object({
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema).array(),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => DocumentRecipientUpsertWithWhereUniqueWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUpsertWithWhereUniqueWithoutSaftContractInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DocumentRecipientCreateManySaftContractInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => DocumentRecipientWhereUniqueInputSchema),z.lazy(() => DocumentRecipientWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => DocumentRecipientUpdateWithWhereUniqueWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUpdateWithWhereUniqueWithoutSaftContractInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => DocumentRecipientUpdateManyWithWhereWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUpdateManyWithWhereWithoutSaftContractInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => DocumentRecipientScalarWhereInputSchema),z.lazy(() => DocumentRecipientScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const UserCreateNestedOneWithoutDocumentRecipientInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutDocumentRecipientInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutDocumentRecipientInputSchema),z.lazy(() => UserUncheckedCreateWithoutDocumentRecipientInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutDocumentRecipientInputSchema).optional(),
+  connect: z.lazy(() => UserWhereUniqueInputSchema).optional()
+}).strict();
+
+export const SaftContractCreateNestedOneWithoutRecipientsInputSchema: z.ZodType<Prisma.SaftContractCreateNestedOneWithoutRecipientsInput> = z.object({
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutRecipientsInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutRecipientsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SaftContractCreateOrConnectWithoutRecipientsInputSchema).optional(),
+  connect: z.lazy(() => SaftContractWhereUniqueInputSchema).optional()
+}).strict();
+
+export const EnumSignableDocumentRoleFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumSignableDocumentRoleFieldUpdateOperationsInput> = z.object({
+  set: z.lazy(() => SignableDocumentRoleSchema).optional()
+}).strict();
+
+export const EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumDocumentSignatureStatusFieldUpdateOperationsInput> = z.object({
+  set: z.lazy(() => DocumentSignatureStatusSchema).optional()
+}).strict();
+
+export const UserUpdateOneWithoutDocumentRecipientNestedInputSchema: z.ZodType<Prisma.UserUpdateOneWithoutDocumentRecipientNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutDocumentRecipientInputSchema),z.lazy(() => UserUncheckedCreateWithoutDocumentRecipientInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutDocumentRecipientInputSchema).optional(),
+  upsert: z.lazy(() => UserUpsertWithoutDocumentRecipientInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutDocumentRecipientInputSchema),z.lazy(() => UserUpdateWithoutDocumentRecipientInputSchema),z.lazy(() => UserUncheckedUpdateWithoutDocumentRecipientInputSchema) ]).optional(),
+}).strict();
+
+export const SaftContractUpdateOneWithoutRecipientsNestedInputSchema: z.ZodType<Prisma.SaftContractUpdateOneWithoutRecipientsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutRecipientsInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutRecipientsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SaftContractCreateOrConnectWithoutRecipientsInputSchema).optional(),
+  upsert: z.lazy(() => SaftContractUpsertWithoutRecipientsInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => SaftContractWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => SaftContractWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => SaftContractWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => SaftContractUpdateToOneWithWhereWithoutRecipientsInputSchema),z.lazy(() => SaftContractUpdateWithoutRecipientsInputSchema),z.lazy(() => SaftContractUncheckedUpdateWithoutRecipientsInputSchema) ]).optional(),
 }).strict();
 
 export const SaleCreateNestedOneWithoutDocumentsInputSchema: z.ZodType<Prisma.SaleCreateNestedOneWithoutDocumentsInput> = z.object({
@@ -7356,20 +8308,6 @@ export const SaleTransactionsUpdateOneRequiredWithoutTokenDistributionsNestedInp
   update: z.union([ z.lazy(() => SaleTransactionsUpdateToOneWithWhereWithoutTokenDistributionsInputSchema),z.lazy(() => SaleTransactionsUpdateWithoutTokenDistributionsInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateWithoutTokenDistributionsInputSchema) ]).optional(),
 }).strict();
 
-export const SaleCreateNestedOneWithoutSaleInformationInputSchema: z.ZodType<Prisma.SaleCreateNestedOneWithoutSaleInformationInput> = z.object({
-  create: z.union([ z.lazy(() => SaleCreateWithoutSaleInformationInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleInformationInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SaleCreateOrConnectWithoutSaleInformationInputSchema).optional(),
-  connect: z.lazy(() => SaleWhereUniqueInputSchema).optional()
-}).strict();
-
-export const SaleUpdateOneRequiredWithoutSaleInformationNestedInputSchema: z.ZodType<Prisma.SaleUpdateOneRequiredWithoutSaleInformationNestedInput> = z.object({
-  create: z.union([ z.lazy(() => SaleCreateWithoutSaleInformationInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleInformationInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SaleCreateOrConnectWithoutSaleInformationInputSchema).optional(),
-  upsert: z.lazy(() => SaleUpsertWithoutSaleInformationInputSchema).optional(),
-  connect: z.lazy(() => SaleWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => SaleUpdateToOneWithWhereWithoutSaleInformationInputSchema),z.lazy(() => SaleUpdateWithoutSaleInformationInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutSaleInformationInputSchema) ]).optional(),
-}).strict();
-
 export const UserCreateNestedOneWithoutTransactionsInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutTransactionsInput> = z.object({
   create: z.union([ z.lazy(() => UserCreateWithoutTransactionsInputSchema),z.lazy(() => UserUncheckedCreateWithoutTransactionsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutTransactionsInputSchema).optional(),
@@ -7380,6 +8318,12 @@ export const SaleCreateNestedOneWithoutTransactionsInputSchema: z.ZodType<Prisma
   create: z.union([ z.lazy(() => SaleCreateWithoutTransactionsInputSchema),z.lazy(() => SaleUncheckedCreateWithoutTransactionsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => SaleCreateOrConnectWithoutTransactionsInputSchema).optional(),
   connect: z.lazy(() => SaleWhereUniqueInputSchema).optional()
+}).strict();
+
+export const CurrencyCreateNestedOneWithoutSaleTransactionsInputSchema: z.ZodType<Prisma.CurrencyCreateNestedOneWithoutSaleTransactionsInput> = z.object({
+  create: z.union([ z.lazy(() => CurrencyCreateWithoutSaleTransactionsInputSchema),z.lazy(() => CurrencyUncheckedCreateWithoutSaleTransactionsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => CurrencyCreateOrConnectWithoutSaleTransactionsInputSchema).optional(),
+  connect: z.lazy(() => CurrencyWhereUniqueInputSchema).optional()
 }).strict();
 
 export const BlockchainCreateNestedOneWithoutTransactionsInputSchema: z.ZodType<Prisma.BlockchainCreateNestedOneWithoutTransactionsInput> = z.object({
@@ -7444,6 +8388,14 @@ export const SaleUpdateOneRequiredWithoutTransactionsNestedInputSchema: z.ZodTyp
   upsert: z.lazy(() => SaleUpsertWithoutTransactionsInputSchema).optional(),
   connect: z.lazy(() => SaleWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => SaleUpdateToOneWithWhereWithoutTransactionsInputSchema),z.lazy(() => SaleUpdateWithoutTransactionsInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutTransactionsInputSchema) ]).optional(),
+}).strict();
+
+export const CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInputSchema: z.ZodType<Prisma.CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CurrencyCreateWithoutSaleTransactionsInputSchema),z.lazy(() => CurrencyUncheckedCreateWithoutSaleTransactionsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => CurrencyCreateOrConnectWithoutSaleTransactionsInputSchema).optional(),
+  upsert: z.lazy(() => CurrencyUpsertWithoutSaleTransactionsInputSchema).optional(),
+  connect: z.lazy(() => CurrencyWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => CurrencyUpdateToOneWithWhereWithoutSaleTransactionsInputSchema),z.lazy(() => CurrencyUpdateWithoutSaleTransactionsInputSchema),z.lazy(() => CurrencyUncheckedUpdateWithoutSaleTransactionsInputSchema) ]).optional(),
 }).strict();
 
 export const BlockchainUpdateOneWithoutTransactionsNestedInputSchema: z.ZodType<Prisma.BlockchainUpdateOneWithoutTransactionsNestedInput> = z.object({
@@ -7880,6 +8832,94 @@ export const BlockchainUpdateOneRequiredWithoutTokensOnBlockchainsNestedInputSch
   update: z.union([ z.lazy(() => BlockchainUpdateToOneWithWhereWithoutTokensOnBlockchainsInputSchema),z.lazy(() => BlockchainUpdateWithoutTokensOnBlockchainsInputSchema),z.lazy(() => BlockchainUncheckedUpdateWithoutTokensOnBlockchainsInputSchema) ]).optional(),
 }).strict();
 
+export const SaleCreateNestedManyWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleCreateNestedManyWithoutSaleCurrencyInput> = z.object({
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema).array(),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => SaleCreateOrConnectWithoutSaleCurrencyInputSchema),z.lazy(() => SaleCreateOrConnectWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => SaleCreateManySaleCurrencyInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaleTransactionsCreateNestedManyWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsCreateNestedManyWithoutAmountPaidCurrencyInput> = z.object({
+  create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema).array(),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => SaleTransactionsCreateManyAmountPaidCurrencyInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaleUncheckedCreateNestedManyWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleUncheckedCreateNestedManyWithoutSaleCurrencyInput> = z.object({
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema).array(),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => SaleCreateOrConnectWithoutSaleCurrencyInputSchema),z.lazy(() => SaleCreateOrConnectWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => SaleCreateManySaleCurrencyInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaleTransactionsUncheckedCreateNestedManyWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsUncheckedCreateNestedManyWithoutAmountPaidCurrencyInput> = z.object({
+  create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema).array(),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => SaleTransactionsCreateManyAmountPaidCurrencyInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const EnumCurrencyTypeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumCurrencyTypeFieldUpdateOperationsInput> = z.object({
+  set: z.lazy(() => CurrencyTypeSchema).optional()
+}).strict();
+
+export const SaleUpdateManyWithoutSaleCurrencyNestedInputSchema: z.ZodType<Prisma.SaleUpdateManyWithoutSaleCurrencyNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema).array(),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => SaleCreateOrConnectWithoutSaleCurrencyInputSchema),z.lazy(() => SaleCreateOrConnectWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => SaleUpsertWithWhereUniqueWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUpsertWithWhereUniqueWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => SaleCreateManySaleCurrencyInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => SaleUpdateWithWhereUniqueWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUpdateWithWhereUniqueWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => SaleUpdateManyWithWhereWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUpdateManyWithWhereWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => SaleScalarWhereInputSchema),z.lazy(() => SaleScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaleTransactionsUpdateManyWithoutAmountPaidCurrencyNestedInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateManyWithoutAmountPaidCurrencyNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema).array(),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => SaleTransactionsUpsertWithWhereUniqueWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUpsertWithWhereUniqueWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => SaleTransactionsCreateManyAmountPaidCurrencyInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => SaleTransactionsUpdateWithWhereUniqueWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUpdateWithWhereUniqueWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => SaleTransactionsUpdateManyWithWhereWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUpdateManyWithWhereWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => SaleTransactionsScalarWhereInputSchema),z.lazy(() => SaleTransactionsScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaleUncheckedUpdateManyWithoutSaleCurrencyNestedInputSchema: z.ZodType<Prisma.SaleUncheckedUpdateManyWithoutSaleCurrencyNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema).array(),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => SaleCreateOrConnectWithoutSaleCurrencyInputSchema),z.lazy(() => SaleCreateOrConnectWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => SaleUpsertWithWhereUniqueWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUpsertWithWhereUniqueWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => SaleCreateManySaleCurrencyInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => SaleWhereUniqueInputSchema),z.lazy(() => SaleWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => SaleUpdateWithWhereUniqueWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUpdateWithWhereUniqueWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => SaleUpdateManyWithWhereWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUpdateManyWithWhereWithoutSaleCurrencyInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => SaleScalarWhereInputSchema),z.lazy(() => SaleScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const SaleTransactionsUncheckedUpdateManyWithoutAmountPaidCurrencyNestedInputSchema: z.ZodType<Prisma.SaleTransactionsUncheckedUpdateManyWithoutAmountPaidCurrencyNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema).array(),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => SaleTransactionsUpsertWithWhereUniqueWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUpsertWithWhereUniqueWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => SaleTransactionsCreateManyAmountPaidCurrencyInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => SaleTransactionsWhereUniqueInputSchema),z.lazy(() => SaleTransactionsWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => SaleTransactionsUpdateWithWhereUniqueWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUpdateWithWhereUniqueWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => SaleTransactionsUpdateManyWithWhereWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUpdateManyWithWhereWithoutAmountPaidCurrencyInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => SaleTransactionsScalarWhereInputSchema),z.lazy(() => SaleTransactionsScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const NestedStringFilterSchema: z.ZodType<Prisma.NestedStringFilter> = z.object({
   equals: z.string().optional(),
   in: z.string().array().optional(),
@@ -8101,13 +9141,6 @@ export const NestedEnumSaleStatusFilterSchema: z.ZodType<Prisma.NestedEnumSaleSt
   not: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => NestedEnumSaleStatusFilterSchema) ]).optional(),
 }).strict();
 
-export const NestedEnumCurrencyFilterSchema: z.ZodType<Prisma.NestedEnumCurrencyFilter> = z.object({
-  equals: z.lazy(() => CurrencySchema).optional(),
-  in: z.lazy(() => CurrencySchema).array().optional(),
-  notIn: z.lazy(() => CurrencySchema).array().optional(),
-  not: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => NestedEnumCurrencyFilterSchema) ]).optional(),
-}).strict();
-
 export const NestedDecimalFilterSchema: z.ZodType<Prisma.NestedDecimalFilter> = z.object({
   equals: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   in: z.union([z.number().array(),z.string().array(),z.instanceof(Decimal).array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
@@ -8127,16 +9160,6 @@ export const NestedEnumSaleStatusWithAggregatesFilterSchema: z.ZodType<Prisma.Ne
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedEnumSaleStatusFilterSchema).optional(),
   _max: z.lazy(() => NestedEnumSaleStatusFilterSchema).optional()
-}).strict();
-
-export const NestedEnumCurrencyWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumCurrencyWithAggregatesFilter> = z.object({
-  equals: z.lazy(() => CurrencySchema).optional(),
-  in: z.lazy(() => CurrencySchema).array().optional(),
-  notIn: z.lazy(() => CurrencySchema).array().optional(),
-  not: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => NestedEnumCurrencyWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedEnumCurrencyFilterSchema).optional(),
-  _max: z.lazy(() => NestedEnumCurrencyFilterSchema).optional()
 }).strict();
 
 export const NestedIntNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedIntNullableWithAggregatesFilter> = z.object({
@@ -8169,6 +9192,57 @@ export const NestedDecimalWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDec
   _sum: z.lazy(() => NestedDecimalFilterSchema).optional(),
   _min: z.lazy(() => NestedDecimalFilterSchema).optional(),
   _max: z.lazy(() => NestedDecimalFilterSchema).optional()
+}).strict();
+
+export const NestedJsonNullableFilterSchema: z.ZodType<Prisma.NestedJsonNullableFilter> = z.object({
+  equals: InputJsonValueSchema.optional(),
+  path: z.string().array().optional(),
+  mode: z.lazy(() => QueryModeSchema).optional(),
+  string_contains: z.string().optional(),
+  string_starts_with: z.string().optional(),
+  string_ends_with: z.string().optional(),
+  array_starts_with: InputJsonValueSchema.optional().nullable(),
+  array_ends_with: InputJsonValueSchema.optional().nullable(),
+  array_contains: InputJsonValueSchema.optional().nullable(),
+  lt: InputJsonValueSchema.optional(),
+  lte: InputJsonValueSchema.optional(),
+  gt: InputJsonValueSchema.optional(),
+  gte: InputJsonValueSchema.optional(),
+  not: InputJsonValueSchema.optional()
+}).strict();
+
+export const NestedEnumSignableDocumentRoleFilterSchema: z.ZodType<Prisma.NestedEnumSignableDocumentRoleFilter> = z.object({
+  equals: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  in: z.lazy(() => SignableDocumentRoleSchema).array().optional(),
+  notIn: z.lazy(() => SignableDocumentRoleSchema).array().optional(),
+  not: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => NestedEnumSignableDocumentRoleFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedEnumDocumentSignatureStatusFilterSchema: z.ZodType<Prisma.NestedEnumDocumentSignatureStatusFilter> = z.object({
+  equals: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  in: z.lazy(() => DocumentSignatureStatusSchema).array().optional(),
+  notIn: z.lazy(() => DocumentSignatureStatusSchema).array().optional(),
+  not: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => NestedEnumDocumentSignatureStatusFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedEnumSignableDocumentRoleWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumSignableDocumentRoleWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  in: z.lazy(() => SignableDocumentRoleSchema).array().optional(),
+  notIn: z.lazy(() => SignableDocumentRoleSchema).array().optional(),
+  not: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => NestedEnumSignableDocumentRoleWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumSignableDocumentRoleFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumSignableDocumentRoleFilterSchema).optional()
+}).strict();
+
+export const NestedEnumDocumentSignatureStatusWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumDocumentSignatureStatusWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  in: z.lazy(() => DocumentSignatureStatusSchema).array().optional(),
+  notIn: z.lazy(() => DocumentSignatureStatusSchema).array().optional(),
+  not: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => NestedEnumDocumentSignatureStatusWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumDocumentSignatureStatusFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumDocumentSignatureStatusFilterSchema).optional()
 }).strict();
 
 export const NestedFloatWithAggregatesFilterSchema: z.ZodType<Prisma.NestedFloatWithAggregatesFilter> = z.object({
@@ -8255,6 +9329,23 @@ export const NestedEnumKycStatusWithAggregatesFilterSchema: z.ZodType<Prisma.Nes
   _max: z.lazy(() => NestedEnumKycStatusFilterSchema).optional()
 }).strict();
 
+export const NestedEnumCurrencyTypeFilterSchema: z.ZodType<Prisma.NestedEnumCurrencyTypeFilter> = z.object({
+  equals: z.lazy(() => CurrencyTypeSchema).optional(),
+  in: z.lazy(() => CurrencyTypeSchema).array().optional(),
+  notIn: z.lazy(() => CurrencyTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => NestedEnumCurrencyTypeFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedEnumCurrencyTypeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumCurrencyTypeWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => CurrencyTypeSchema).optional(),
+  in: z.lazy(() => CurrencyTypeSchema).array().optional(),
+  notIn: z.lazy(() => CurrencyTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => NestedEnumCurrencyTypeWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumCurrencyTypeFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumCurrencyTypeFilterSchema).optional()
+}).strict();
+
 export const ProfileCreateWithoutUserInputSchema: z.ZodType<Prisma.ProfileCreateWithoutUserInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
@@ -8292,8 +9383,8 @@ export const SaleCreateWithoutUserInputSchema: z.ZodType<Prisma.SaleCreateWithou
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -8303,16 +9394,16 @@ export const SaleCreateWithoutUserInputSchema: z.ZodType<Prisma.SaleCreateWithou
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
-  transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationCreateNestedOneWithoutSaleInputSchema).optional(),
-  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
   token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
+  saftContract: z.lazy(() => SaftContractCreateNestedOneWithoutSaleInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
+  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
 
@@ -8322,8 +9413,9 @@ export const SaleUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.SaleUnc
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -8331,17 +9423,17 @@ export const SaleUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.SaleUnc
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
   tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
@@ -8489,13 +9581,13 @@ export const SaleTransactionsCreateWithoutUserInputSchema: z.ZodType<Prisma.Sale
   status: z.lazy(() => TransactionStatusSchema).optional(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   rejectionReason: z.string().optional().nullable(),
   paymentEvidence: z.string().optional().nullable(),
   paymentDate: z.coerce.date().optional().nullable(),
   sale: z.lazy(() => SaleCreateNestedOneWithoutTransactionsInputSchema),
+  amountPaidCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleTransactionsInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutTransactionsInputSchema).optional(),
   approver: z.lazy(() => UserCreateNestedOneWithoutTransactionApprovalsInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditCreateNestedManyWithoutTransactionInputSchema).optional(),
@@ -8519,7 +9611,7 @@ export const SaleTransactionsUncheckedCreateWithoutUserInputSchema: z.ZodType<Pr
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -8557,7 +9649,6 @@ export const SaleTransactionsCreateWithoutApproverInputSchema: z.ZodType<Prisma.
   status: z.lazy(() => TransactionStatusSchema).optional(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   rejectionReason: z.string().optional().nullable(),
@@ -8565,6 +9656,7 @@ export const SaleTransactionsCreateWithoutApproverInputSchema: z.ZodType<Prisma.
   paymentDate: z.coerce.date().optional().nullable(),
   user: z.lazy(() => UserCreateNestedOneWithoutTransactionsInputSchema),
   sale: z.lazy(() => SaleCreateNestedOneWithoutTransactionsInputSchema),
+  amountPaidCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleTransactionsInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutTransactionsInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditCreateNestedManyWithoutTransactionInputSchema).optional(),
   tokenDistributions: z.lazy(() => TokenDistributionCreateNestedManyWithoutTransactionInputSchema).optional()
@@ -8588,7 +9680,7 @@ export const SaleTransactionsUncheckedCreateWithoutApproverInputSchema: z.ZodTyp
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -8667,6 +9759,44 @@ export const WalletAddressCreateManyAddressInputEnvelopeSchema: z.ZodType<Prisma
   skipDuplicates: z.boolean().optional()
 }).strict();
 
+export const DocumentRecipientCreateWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientCreateWithoutUserInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  SaftContract: z.lazy(() => SaftContractCreateNestedOneWithoutRecipientsInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedCreateWithoutUserInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  saftContractId: z.string().optional().nullable()
+}).strict();
+
+export const DocumentRecipientCreateOrConnectWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientCreateOrConnectWithoutUserInput> = z.object({
+  where: z.lazy(() => DocumentRecipientWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema) ]),
+}).strict();
+
+export const DocumentRecipientCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.DocumentRecipientCreateManyUserInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => DocumentRecipientCreateManyUserInputSchema),z.lazy(() => DocumentRecipientCreateManyUserInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
 export const ProfileUpsertWithoutUserInputSchema: z.ZodType<Prisma.ProfileUpsertWithoutUserInput> = z.object({
   update: z.union([ z.lazy(() => ProfileUpdateWithoutUserInputSchema),z.lazy(() => ProfileUncheckedUpdateWithoutUserInputSchema) ]),
   create: z.union([ z.lazy(() => ProfileCreateWithoutUserInputSchema),z.lazy(() => ProfileUncheckedCreateWithoutUserInputSchema) ]),
@@ -8729,8 +9859,9 @@ export const SaleScalarWhereInputSchema: z.ZodType<Prisma.SaleScalarWhereInput> 
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  catchPhrase: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   status: z.union([ z.lazy(() => EnumSaleStatusFilterSchema),z.lazy(() => SaleStatusSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => EnumCurrencyFilterSchema),z.lazy(() => CurrencySchema) ]).optional(),
+  currency: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   initialTokenQuantity: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   availableTokenQuantity: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
@@ -8738,16 +9869,16 @@ export const SaleScalarWhereInputSchema: z.ZodType<Prisma.SaleScalarWhereInput> 
   saleStartDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   tokenContractAddress: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   tokenContractChainId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenTotalSupply: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.lazy(() => DecimalFilterSchema),z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
-  tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   toWalletsAddress: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   saleClosingDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   createdBy: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   saftCheckbox: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  saftContract: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  information: z.lazy(() => JsonNullableFilterSchema).optional()
 }).strict();
 
 export const UserRoleUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.UserRoleUpsertWithWhereUniqueWithoutUserInput> = z.object({
@@ -8911,7 +10042,7 @@ export const SaleTransactionsScalarWhereInputSchema: z.ZodType<Prisma.SaleTransa
   saleId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   comment: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   amountPaid: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => EnumCurrencyFilterSchema),z.lazy(() => CurrencySchema) ]).optional(),
+  paidCurrency: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   txHash: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   blockchainId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   agreementId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -8996,6 +10127,40 @@ export const WalletAddressScalarWhereInputSchema: z.ZodType<Prisma.WalletAddress
   chainId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
 }).strict();
 
+export const DocumentRecipientUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientUpsertWithWhereUniqueWithoutUserInput> = z.object({
+  where: z.lazy(() => DocumentRecipientWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => DocumentRecipientUpdateWithoutUserInputSchema),z.lazy(() => DocumentRecipientUncheckedUpdateWithoutUserInputSchema) ]),
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutUserInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutUserInputSchema) ]),
+}).strict();
+
+export const DocumentRecipientUpdateWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateWithWhereUniqueWithoutUserInput> = z.object({
+  where: z.lazy(() => DocumentRecipientWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => DocumentRecipientUpdateWithoutUserInputSchema),z.lazy(() => DocumentRecipientUncheckedUpdateWithoutUserInputSchema) ]),
+}).strict();
+
+export const DocumentRecipientUpdateManyWithWhereWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateManyWithWhereWithoutUserInput> = z.object({
+  where: z.lazy(() => DocumentRecipientScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => DocumentRecipientUpdateManyMutationInputSchema),z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserInputSchema) ]),
+}).strict();
+
+export const DocumentRecipientScalarWhereInputSchema: z.ZodType<Prisma.DocumentRecipientScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => DocumentRecipientScalarWhereInputSchema),z.lazy(() => DocumentRecipientScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => DocumentRecipientScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => DocumentRecipientScalarWhereInputSchema),z.lazy(() => DocumentRecipientScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  deletedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  fullname: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  email: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  role: z.union([ z.lazy(() => EnumSignableDocumentRoleFilterSchema),z.lazy(() => SignableDocumentRoleSchema) ]).optional(),
+  status: z.union([ z.lazy(() => EnumDocumentSignatureStatusFilterSchema),z.lazy(() => DocumentSignatureStatusSchema) ]).optional(),
+  signatureUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  externalId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  address: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  saftContractId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+}).strict();
+
 export const UserCreateWithoutWalletAddressInputSchema: z.ZodType<Prisma.UserCreateWithoutWalletAddressInput> = z.object({
   id: z.string().cuid().optional(),
   externalId: z.string().optional().nullable(),
@@ -9016,7 +10181,8 @@ export const UserCreateWithoutWalletAddressInputSchema: z.ZodType<Prisma.UserCre
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
-  Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional()
+  Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutWalletAddressInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutWalletAddressInput> = z.object({
@@ -9039,7 +10205,8 @@ export const UserUncheckedCreateWithoutWalletAddressInputSchema: z.ZodType<Prism
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
-  Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutWalletAddressInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutWalletAddressInput> = z.object({
@@ -9078,7 +10245,8 @@ export const UserUpdateWithoutWalletAddressInputSchema: z.ZodType<Prisma.UserUpd
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
-  Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional()
+  Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutWalletAddressInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutWalletAddressInput> = z.object({
@@ -9101,7 +10269,8 @@ export const UserUncheckedUpdateWithoutWalletAddressInputSchema: z.ZodType<Prism
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
-  Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateWithoutSessionsInputSchema: z.ZodType<Prisma.UserCreateWithoutSessionsInput> = z.object({
@@ -9124,7 +10293,8 @@ export const UserCreateWithoutSessionsInputSchema: z.ZodType<Prisma.UserCreateWi
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutSessionsInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutSessionsInput> = z.object({
@@ -9147,7 +10317,8 @@ export const UserUncheckedCreateWithoutSessionsInputSchema: z.ZodType<Prisma.Use
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutSessionsInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutSessionsInput> = z.object({
@@ -9186,7 +10357,8 @@ export const UserUpdateWithoutSessionsInputSchema: z.ZodType<Prisma.UserUpdateWi
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutSessionsInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutSessionsInput> = z.object({
@@ -9209,7 +10381,8 @@ export const UserUncheckedUpdateWithoutSessionsInputSchema: z.ZodType<Prisma.Use
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateWithoutProfileInputSchema: z.ZodType<Prisma.UserCreateWithoutProfileInput> = z.object({
@@ -9232,7 +10405,8 @@ export const UserCreateWithoutProfileInputSchema: z.ZodType<Prisma.UserCreateWit
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutProfileInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutProfileInput> = z.object({
@@ -9255,7 +10429,8 @@ export const UserUncheckedCreateWithoutProfileInputSchema: z.ZodType<Prisma.User
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutProfileInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutProfileInput> = z.object({
@@ -9329,7 +10504,8 @@ export const UserUpdateWithoutProfileInputSchema: z.ZodType<Prisma.UserUpdateWit
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutProfileInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutProfileInput> = z.object({
@@ -9352,7 +10528,8 @@ export const UserUncheckedUpdateWithoutProfileInputSchema: z.ZodType<Prisma.User
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const AddressUpsertWithoutProfileInputSchema: z.ZodType<Prisma.AddressUpsertWithoutProfileInput> = z.object({
@@ -9464,6 +10641,33 @@ export const ProfileUncheckedUpdateWithoutAddressInputSchema: z.ZodType<Prisma.P
   dateOfBirth: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
+export const CurrencyCreateWithoutSaleInputSchema: z.ZodType<Prisma.CurrencyCreateWithoutSaleInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  symbol: z.string(),
+  type: z.lazy(() => CurrencyTypeSchema),
+  SaleTransactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutAmountPaidCurrencyInputSchema).optional()
+}).strict();
+
+export const CurrencyUncheckedCreateWithoutSaleInputSchema: z.ZodType<Prisma.CurrencyUncheckedCreateWithoutSaleInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  symbol: z.string(),
+  type: z.lazy(() => CurrencyTypeSchema),
+  SaleTransactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutAmountPaidCurrencyInputSchema).optional()
+}).strict();
+
+export const CurrencyCreateOrConnectWithoutSaleInputSchema: z.ZodType<Prisma.CurrencyCreateOrConnectWithoutSaleInput> = z.object({
+  where: z.lazy(() => CurrencyWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => CurrencyCreateWithoutSaleInputSchema),z.lazy(() => CurrencyUncheckedCreateWithoutSaleInputSchema) ]),
+}).strict();
+
 export const BlockchainCreateWithoutSaleInputSchema: z.ZodType<Prisma.BlockchainCreateWithoutSaleInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
@@ -9499,6 +10703,70 @@ export const BlockchainCreateOrConnectWithoutSaleInputSchema: z.ZodType<Prisma.B
   create: z.union([ z.lazy(() => BlockchainCreateWithoutSaleInputSchema),z.lazy(() => BlockchainUncheckedCreateWithoutSaleInputSchema) ]),
 }).strict();
 
+export const TokenCreateWithoutSalesInputSchema: z.ZodType<Prisma.TokenCreateWithoutSalesInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  symbol: z.string(),
+  totalSupply: z.string().optional().nullable(),
+  image: z.string().optional().nullable(),
+  TokensOnBlockchains: z.lazy(() => TokensOnBlockchainsCreateNestedManyWithoutTokenInputSchema).optional()
+}).strict();
+
+export const TokenUncheckedCreateWithoutSalesInputSchema: z.ZodType<Prisma.TokenUncheckedCreateWithoutSalesInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  symbol: z.string(),
+  totalSupply: z.string().optional().nullable(),
+  image: z.string().optional().nullable(),
+  TokensOnBlockchains: z.lazy(() => TokensOnBlockchainsUncheckedCreateNestedManyWithoutTokenInputSchema).optional()
+}).strict();
+
+export const TokenCreateOrConnectWithoutSalesInputSchema: z.ZodType<Prisma.TokenCreateOrConnectWithoutSalesInput> = z.object({
+  where: z.lazy(() => TokenWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => TokenCreateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedCreateWithoutSalesInputSchema) ]),
+}).strict();
+
+export const SaftContractCreateWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractCreateWithoutSaleInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractCreatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.number().int().optional(),
+  parentId: z.string().optional().nullable(),
+  isCurrent: z.boolean().optional(),
+  recipients: z.lazy(() => DocumentRecipientCreateNestedManyWithoutSaftContractInputSchema).optional()
+}).strict();
+
+export const SaftContractUncheckedCreateWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractUncheckedCreateWithoutSaleInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractCreatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.number().int().optional(),
+  parentId: z.string().optional().nullable(),
+  isCurrent: z.boolean().optional(),
+  recipients: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutSaftContractInputSchema).optional()
+}).strict();
+
+export const SaftContractCreateOrConnectWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractCreateOrConnectWithoutSaleInput> = z.object({
+  where: z.lazy(() => SaftContractWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutSaleInputSchema) ]),
+}).strict();
+
 export const UserCreateWithoutSalesInputSchema: z.ZodType<Prisma.UserCreateWithoutSalesInput> = z.object({
   id: z.string().cuid().optional(),
   externalId: z.string().optional().nullable(),
@@ -9519,7 +10787,8 @@ export const UserCreateWithoutSalesInputSchema: z.ZodType<Prisma.UserCreateWitho
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutSalesInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutSalesInput> = z.object({
@@ -9542,7 +10811,8 @@ export const UserUncheckedCreateWithoutSalesInputSchema: z.ZodType<Prisma.UserUn
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutSalesInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutSalesInput> = z.object({
@@ -9566,13 +10836,13 @@ export const SaleTransactionsCreateWithoutSaleInputSchema: z.ZodType<Prisma.Sale
   status: z.lazy(() => TransactionStatusSchema).optional(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   rejectionReason: z.string().optional().nullable(),
   paymentEvidence: z.string().optional().nullable(),
   paymentDate: z.coerce.date().optional().nullable(),
   user: z.lazy(() => UserCreateNestedOneWithoutTransactionsInputSchema),
+  amountPaidCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleTransactionsInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutTransactionsInputSchema).optional(),
   approver: z.lazy(() => UserCreateNestedOneWithoutTransactionApprovalsInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditCreateNestedManyWithoutTransactionInputSchema).optional(),
@@ -9596,7 +10866,7 @@ export const SaleTransactionsUncheckedCreateWithoutSaleInputSchema: z.ZodType<Pr
   userId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -9616,47 +10886,6 @@ export const SaleTransactionsCreateOrConnectWithoutSaleInputSchema: z.ZodType<Pr
 export const SaleTransactionsCreateManySaleInputEnvelopeSchema: z.ZodType<Prisma.SaleTransactionsCreateManySaleInputEnvelope> = z.object({
   data: z.union([ z.lazy(() => SaleTransactionsCreateManySaleInputSchema),z.lazy(() => SaleTransactionsCreateManySaleInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
-}).strict();
-
-export const SaleInformationCreateWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationCreateWithoutSaleInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  summary: z.string().optional().nullable(),
-  tokenUtility: z.string().optional().nullable(),
-  tokenDistribution: z.string().optional().nullable(),
-  otherInformation: z.string().optional().nullable(),
-  tokenLifecycle: z.string().optional().nullable(),
-  liquidityPool: z.string().optional().nullable(),
-  futurePlans: z.string().optional().nullable(),
-  useOfProceeds: z.string().optional().nullable(),
-  imageSale: z.string().optional().nullable(),
-  imageToken: z.string().optional().nullable(),
-  contactEmail: z.string().optional().nullable()
-}).strict();
-
-export const SaleInformationUncheckedCreateWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationUncheckedCreateWithoutSaleInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  summary: z.string().optional().nullable(),
-  tokenUtility: z.string().optional().nullable(),
-  tokenDistribution: z.string().optional().nullable(),
-  otherInformation: z.string().optional().nullable(),
-  tokenLifecycle: z.string().optional().nullable(),
-  liquidityPool: z.string().optional().nullable(),
-  futurePlans: z.string().optional().nullable(),
-  useOfProceeds: z.string().optional().nullable(),
-  imageSale: z.string().optional().nullable(),
-  imageToken: z.string().optional().nullable(),
-  contactEmail: z.string().optional().nullable()
-}).strict();
-
-export const SaleInformationCreateOrConnectWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationCreateOrConnectWithoutSaleInput> = z.object({
-  where: z.lazy(() => SaleInformationWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => SaleInformationCreateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedCreateWithoutSaleInputSchema) ]),
 }).strict();
 
 export const DocumentCreateWithoutSaleInputSchema: z.ZodType<Prisma.DocumentCreateWithoutSaleInput> = z.object({
@@ -9693,33 +10922,6 @@ export const DocumentCreateManySaleInputEnvelopeSchema: z.ZodType<Prisma.Documen
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const TokenCreateWithoutSalesInputSchema: z.ZodType<Prisma.TokenCreateWithoutSalesInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  symbol: z.string(),
-  totalSupply: z.string().optional().nullable(),
-  image: z.string().optional().nullable(),
-  TokensOnBlockchains: z.lazy(() => TokensOnBlockchainsCreateNestedManyWithoutTokenInputSchema).optional()
-}).strict();
-
-export const TokenUncheckedCreateWithoutSalesInputSchema: z.ZodType<Prisma.TokenUncheckedCreateWithoutSalesInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  symbol: z.string(),
-  totalSupply: z.string().optional().nullable(),
-  image: z.string().optional().nullable(),
-  TokensOnBlockchains: z.lazy(() => TokensOnBlockchainsUncheckedCreateNestedManyWithoutTokenInputSchema).optional()
-}).strict();
-
-export const TokenCreateOrConnectWithoutSalesInputSchema: z.ZodType<Prisma.TokenCreateOrConnectWithoutSalesInput> = z.object({
-  where: z.lazy(() => TokenWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => TokenCreateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedCreateWithoutSalesInputSchema) ]),
-}).strict();
-
 export const VestingScheduleCreateWithoutSaleInputSchema: z.ZodType<Prisma.VestingScheduleCreateWithoutSaleInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
@@ -9754,6 +10956,39 @@ export const VestingScheduleCreateOrConnectWithoutSaleInputSchema: z.ZodType<Pri
 export const VestingScheduleCreateManySaleInputEnvelopeSchema: z.ZodType<Prisma.VestingScheduleCreateManySaleInputEnvelope> = z.object({
   data: z.union([ z.lazy(() => VestingScheduleCreateManySaleInputSchema),z.lazy(() => VestingScheduleCreateManySaleInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
+}).strict();
+
+export const CurrencyUpsertWithoutSaleInputSchema: z.ZodType<Prisma.CurrencyUpsertWithoutSaleInput> = z.object({
+  update: z.union([ z.lazy(() => CurrencyUpdateWithoutSaleInputSchema),z.lazy(() => CurrencyUncheckedUpdateWithoutSaleInputSchema) ]),
+  create: z.union([ z.lazy(() => CurrencyCreateWithoutSaleInputSchema),z.lazy(() => CurrencyUncheckedCreateWithoutSaleInputSchema) ]),
+  where: z.lazy(() => CurrencyWhereInputSchema).optional()
+}).strict();
+
+export const CurrencyUpdateToOneWithWhereWithoutSaleInputSchema: z.ZodType<Prisma.CurrencyUpdateToOneWithWhereWithoutSaleInput> = z.object({
+  where: z.lazy(() => CurrencyWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => CurrencyUpdateWithoutSaleInputSchema),z.lazy(() => CurrencyUncheckedUpdateWithoutSaleInputSchema) ]),
+}).strict();
+
+export const CurrencyUpdateWithoutSaleInputSchema: z.ZodType<Prisma.CurrencyUpdateWithoutSaleInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  symbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => EnumCurrencyTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsUpdateManyWithoutAmountPaidCurrencyNestedInputSchema).optional()
+}).strict();
+
+export const CurrencyUncheckedUpdateWithoutSaleInputSchema: z.ZodType<Prisma.CurrencyUncheckedUpdateWithoutSaleInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  symbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => EnumCurrencyTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  SaleTransactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutAmountPaidCurrencyNestedInputSchema).optional()
 }).strict();
 
 export const BlockchainUpsertWithoutSaleInputSchema: z.ZodType<Prisma.BlockchainUpsertWithoutSaleInput> = z.object({
@@ -9797,142 +11032,6 @@ export const BlockchainUncheckedUpdateWithoutSaleInputSchema: z.ZodType<Prisma.B
   TokensOnBlockchains: z.lazy(() => TokensOnBlockchainsUncheckedUpdateManyWithoutBlockchainNestedInputSchema).optional()
 }).strict();
 
-export const UserUpsertWithoutSalesInputSchema: z.ZodType<Prisma.UserUpsertWithoutSalesInput> = z.object({
-  update: z.union([ z.lazy(() => UserUpdateWithoutSalesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutSalesInputSchema) ]),
-  create: z.union([ z.lazy(() => UserCreateWithoutSalesInputSchema),z.lazy(() => UserUncheckedCreateWithoutSalesInputSchema) ]),
-  where: z.lazy(() => UserWhereInputSchema).optional()
-}).strict();
-
-export const UserUpdateToOneWithWhereWithoutSalesInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutSalesInput> = z.object({
-  where: z.lazy(() => UserWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => UserUpdateWithoutSalesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutSalesInputSchema) ]),
-}).strict();
-
-export const UserUpdateWithoutSalesInputSchema: z.ZodType<Prisma.UserUpdateWithoutSalesInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  externalId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  walletAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emailVerified: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  image: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isSiwe: z.union([ z.boolean(),z.lazy(() => NullableBoolFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  profile: z.lazy(() => ProfileUpdateOneWithoutUserNestedInputSchema).optional(),
-  userRole: z.lazy(() => UserRoleUpdateManyWithoutUserNestedInputSchema).optional(),
-  transactionAudit: z.lazy(() => TransactionAuditUpdateManyWithoutAdminNestedInputSchema).optional(),
-  kycVerification: z.lazy(() => KycVerificationUpdateOneWithoutUserNestedInputSchema).optional(),
-  sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
-  transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
-  transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
-  Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
-}).strict();
-
-export const UserUncheckedUpdateWithoutSalesInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutSalesInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  externalId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  walletAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emailVerified: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  image: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isSiwe: z.union([ z.boolean(),z.lazy(() => NullableBoolFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  profile: z.lazy(() => ProfileUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
-  userRole: z.lazy(() => UserRoleUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  transactionAudit: z.lazy(() => TransactionAuditUncheckedUpdateManyWithoutAdminNestedInputSchema).optional(),
-  kycVerification: z.lazy(() => KycVerificationUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
-  sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
-  Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
-}).strict();
-
-export const SaleTransactionsUpsertWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.SaleTransactionsUpsertWithWhereUniqueWithoutSaleInput> = z.object({
-  where: z.lazy(() => SaleTransactionsWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => SaleTransactionsUpdateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateWithoutSaleInputSchema) ]),
-  create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutSaleInputSchema) ]),
-}).strict();
-
-export const SaleTransactionsUpdateWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateWithWhereUniqueWithoutSaleInput> = z.object({
-  where: z.lazy(() => SaleTransactionsWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => SaleTransactionsUpdateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateWithoutSaleInputSchema) ]),
-}).strict();
-
-export const SaleTransactionsUpdateManyWithWhereWithoutSaleInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateManyWithWhereWithoutSaleInput> = z.object({
-  where: z.lazy(() => SaleTransactionsScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => SaleTransactionsUpdateManyMutationInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleInputSchema) ]),
-}).strict();
-
-export const SaleInformationUpsertWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationUpsertWithoutSaleInput> = z.object({
-  update: z.union([ z.lazy(() => SaleInformationUpdateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedUpdateWithoutSaleInputSchema) ]),
-  create: z.union([ z.lazy(() => SaleInformationCreateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedCreateWithoutSaleInputSchema) ]),
-  where: z.lazy(() => SaleInformationWhereInputSchema).optional()
-}).strict();
-
-export const SaleInformationUpdateToOneWithWhereWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationUpdateToOneWithWhereWithoutSaleInput> = z.object({
-  where: z.lazy(() => SaleInformationWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => SaleInformationUpdateWithoutSaleInputSchema),z.lazy(() => SaleInformationUncheckedUpdateWithoutSaleInputSchema) ]),
-}).strict();
-
-export const SaleInformationUpdateWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationUpdateWithoutSaleInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  summary: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenUtility: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenDistribution: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  otherInformation: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  liquidityPool: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  futurePlans: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  useOfProceeds: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageSale: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageToken: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  contactEmail: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-}).strict();
-
-export const SaleInformationUncheckedUpdateWithoutSaleInputSchema: z.ZodType<Prisma.SaleInformationUncheckedUpdateWithoutSaleInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  summary: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenUtility: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenDistribution: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  otherInformation: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenLifecycle: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  liquidityPool: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  futurePlans: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  useOfProceeds: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageSale: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  imageToken: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  contactEmail: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-}).strict();
-
-export const DocumentUpsertWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.DocumentUpsertWithWhereUniqueWithoutSaleInput> = z.object({
-  where: z.lazy(() => DocumentWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => DocumentUpdateWithoutSaleInputSchema),z.lazy(() => DocumentUncheckedUpdateWithoutSaleInputSchema) ]),
-  create: z.union([ z.lazy(() => DocumentCreateWithoutSaleInputSchema),z.lazy(() => DocumentUncheckedCreateWithoutSaleInputSchema) ]),
-}).strict();
-
-export const DocumentUpdateWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.DocumentUpdateWithWhereUniqueWithoutSaleInput> = z.object({
-  where: z.lazy(() => DocumentWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => DocumentUpdateWithoutSaleInputSchema),z.lazy(() => DocumentUncheckedUpdateWithoutSaleInputSchema) ]),
-}).strict();
-
-export const DocumentUpdateManyWithWhereWithoutSaleInputSchema: z.ZodType<Prisma.DocumentUpdateManyWithWhereWithoutSaleInput> = z.object({
-  where: z.lazy(() => DocumentScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => DocumentUpdateManyMutationInputSchema),z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleInputSchema) ]),
-}).strict();
-
 export const TokenUpsertWithoutSalesInputSchema: z.ZodType<Prisma.TokenUpsertWithoutSalesInput> = z.object({
   update: z.union([ z.lazy(() => TokenUpdateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedUpdateWithoutSalesInputSchema) ]),
   create: z.union([ z.lazy(() => TokenCreateWithoutSalesInputSchema),z.lazy(() => TokenUncheckedCreateWithoutSalesInputSchema) ]),
@@ -9964,6 +11063,140 @@ export const TokenUncheckedUpdateWithoutSalesInputSchema: z.ZodType<Prisma.Token
   totalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   image: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   TokensOnBlockchains: z.lazy(() => TokensOnBlockchainsUncheckedUpdateManyWithoutTokenNestedInputSchema).optional()
+}).strict();
+
+export const SaftContractUpsertWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractUpsertWithoutSaleInput> = z.object({
+  update: z.union([ z.lazy(() => SaftContractUpdateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedUpdateWithoutSaleInputSchema) ]),
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutSaleInputSchema) ]),
+  where: z.lazy(() => SaftContractWhereInputSchema).optional()
+}).strict();
+
+export const SaftContractUpdateToOneWithWhereWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractUpdateToOneWithWhereWithoutSaleInput> = z.object({
+  where: z.lazy(() => SaftContractWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => SaftContractUpdateWithoutSaleInputSchema),z.lazy(() => SaftContractUncheckedUpdateWithoutSaleInputSchema) ]),
+}).strict();
+
+export const SaftContractUpdateWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractUpdateWithoutSaleInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractUpdatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  parentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isCurrent: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  recipients: z.lazy(() => DocumentRecipientUpdateManyWithoutSaftContractNestedInputSchema).optional()
+}).strict();
+
+export const SaftContractUncheckedUpdateWithoutSaleInputSchema: z.ZodType<Prisma.SaftContractUncheckedUpdateWithoutSaleInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractUpdatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  parentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isCurrent: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  recipients: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutSaftContractNestedInputSchema).optional()
+}).strict();
+
+export const UserUpsertWithoutSalesInputSchema: z.ZodType<Prisma.UserUpsertWithoutSalesInput> = z.object({
+  update: z.union([ z.lazy(() => UserUpdateWithoutSalesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutSalesInputSchema) ]),
+  create: z.union([ z.lazy(() => UserCreateWithoutSalesInputSchema),z.lazy(() => UserUncheckedCreateWithoutSalesInputSchema) ]),
+  where: z.lazy(() => UserWhereInputSchema).optional()
+}).strict();
+
+export const UserUpdateToOneWithWhereWithoutSalesInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutSalesInput> = z.object({
+  where: z.lazy(() => UserWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => UserUpdateWithoutSalesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutSalesInputSchema) ]),
+}).strict();
+
+export const UserUpdateWithoutSalesInputSchema: z.ZodType<Prisma.UserUpdateWithoutSalesInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  externalId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  walletAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  emailVerified: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  image: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isSiwe: z.union([ z.boolean(),z.lazy(() => NullableBoolFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  profile: z.lazy(() => ProfileUpdateOneWithoutUserNestedInputSchema).optional(),
+  userRole: z.lazy(() => UserRoleUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactionAudit: z.lazy(() => TransactionAuditUpdateManyWithoutAdminNestedInputSchema).optional(),
+  kycVerification: z.lazy(() => KycVerificationUpdateOneWithoutUserNestedInputSchema).optional(),
+  sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
+  Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
+}).strict();
+
+export const UserUncheckedUpdateWithoutSalesInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutSalesInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  externalId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  walletAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  emailVerified: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  image: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isSiwe: z.union([ z.boolean(),z.lazy(() => NullableBoolFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  profile: z.lazy(() => ProfileUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  userRole: z.lazy(() => UserRoleUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactionAudit: z.lazy(() => TransactionAuditUncheckedUpdateManyWithoutAdminNestedInputSchema).optional(),
+  kycVerification: z.lazy(() => KycVerificationUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
+  Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+}).strict();
+
+export const SaleTransactionsUpsertWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.SaleTransactionsUpsertWithWhereUniqueWithoutSaleInput> = z.object({
+  where: z.lazy(() => SaleTransactionsWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => SaleTransactionsUpdateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateWithoutSaleInputSchema) ]),
+  create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutSaleInputSchema) ]),
+}).strict();
+
+export const SaleTransactionsUpdateWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateWithWhereUniqueWithoutSaleInput> = z.object({
+  where: z.lazy(() => SaleTransactionsWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => SaleTransactionsUpdateWithoutSaleInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateWithoutSaleInputSchema) ]),
+}).strict();
+
+export const SaleTransactionsUpdateManyWithWhereWithoutSaleInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateManyWithWhereWithoutSaleInput> = z.object({
+  where: z.lazy(() => SaleTransactionsScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => SaleTransactionsUpdateManyMutationInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleInputSchema) ]),
+}).strict();
+
+export const DocumentUpsertWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.DocumentUpsertWithWhereUniqueWithoutSaleInput> = z.object({
+  where: z.lazy(() => DocumentWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => DocumentUpdateWithoutSaleInputSchema),z.lazy(() => DocumentUncheckedUpdateWithoutSaleInputSchema) ]),
+  create: z.union([ z.lazy(() => DocumentCreateWithoutSaleInputSchema),z.lazy(() => DocumentUncheckedCreateWithoutSaleInputSchema) ]),
+}).strict();
+
+export const DocumentUpdateWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.DocumentUpdateWithWhereUniqueWithoutSaleInput> = z.object({
+  where: z.lazy(() => DocumentWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => DocumentUpdateWithoutSaleInputSchema),z.lazy(() => DocumentUncheckedUpdateWithoutSaleInputSchema) ]),
+}).strict();
+
+export const DocumentUpdateManyWithWhereWithoutSaleInputSchema: z.ZodType<Prisma.DocumentUpdateManyWithWhereWithoutSaleInput> = z.object({
+  where: z.lazy(() => DocumentScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => DocumentUpdateManyMutationInputSchema),z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleInputSchema) ]),
 }).strict();
 
 export const VestingScheduleUpsertWithWhereUniqueWithoutSaleInputSchema: z.ZodType<Prisma.VestingScheduleUpsertWithWhereUniqueWithoutSaleInput> = z.object({
@@ -9999,14 +11232,52 @@ export const VestingScheduleScalarWhereInputSchema: z.ZodType<Prisma.VestingSche
   isEnabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
-export const SaleCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.SaleCreateWithoutDocumentsInput> = z.object({
+export const DocumentRecipientCreateWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientCreateWithoutSaftContractInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  user: z.lazy(() => UserCreateNestedOneWithoutDocumentRecipientInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedCreateWithoutSaftContractInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  address: z.string().optional().nullable()
+}).strict();
+
+export const DocumentRecipientCreateOrConnectWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientCreateOrConnectWithoutSaftContractInput> = z.object({
+  where: z.lazy(() => DocumentRecipientWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema) ]),
+}).strict();
+
+export const DocumentRecipientCreateManySaftContractInputEnvelopeSchema: z.ZodType<Prisma.DocumentRecipientCreateManySaftContractInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => DocumentRecipientCreateManySaftContractInputSchema),z.lazy(() => DocumentRecipientCreateManySaftContractInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
+export const SaleCreateWithoutSaftContractInputSchema: z.ZodType<Prisma.SaleCreateWithoutSaftContractInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -10016,16 +11287,362 @@ export const SaleCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.SaleCreateW
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
+  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
   user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationCreateNestedOneWithoutSaleInputSchema).optional(),
+  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
+  vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
+}).strict();
+
+export const SaleUncheckedCreateWithoutSaftContractInputSchema: z.ZodType<Prisma.SaleUncheckedCreateWithoutSaftContractInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
+  status: z.lazy(() => SaleStatusSchema).optional(),
+  currency: z.string(),
+  initialTokenQuantity: z.number().int(),
+  availableTokenQuantity: z.number().int(),
+  maximumTokenBuyPerUser: z.number().int().optional().nullable(),
+  minimumTokenBuyPerUser: z.number().int().optional(),
+  saleStartDate: z.coerce.date(),
+  tokenContractAddress: z.string().optional().nullable(),
+  tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
+  tokenName: z.string(),
+  tokenSymbol: z.string(),
+  tokenTotalSupply: z.string().optional().nullable(),
+  tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  toWalletsAddress: z.string(),
+  saleClosingDate: z.coerce.date(),
+  createdBy: z.string(),
+  saftCheckbox: z.boolean().optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
+  documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
+  vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
+}).strict();
+
+export const SaleCreateOrConnectWithoutSaftContractInputSchema: z.ZodType<Prisma.SaleCreateOrConnectWithoutSaftContractInput> = z.object({
+  where: z.lazy(() => SaleWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaftContractInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaftContractInputSchema) ]),
+}).strict();
+
+export const DocumentRecipientUpsertWithWhereUniqueWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientUpsertWithWhereUniqueWithoutSaftContractInput> = z.object({
+  where: z.lazy(() => DocumentRecipientWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => DocumentRecipientUpdateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUncheckedUpdateWithoutSaftContractInputSchema) ]),
+  create: z.union([ z.lazy(() => DocumentRecipientCreateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUncheckedCreateWithoutSaftContractInputSchema) ]),
+}).strict();
+
+export const DocumentRecipientUpdateWithWhereUniqueWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateWithWhereUniqueWithoutSaftContractInput> = z.object({
+  where: z.lazy(() => DocumentRecipientWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => DocumentRecipientUpdateWithoutSaftContractInputSchema),z.lazy(() => DocumentRecipientUncheckedUpdateWithoutSaftContractInputSchema) ]),
+}).strict();
+
+export const DocumentRecipientUpdateManyWithWhereWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateManyWithWhereWithoutSaftContractInput> = z.object({
+  where: z.lazy(() => DocumentRecipientScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => DocumentRecipientUpdateManyMutationInputSchema),z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutSaftContractInputSchema) ]),
+}).strict();
+
+export const SaleUpsertWithoutSaftContractInputSchema: z.ZodType<Prisma.SaleUpsertWithoutSaftContractInput> = z.object({
+  update: z.union([ z.lazy(() => SaleUpdateWithoutSaftContractInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutSaftContractInputSchema) ]),
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaftContractInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaftContractInputSchema) ]),
+  where: z.lazy(() => SaleWhereInputSchema).optional()
+}).strict();
+
+export const SaleUpdateToOneWithWhereWithoutSaftContractInputSchema: z.ZodType<Prisma.SaleUpdateToOneWithWhereWithoutSaftContractInput> = z.object({
+  where: z.lazy(() => SaleWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => SaleUpdateWithoutSaftContractInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutSaftContractInputSchema) ]),
+}).strict();
+
+export const SaleUpdateWithoutSaftContractInputSchema: z.ZodType<Prisma.SaleUpdateWithoutSaftContractInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema).optional(),
+  blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
+  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
+  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
+  vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
+}).strict();
+
+export const SaleUncheckedUpdateWithoutSaftContractInputSchema: z.ZodType<Prisma.SaleUncheckedUpdateWithoutSaftContractInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
+  documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
+  vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
+}).strict();
+
+export const UserCreateWithoutDocumentRecipientInputSchema: z.ZodType<Prisma.UserCreateWithoutDocumentRecipientInput> = z.object({
+  id: z.string().cuid().optional(),
+  externalId: z.string().optional().nullable(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  walletAddress: z.string(),
+  email: z.string(),
+  emailVerified: z.boolean().optional(),
+  image: z.string().optional().nullable(),
+  isSiwe: z.boolean().optional().nullable(),
+  profile: z.lazy(() => ProfileCreateNestedOneWithoutUserInputSchema).optional(),
+  sales: z.lazy(() => SaleCreateNestedManyWithoutUserInputSchema).optional(),
+  userRole: z.lazy(() => UserRoleCreateNestedManyWithoutUserInputSchema).optional(),
+  transactionAudit: z.lazy(() => TransactionAuditCreateNestedManyWithoutAdminInputSchema).optional(),
+  kycVerification: z.lazy(() => KycVerificationCreateNestedOneWithoutUserInputSchema).optional(),
+  sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
+  transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
+  Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+}).strict();
+
+export const UserUncheckedCreateWithoutDocumentRecipientInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutDocumentRecipientInput> = z.object({
+  id: z.string().cuid().optional(),
+  externalId: z.string().optional().nullable(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  walletAddress: z.string(),
+  email: z.string(),
+  emailVerified: z.boolean().optional(),
+  image: z.string().optional().nullable(),
+  isSiwe: z.boolean().optional().nullable(),
+  profile: z.lazy(() => ProfileUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  sales: z.lazy(() => SaleUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  userRole: z.lazy(() => UserRoleUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  transactionAudit: z.lazy(() => TransactionAuditUncheckedCreateNestedManyWithoutAdminInputSchema).optional(),
+  kycVerification: z.lazy(() => KycVerificationUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
+  Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+}).strict();
+
+export const UserCreateOrConnectWithoutDocumentRecipientInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutDocumentRecipientInput> = z.object({
+  where: z.lazy(() => UserWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => UserCreateWithoutDocumentRecipientInputSchema),z.lazy(() => UserUncheckedCreateWithoutDocumentRecipientInputSchema) ]),
+}).strict();
+
+export const SaftContractCreateWithoutRecipientsInputSchema: z.ZodType<Prisma.SaftContractCreateWithoutRecipientsInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractCreatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.number().int().optional(),
+  parentId: z.string().optional().nullable(),
+  isCurrent: z.boolean().optional(),
+  Sale: z.lazy(() => SaleCreateNestedOneWithoutSaftContractInputSchema).optional()
+}).strict();
+
+export const SaftContractUncheckedCreateWithoutRecipientsInputSchema: z.ZodType<Prisma.SaftContractUncheckedCreateWithoutRecipientsInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractCreatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.number().int().optional(),
+  parentId: z.string().optional().nullable(),
+  isCurrent: z.boolean().optional(),
+  saleId: z.string().optional().nullable()
+}).strict();
+
+export const SaftContractCreateOrConnectWithoutRecipientsInputSchema: z.ZodType<Prisma.SaftContractCreateOrConnectWithoutRecipientsInput> = z.object({
+  where: z.lazy(() => SaftContractWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutRecipientsInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutRecipientsInputSchema) ]),
+}).strict();
+
+export const UserUpsertWithoutDocumentRecipientInputSchema: z.ZodType<Prisma.UserUpsertWithoutDocumentRecipientInput> = z.object({
+  update: z.union([ z.lazy(() => UserUpdateWithoutDocumentRecipientInputSchema),z.lazy(() => UserUncheckedUpdateWithoutDocumentRecipientInputSchema) ]),
+  create: z.union([ z.lazy(() => UserCreateWithoutDocumentRecipientInputSchema),z.lazy(() => UserUncheckedCreateWithoutDocumentRecipientInputSchema) ]),
+  where: z.lazy(() => UserWhereInputSchema).optional()
+}).strict();
+
+export const UserUpdateToOneWithWhereWithoutDocumentRecipientInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutDocumentRecipientInput> = z.object({
+  where: z.lazy(() => UserWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => UserUpdateWithoutDocumentRecipientInputSchema),z.lazy(() => UserUncheckedUpdateWithoutDocumentRecipientInputSchema) ]),
+}).strict();
+
+export const UserUpdateWithoutDocumentRecipientInputSchema: z.ZodType<Prisma.UserUpdateWithoutDocumentRecipientInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  externalId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  walletAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  emailVerified: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  image: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isSiwe: z.union([ z.boolean(),z.lazy(() => NullableBoolFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  profile: z.lazy(() => ProfileUpdateOneWithoutUserNestedInputSchema).optional(),
+  sales: z.lazy(() => SaleUpdateManyWithoutUserNestedInputSchema).optional(),
+  userRole: z.lazy(() => UserRoleUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactionAudit: z.lazy(() => TransactionAuditUpdateManyWithoutAdminNestedInputSchema).optional(),
+  kycVerification: z.lazy(() => KycVerificationUpdateOneWithoutUserNestedInputSchema).optional(),
+  sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
+  Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+}).strict();
+
+export const UserUncheckedUpdateWithoutDocumentRecipientInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutDocumentRecipientInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  externalId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  walletAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  emailVerified: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  image: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isSiwe: z.union([ z.boolean(),z.lazy(() => NullableBoolFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  profile: z.lazy(() => ProfileUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  sales: z.lazy(() => SaleUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  userRole: z.lazy(() => UserRoleUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactionAudit: z.lazy(() => TransactionAuditUncheckedUpdateManyWithoutAdminNestedInputSchema).optional(),
+  kycVerification: z.lazy(() => KycVerificationUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
+  Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+}).strict();
+
+export const SaftContractUpsertWithoutRecipientsInputSchema: z.ZodType<Prisma.SaftContractUpsertWithoutRecipientsInput> = z.object({
+  update: z.union([ z.lazy(() => SaftContractUpdateWithoutRecipientsInputSchema),z.lazy(() => SaftContractUncheckedUpdateWithoutRecipientsInputSchema) ]),
+  create: z.union([ z.lazy(() => SaftContractCreateWithoutRecipientsInputSchema),z.lazy(() => SaftContractUncheckedCreateWithoutRecipientsInputSchema) ]),
+  where: z.lazy(() => SaftContractWhereInputSchema).optional()
+}).strict();
+
+export const SaftContractUpdateToOneWithWhereWithoutRecipientsInputSchema: z.ZodType<Prisma.SaftContractUpdateToOneWithWhereWithoutRecipientsInput> = z.object({
+  where: z.lazy(() => SaftContractWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => SaftContractUpdateWithoutRecipientsInputSchema),z.lazy(() => SaftContractUncheckedUpdateWithoutRecipientsInputSchema) ]),
+}).strict();
+
+export const SaftContractUpdateWithoutRecipientsInputSchema: z.ZodType<Prisma.SaftContractUpdateWithoutRecipientsInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractUpdatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  parentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isCurrent: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  Sale: z.lazy(() => SaleUpdateOneWithoutSaftContractNestedInputSchema).optional()
+}).strict();
+
+export const SaftContractUncheckedUpdateWithoutRecipientsInputSchema: z.ZodType<Prisma.SaftContractUncheckedUpdateWithoutRecipientsInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  content: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  variables: z.union([ z.lazy(() => SaftContractUpdatevariablesInputSchema),InputJsonValueSchema.array() ]).optional(),
+  version: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  parentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isCurrent: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  saleId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const SaleCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.SaleCreateWithoutDocumentsInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
+  status: z.lazy(() => SaleStatusSchema).optional(),
+  initialTokenQuantity: z.number().int(),
+  availableTokenQuantity: z.number().int(),
+  maximumTokenBuyPerUser: z.number().int().optional().nullable(),
+  minimumTokenBuyPerUser: z.number().int().optional(),
+  saleStartDate: z.coerce.date(),
+  tokenContractAddress: z.string().optional().nullable(),
+  tokenName: z.string(),
+  tokenTotalSupply: z.string().optional().nullable(),
+  tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  toWalletsAddress: z.string(),
+  saleClosingDate: z.coerce.date(),
+  saftCheckbox: z.boolean().optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleInputSchema),
+  blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
   token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
+  saftContract: z.lazy(() => SaftContractCreateNestedOneWithoutSaleInputSchema).optional(),
+  user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
+  transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
 
@@ -10035,8 +11652,9 @@ export const SaleUncheckedCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.Sa
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -10044,18 +11662,18 @@ export const SaleUncheckedCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.Sa
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
   tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
 
@@ -10084,7 +11702,8 @@ export const UserCreateWithoutDocumentInputSchema: z.ZodType<Prisma.UserCreateWi
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutDocumentInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutDocumentInput> = z.object({
@@ -10107,7 +11726,8 @@ export const UserUncheckedCreateWithoutDocumentInputSchema: z.ZodType<Prisma.Use
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutDocumentInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutDocumentInput> = z.object({
@@ -10132,8 +11752,8 @@ export const SaleUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.SaleUpdateW
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -10143,16 +11763,16 @@ export const SaleUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.SaleUpdateW
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
+  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractUpdateOneWithoutSaleNestedInputSchema).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUpdateOneWithoutSaleNestedInputSchema).optional(),
-  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
@@ -10162,8 +11782,9 @@ export const SaleUncheckedUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.Sa
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -10171,18 +11792,18 @@ export const SaleUncheckedUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.Sa
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
@@ -10217,7 +11838,8 @@ export const UserUpdateWithoutDocumentInputSchema: z.ZodType<Prisma.UserUpdateWi
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutDocumentInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutDocumentInput> = z.object({
@@ -10240,7 +11862,8 @@ export const UserUncheckedUpdateWithoutDocumentInputSchema: z.ZodType<Prisma.Use
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const SaleCreateWithoutVestingSchedulesInputSchema: z.ZodType<Prisma.SaleCreateWithoutVestingSchedulesInput> = z.object({
@@ -10249,8 +11872,8 @@ export const SaleCreateWithoutVestingSchedulesInputSchema: z.ZodType<Prisma.Sale
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -10260,17 +11883,17 @@ export const SaleCreateWithoutVestingSchedulesInputSchema: z.ZodType<Prisma.Sale
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
+  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
+  saftContract: z.lazy(() => SaftContractCreateNestedOneWithoutSaleInputSchema).optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationCreateNestedOneWithoutSaleInputSchema).optional(),
-  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
-  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema)
+  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
 
 export const SaleUncheckedCreateWithoutVestingSchedulesInputSchema: z.ZodType<Prisma.SaleUncheckedCreateWithoutVestingSchedulesInput> = z.object({
@@ -10279,8 +11902,9 @@ export const SaleUncheckedCreateWithoutVestingSchedulesInputSchema: z.ZodType<Pr
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -10288,18 +11912,18 @@ export const SaleUncheckedCreateWithoutVestingSchedulesInputSchema: z.ZodType<Pr
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
   tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
 
@@ -10325,8 +11949,8 @@ export const SaleUpdateWithoutVestingSchedulesInputSchema: z.ZodType<Prisma.Sale
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -10336,17 +11960,17 @@ export const SaleUpdateWithoutVestingSchedulesInputSchema: z.ZodType<Prisma.Sale
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
+  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractUpdateOneWithoutSaleNestedInputSchema).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUpdateOneWithoutSaleNestedInputSchema).optional(),
-  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
-  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional()
+  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
 export const SaleUncheckedUpdateWithoutVestingSchedulesInputSchema: z.ZodType<Prisma.SaleUncheckedUpdateWithoutVestingSchedulesInput> = z.object({
@@ -10355,8 +11979,9 @@ export const SaleUncheckedUpdateWithoutVestingSchedulesInputSchema: z.ZodType<Pr
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -10364,18 +11989,18 @@ export const SaleUncheckedUpdateWithoutVestingSchedulesInputSchema: z.ZodType<Pr
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
@@ -10395,7 +12020,6 @@ export const SaleTransactionsCreateWithoutTokenDistributionsInputSchema: z.ZodTy
   status: z.lazy(() => TransactionStatusSchema).optional(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   rejectionReason: z.string().optional().nullable(),
@@ -10403,6 +12027,7 @@ export const SaleTransactionsCreateWithoutTokenDistributionsInputSchema: z.ZodTy
   paymentDate: z.coerce.date().optional().nullable(),
   user: z.lazy(() => UserCreateNestedOneWithoutTransactionsInputSchema),
   sale: z.lazy(() => SaleCreateNestedOneWithoutTransactionsInputSchema),
+  amountPaidCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleTransactionsInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutTransactionsInputSchema).optional(),
   approver: z.lazy(() => UserCreateNestedOneWithoutTransactionApprovalsInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditCreateNestedManyWithoutTransactionInputSchema).optional()
@@ -10426,7 +12051,7 @@ export const SaleTransactionsUncheckedCreateWithoutTokenDistributionsInputSchema
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -10469,7 +12094,6 @@ export const SaleTransactionsUpdateWithoutTokenDistributionsInputSchema: z.ZodTy
   status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -10477,6 +12101,7 @@ export const SaleTransactionsUpdateWithoutTokenDistributionsInputSchema: z.ZodTy
   paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
   sale: z.lazy(() => SaleUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  amountPaidCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutTransactionsNestedInputSchema).optional(),
   approver: z.lazy(() => UserUpdateOneWithoutTransactionApprovalsNestedInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditUpdateManyWithoutTransactionNestedInputSchema).optional()
@@ -10500,7 +12125,7 @@ export const SaleTransactionsUncheckedUpdateWithoutTokenDistributionsInputSchema
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -10509,142 +12134,6 @@ export const SaleTransactionsUncheckedUpdateWithoutTokenDistributionsInputSchema
   paymentEvidence: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   auditTrail: z.lazy(() => TransactionAuditUncheckedUpdateManyWithoutTransactionNestedInputSchema).optional()
-}).strict();
-
-export const SaleCreateWithoutSaleInformationInputSchema: z.ZodType<Prisma.SaleCreateWithoutSaleInformationInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  name: z.string(),
-  status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
-  initialTokenQuantity: z.number().int(),
-  availableTokenQuantity: z.number().int(),
-  maximumTokenBuyPerUser: z.number().int().optional().nullable(),
-  minimumTokenBuyPerUser: z.number().int().optional(),
-  saleStartDate: z.coerce.date(),
-  tokenContractAddress: z.string().optional().nullable(),
-  tokenName: z.string(),
-  tokenTotalSupply: z.string().optional().nullable(),
-  tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
-  toWalletsAddress: z.string(),
-  saleClosingDate: z.coerce.date(),
-  saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
-  user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
-  transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
-  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
-  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
-  vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
-}).strict();
-
-export const SaleUncheckedCreateWithoutSaleInformationInputSchema: z.ZodType<Prisma.SaleUncheckedCreateWithoutSaleInformationInput> = z.object({
-  id: z.string().cuid().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  deletedAt: z.coerce.date().optional().nullable(),
-  name: z.string(),
-  status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
-  initialTokenQuantity: z.number().int(),
-  availableTokenQuantity: z.number().int(),
-  maximumTokenBuyPerUser: z.number().int().optional().nullable(),
-  minimumTokenBuyPerUser: z.number().int().optional(),
-  saleStartDate: z.coerce.date(),
-  tokenContractAddress: z.string().optional().nullable(),
-  tokenContractChainId: z.number().int().optional().nullable(),
-  tokenName: z.string(),
-  tokenTotalSupply: z.string().optional().nullable(),
-  tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
-  toWalletsAddress: z.string(),
-  saleClosingDate: z.coerce.date(),
-  createdBy: z.string(),
-  saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string(),
-  transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
-  documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
-  vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
-}).strict();
-
-export const SaleCreateOrConnectWithoutSaleInformationInputSchema: z.ZodType<Prisma.SaleCreateOrConnectWithoutSaleInformationInput> = z.object({
-  where: z.lazy(() => SaleWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => SaleCreateWithoutSaleInformationInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleInformationInputSchema) ]),
-}).strict();
-
-export const SaleUpsertWithoutSaleInformationInputSchema: z.ZodType<Prisma.SaleUpsertWithoutSaleInformationInput> = z.object({
-  update: z.union([ z.lazy(() => SaleUpdateWithoutSaleInformationInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutSaleInformationInputSchema) ]),
-  create: z.union([ z.lazy(() => SaleCreateWithoutSaleInformationInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleInformationInputSchema) ]),
-  where: z.lazy(() => SaleWhereInputSchema).optional()
-}).strict();
-
-export const SaleUpdateToOneWithWhereWithoutSaleInformationInputSchema: z.ZodType<Prisma.SaleUpdateToOneWithWhereWithoutSaleInformationInput> = z.object({
-  where: z.lazy(() => SaleWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => SaleUpdateWithoutSaleInformationInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutSaleInformationInputSchema) ]),
-}).strict();
-
-export const SaleUpdateWithoutSaleInformationInputSchema: z.ZodType<Prisma.SaleUpdateWithoutSaleInformationInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
-  initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
-  user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
-  transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
-  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
-  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
-  vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
-}).strict();
-
-export const SaleUncheckedUpdateWithoutSaleInformationInputSchema: z.ZodType<Prisma.SaleUncheckedUpdateWithoutSaleInformationInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
-  initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
-  documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
-  vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateWithoutTransactionsInputSchema: z.ZodType<Prisma.UserCreateWithoutTransactionsInput> = z.object({
@@ -10667,7 +12156,8 @@ export const UserCreateWithoutTransactionsInputSchema: z.ZodType<Prisma.UserCrea
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutTransactionsInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutTransactionsInput> = z.object({
@@ -10690,7 +12180,8 @@ export const UserUncheckedCreateWithoutTransactionsInputSchema: z.ZodType<Prisma
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutTransactionsInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutTransactionsInput> = z.object({
@@ -10704,8 +12195,8 @@ export const SaleCreateWithoutTransactionsInputSchema: z.ZodType<Prisma.SaleCrea
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -10715,16 +12206,16 @@ export const SaleCreateWithoutTransactionsInputSchema: z.ZodType<Prisma.SaleCrea
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
-  user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
-  saleInformation: z.lazy(() => SaleInformationCreateNestedOneWithoutSaleInputSchema).optional(),
-  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
   token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
+  saftContract: z.lazy(() => SaftContractCreateNestedOneWithoutSaleInputSchema).optional(),
+  user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
+  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
 
@@ -10734,8 +12225,9 @@ export const SaleUncheckedCreateWithoutTransactionsInputSchema: z.ZodType<Prisma
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -10743,17 +12235,17 @@ export const SaleUncheckedCreateWithoutTransactionsInputSchema: z.ZodType<Prisma
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
   tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
@@ -10761,6 +12253,33 @@ export const SaleUncheckedCreateWithoutTransactionsInputSchema: z.ZodType<Prisma
 export const SaleCreateOrConnectWithoutTransactionsInputSchema: z.ZodType<Prisma.SaleCreateOrConnectWithoutTransactionsInput> = z.object({
   where: z.lazy(() => SaleWhereUniqueInputSchema),
   create: z.union([ z.lazy(() => SaleCreateWithoutTransactionsInputSchema),z.lazy(() => SaleUncheckedCreateWithoutTransactionsInputSchema) ]),
+}).strict();
+
+export const CurrencyCreateWithoutSaleTransactionsInputSchema: z.ZodType<Prisma.CurrencyCreateWithoutSaleTransactionsInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  symbol: z.string(),
+  type: z.lazy(() => CurrencyTypeSchema),
+  Sale: z.lazy(() => SaleCreateNestedManyWithoutSaleCurrencyInputSchema).optional()
+}).strict();
+
+export const CurrencyUncheckedCreateWithoutSaleTransactionsInputSchema: z.ZodType<Prisma.CurrencyUncheckedCreateWithoutSaleTransactionsInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  symbol: z.string(),
+  type: z.lazy(() => CurrencyTypeSchema),
+  Sale: z.lazy(() => SaleUncheckedCreateNestedManyWithoutSaleCurrencyInputSchema).optional()
+}).strict();
+
+export const CurrencyCreateOrConnectWithoutSaleTransactionsInputSchema: z.ZodType<Prisma.CurrencyCreateOrConnectWithoutSaleTransactionsInput> = z.object({
+  where: z.lazy(() => CurrencyWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => CurrencyCreateWithoutSaleTransactionsInputSchema),z.lazy(() => CurrencyUncheckedCreateWithoutSaleTransactionsInputSchema) ]),
 }).strict();
 
 export const BlockchainCreateWithoutTransactionsInputSchema: z.ZodType<Prisma.BlockchainCreateWithoutTransactionsInput> = z.object({
@@ -10818,7 +12337,8 @@ export const UserCreateWithoutTransactionApprovalsInputSchema: z.ZodType<Prisma.
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutTransactionApprovalsInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutTransactionApprovalsInput> = z.object({
@@ -10841,7 +12361,8 @@ export const UserUncheckedCreateWithoutTransactionApprovalsInputSchema: z.ZodTyp
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutTransactionApprovalsInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutTransactionApprovalsInput> = z.object({
@@ -10946,7 +12467,8 @@ export const UserUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma.UserUpda
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutTransactionsInput> = z.object({
@@ -10969,7 +12491,8 @@ export const UserUncheckedUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const SaleUpsertWithoutTransactionsInputSchema: z.ZodType<Prisma.SaleUpsertWithoutTransactionsInput> = z.object({
@@ -10989,8 +12512,8 @@ export const SaleUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma.SaleUpda
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -11000,16 +12523,16 @@ export const SaleUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma.SaleUpda
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
-  user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUpdateOneWithoutSaleNestedInputSchema).optional(),
-  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
   token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractUpdateOneWithoutSaleNestedInputSchema).optional(),
+  user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
@@ -11019,8 +12542,9 @@ export const SaleUncheckedUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -11028,19 +12552,52 @@ export const SaleUncheckedUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
+}).strict();
+
+export const CurrencyUpsertWithoutSaleTransactionsInputSchema: z.ZodType<Prisma.CurrencyUpsertWithoutSaleTransactionsInput> = z.object({
+  update: z.union([ z.lazy(() => CurrencyUpdateWithoutSaleTransactionsInputSchema),z.lazy(() => CurrencyUncheckedUpdateWithoutSaleTransactionsInputSchema) ]),
+  create: z.union([ z.lazy(() => CurrencyCreateWithoutSaleTransactionsInputSchema),z.lazy(() => CurrencyUncheckedCreateWithoutSaleTransactionsInputSchema) ]),
+  where: z.lazy(() => CurrencyWhereInputSchema).optional()
+}).strict();
+
+export const CurrencyUpdateToOneWithWhereWithoutSaleTransactionsInputSchema: z.ZodType<Prisma.CurrencyUpdateToOneWithWhereWithoutSaleTransactionsInput> = z.object({
+  where: z.lazy(() => CurrencyWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => CurrencyUpdateWithoutSaleTransactionsInputSchema),z.lazy(() => CurrencyUncheckedUpdateWithoutSaleTransactionsInputSchema) ]),
+}).strict();
+
+export const CurrencyUpdateWithoutSaleTransactionsInputSchema: z.ZodType<Prisma.CurrencyUpdateWithoutSaleTransactionsInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  symbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => EnumCurrencyTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  Sale: z.lazy(() => SaleUpdateManyWithoutSaleCurrencyNestedInputSchema).optional()
+}).strict();
+
+export const CurrencyUncheckedUpdateWithoutSaleTransactionsInputSchema: z.ZodType<Prisma.CurrencyUncheckedUpdateWithoutSaleTransactionsInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  symbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => CurrencyTypeSchema),z.lazy(() => EnumCurrencyTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  Sale: z.lazy(() => SaleUncheckedUpdateManyWithoutSaleCurrencyNestedInputSchema).optional()
 }).strict();
 
 export const BlockchainUpsertWithoutTransactionsInputSchema: z.ZodType<Prisma.BlockchainUpsertWithoutTransactionsInput> = z.object({
@@ -11115,7 +12672,8 @@ export const UserUpdateWithoutTransactionApprovalsInputSchema: z.ZodType<Prisma.
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutTransactionApprovalsInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutTransactionApprovalsInput> = z.object({
@@ -11138,7 +12696,8 @@ export const UserUncheckedUpdateWithoutTransactionApprovalsInputSchema: z.ZodTyp
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const TransactionAuditUpsertWithWhereUniqueWithoutTransactionInputSchema: z.ZodType<Prisma.TransactionAuditUpsertWithWhereUniqueWithoutTransactionInput> = z.object({
@@ -11204,7 +12763,6 @@ export const SaleTransactionsCreateWithoutBlockchainInputSchema: z.ZodType<Prism
   status: z.lazy(() => TransactionStatusSchema).optional(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   rejectionReason: z.string().optional().nullable(),
@@ -11212,6 +12770,7 @@ export const SaleTransactionsCreateWithoutBlockchainInputSchema: z.ZodType<Prism
   paymentDate: z.coerce.date().optional().nullable(),
   user: z.lazy(() => UserCreateNestedOneWithoutTransactionsInputSchema),
   sale: z.lazy(() => SaleCreateNestedOneWithoutTransactionsInputSchema),
+  amountPaidCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleTransactionsInputSchema),
   approver: z.lazy(() => UserCreateNestedOneWithoutTransactionApprovalsInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditCreateNestedManyWithoutTransactionInputSchema).optional(),
   tokenDistributions: z.lazy(() => TokenDistributionCreateNestedManyWithoutTransactionInputSchema).optional()
@@ -11235,7 +12794,7 @@ export const SaleTransactionsUncheckedCreateWithoutBlockchainInputSchema: z.ZodT
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   approvedBy: z.string().optional().nullable(),
@@ -11258,7 +12817,6 @@ export const SaleTransactionsCreateManyBlockchainInputEnvelopeSchema: z.ZodType<
 
 export const TokensOnBlockchainsCreateWithoutBlockchainInputSchema: z.ZodType<Prisma.TokensOnBlockchainsCreateWithoutBlockchainInput> = z.object({
   id: z.string().cuid().optional(),
-  tokenSymbol: z.string(),
   name: z.string(),
   isNative: z.boolean().optional(),
   decimals: z.number().int(),
@@ -11292,8 +12850,8 @@ export const SaleCreateWithoutBlockchainInputSchema: z.ZodType<Prisma.SaleCreate
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -11303,16 +12861,16 @@ export const SaleCreateWithoutBlockchainInputSchema: z.ZodType<Prisma.SaleCreate
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleInputSchema),
+  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
+  saftContract: z.lazy(() => SaftContractCreateNestedOneWithoutSaleInputSchema).optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
-  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
   vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
 
@@ -11322,26 +12880,27 @@ export const SaleUncheckedCreateWithoutBlockchainInputSchema: z.ZodType<Prisma.S
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
   minimumTokenBuyPerUser: z.number().int().optional(),
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
@@ -11395,7 +12954,7 @@ export const TokensOnBlockchainsScalarWhereInputSchema: z.ZodType<Prisma.TokensO
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tokenSymbol: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  blockchainId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  chainId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   isNative: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   decimals: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
@@ -11434,7 +12993,6 @@ export const SaleTransactionsCreateWithoutAuditTrailInputSchema: z.ZodType<Prism
   status: z.lazy(() => TransactionStatusSchema).optional(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   rejectionReason: z.string().optional().nullable(),
@@ -11442,6 +13000,7 @@ export const SaleTransactionsCreateWithoutAuditTrailInputSchema: z.ZodType<Prism
   paymentDate: z.coerce.date().optional().nullable(),
   user: z.lazy(() => UserCreateNestedOneWithoutTransactionsInputSchema),
   sale: z.lazy(() => SaleCreateNestedOneWithoutTransactionsInputSchema),
+  amountPaidCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleTransactionsInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutTransactionsInputSchema).optional(),
   approver: z.lazy(() => UserCreateNestedOneWithoutTransactionApprovalsInputSchema).optional(),
   tokenDistributions: z.lazy(() => TokenDistributionCreateNestedManyWithoutTransactionInputSchema).optional()
@@ -11465,7 +13024,7 @@ export const SaleTransactionsUncheckedCreateWithoutAuditTrailInputSchema: z.ZodT
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -11501,7 +13060,8 @@ export const UserCreateWithoutTransactionAuditInputSchema: z.ZodType<Prisma.User
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutTransactionAuditInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutTransactionAuditInput> = z.object({
@@ -11524,7 +13084,8 @@ export const UserUncheckedCreateWithoutTransactionAuditInputSchema: z.ZodType<Pr
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutTransactionAuditInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutTransactionAuditInput> = z.object({
@@ -11559,7 +13120,6 @@ export const SaleTransactionsUpdateWithoutAuditTrailInputSchema: z.ZodType<Prism
   status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -11567,6 +13127,7 @@ export const SaleTransactionsUpdateWithoutAuditTrailInputSchema: z.ZodType<Prism
   paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
   sale: z.lazy(() => SaleUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  amountPaidCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutTransactionsNestedInputSchema).optional(),
   approver: z.lazy(() => UserUpdateOneWithoutTransactionApprovalsNestedInputSchema).optional(),
   tokenDistributions: z.lazy(() => TokenDistributionUpdateManyWithoutTransactionNestedInputSchema).optional()
@@ -11590,7 +13151,7 @@ export const SaleTransactionsUncheckedUpdateWithoutAuditTrailInputSchema: z.ZodT
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -11632,7 +13193,8 @@ export const UserUpdateWithoutTransactionAuditInputSchema: z.ZodType<Prisma.User
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutTransactionAuditInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutTransactionAuditInput> = z.object({
@@ -11655,7 +13217,8 @@ export const UserUncheckedUpdateWithoutTransactionAuditInputSchema: z.ZodType<Pr
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateWithoutKycVerificationInputSchema: z.ZodType<Prisma.UserCreateWithoutKycVerificationInput> = z.object({
@@ -11678,7 +13241,8 @@ export const UserCreateWithoutKycVerificationInputSchema: z.ZodType<Prisma.UserC
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutKycVerificationInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutKycVerificationInput> = z.object({
@@ -11701,7 +13265,8 @@ export const UserUncheckedCreateWithoutKycVerificationInputSchema: z.ZodType<Pri
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutKycVerificationInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutKycVerificationInput> = z.object({
@@ -11740,7 +13305,8 @@ export const UserUpdateWithoutKycVerificationInputSchema: z.ZodType<Prisma.UserU
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutKycVerificationInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutKycVerificationInput> = z.object({
@@ -11763,7 +13329,8 @@ export const UserUncheckedUpdateWithoutKycVerificationInputSchema: z.ZodType<Pri
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserRoleCreateWithoutRoleInputSchema: z.ZodType<Prisma.UserRoleCreateWithoutRoleInput> = z.object({
@@ -11826,7 +13393,8 @@ export const UserCreateWithoutUserRoleInputSchema: z.ZodType<Prisma.UserCreateWi
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutUserRoleInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutUserRoleInput> = z.object({
@@ -11849,7 +13417,8 @@ export const UserUncheckedCreateWithoutUserRoleInputSchema: z.ZodType<Prisma.Use
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutApproverInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutUserRoleInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutUserRoleInput> = z.object({
@@ -11911,7 +13480,8 @@ export const UserUpdateWithoutUserRoleInputSchema: z.ZodType<Prisma.UserUpdateWi
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutUserRoleInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutUserRoleInput> = z.object({
@@ -11934,7 +13504,8 @@ export const UserUncheckedUpdateWithoutUserRoleInputSchema: z.ZodType<Prisma.Use
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   transactionApprovals: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutApproverNestedInputSchema).optional(),
   Document: z.lazy(() => DocumentUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
+  WalletAddress: z.lazy(() => WalletAddressUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
+  DocumentRecipient: z.lazy(() => DocumentRecipientUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export const RoleUpsertWithoutUsersInputSchema: z.ZodType<Prisma.RoleUpsertWithoutUsersInput> = z.object({
@@ -11972,8 +13543,8 @@ export const SaleCreateWithoutTokenInputSchema: z.ZodType<Prisma.SaleCreateWitho
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -11983,15 +13554,15 @@ export const SaleCreateWithoutTokenInputSchema: z.ZodType<Prisma.SaleCreateWitho
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyCreateNestedOneWithoutSaleInputSchema),
   blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractCreateNestedOneWithoutSaleInputSchema).optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
   transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
@@ -12002,8 +13573,9 @@ export const SaleUncheckedCreateWithoutTokenInputSchema: z.ZodType<Prisma.SaleUn
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -12014,14 +13586,13 @@ export const SaleUncheckedCreateWithoutTokenInputSchema: z.ZodType<Prisma.SaleUn
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
 }).strict();
@@ -12038,7 +13609,6 @@ export const SaleCreateManyTokenInputEnvelopeSchema: z.ZodType<Prisma.SaleCreate
 
 export const TokensOnBlockchainsCreateWithoutTokenInputSchema: z.ZodType<Prisma.TokensOnBlockchainsCreateWithoutTokenInput> = z.object({
   id: z.string().cuid().optional(),
-  tokenSymbol: z.string(),
   name: z.string(),
   isNative: z.boolean().optional(),
   decimals: z.number().int(),
@@ -12048,8 +13618,7 @@ export const TokensOnBlockchainsCreateWithoutTokenInputSchema: z.ZodType<Prisma.
 
 export const TokensOnBlockchainsUncheckedCreateWithoutTokenInputSchema: z.ZodType<Prisma.TokensOnBlockchainsUncheckedCreateWithoutTokenInput> = z.object({
   id: z.string().cuid().optional(),
-  tokenSymbol: z.string(),
-  blockchainId: z.string(),
+  chainId: z.number().int(),
   name: z.string(),
   isNative: z.boolean().optional(),
   decimals: z.number().int(),
@@ -12234,14 +13803,44 @@ export const BlockchainUncheckedUpdateWithoutTokensOnBlockchainsInputSchema: z.Z
   Sale: z.lazy(() => SaleUncheckedUpdateManyWithoutBlockchainNestedInputSchema).optional()
 }).strict();
 
-export const SaleCreateManyUserInputSchema: z.ZodType<Prisma.SaleCreateManyUserInput> = z.object({
+export const SaleCreateWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleCreateWithoutSaleCurrencyInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  initialTokenQuantity: z.number().int(),
+  availableTokenQuantity: z.number().int(),
+  maximumTokenBuyPerUser: z.number().int().optional().nullable(),
+  minimumTokenBuyPerUser: z.number().int().optional(),
+  saleStartDate: z.coerce.date(),
+  tokenContractAddress: z.string().optional().nullable(),
+  tokenName: z.string(),
+  tokenTotalSupply: z.string().optional().nullable(),
+  tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  toWalletsAddress: z.string(),
+  saleClosingDate: z.coerce.date(),
+  saftCheckbox: z.boolean().optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutSaleInputSchema).optional(),
+  token: z.lazy(() => TokenCreateNestedOneWithoutSalesInputSchema),
+  saftContract: z.lazy(() => SaftContractCreateNestedOneWithoutSaleInputSchema).optional(),
+  user: z.lazy(() => UserCreateNestedOneWithoutSalesInputSchema),
+  transactions: z.lazy(() => SaleTransactionsCreateNestedManyWithoutSaleInputSchema).optional(),
+  documents: z.lazy(() => DocumentCreateNestedManyWithoutSaleInputSchema).optional(),
+  vestingSchedules: z.lazy(() => VestingScheduleCreateNestedManyWithoutSaleInputSchema).optional()
+}).strict();
+
+export const SaleUncheckedCreateWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleUncheckedCreateWithoutSaleCurrencyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
+  status: z.lazy(() => SaleStatusSchema).optional(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -12249,15 +13848,157 @@ export const SaleCreateManyUserInputSchema: z.ZodType<Prisma.SaleCreateManyUserI
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
   tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  toWalletsAddress: z.string(),
+  saleClosingDate: z.coerce.date(),
+  createdBy: z.string(),
+  saftCheckbox: z.boolean().optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedCreateNestedOneWithoutSaleInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
+  documents: z.lazy(() => DocumentUncheckedCreateNestedManyWithoutSaleInputSchema).optional(),
+  vestingSchedules: z.lazy(() => VestingScheduleUncheckedCreateNestedManyWithoutSaleInputSchema).optional()
+}).strict();
+
+export const SaleCreateOrConnectWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleCreateOrConnectWithoutSaleCurrencyInput> = z.object({
+  where: z.lazy(() => SaleWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema) ]),
+}).strict();
+
+export const SaleCreateManySaleCurrencyInputEnvelopeSchema: z.ZodType<Prisma.SaleCreateManySaleCurrencyInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => SaleCreateManySaleCurrencyInputSchema),z.lazy(() => SaleCreateManySaleCurrencyInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
+export const SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsCreateWithoutAmountPaidCurrencyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
   tokenSymbol: z.string(),
+  quantity: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  rawPrice: z.string(),
+  price: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  totalAmount: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  formOfPayment: z.lazy(() => FOPSchema),
+  confirmationId: z.string().optional().nullable(),
+  receivingWallet: z.string().optional().nullable(),
+  status: z.lazy(() => TransactionStatusSchema).optional(),
+  comment: z.string().optional().nullable(),
+  amountPaid: z.string(),
+  txHash: z.string().optional().nullable(),
+  agreementId: z.string().optional().nullable(),
+  rejectionReason: z.string().optional().nullable(),
+  paymentEvidence: z.string().optional().nullable(),
+  paymentDate: z.coerce.date().optional().nullable(),
+  user: z.lazy(() => UserCreateNestedOneWithoutTransactionsInputSchema),
+  sale: z.lazy(() => SaleCreateNestedOneWithoutTransactionsInputSchema),
+  blockchain: z.lazy(() => BlockchainCreateNestedOneWithoutTransactionsInputSchema).optional(),
+  approver: z.lazy(() => UserCreateNestedOneWithoutTransactionApprovalsInputSchema).optional(),
+  auditTrail: z.lazy(() => TransactionAuditCreateNestedManyWithoutTransactionInputSchema).optional(),
+  tokenDistributions: z.lazy(() => TokenDistributionCreateNestedManyWithoutTransactionInputSchema).optional()
+}).strict();
+
+export const SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  tokenSymbol: z.string(),
+  quantity: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  rawPrice: z.string(),
+  price: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  totalAmount: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  formOfPayment: z.lazy(() => FOPSchema),
+  confirmationId: z.string().optional().nullable(),
+  receivingWallet: z.string().optional().nullable(),
+  status: z.lazy(() => TransactionStatusSchema).optional(),
+  userId: z.string(),
+  saleId: z.string(),
+  comment: z.string().optional().nullable(),
+  amountPaid: z.string(),
+  txHash: z.string().optional().nullable(),
+  blockchainId: z.string().optional().nullable(),
+  agreementId: z.string().optional().nullable(),
+  approvedBy: z.string().optional().nullable(),
+  rejectionReason: z.string().optional().nullable(),
+  paymentEvidence: z.string().optional().nullable(),
+  paymentDate: z.coerce.date().optional().nullable(),
+  auditTrail: z.lazy(() => TransactionAuditUncheckedCreateNestedManyWithoutTransactionInputSchema).optional(),
+  tokenDistributions: z.lazy(() => TokenDistributionUncheckedCreateNestedManyWithoutTransactionInputSchema).optional()
+}).strict();
+
+export const SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsCreateOrConnectWithoutAmountPaidCurrencyInput> = z.object({
+  where: z.lazy(() => SaleTransactionsWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema) ]),
+}).strict();
+
+export const SaleTransactionsCreateManyAmountPaidCurrencyInputEnvelopeSchema: z.ZodType<Prisma.SaleTransactionsCreateManyAmountPaidCurrencyInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => SaleTransactionsCreateManyAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsCreateManyAmountPaidCurrencyInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
+export const SaleUpsertWithWhereUniqueWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleUpsertWithWhereUniqueWithoutSaleCurrencyInput> = z.object({
+  where: z.lazy(() => SaleWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => SaleUpdateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutSaleCurrencyInputSchema) ]),
+  create: z.union([ z.lazy(() => SaleCreateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUncheckedCreateWithoutSaleCurrencyInputSchema) ]),
+}).strict();
+
+export const SaleUpdateWithWhereUniqueWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleUpdateWithWhereUniqueWithoutSaleCurrencyInput> = z.object({
+  where: z.lazy(() => SaleWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => SaleUpdateWithoutSaleCurrencyInputSchema),z.lazy(() => SaleUncheckedUpdateWithoutSaleCurrencyInputSchema) ]),
+}).strict();
+
+export const SaleUpdateManyWithWhereWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleUpdateManyWithWhereWithoutSaleCurrencyInput> = z.object({
+  where: z.lazy(() => SaleScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => SaleUpdateManyMutationInputSchema),z.lazy(() => SaleUncheckedUpdateManyWithoutSaleCurrencyInputSchema) ]),
+}).strict();
+
+export const SaleTransactionsUpsertWithWhereUniqueWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsUpsertWithWhereUniqueWithoutAmountPaidCurrencyInput> = z.object({
+  where: z.lazy(() => SaleTransactionsWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => SaleTransactionsUpdateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateWithoutAmountPaidCurrencyInputSchema) ]),
+  create: z.union([ z.lazy(() => SaleTransactionsCreateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUncheckedCreateWithoutAmountPaidCurrencyInputSchema) ]),
+}).strict();
+
+export const SaleTransactionsUpdateWithWhereUniqueWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateWithWhereUniqueWithoutAmountPaidCurrencyInput> = z.object({
+  where: z.lazy(() => SaleTransactionsWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => SaleTransactionsUpdateWithoutAmountPaidCurrencyInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateWithoutAmountPaidCurrencyInputSchema) ]),
+}).strict();
+
+export const SaleTransactionsUpdateManyWithWhereWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateManyWithWhereWithoutAmountPaidCurrencyInput> = z.object({
+  where: z.lazy(() => SaleTransactionsScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => SaleTransactionsUpdateManyMutationInputSchema),z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutAmountPaidCurrencyInputSchema) ]),
+}).strict();
+
+export const SaleCreateManyUserInputSchema: z.ZodType<Prisma.SaleCreateManyUserInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
+  status: z.lazy(() => SaleStatusSchema).optional(),
+  currency: z.string(),
+  initialTokenQuantity: z.number().int(),
+  availableTokenQuantity: z.number().int(),
+  maximumTokenBuyPerUser: z.number().int().optional().nullable(),
+  minimumTokenBuyPerUser: z.number().int().optional(),
+  saleStartDate: z.coerce.date(),
+  tokenContractAddress: z.string().optional().nullable(),
+  tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
+  tokenName: z.string(),
+  tokenSymbol: z.string(),
+  tokenTotalSupply: z.string().optional().nullable(),
+  tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string()
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const UserRoleCreateManyUserInputSchema: z.ZodType<Prisma.UserRoleCreateManyUserInput> = z.object({
@@ -12306,7 +14047,7 @@ export const SaleTransactionsCreateManyUserInputSchema: z.ZodType<Prisma.SaleTra
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -12334,7 +14075,7 @@ export const SaleTransactionsCreateManyApproverInputSchema: z.ZodType<Prisma.Sal
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -12362,14 +14103,28 @@ export const WalletAddressCreateManyAddressInputSchema: z.ZodType<Prisma.WalletA
   chainId: z.number().int()
 }).strict();
 
+export const DocumentRecipientCreateManyUserInputSchema: z.ZodType<Prisma.DocumentRecipientCreateManyUserInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  saftContractId: z.string().optional().nullable()
+}).strict();
+
 export const SaleUpdateWithoutUserInputSchema: z.ZodType<Prisma.SaleUpdateWithoutUserInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12379,16 +14134,16 @@ export const SaleUpdateWithoutUserInputSchema: z.ZodType<Prisma.SaleUpdateWithou
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
-  transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUpdateOneWithoutSaleNestedInputSchema).optional(),
-  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
   token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractUpdateOneWithoutSaleNestedInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
+  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
@@ -12398,8 +14153,9 @@ export const SaleUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.SaleUnc
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12407,17 +14163,17 @@ export const SaleUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.SaleUnc
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
@@ -12428,8 +14184,9 @@ export const SaleUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.Sal
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12437,15 +14194,15 @@ export const SaleUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.Sal
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const UserRoleUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserRoleUpdateWithoutUserInput> = z.object({
@@ -12551,13 +14308,13 @@ export const SaleTransactionsUpdateWithoutUserInputSchema: z.ZodType<Prisma.Sale
   status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   paymentEvidence: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sale: z.lazy(() => SaleUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  amountPaidCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutTransactionsNestedInputSchema).optional(),
   approver: z.lazy(() => UserUpdateOneWithoutTransactionApprovalsNestedInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditUpdateManyWithoutTransactionNestedInputSchema).optional(),
@@ -12581,7 +14338,7 @@ export const SaleTransactionsUncheckedUpdateWithoutUserInputSchema: z.ZodType<Pr
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12610,7 +14367,7 @@ export const SaleTransactionsUncheckedUpdateManyWithoutUserInputSchema: z.ZodTyp
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12636,7 +14393,6 @@ export const SaleTransactionsUpdateWithoutApproverInputSchema: z.ZodType<Prisma.
   status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12644,6 +14400,7 @@ export const SaleTransactionsUpdateWithoutApproverInputSchema: z.ZodType<Prisma.
   paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
   sale: z.lazy(() => SaleUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  amountPaidCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutTransactionsNestedInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditUpdateManyWithoutTransactionNestedInputSchema).optional(),
   tokenDistributions: z.lazy(() => TokenDistributionUpdateManyWithoutTransactionNestedInputSchema).optional()
@@ -12667,7 +14424,7 @@ export const SaleTransactionsUncheckedUpdateWithoutApproverInputSchema: z.ZodTyp
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12696,7 +14453,7 @@ export const SaleTransactionsUncheckedUpdateManyWithoutApproverInputSchema: z.Zo
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12762,6 +14519,48 @@ export const WalletAddressUncheckedUpdateManyWithoutAddressInputSchema: z.ZodTyp
   chainId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
+export const DocumentRecipientUpdateWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateWithoutUserInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  SaftContract: z.lazy(() => SaftContractUpdateOneWithoutRecipientsNestedInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedUpdateWithoutUserInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  saftContractId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DocumentRecipientUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedUpdateManyWithoutUserInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  saftContractId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
 export const SaleTransactionsCreateManySaleInputSchema: z.ZodType<Prisma.SaleTransactionsCreateManySaleInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
@@ -12779,7 +14578,7 @@ export const SaleTransactionsCreateManySaleInputSchema: z.ZodType<Prisma.SaleTra
   userId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   blockchainId: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
@@ -12830,13 +14629,13 @@ export const SaleTransactionsUpdateWithoutSaleInputSchema: z.ZodType<Prisma.Sale
   status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   paymentEvidence: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  amountPaidCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutTransactionsNestedInputSchema).optional(),
   approver: z.lazy(() => UserUpdateOneWithoutTransactionApprovalsNestedInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditUpdateManyWithoutTransactionNestedInputSchema).optional(),
@@ -12860,7 +14659,7 @@ export const SaleTransactionsUncheckedUpdateWithoutSaleInputSchema: z.ZodType<Pr
   userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12889,7 +14688,7 @@ export const SaleTransactionsUncheckedUpdateManyWithoutSaleInputSchema: z.ZodTyp
   userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12972,6 +14771,62 @@ export const VestingScheduleUncheckedUpdateManyWithoutSaleInputSchema: z.ZodType
   releaseFrequency: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   initialRelease: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   isEnabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const DocumentRecipientCreateManySaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientCreateManySaftContractInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  fullname: z.string().optional().nullable(),
+  email: z.string(),
+  role: z.lazy(() => SignableDocumentRoleSchema).optional(),
+  status: z.lazy(() => DocumentSignatureStatusSchema).optional(),
+  signatureUrl: z.string().optional().nullable(),
+  externalId: z.number().int().optional().nullable(),
+  address: z.string().optional().nullable()
+}).strict();
+
+export const DocumentRecipientUpdateWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientUpdateWithoutSaftContractInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  user: z.lazy(() => UserUpdateOneWithoutDocumentRecipientNestedInputSchema).optional()
+}).strict();
+
+export const DocumentRecipientUncheckedUpdateWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedUpdateWithoutSaftContractInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DocumentRecipientUncheckedUpdateManyWithoutSaftContractInputSchema: z.ZodType<Prisma.DocumentRecipientUncheckedUpdateManyWithoutSaftContractInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  fullname: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => SignableDocumentRoleSchema),z.lazy(() => EnumSignableDocumentRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => DocumentSignatureStatusSchema),z.lazy(() => EnumDocumentSignatureStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  signatureUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  externalId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  address: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const TransactionAuditCreateManyTransactionInputSchema: z.ZodType<Prisma.TransactionAuditCreateManyTransactionInput> = z.object({
@@ -13084,7 +14939,7 @@ export const SaleTransactionsCreateManyBlockchainInputSchema: z.ZodType<Prisma.S
   saleId: z.string(),
   comment: z.string().optional().nullable(),
   amountPaid: z.string(),
-  amountPaidCurrency: z.lazy(() => CurrencySchema),
+  paidCurrency: z.string(),
   txHash: z.string().optional().nullable(),
   agreementId: z.string().optional().nullable(),
   approvedBy: z.string().optional().nullable(),
@@ -13109,24 +14964,25 @@ export const SaleCreateManyBlockchainInputSchema: z.ZodType<Prisma.SaleCreateMan
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
   minimumTokenBuyPerUser: z.number().int().optional(),
   saleStartDate: z.coerce.date(),
   tokenContractAddress: z.string().optional().nullable(),
+  tokenId: z.string(),
   tokenName: z.string(),
+  tokenSymbol: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable(),
-  tokenId: z.string()
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const SaleTransactionsUpdateWithoutBlockchainInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateWithoutBlockchainInput> = z.object({
@@ -13145,7 +15001,6 @@ export const SaleTransactionsUpdateWithoutBlockchainInputSchema: z.ZodType<Prism
   status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -13153,6 +15008,7 @@ export const SaleTransactionsUpdateWithoutBlockchainInputSchema: z.ZodType<Prism
   paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
   sale: z.lazy(() => SaleUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  amountPaidCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleTransactionsNestedInputSchema).optional(),
   approver: z.lazy(() => UserUpdateOneWithoutTransactionApprovalsNestedInputSchema).optional(),
   auditTrail: z.lazy(() => TransactionAuditUpdateManyWithoutTransactionNestedInputSchema).optional(),
   tokenDistributions: z.lazy(() => TokenDistributionUpdateManyWithoutTransactionNestedInputSchema).optional()
@@ -13176,7 +15032,7 @@ export const SaleTransactionsUncheckedUpdateWithoutBlockchainInputSchema: z.ZodT
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   approvedBy: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -13205,7 +15061,7 @@ export const SaleTransactionsUncheckedUpdateManyWithoutBlockchainInputSchema: z.
   saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  amountPaidCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  paidCurrency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   approvedBy: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -13216,7 +15072,6 @@ export const SaleTransactionsUncheckedUpdateManyWithoutBlockchainInputSchema: z.
 
 export const TokensOnBlockchainsUpdateWithoutBlockchainInputSchema: z.ZodType<Prisma.TokensOnBlockchainsUpdateWithoutBlockchainInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   isNative: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   decimals: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -13250,8 +15105,8 @@ export const SaleUpdateWithoutBlockchainInputSchema: z.ZodType<Prisma.SaleUpdate
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -13261,16 +15116,16 @@ export const SaleUpdateWithoutBlockchainInputSchema: z.ZodType<Prisma.SaleUpdate
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema).optional(),
+  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractUpdateOneWithoutSaleNestedInputSchema).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
-  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
 
@@ -13280,26 +15135,27 @@ export const SaleUncheckedUpdateWithoutBlockchainInputSchema: z.ZodType<Prisma.S
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
@@ -13310,24 +15166,25 @@ export const SaleUncheckedUpdateManyWithoutBlockchainInputSchema: z.ZodType<Pris
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const UserRoleCreateManyRoleInputSchema: z.ZodType<Prisma.UserRoleCreateManyRoleInput> = z.object({
@@ -13364,8 +15221,9 @@ export const SaleCreateManyTokenInputSchema: z.ZodType<Prisma.SaleCreateManyToke
   updatedAt: z.coerce.date().optional(),
   deletedAt: z.coerce.date().optional().nullable(),
   name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
   status: z.lazy(() => SaleStatusSchema).optional(),
-  saleCurrency: z.lazy(() => CurrencySchema).optional(),
+  currency: z.string(),
   initialTokenQuantity: z.number().int(),
   availableTokenQuantity: z.number().int(),
   maximumTokenBuyPerUser: z.number().int().optional().nullable(),
@@ -13376,18 +15234,16 @@ export const SaleCreateManyTokenInputSchema: z.ZodType<Prisma.SaleCreateManyToke
   tokenName: z.string(),
   tokenTotalSupply: z.string().optional().nullable(),
   tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
-  tokenSymbol: z.string(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean().optional(),
-  saftContract: z.string().optional().nullable()
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const TokensOnBlockchainsCreateManyTokenInputSchema: z.ZodType<Prisma.TokensOnBlockchainsCreateManyTokenInput> = z.object({
   id: z.string().cuid().optional(),
-  tokenSymbol: z.string(),
-  blockchainId: z.string(),
+  chainId: z.number().int(),
   name: z.string(),
   isNative: z.boolean().optional(),
   decimals: z.number().int(),
@@ -13400,8 +15256,8 @@ export const SaleUpdateWithoutTokenInputSchema: z.ZodType<Prisma.SaleUpdateWitho
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -13411,15 +15267,15 @@ export const SaleUpdateWithoutTokenInputSchema: z.ZodType<Prisma.SaleUpdateWitho
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saleCurrency: z.lazy(() => CurrencyUpdateOneRequiredWithoutSaleNestedInputSchema).optional(),
   blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractUpdateOneWithoutSaleNestedInputSchema).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
@@ -13430,8 +15286,9 @@ export const SaleUncheckedUpdateWithoutTokenInputSchema: z.ZodType<Prisma.SaleUn
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -13442,14 +15299,13 @@ export const SaleUncheckedUpdateWithoutTokenInputSchema: z.ZodType<Prisma.SaleUn
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
-  saleInformation: z.lazy(() => SaleInformationUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
   documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
   vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
 }).strict();
@@ -13460,8 +15316,9 @@ export const SaleUncheckedUpdateManyWithoutTokenInputSchema: z.ZodType<Prisma.Sa
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  saleCurrency: z.union([ z.lazy(() => CurrencySchema),z.lazy(() => EnumCurrencyFieldUpdateOperationsInputSchema) ]).optional(),
+  currency: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -13472,17 +15329,15 @@ export const SaleUncheckedUpdateManyWithoutTokenInputSchema: z.ZodType<Prisma.Sa
   tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  saftContract: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const TokensOnBlockchainsUpdateWithoutTokenInputSchema: z.ZodType<Prisma.TokensOnBlockchainsUpdateWithoutTokenInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   isNative: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   decimals: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -13492,8 +15347,7 @@ export const TokensOnBlockchainsUpdateWithoutTokenInputSchema: z.ZodType<Prisma.
 
 export const TokensOnBlockchainsUncheckedUpdateWithoutTokenInputSchema: z.ZodType<Prisma.TokensOnBlockchainsUncheckedUpdateWithoutTokenInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  blockchainId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  chainId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   isNative: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   decimals: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -13502,12 +15356,238 @@ export const TokensOnBlockchainsUncheckedUpdateWithoutTokenInputSchema: z.ZodTyp
 
 export const TokensOnBlockchainsUncheckedUpdateManyWithoutTokenInputSchema: z.ZodType<Prisma.TokensOnBlockchainsUncheckedUpdateManyWithoutTokenInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  blockchainId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  chainId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   isNative: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   decimals: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   contractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const SaleCreateManySaleCurrencyInputSchema: z.ZodType<Prisma.SaleCreateManySaleCurrencyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  name: z.string(),
+  catchPhrase: z.string().optional().nullable(),
+  status: z.lazy(() => SaleStatusSchema).optional(),
+  initialTokenQuantity: z.number().int(),
+  availableTokenQuantity: z.number().int(),
+  maximumTokenBuyPerUser: z.number().int().optional().nullable(),
+  minimumTokenBuyPerUser: z.number().int().optional(),
+  saleStartDate: z.coerce.date(),
+  tokenContractAddress: z.string().optional().nullable(),
+  tokenContractChainId: z.number().int().optional().nullable(),
+  tokenId: z.string(),
+  tokenName: z.string(),
+  tokenSymbol: z.string(),
+  tokenTotalSupply: z.string().optional().nullable(),
+  tokenPricePerUnit: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  toWalletsAddress: z.string(),
+  saleClosingDate: z.coerce.date(),
+  createdBy: z.string(),
+  saftCheckbox: z.boolean().optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+}).strict();
+
+export const SaleTransactionsCreateManyAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsCreateManyAmountPaidCurrencyInput> = z.object({
+  id: z.string().cuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  deletedAt: z.coerce.date().optional().nullable(),
+  tokenSymbol: z.string(),
+  quantity: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  rawPrice: z.string(),
+  price: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  totalAmount: z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),
+  formOfPayment: z.lazy(() => FOPSchema),
+  confirmationId: z.string().optional().nullable(),
+  receivingWallet: z.string().optional().nullable(),
+  status: z.lazy(() => TransactionStatusSchema).optional(),
+  userId: z.string(),
+  saleId: z.string(),
+  comment: z.string().optional().nullable(),
+  amountPaid: z.string(),
+  txHash: z.string().optional().nullable(),
+  blockchainId: z.string().optional().nullable(),
+  agreementId: z.string().optional().nullable(),
+  approvedBy: z.string().optional().nullable(),
+  rejectionReason: z.string().optional().nullable(),
+  paymentEvidence: z.string().optional().nullable(),
+  paymentDate: z.coerce.date().optional().nullable()
+}).strict();
+
+export const SaleUpdateWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleUpdateWithoutSaleCurrencyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  blockchain: z.lazy(() => BlockchainUpdateOneWithoutSaleNestedInputSchema).optional(),
+  token: z.lazy(() => TokenUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  saftContract: z.lazy(() => SaftContractUpdateOneWithoutSaleNestedInputSchema).optional(),
+  user: z.lazy(() => UserUpdateOneRequiredWithoutSalesNestedInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUpdateManyWithoutSaleNestedInputSchema).optional(),
+  documents: z.lazy(() => DocumentUpdateManyWithoutSaleNestedInputSchema).optional(),
+  vestingSchedules: z.lazy(() => VestingScheduleUpdateManyWithoutSaleNestedInputSchema).optional()
+}).strict();
+
+export const SaleUncheckedUpdateWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleUncheckedUpdateWithoutSaleCurrencyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  saftContract: z.lazy(() => SaftContractUncheckedUpdateOneWithoutSaleNestedInputSchema).optional(),
+  transactions: z.lazy(() => SaleTransactionsUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
+  documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutSaleNestedInputSchema).optional(),
+  vestingSchedules: z.lazy(() => VestingScheduleUncheckedUpdateManyWithoutSaleNestedInputSchema).optional()
+}).strict();
+
+export const SaleUncheckedUpdateManyWithoutSaleCurrencyInputSchema: z.ZodType<Prisma.SaleUncheckedUpdateManyWithoutSaleCurrencyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  catchPhrase: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => SaleStatusSchema),z.lazy(() => EnumSaleStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  initialTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  availableTokenQuantity: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  maximumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  minimumTokenBuyPerUser: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  saleStartDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenContractAddress: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenContractChainId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tokenTotalSupply: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenPricePerUnit: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  toWalletsAddress: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saleClosingDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdBy: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saftCheckbox: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  information: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+}).strict();
+
+export const SaleTransactionsUpdateWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsUpdateWithoutAmountPaidCurrencyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  quantity: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  rawPrice: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  price: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  totalAmount: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  formOfPayment: z.union([ z.lazy(() => FOPSchema),z.lazy(() => EnumFOPFieldUpdateOperationsInputSchema) ]).optional(),
+  confirmationId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  receivingWallet: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentEvidence: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  user: z.lazy(() => UserUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  sale: z.lazy(() => SaleUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional(),
+  blockchain: z.lazy(() => BlockchainUpdateOneWithoutTransactionsNestedInputSchema).optional(),
+  approver: z.lazy(() => UserUpdateOneWithoutTransactionApprovalsNestedInputSchema).optional(),
+  auditTrail: z.lazy(() => TransactionAuditUpdateManyWithoutTransactionNestedInputSchema).optional(),
+  tokenDistributions: z.lazy(() => TokenDistributionUpdateManyWithoutTransactionNestedInputSchema).optional()
+}).strict();
+
+export const SaleTransactionsUncheckedUpdateWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsUncheckedUpdateWithoutAmountPaidCurrencyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  quantity: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  rawPrice: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  price: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  totalAmount: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  formOfPayment: z.union([ z.lazy(() => FOPSchema),z.lazy(() => EnumFOPFieldUpdateOperationsInputSchema) ]).optional(),
+  confirmationId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  receivingWallet: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  approvedBy: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentEvidence: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  auditTrail: z.lazy(() => TransactionAuditUncheckedUpdateManyWithoutTransactionNestedInputSchema).optional(),
+  tokenDistributions: z.lazy(() => TokenDistributionUncheckedUpdateManyWithoutTransactionNestedInputSchema).optional()
+}).strict();
+
+export const SaleTransactionsUncheckedUpdateManyWithoutAmountPaidCurrencyInputSchema: z.ZodType<Prisma.SaleTransactionsUncheckedUpdateManyWithoutAmountPaidCurrencyInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  deletedAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  tokenSymbol: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  quantity: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  rawPrice: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  price: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  totalAmount: z.union([ z.union([z.number(),z.string(),z.instanceof(Decimal),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  formOfPayment: z.union([ z.lazy(() => FOPSchema),z.lazy(() => EnumFOPFieldUpdateOperationsInputSchema) ]).optional(),
+  confirmationId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  receivingWallet: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => TransactionStatusSchema),z.lazy(() => EnumTransactionStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  saleId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  comment: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  amountPaid: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  txHash: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  blockchainId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  agreementId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  approvedBy: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  rejectionReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentEvidence: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 /////////////////////////////////////////
@@ -13943,6 +16023,130 @@ export const SaleFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.SaleFindUniqueOrT
   where: SaleWhereUniqueInputSchema,
 }).strict() ;
 
+export const SaftContractFindFirstArgsSchema: z.ZodType<Prisma.SaftContractFindFirstArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  where: SaftContractWhereInputSchema.optional(),
+  orderBy: z.union([ SaftContractOrderByWithRelationInputSchema.array(),SaftContractOrderByWithRelationInputSchema ]).optional(),
+  cursor: SaftContractWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ SaftContractScalarFieldEnumSchema,SaftContractScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const SaftContractFindFirstOrThrowArgsSchema: z.ZodType<Prisma.SaftContractFindFirstOrThrowArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  where: SaftContractWhereInputSchema.optional(),
+  orderBy: z.union([ SaftContractOrderByWithRelationInputSchema.array(),SaftContractOrderByWithRelationInputSchema ]).optional(),
+  cursor: SaftContractWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ SaftContractScalarFieldEnumSchema,SaftContractScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const SaftContractFindManyArgsSchema: z.ZodType<Prisma.SaftContractFindManyArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  where: SaftContractWhereInputSchema.optional(),
+  orderBy: z.union([ SaftContractOrderByWithRelationInputSchema.array(),SaftContractOrderByWithRelationInputSchema ]).optional(),
+  cursor: SaftContractWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ SaftContractScalarFieldEnumSchema,SaftContractScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const SaftContractAggregateArgsSchema: z.ZodType<Prisma.SaftContractAggregateArgs> = z.object({
+  where: SaftContractWhereInputSchema.optional(),
+  orderBy: z.union([ SaftContractOrderByWithRelationInputSchema.array(),SaftContractOrderByWithRelationInputSchema ]).optional(),
+  cursor: SaftContractWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const SaftContractGroupByArgsSchema: z.ZodType<Prisma.SaftContractGroupByArgs> = z.object({
+  where: SaftContractWhereInputSchema.optional(),
+  orderBy: z.union([ SaftContractOrderByWithAggregationInputSchema.array(),SaftContractOrderByWithAggregationInputSchema ]).optional(),
+  by: SaftContractScalarFieldEnumSchema.array(),
+  having: SaftContractScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const SaftContractFindUniqueArgsSchema: z.ZodType<Prisma.SaftContractFindUniqueArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  where: SaftContractWhereUniqueInputSchema,
+}).strict() ;
+
+export const SaftContractFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.SaftContractFindUniqueOrThrowArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  where: SaftContractWhereUniqueInputSchema,
+}).strict() ;
+
+export const DocumentRecipientFindFirstArgsSchema: z.ZodType<Prisma.DocumentRecipientFindFirstArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  where: DocumentRecipientWhereInputSchema.optional(),
+  orderBy: z.union([ DocumentRecipientOrderByWithRelationInputSchema.array(),DocumentRecipientOrderByWithRelationInputSchema ]).optional(),
+  cursor: DocumentRecipientWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ DocumentRecipientScalarFieldEnumSchema,DocumentRecipientScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const DocumentRecipientFindFirstOrThrowArgsSchema: z.ZodType<Prisma.DocumentRecipientFindFirstOrThrowArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  where: DocumentRecipientWhereInputSchema.optional(),
+  orderBy: z.union([ DocumentRecipientOrderByWithRelationInputSchema.array(),DocumentRecipientOrderByWithRelationInputSchema ]).optional(),
+  cursor: DocumentRecipientWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ DocumentRecipientScalarFieldEnumSchema,DocumentRecipientScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const DocumentRecipientFindManyArgsSchema: z.ZodType<Prisma.DocumentRecipientFindManyArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  where: DocumentRecipientWhereInputSchema.optional(),
+  orderBy: z.union([ DocumentRecipientOrderByWithRelationInputSchema.array(),DocumentRecipientOrderByWithRelationInputSchema ]).optional(),
+  cursor: DocumentRecipientWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ DocumentRecipientScalarFieldEnumSchema,DocumentRecipientScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const DocumentRecipientAggregateArgsSchema: z.ZodType<Prisma.DocumentRecipientAggregateArgs> = z.object({
+  where: DocumentRecipientWhereInputSchema.optional(),
+  orderBy: z.union([ DocumentRecipientOrderByWithRelationInputSchema.array(),DocumentRecipientOrderByWithRelationInputSchema ]).optional(),
+  cursor: DocumentRecipientWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const DocumentRecipientGroupByArgsSchema: z.ZodType<Prisma.DocumentRecipientGroupByArgs> = z.object({
+  where: DocumentRecipientWhereInputSchema.optional(),
+  orderBy: z.union([ DocumentRecipientOrderByWithAggregationInputSchema.array(),DocumentRecipientOrderByWithAggregationInputSchema ]).optional(),
+  by: DocumentRecipientScalarFieldEnumSchema.array(),
+  having: DocumentRecipientScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const DocumentRecipientFindUniqueArgsSchema: z.ZodType<Prisma.DocumentRecipientFindUniqueArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  where: DocumentRecipientWhereUniqueInputSchema,
+}).strict() ;
+
+export const DocumentRecipientFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.DocumentRecipientFindUniqueOrThrowArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  where: DocumentRecipientWhereUniqueInputSchema,
+}).strict() ;
+
 export const DocumentFindFirstArgsSchema: z.ZodType<Prisma.DocumentFindFirstArgs> = z.object({
   select: DocumentSelectSchema.optional(),
   include: DocumentIncludeSchema.optional(),
@@ -14127,68 +16331,6 @@ export const TokenDistributionFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.Toke
   select: TokenDistributionSelectSchema.optional(),
   include: TokenDistributionIncludeSchema.optional(),
   where: TokenDistributionWhereUniqueInputSchema,
-}).strict() ;
-
-export const SaleInformationFindFirstArgsSchema: z.ZodType<Prisma.SaleInformationFindFirstArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  where: SaleInformationWhereInputSchema.optional(),
-  orderBy: z.union([ SaleInformationOrderByWithRelationInputSchema.array(),SaleInformationOrderByWithRelationInputSchema ]).optional(),
-  cursor: SaleInformationWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ SaleInformationScalarFieldEnumSchema,SaleInformationScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const SaleInformationFindFirstOrThrowArgsSchema: z.ZodType<Prisma.SaleInformationFindFirstOrThrowArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  where: SaleInformationWhereInputSchema.optional(),
-  orderBy: z.union([ SaleInformationOrderByWithRelationInputSchema.array(),SaleInformationOrderByWithRelationInputSchema ]).optional(),
-  cursor: SaleInformationWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ SaleInformationScalarFieldEnumSchema,SaleInformationScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const SaleInformationFindManyArgsSchema: z.ZodType<Prisma.SaleInformationFindManyArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  where: SaleInformationWhereInputSchema.optional(),
-  orderBy: z.union([ SaleInformationOrderByWithRelationInputSchema.array(),SaleInformationOrderByWithRelationInputSchema ]).optional(),
-  cursor: SaleInformationWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ SaleInformationScalarFieldEnumSchema,SaleInformationScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const SaleInformationAggregateArgsSchema: z.ZodType<Prisma.SaleInformationAggregateArgs> = z.object({
-  where: SaleInformationWhereInputSchema.optional(),
-  orderBy: z.union([ SaleInformationOrderByWithRelationInputSchema.array(),SaleInformationOrderByWithRelationInputSchema ]).optional(),
-  cursor: SaleInformationWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-}).strict() ;
-
-export const SaleInformationGroupByArgsSchema: z.ZodType<Prisma.SaleInformationGroupByArgs> = z.object({
-  where: SaleInformationWhereInputSchema.optional(),
-  orderBy: z.union([ SaleInformationOrderByWithAggregationInputSchema.array(),SaleInformationOrderByWithAggregationInputSchema ]).optional(),
-  by: SaleInformationScalarFieldEnumSchema.array(),
-  having: SaleInformationScalarWhereWithAggregatesInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-}).strict() ;
-
-export const SaleInformationFindUniqueArgsSchema: z.ZodType<Prisma.SaleInformationFindUniqueArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  where: SaleInformationWhereUniqueInputSchema,
-}).strict() ;
-
-export const SaleInformationFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.SaleInformationFindUniqueOrThrowArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  where: SaleInformationWhereUniqueInputSchema,
 }).strict() ;
 
 export const SaleTransactionsFindFirstArgsSchema: z.ZodType<Prisma.SaleTransactionsFindFirstArgs> = z.object({
@@ -14744,6 +16886,68 @@ export const TokensOnBlockchainsFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.To
   where: TokensOnBlockchainsWhereUniqueInputSchema,
 }).strict() ;
 
+export const CurrencyFindFirstArgsSchema: z.ZodType<Prisma.CurrencyFindFirstArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  where: CurrencyWhereInputSchema.optional(),
+  orderBy: z.union([ CurrencyOrderByWithRelationInputSchema.array(),CurrencyOrderByWithRelationInputSchema ]).optional(),
+  cursor: CurrencyWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ CurrencyScalarFieldEnumSchema,CurrencyScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const CurrencyFindFirstOrThrowArgsSchema: z.ZodType<Prisma.CurrencyFindFirstOrThrowArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  where: CurrencyWhereInputSchema.optional(),
+  orderBy: z.union([ CurrencyOrderByWithRelationInputSchema.array(),CurrencyOrderByWithRelationInputSchema ]).optional(),
+  cursor: CurrencyWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ CurrencyScalarFieldEnumSchema,CurrencyScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const CurrencyFindManyArgsSchema: z.ZodType<Prisma.CurrencyFindManyArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  where: CurrencyWhereInputSchema.optional(),
+  orderBy: z.union([ CurrencyOrderByWithRelationInputSchema.array(),CurrencyOrderByWithRelationInputSchema ]).optional(),
+  cursor: CurrencyWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ CurrencyScalarFieldEnumSchema,CurrencyScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const CurrencyAggregateArgsSchema: z.ZodType<Prisma.CurrencyAggregateArgs> = z.object({
+  where: CurrencyWhereInputSchema.optional(),
+  orderBy: z.union([ CurrencyOrderByWithRelationInputSchema.array(),CurrencyOrderByWithRelationInputSchema ]).optional(),
+  cursor: CurrencyWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const CurrencyGroupByArgsSchema: z.ZodType<Prisma.CurrencyGroupByArgs> = z.object({
+  where: CurrencyWhereInputSchema.optional(),
+  orderBy: z.union([ CurrencyOrderByWithAggregationInputSchema.array(),CurrencyOrderByWithAggregationInputSchema ]).optional(),
+  by: CurrencyScalarFieldEnumSchema.array(),
+  having: CurrencyScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const CurrencyFindUniqueArgsSchema: z.ZodType<Prisma.CurrencyFindUniqueArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  where: CurrencyWhereUniqueInputSchema,
+}).strict() ;
+
+export const CurrencyFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.CurrencyFindUniqueOrThrowArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  where: CurrencyWhereUniqueInputSchema,
+}).strict() ;
+
 export const UserCreateArgsSchema: z.ZodType<Prisma.UserCreateArgs> = z.object({
   select: UserSelectSchema.optional(),
   include: UserIncludeSchema.optional(),
@@ -15118,6 +17322,114 @@ export const SaleDeleteManyArgsSchema: z.ZodType<Prisma.SaleDeleteManyArgs> = z.
   limit: z.number().optional(),
 }).strict() ;
 
+export const SaftContractCreateArgsSchema: z.ZodType<Prisma.SaftContractCreateArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  data: z.union([ SaftContractCreateInputSchema,SaftContractUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const SaftContractUpsertArgsSchema: z.ZodType<Prisma.SaftContractUpsertArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  where: SaftContractWhereUniqueInputSchema,
+  create: z.union([ SaftContractCreateInputSchema,SaftContractUncheckedCreateInputSchema ]),
+  update: z.union([ SaftContractUpdateInputSchema,SaftContractUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const SaftContractCreateManyArgsSchema: z.ZodType<Prisma.SaftContractCreateManyArgs> = z.object({
+  data: z.union([ SaftContractCreateManyInputSchema,SaftContractCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const SaftContractCreateManyAndReturnArgsSchema: z.ZodType<Prisma.SaftContractCreateManyAndReturnArgs> = z.object({
+  data: z.union([ SaftContractCreateManyInputSchema,SaftContractCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const SaftContractDeleteArgsSchema: z.ZodType<Prisma.SaftContractDeleteArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  where: SaftContractWhereUniqueInputSchema,
+}).strict() ;
+
+export const SaftContractUpdateArgsSchema: z.ZodType<Prisma.SaftContractUpdateArgs> = z.object({
+  select: SaftContractSelectSchema.optional(),
+  include: SaftContractIncludeSchema.optional(),
+  data: z.union([ SaftContractUpdateInputSchema,SaftContractUncheckedUpdateInputSchema ]),
+  where: SaftContractWhereUniqueInputSchema,
+}).strict() ;
+
+export const SaftContractUpdateManyArgsSchema: z.ZodType<Prisma.SaftContractUpdateManyArgs> = z.object({
+  data: z.union([ SaftContractUpdateManyMutationInputSchema,SaftContractUncheckedUpdateManyInputSchema ]),
+  where: SaftContractWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const SaftContractUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.SaftContractUpdateManyAndReturnArgs> = z.object({
+  data: z.union([ SaftContractUpdateManyMutationInputSchema,SaftContractUncheckedUpdateManyInputSchema ]),
+  where: SaftContractWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const SaftContractDeleteManyArgsSchema: z.ZodType<Prisma.SaftContractDeleteManyArgs> = z.object({
+  where: SaftContractWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const DocumentRecipientCreateArgsSchema: z.ZodType<Prisma.DocumentRecipientCreateArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  data: z.union([ DocumentRecipientCreateInputSchema,DocumentRecipientUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const DocumentRecipientUpsertArgsSchema: z.ZodType<Prisma.DocumentRecipientUpsertArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  where: DocumentRecipientWhereUniqueInputSchema,
+  create: z.union([ DocumentRecipientCreateInputSchema,DocumentRecipientUncheckedCreateInputSchema ]),
+  update: z.union([ DocumentRecipientUpdateInputSchema,DocumentRecipientUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const DocumentRecipientCreateManyArgsSchema: z.ZodType<Prisma.DocumentRecipientCreateManyArgs> = z.object({
+  data: z.union([ DocumentRecipientCreateManyInputSchema,DocumentRecipientCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const DocumentRecipientCreateManyAndReturnArgsSchema: z.ZodType<Prisma.DocumentRecipientCreateManyAndReturnArgs> = z.object({
+  data: z.union([ DocumentRecipientCreateManyInputSchema,DocumentRecipientCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const DocumentRecipientDeleteArgsSchema: z.ZodType<Prisma.DocumentRecipientDeleteArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  where: DocumentRecipientWhereUniqueInputSchema,
+}).strict() ;
+
+export const DocumentRecipientUpdateArgsSchema: z.ZodType<Prisma.DocumentRecipientUpdateArgs> = z.object({
+  select: DocumentRecipientSelectSchema.optional(),
+  include: DocumentRecipientIncludeSchema.optional(),
+  data: z.union([ DocumentRecipientUpdateInputSchema,DocumentRecipientUncheckedUpdateInputSchema ]),
+  where: DocumentRecipientWhereUniqueInputSchema,
+}).strict() ;
+
+export const DocumentRecipientUpdateManyArgsSchema: z.ZodType<Prisma.DocumentRecipientUpdateManyArgs> = z.object({
+  data: z.union([ DocumentRecipientUpdateManyMutationInputSchema,DocumentRecipientUncheckedUpdateManyInputSchema ]),
+  where: DocumentRecipientWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const DocumentRecipientUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.DocumentRecipientUpdateManyAndReturnArgs> = z.object({
+  data: z.union([ DocumentRecipientUpdateManyMutationInputSchema,DocumentRecipientUncheckedUpdateManyInputSchema ]),
+  where: DocumentRecipientWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const DocumentRecipientDeleteManyArgsSchema: z.ZodType<Prisma.DocumentRecipientDeleteManyArgs> = z.object({
+  where: DocumentRecipientWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
 export const DocumentCreateArgsSchema: z.ZodType<Prisma.DocumentCreateArgs> = z.object({
   select: DocumentSelectSchema.optional(),
   include: DocumentIncludeSchema.optional(),
@@ -15277,60 +17589,6 @@ export const TokenDistributionUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.To
 
 export const TokenDistributionDeleteManyArgsSchema: z.ZodType<Prisma.TokenDistributionDeleteManyArgs> = z.object({
   where: TokenDistributionWhereInputSchema.optional(),
-  limit: z.number().optional(),
-}).strict() ;
-
-export const SaleInformationCreateArgsSchema: z.ZodType<Prisma.SaleInformationCreateArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  data: z.union([ SaleInformationCreateInputSchema,SaleInformationUncheckedCreateInputSchema ]),
-}).strict() ;
-
-export const SaleInformationUpsertArgsSchema: z.ZodType<Prisma.SaleInformationUpsertArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  where: SaleInformationWhereUniqueInputSchema,
-  create: z.union([ SaleInformationCreateInputSchema,SaleInformationUncheckedCreateInputSchema ]),
-  update: z.union([ SaleInformationUpdateInputSchema,SaleInformationUncheckedUpdateInputSchema ]),
-}).strict() ;
-
-export const SaleInformationCreateManyArgsSchema: z.ZodType<Prisma.SaleInformationCreateManyArgs> = z.object({
-  data: z.union([ SaleInformationCreateManyInputSchema,SaleInformationCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
-export const SaleInformationCreateManyAndReturnArgsSchema: z.ZodType<Prisma.SaleInformationCreateManyAndReturnArgs> = z.object({
-  data: z.union([ SaleInformationCreateManyInputSchema,SaleInformationCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
-export const SaleInformationDeleteArgsSchema: z.ZodType<Prisma.SaleInformationDeleteArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  where: SaleInformationWhereUniqueInputSchema,
-}).strict() ;
-
-export const SaleInformationUpdateArgsSchema: z.ZodType<Prisma.SaleInformationUpdateArgs> = z.object({
-  select: SaleInformationSelectSchema.optional(),
-  include: SaleInformationIncludeSchema.optional(),
-  data: z.union([ SaleInformationUpdateInputSchema,SaleInformationUncheckedUpdateInputSchema ]),
-  where: SaleInformationWhereUniqueInputSchema,
-}).strict() ;
-
-export const SaleInformationUpdateManyArgsSchema: z.ZodType<Prisma.SaleInformationUpdateManyArgs> = z.object({
-  data: z.union([ SaleInformationUpdateManyMutationInputSchema,SaleInformationUncheckedUpdateManyInputSchema ]),
-  where: SaleInformationWhereInputSchema.optional(),
-  limit: z.number().optional(),
-}).strict() ;
-
-export const SaleInformationUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.SaleInformationUpdateManyAndReturnArgs> = z.object({
-  data: z.union([ SaleInformationUpdateManyMutationInputSchema,SaleInformationUncheckedUpdateManyInputSchema ]),
-  where: SaleInformationWhereInputSchema.optional(),
-  limit: z.number().optional(),
-}).strict() ;
-
-export const SaleInformationDeleteManyArgsSchema: z.ZodType<Prisma.SaleInformationDeleteManyArgs> = z.object({
-  where: SaleInformationWhereInputSchema.optional(),
   limit: z.number().optional(),
 }).strict() ;
 
@@ -15813,5 +18071,59 @@ export const TokensOnBlockchainsUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.
 
 export const TokensOnBlockchainsDeleteManyArgsSchema: z.ZodType<Prisma.TokensOnBlockchainsDeleteManyArgs> = z.object({
   where: TokensOnBlockchainsWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const CurrencyCreateArgsSchema: z.ZodType<Prisma.CurrencyCreateArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  data: z.union([ CurrencyCreateInputSchema,CurrencyUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const CurrencyUpsertArgsSchema: z.ZodType<Prisma.CurrencyUpsertArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  where: CurrencyWhereUniqueInputSchema,
+  create: z.union([ CurrencyCreateInputSchema,CurrencyUncheckedCreateInputSchema ]),
+  update: z.union([ CurrencyUpdateInputSchema,CurrencyUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const CurrencyCreateManyArgsSchema: z.ZodType<Prisma.CurrencyCreateManyArgs> = z.object({
+  data: z.union([ CurrencyCreateManyInputSchema,CurrencyCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const CurrencyCreateManyAndReturnArgsSchema: z.ZodType<Prisma.CurrencyCreateManyAndReturnArgs> = z.object({
+  data: z.union([ CurrencyCreateManyInputSchema,CurrencyCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const CurrencyDeleteArgsSchema: z.ZodType<Prisma.CurrencyDeleteArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  where: CurrencyWhereUniqueInputSchema,
+}).strict() ;
+
+export const CurrencyUpdateArgsSchema: z.ZodType<Prisma.CurrencyUpdateArgs> = z.object({
+  select: CurrencySelectSchema.optional(),
+  include: CurrencyIncludeSchema.optional(),
+  data: z.union([ CurrencyUpdateInputSchema,CurrencyUncheckedUpdateInputSchema ]),
+  where: CurrencyWhereUniqueInputSchema,
+}).strict() ;
+
+export const CurrencyUpdateManyArgsSchema: z.ZodType<Prisma.CurrencyUpdateManyArgs> = z.object({
+  data: z.union([ CurrencyUpdateManyMutationInputSchema,CurrencyUncheckedUpdateManyInputSchema ]),
+  where: CurrencyWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const CurrencyUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.CurrencyUpdateManyAndReturnArgs> = z.object({
+  data: z.union([ CurrencyUpdateManyMutationInputSchema,CurrencyUncheckedUpdateManyInputSchema ]),
+  where: CurrencyWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const CurrencyDeleteManyArgsSchema: z.ZodType<Prisma.CurrencyDeleteManyArgs> = z.object({
+  where: CurrencyWhereInputSchema.optional(),
   limit: z.number().optional(),
 }).strict() ;

@@ -53,9 +53,9 @@ model User {
   transactionApprovals SaleTransactions[] @relation("TransactionApprovals")
   Document             Document[]
 
-  isSiwe        Boolean?
-  // passkeys    Passkey[]
-  WalletAddress WalletAddress[]
+  isSiwe            Boolean?
+  WalletAddress     WalletAddress[]
+  DocumentRecipient DocumentRecipient[]
 
   @@map("users")
 }
@@ -168,35 +168,118 @@ model Sale {
   deletedAt DateTime? @db.Timestamptz(6)
 
   name                   String
-  status                 SaleStatus         @default(CREATED)
-  saleCurrency           Currency           @default(CHF)
+  catchPhrase            String?
+  status                 SaleStatus    @default(CREATED)
+  saleCurrency           Currency      @relation(fields: [currency], references: [symbol])
+  currency               String
   initialTokenQuantity   Int
   availableTokenQuantity Int
   maximumTokenBuyPerUser Int?
-  minimumTokenBuyPerUser Int                @default(1)
+  minimumTokenBuyPerUser Int           @default(1)
   saleStartDate          DateTime
   tokenContractAddress   String?
   tokenContractChainId   Int?
-  blockchain             Blockchain?        @relation(fields: [tokenContractChainId], references: [chainId])
+  blockchain             Blockchain?   @relation(fields: [tokenContractChainId], references: [chainId])
+  token                  Token         @relation(fields: [tokenId, tokenSymbol], references: [id, symbol])
+  tokenId                String
   tokenName              String
-  tokenTotalSupply       String?
-  tokenPricePerUnit      Decimal            @db.Decimal(36, 18)
   tokenSymbol            String
+  tokenTotalSupply       String?
+  tokenPricePerUnit      Decimal       @db.Decimal(36, 18)
   toWalletsAddress       String
   saleClosingDate        DateTime
   createdBy              String
-  saftCheckbox           Boolean            @default(false)
-  saftContract           String?
-  user                   User               @relation(fields: [createdBy], references: [id])
-  transactions           SaleTransactions[]
-  saleInformation        SaleInformation?
-  documents              Document[]
+  saftCheckbox           Boolean       @default(false)
+  saftContract           SaftContract?
+  information            Json?
 
-  token            Token             @relation(fields: [tokenId], references: [id])
-  tokenId          String
+  user         User               @relation(fields: [createdBy], references: [id])
+  transactions SaleTransactions[]
+  documents    Document[]
+
   vestingSchedules VestingSchedule[]
 
   @@map("sales")
+}
+
+/**
+ * SaftContract model with versioning support.
+ * - All versions are stored in this table.
+ * - parentId: null for the original (v1), set to original id for subsequent versions.
+ * - isLatest: true for the latest version, false for previous versions.
+ * - Sale points to the latest version only.
+ */
+model SaftContract {
+  id        String    @id @default(cuid()) @db.Text
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+
+  name        String
+  description String?
+  /// For File types
+  url         String?
+  /// Text content for TEXT type
+  content     Json?
+  /// Variables for TEXT type
+  variables   Json[]
+
+  recipients DocumentRecipient[]
+
+  version   Int     @default(1)
+  parentId  String? // Points to the original contract (null for v1)
+  isCurrent Boolean @default(true)
+
+  /// latest contract should always have a saleId to which is related
+  Sale   Sale?   @relation(fields: [saleId], references: [id])
+  saleId String? @unique
+
+  @@unique([parentId, version]) // Ensures no duplicate version per parent
+  @@map("saft_contract")
+}
+
+model DocumentRecipient {
+  id        String    @id @default(cuid()) @db.Text
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+
+  fullname     String?
+  email        String
+  role         SignableDocumentRole    @default(SIGNER)
+  status       DocumentSignatureStatus @default(CREATED)
+  signatureUrl String?
+  externalId   Int?
+
+  user    User?   @relation(fields: [address], references: [walletAddress])
+  address String?
+
+  SaftContract   SaftContract? @relation(fields: [saftContractId], references: [id])
+  saftContractId String?       @db.Text
+
+  @@index([email])
+  @@map("signable_document_recipient")
+}
+
+enum SignableDocumentRole {
+  CC
+  SIGNER
+  VIEWER
+  APPROVER
+
+  @@map("signable_document_role")
+}
+
+enum DocumentSignatureStatus {
+  CREATED
+  SENT_FOR_SIGNATURE
+  WAITING_FOR_COUNTERPARTY
+  SIGNED
+  EXPIRED
+  REJECTED
+  OPENED
+
+  @@map("document_signature_status")
 }
 
 model Document {
@@ -253,29 +336,6 @@ model TokenDistribution {
   @@map("token_distributions")
 }
 
-model SaleInformation {
-  id        String    @id @default(cuid()) @db.Text
-  createdAt DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
-  deletedAt DateTime? @db.Timestamptz(6)
-
-  summary           String?
-  tokenUtility      String?
-  tokenDistribution String?
-  otherInformation  String?
-  tokenLifecycle    String?
-  liquidityPool     String?
-  futurePlans       String?
-  useOfProceeds     String?
-  imageSale         String?
-  imageToken        String?
-  contactEmail      String?
-  sale              Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  saleId            String  @unique
-
-  @@map("sales_information")
-}
-
 model SaleTransactions {
   id        String    @id @default(cuid()) @db.Text
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
@@ -302,8 +362,10 @@ model SaleTransactions {
 
   comment String?
 
-  amountPaid         String
-  amountPaidCurrency Currency
+  amountPaid String
+
+  amountPaidCurrency Currency @relation(fields: [paidCurrency], references: [symbol])
+  paidCurrency       String
 
   txHash     String?
   blockchain Blockchain? @relation(fields: [blockchainId], references: [id])
@@ -342,6 +404,7 @@ model Blockchain {
   TokensOnBlockchains TokensOnBlockchains[]
   Sale                Sale[]
 
+  @@unique([id, chainId])
   @@map("blockchain")
 }
 
@@ -435,25 +498,27 @@ model Token {
   sales               Sale[]
   TokensOnBlockchains TokensOnBlockchains[]
 
+  @@unique([id, symbol])
   @@map("tokens")
 }
 
 model TokensOnBlockchains {
   id          String @id @default(cuid()) @db.Text
-  token       Token  @relation(fields: [tokenId], references: [id])
+  token       Token  @relation(fields: [tokenId, tokenSymbol], references: [id, symbol])
   tokenId     String
   tokenSymbol String
 
-  blockchain   Blockchain @relation(fields: [blockchainId], references: [id])
-  blockchainId String
+  blockchain Blockchain @relation(fields: [chainId], references: [chainId])
+  chainId    Int
 
   name            String
   isNative        Boolean @default(false)
   decimals        Int
   contractAddress String?
 
-  @@unique([tokenId, blockchainId])
-  @@unique([tokenSymbol, blockchainId])
+  @@unique([tokenId, chainId])
+  @@unique([tokenSymbol, chainId])
+  @@map("tokens_on_blockchains")
 }
 
 enum RegistrationStep {
@@ -476,16 +541,36 @@ enum SaleStatus {
   FINISHED
 }
 
-enum Currency {
-  CHF
-  GBP
-  USD
-  EUR
-  ETH
-  USDC
-  MATIC
-  LINK
+model Currency {
+  id        String    @id @default(cuid()) @db.Text
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+
+  name   String
+  symbol String       @unique
+  type   CurrencyType
+
+  Sale             Sale[]
+  SaleTransactions SaleTransactions[]
 }
+
+enum CurrencyType {
+  CRYPTO
+  FIAT
+}
+
+// enum Currency {
+//   CHF
+//   GBP
+//   USD
+//   EUR
+//   ETH
+//   USDC
+//   MATIC
+//   LINK
+//   BNB
+// }
 
 enum TransactionStatus {
   PENDING

@@ -1,9 +1,12 @@
-export const percentCalculator = (props) => {
-	const availableBalance = props?.availableTokenQuantity;
+export const percentCalculator = (props: {
+  availableTokenQuantity: number;
+  initialTokenQuantity: number;
+}) => {
+  const availableBalance = props?.availableTokenQuantity;
 
-	if (availableBalance && props?.initialTokenQuantity) {
-		return (1 - availableBalance / props?.initialTokenQuantity) * 100;
-	} else {
-		return 100;
-	}
+  if (availableBalance && props?.initialTokenQuantity) {
+    return (1 - availableBalance / props?.initialTokenQuantity) * 100;
+  } else {
+    return 100;
+  }
 };

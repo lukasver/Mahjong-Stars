@@ -1,23 +1,29 @@
-@import "@mjs/ui/globals.css";
+@import '@mjs/ui/globals.css';
 
 /* Root level overrides from the shared config styles*/
-/* :root {
-  
-} */
+:root {
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+}
+
+.dark {
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+}
 
 body {
-	background: var(--background);
-	color: var(--foreground);
+  background: var(--background);
+  color: var(--foreground);
 }
 
 @layer utilities {
-	.border-gradient {
-		border: 1px solid;
-		border-image-source: linear-gradient(
-			144.54deg,
-			#ffffff 2.22%,
-			rgba(255, 255, 255, 0) 54.79%,
-			#ffffff 95.31%
-		);
-	}
+  .border-gradient {
+    border: 1px solid;
+    border-image-source: linear-gradient(
+      144.54deg,
+      #ffffff 2.22%,
+      rgba(255, 255, 255, 0) 54.79%,
+      #ffffff 95.31%
+    );
+  }
 }

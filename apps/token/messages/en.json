@@ -10,6 +10,78 @@
 		},
 		"copyright": "©{year} WASABI GAMES DMCC"
 	},
+	"Global": {
+		"soon": "Coming soon",
+		"goDashboard": "Go to dashboard"
+	},
+	"admin": {
+		"sales": {
+			"create": {
+				"basic": {
+					"name": {
+						"label": "Name",
+						"description": "Public name for this sale round"
+					},
+					"tokenName": {
+						"label": "Token Name",
+						"description": "Long name for the token. I.e: Chainlink"
+					},
+					"tokenSymbol": {
+						"label": "Token Symbol",
+						"description": "Short name for the token. I.e: LINK"
+					},
+					"tokenContractAddress": {
+						"label": "Contract Address",
+						"description": "Token contract address"
+					},
+					"tokenContractChainId": {
+						"label": "Blockchain",
+						"description": "Chain where the token is deployed"
+					},
+					"toWalletsAddress": {
+						"label": "Wallet Address",
+						"description": "Destination wallet address to receive funds for sales"
+					},
+					"tokenPricePerUnit": {
+						"label": "Price per Unit",
+						"description": "Price the token will be sold in this sale"
+					},
+					"currency": {
+						"label": "Currency",
+						"description": "FIAT Currency to be used in this sale for the PPU"
+					},
+					"saleStartDate": {
+						"label": "Sale Start Date",
+						"description": "Start date of the sale"
+					},
+					"saleClosingDate": {
+						"label": "Sale Closing Date",
+						"description": "Closing date of the sale"
+					},
+					"initialTokenQuantity": {
+						"label": "Initial Token Quantity",
+						"description": "Total amount of tokens released for this sale"
+					},
+					"availableTokenQuantity": {
+						"label": "Available Token Quantity",
+						"description": "Amount of tokens Actually available for sale (in case is less than initial value)"
+					},
+					"minimumTokenBuyPerUser": {
+						"label": "Minimum Token Buy Per User",
+						"description": "Minimum amount of tokens a user can buy per purchase"
+					},
+					"maximumTokenBuyPerUser": {
+						"label": "Maximum Token Buy Per User",
+						"description": "Maximum amount of tokens a user can buy per purchase"
+					},
+					"saftCheckbox": {
+						"label": "SAFT Agreement",
+						"description": "Tick the box if this sale requires a SAFT agreement for users to buy"
+					}
+				}
+			}
+		}
+	},
 	"globalError": {
 		"required": "This field is required",
 		"check": "To continue, confirm is mandatory",
