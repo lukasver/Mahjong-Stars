@@ -372,6 +372,7 @@ class SalesController {
       ...rest
     } = data;
 
+    // @ts-expect-error FIXME issue with the discriminated union
     const updateData: Prisma.SaleUpdateInput = {
       ...rest,
       ...(information && {

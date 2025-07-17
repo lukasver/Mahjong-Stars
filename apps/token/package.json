@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
-		"build": "turbo run build",
+		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
 		"clean": "rimraf .next node_modules",
@@ -25,7 +25,7 @@
 		"e2e:renew": " RENEW_STATE=true NODE_ENV=test playwright test --project=chromium",
 		"e2e:codegen": "npx playwright codegen",
 		"e2e:ci": "RENEW_STATE=true NODE_ENV=test playwright test --project=chromium",
-		"vercel-build": "npx prisma generate && next build",
+		"vercel-build": "npx prisma generate && turbo run build",
 		"_vercel-build:prod": "npx prisma generate && npx prisma migrate deploy && next build",
 		"db:seed": "dotenv -e .env.local -- npx prisma db seed -- --environment development",
 		"db:seed:stage": "dotenv -e .env.stage.local -- npx prisma db seed -- --environment development",
