@@ -91,7 +91,8 @@
 		},
 		"@mjs/token#build": {
 			"dependsOn": [
-				"@mjs/i18n#build"
+				"@mjs/i18n#build",
+				"@mjs/utils#build"
 			],
 			"outputs": [
 				"dist/**",
