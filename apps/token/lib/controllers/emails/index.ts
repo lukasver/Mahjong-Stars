@@ -1,178 +1,130 @@
-import "server-only";
-import {
-	CreateEmailVerificationDto,
-	DeleteTokenDto,
-	GetTokenVerificationDto,
-} from "@/common/schemas/dtos/emails";
-import { ActionCtx } from "@/common/schemas/dtos/sales";
-import { Failure, Success } from "@/common/schemas/dtos/utils";
-import { prisma } from "@/db";
-import logger from "@/lib/services/logger.server";
-import { invariant } from "@epic-web/invariant";
-import { templates } from "@mjs/emails";
-import { Resend } from "resend";
+import 'server-only';
+import { ActionCtx } from '@/common/schemas/dtos/sales';
+import { Failure, Success } from '@/common/schemas/dtos/utils';
+import { prisma } from '@/db';
+import logger from '@/lib/services/logger.server';
+import { invariant } from '@epic-web/invariant';
+import { IEmailService } from '@/lib/email';
+import { env, publicUrl } from '@/common/config/env';
 
-/**
- * EmailController class handles email verification operations.
- */
-class EmailController {
-	/**
-	 * Get and verify token for email verification.
-	 * @param dto - The token verification data.
-	 * @param ctx - The action context.
-	 * @returns Success with verification response, or Failure on error.
-	 */
-	async getTokenVerification(
-		dto: GetTokenVerificationDto,
-		ctx: ActionCtx,
-	): Promise<Success<{ response: unknown }> | Failure> {
-		try {
-			const { token } = dto;
-			invariant(ctx.userId, "UNAUTHORIZED");
-			invariant(token, "Token is required");
+export class EmailVerificationService {
+  private readonly sender: IEmailService;
+  constructor(emailService: IEmailService) {
+    this.sender = emailService;
+  }
 
-			const response = await prisma.verification.findFirst({
-				where: {
-					value: String(token),
-					identifier: ctx.userId,
-				},
-			});
+  async verify(token: string, ctx: ActionCtx) {
+    invariant(ctx.address, 'UNAUTHORIZED');
+    invariant(token, 'Token is required');
 
-			if (!response) {
-				return Failure("Token is incorrect", 400, "Token is incorrect");
-			}
+    try {
+      const user = await prisma.user.findUniqueOrThrow({
+        where: {
+          walletAddress: ctx.address,
+          EmailVerification: {
+            token,
+          },
+        },
+        select: {
+          id: true,
+          EmailVerification: {
+            select: {
+              expiredAt: true,
+            },
+          },
+        },
+      });
 
-			if (response.expiresAt < new Date()) {
-				await prisma.verification.delete({
-					where: { id: response.id },
-				});
-				return Failure(
-					"Token expired. Please re-enter your email to generate a new token.",
-					400,
-					"Token expired",
-				);
-			}
+      const exp = user?.EmailVerification?.expiredAt;
+      invariant(exp, 'Token not found');
 
-			const data = await prisma.profile.upsert({
-				where: { userId: ctx.userId },
-				create: {
-					userId: ctx.userId,
-					email: response.identifier,
-				},
-				update: {
-					email: response.identifier,
-				},
-			});
+      if (exp < new Date()) {
+        await this.daleteToken(token, ctx);
+        return Failure(
+          'Token expired. Please re-enter your email to generate a new token.',
+          400
+        );
+      }
 
-			if (data) {
-				await prisma.user.update({
-					where: { id: ctx.userId },
-					data: { emailVerified: true },
-				});
-			}
+      await prisma.$transaction(async (tx) => {
+        return Promise.all([
+          tx.user.update({
+            where: { id: user.id },
+            data: {
+              emailVerified: true,
+            },
+          }),
+          this.daleteToken(token, ctx).catch((e) => {
+            logger(e);
+          }),
+        ]);
+      });
 
-			await prisma.verification.delete({
-				where: { id: response.id },
-			});
+      return Success({
+        message: 'Email verified successfully',
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
 
-			return Success({ response });
-		} catch (e) {
-			logger(e);
-			return Failure(e);
-		}
-	}
+  private generateToken() {
+    return Math.floor(Math.random() * 900000 + 100000).toString();
+  }
 
-	/**
-	 * Create email verification record and send verification email.
-	 * @param dto - The email verification data.
-	 * @param ctx - The action context.
-	 * @returns Success with message, or Failure on error.
-	 */
-	async createEmailVerification(
-		dto: CreateEmailVerificationDto,
-		ctx: ActionCtx,
-	): Promise<Success<{ message: string }> | Failure> {
-		try {
-			invariant(ctx.userId, "UNAUTHORIZED");
-			invariant(dto.email, "Email is required");
-			invariant(dto.token, "Token is required");
-			invariant(dto.userId, "User ID is required");
+  async createEmailVerification(email: string, ctx: ActionCtx) {
+    try {
+      invariant(email, 'Email is required');
 
-			const { email, token } = dto;
+      const verification = await prisma.emailVerification.upsert({
+        where: {
+          userId: ctx.userId,
+        },
+        update: {
+          email,
+          token: this.generateToken(),
+        },
+        create: {
+          email,
+          token: this.generateToken(),
+          user: { connect: { id: ctx.userId } },
+        },
+      });
 
-			const verification = await prisma.verification.create({
-				data: {
-					identifier: email,
-					value: token,
-					expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-				},
-			});
+      const sendResponse = await this.sender.sendReactEmail(
+        'emailVerification',
+        {
+          url: `${publicUrl}/verify-email?token=${verification.token}`,
+          logoUrl: `${publicUrl}/static/favicons/apple-touch-icon-120x120.png`,
+        },
+        { to: { email }, subject: 'Email Verification' }
+      );
 
-			invariant(verification, "Error creating token");
+      invariant(sendResponse, 'Error sending email');
 
-			const updatedVerification = await prisma.user.update({
-				where: { id: ctx.userId },
-				data: { emailVerified: false },
-			});
+      return Success(
+        Object.assign(
+          { message: 'Verification email sent successfully' },
+          env.IS_DEV ? { code: verification.token } : {}
+        )
+      );
+    } catch (error) {
+      logger(error);
+      return Failure(error);
+    }
+  }
 
-			invariant(updatedVerification, "Error changing status");
-
-			const sendResponse = await sendEmail({ email, token });
-			invariant(sendResponse, "Error sending email");
-
-			return Success({ message: "Verification email sent successfully" });
-		} catch (error) {
-			logger(error);
-			return Failure(error);
-		}
-	}
-
-	/**
-	 * Delete email verification token.
-	 * @param _dto - The delete token data (unused).
-	 * @param ctx - The action context.
-	 * @returns Success with message, or Failure on error.
-	 */
-	async deleteToken(
-		_dto: DeleteTokenDto,
-		ctx: ActionCtx,
-	): Promise<Success<{ message: string }> | Failure> {
-		try {
-			invariant(ctx.userId, "UNAUTHORIZED");
-
-			await prisma.verification.deleteMany({
-				where: { identifier: ctx.userId },
-			});
-
-			return Success({ message: "Deleted Register" });
-		} catch (error) {
-			logger(error);
-			return Failure(error);
-		}
-	}
+  async daleteToken(token: string, ctx: ActionCtx) {
+    try {
+      invariant(token, 'Token is required');
+      await prisma.emailVerification.deleteMany({
+        where: { token, userId: ctx.userId },
+      });
+      return Success({ message: 'Deleted Register' }, { status: 200 });
+    } catch (error) {
+      logger(error);
+      return Failure(error);
+    }
+  }
 }
-
-/**
- * Send verification email using Resend service.
- * @param email - The recipient email address.
- * @param token - The verification token.
- * @returns Promise with email send response.
- */
-const sendEmail = async ({
-	email,
-	token,
-}: {
-	email: string;
-	token: string;
-}) => {
-	const resend = new Resend(process.env.RESEND_API_KEY);
-	const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
-	return await resend.emails.send({
-		from: "Mahjong Stars <notifications@mjs.smat.io>",
-		to: email,
-		subject: "Email Verification",
-		react: templates.emailVerification({ url: verificationUrl }),
-	});
-};
-
-export default new EmailController();

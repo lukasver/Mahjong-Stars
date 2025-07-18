@@ -52,7 +52,6 @@ export const TokenInformation = ({
   const t = useTranslations('admin.sales.create.basic');
   const { data, isLoading } = useSale(saleId);
 
-  console.debug('🚀 ~ index.tsx:48 ~ data, isLoading:', data, isLoading);
   const form = useFormContext() as unknown as UseAppForm;
   const { options } = useInputOptionsContext();
 

@@ -100,6 +100,7 @@ export const login = loginActionClient
     }
     const { payload } = verifiedPayload;
 
+    console.log('VERIFIED PAYLOAD');
     // Here should go the JWT logic
     const [jwt] = await Promise.all([
       generateJWT(payload, {
@@ -116,9 +117,9 @@ export const login = loginActionClient
       },
       chainId: payload.chain_id ? Number(payload.chain_id) : undefined,
     });
-    invariant(user, 'User could not be found/created');
-    console.debug('Redirecting to dashboard...');
-    redirect('/dashboard');
+    invariant(user?.success, 'User could not be found/created');
+
+    redirect(user.data.user.emailVerified ? '/dashboard' : '/onboarding');
   });
 
 export const generatePayload = loginActionClient
@@ -148,7 +149,7 @@ export const logout = loginActionClient.action(async () => {
         })
         .catch((e) => {
           console.error(
-            '🚀 ~ index.ts:122 ~ e:',
+            'index.ts:122 ~ e:',
             e instanceof Error ? e.message : e
           );
         }),
@@ -342,24 +343,43 @@ export const getExchangeRate = authActionClient
     return exchangeRate;
   });
 
-// TODO! this should not be a server action, instead happen when user updates email
-// export const createEmailVerification = async (
-//   formData: Partial<EmailVerification>
-// ): CallApiRes<CreateEmailVerificationRes> => {
-//   try {
-//     const { data, status } = await callAPI<CreateEmailVerificationRes>({
-//       url: '/emailVerification',
-//       method: 'POST' as const,
-//       data: formData,
-//     });
-//     if (!isHTTPSuccessStatus(status)) {
-//       throw new Error(GET_UNHANDLED_ERROR);
-//     }
-//     return { success: true, emailVerification: data.emailVerification };
-//   } catch (err) {
-//     return notifyError(err);
-//   }
-// };
+export const createEmailVerification = authActionClient
+  .schema(
+    UserSchema.pick({
+      email: true,
+    }).extend({
+      firstName: z
+        .string()
+        .max(64, 'First name must be less than 64 characters')
+        .optional(),
+      lastName: z
+        .string()
+        .max(64, 'Last name must be less than 64 characters')
+        .optional(),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const { email, ...profile } = parsedInput;
+    const result = await usersController.updateUser(
+      { user: { email }, profile },
+      ctx
+    );
+
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result;
+  });
+
+export const verifyEmail = authActionClient
+  .schema(z.object({ token: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    const result = await usersController.verifyEmail(parsedInput.token, ctx);
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result;
+  });
 
 export const updateContractStatus = authActionClient
   .schema(CreateContractStatusDto)

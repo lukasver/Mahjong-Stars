@@ -19,7 +19,10 @@ export const isLoggedIn = async (address: string) => {
 };
 
 export const doLogin = async (params: LoginParams) => {
-  await login(params);
+  const res = await login(params);
+  if (!res?.serverError || res.validationErrors) {
+    throw new Error('Login failed');
+  }
 };
 
 interface GetLoginPayload {

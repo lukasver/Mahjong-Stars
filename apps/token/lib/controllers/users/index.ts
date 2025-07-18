@@ -2,16 +2,24 @@ import { JWT_EXPIRATION_TIME, ONE_DAY, ROLES } from '@/common/config/constants';
 import { publicUrl } from '@/common/config/env';
 import { ActionCtx } from '@/common/schemas/dtos/sales';
 import { CreateUserDto, GetUserDto } from '@/common/schemas/dtos/users';
-import { Failure, Success } from '@/common/schemas/dtos/utils';
-import { Profile, UserUpdateInputSchema } from '@/common/schemas/generated';
+import { Failure, isObject, Success } from '@/common/schemas/dtos/utils';
+import { Profile, User } from '@/common/schemas/generated';
 import { prisma } from '@/db';
+import createEmailService from '@/lib/email';
 import { getIpAddress, getUserAgent } from '@/lib/geo';
 import logger from '@/services/logger.server';
 import { invariant } from '@epic-web/invariant';
 import { DateTime } from 'luxon';
 import { headers } from 'next/headers';
+import { EmailVerificationService } from '../emails';
 
 class UsersController {
+  private readonly emailVerification: EmailVerificationService;
+
+  constructor(emailVerificationService: EmailVerificationService) {
+    this.emailVerification = emailVerificationService;
+  }
+
   async getMe({ address }: GetUserDto) {
     try {
       const user = await prisma.user.findUnique({
@@ -155,23 +163,23 @@ class UsersController {
               },
             },
           }),
-          ...(chainId
-            ? {
-                WalletAddress: {
-                  connectOrCreate: {
-                    where: {
-                      walletAddress_chainId: {
-                        chainId: chainId,
-                        walletAddress: address,
-                      },
-                    },
-                    create: {
-                      chainId: chainId,
-                    },
-                  },
-                },
-              }
-            : {}),
+          // ...(chainId
+          //   ? {
+          //       WalletAddress: {
+          //         connectOrCreate: {
+          //           where: {
+          //             walletAddress_chainId: {
+          //               chainId: chainId,
+          //               walletAddress: address,
+          //             },
+          //           },
+          //           create: {
+          //             chainId: chainId,
+          //           },
+          //         },
+          //       },
+          //     }
+          //   : {}),
           //TODO!
           // userRole: {
           //   connect: {
@@ -200,11 +208,13 @@ class UsersController {
    */
   async updateUser(
     dto: {
-      user: typeof UserUpdateInputSchema._type;
+      user: Partial<Omit<User, 'id' | 'walletAddress'>>;
       profile?: Partial<Omit<Profile, 'userId'>>;
     },
     ctx: ActionCtx
   ) {
+    console.debug('🚀 ~ index.ts:217 ~ UsersController ~ dto:', dto);
+
     try {
       invariant(dto.user, 'User data missing');
 
@@ -214,8 +224,13 @@ class UsersController {
         },
         select: {
           id: true,
+          email: true,
         },
       });
+
+      console.debug('🚀 ~ index.ts:229 ~ UsersController ~ _user:', _user);
+
+      const changedEmail = !!dto.user.email && dto.user.email !== _user.email;
 
       const promises = [];
       if (dto.profile) {
@@ -235,25 +250,48 @@ class UsersController {
       promises.push(
         prisma.user.update({
           where: { id: _user.id },
-          data: { ...dto.user },
+          data: {
+            ...dto.user,
+            ...(changedEmail
+              ? { email: dto.user.email, emailVerified: false }
+              : {}),
+          },
         })
       );
-      const [user, profile] = (await Promise.allSettled(promises))
+      if (changedEmail && dto.user.email) {
+        promises.push(
+          this.emailVerification.createEmailVerification(dto.user.email, ctx)
+        );
+      }
+      const results = await Promise.allSettled(promises);
+      results.forEach((result) => {
+        if (result.status === 'rejected') {
+          logger(result.reason);
+        }
+        if (result.status === 'fulfilled' && FailureTG(result.value)) {
+          logger(result.value.message);
+        }
+      });
+      const [profile, user, email] = results
         .filter((p) => p.status === 'fulfilled')
         .map((p) => p.value);
+
       return Success({ user, ...(profile && { profile }) });
     } catch (e) {
       logger(e);
       return Failure(e);
     }
   }
+
+  async verifyEmail(token: string, ctx: ActionCtx) {
+    return this.emailVerification.verify(token, ctx);
+  }
 }
 
-export default new UsersController();
-// const cleanData = (obj: Record<string, unknown>) => {
-//   for (const key in obj) {
-//     if (obj[key] === null || obj[key] === undefined) {
-//       delete obj[key];
-//     }
-//   }
-// };
+export default new UsersController(
+  new EmailVerificationService(createEmailService())
+);
+
+const FailureTG = (obj: unknown): obj is Failure<unknown> => {
+  return isObject(obj) && 'success' in obj && !obj.success;
+};

@@ -18,20 +18,9 @@ export default async function DashboardPage(_props: PageProps) {
     queryFn: () => getActiveSale(),
   });
 
-  // const t = await getTranslations();
-
   return (
-    <main
-      className={cn(
-        'bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center w-full h-full'
-      )}
-    >
-      <div
-        className={cn(
-          'p-4 relative mx-auto max-w-7xl space-y-8',
-          'bg-gradient-to-b from-primary to-5% to-transparent'
-        )}
-      >
+    <main className={cn('relative pb-6')}>
+      <div className={cn('p-4 relative mx-auto max-w-7xl space-y-8 z-10')}>
         <VisuallyHidden>
           <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
             Dashboard
@@ -83,17 +72,14 @@ export default async function DashboardPage(_props: PageProps) {
 
         <RecentTransactions />
       </div>
-      {/* <Image
-        src='/static/images/bg2.webp'
-        alt=''
-        priority
-        fill
-        sizes='100vw'
-        style={{
-          objectFit: 'cover',
-          zIndex: -1,
-        }}
-      /> */}
+      <div
+        className={cn(
+          'bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center w-full h-full -z-50!',
+          'size-full absolute inset-0'
+        )}
+      >
+        <div className='absolute inset-0 bg-gradient-to-b from-primary to-5% to-transparent' />
+      </div>
     </main>
   );
 }

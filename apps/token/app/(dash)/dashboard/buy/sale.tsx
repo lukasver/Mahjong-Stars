@@ -12,8 +12,6 @@ import { invariant } from '@epic-web/invariant';
 export const TokenSale = () => {
   const { data: sale, status } = useActiveSale();
 
-  console.debug('🚀 ~ sale.tsx:17 ~ TokenSale ~ sale:', status, sale);
-
   // invariant(!error, 'Sale not found');
   invariant(sale, 'Sale not found');
 

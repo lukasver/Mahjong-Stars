@@ -69,10 +69,6 @@ export const CreateSaleForm = () => {
         });
       }
 
-      console.debug(
-        '🚀 ~ index.tsx:73 ~ CreateSaleForm ~ allErrors:',
-        allErrors
-      );
       toast.error(allErrors.join('\n'));
     },
 
@@ -101,8 +97,6 @@ export const CreateSaleForm = () => {
         if (step === 2) {
           const vals = SaleSchemas[2].parse(value);
           const f = formApi.getFieldMeta('content');
-
-          console.debug('🚀 ~ index.tsx:80 ~ onSubmit: ~ f:', f);
 
           if (sale?.saftCheckbox === true && f?.isPristine) {
             toast.error('Please fill in the Saft contract');
