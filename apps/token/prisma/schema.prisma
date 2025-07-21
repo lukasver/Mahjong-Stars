@@ -9,14 +9,20 @@ generator client {
 }
 
 generator zod {
-  provider               = "zod-prisma-types"
-  output                 = "../common/schemas/generated"
-  useMultipleFiles       = false
-  createModelTypes       = true
+  provider         = "zod-prisma-types"
+  output           = "../common/schemas/generated"
+  useMultipleFiles = false
+  createModelTypes = true
   // Useful for input validation but might affect performance since outputed file is huge
-  createInputTypes       = true
-  addInputTypeValidation = true
+  // createInputTypes       = true
+  // addInputTypeValidation = true
   // createOptionalDefaultValuesTypes = false
+
+  createInputTypes         = false // default is true
+  addInputTypeValidation   = false // default is true
+  addIncludeType           = false // default is true
+  addSelectType            = false // default is true
+  validateWhereUniqueInput = false // default is true
 }
 
 model User {
@@ -54,23 +60,37 @@ model User {
   Document             Document[]
 
   isSiwe            Boolean?
-  WalletAddress     WalletAddress[]
   DocumentRecipient DocumentRecipient[]
+  EmailVerification EmailVerification?
 
   @@map("users")
 }
 
-model WalletAddress {
-  createdAt DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
-  deletedAt DateTime? @db.Timestamptz(6)
+model EmailVerification {
+  id        String   @id @default(cuid()) @db.Text
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  expiredAt DateTime @default(dbgenerated("NOW() + interval '3 hour'"))
 
-  address       User   @relation(fields: [walletAddress], references: [walletAddress], onDelete: Cascade)
-  walletAddress String
-  chainId       Int
+  email  String
+  token  String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 
-  @@unique([walletAddress, chainId])
+  @@map("email_verification")
 }
+
+// model WalletAddress {
+//   createdAt DateTime  @default(now()) @db.Timestamptz(6)
+//   updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+//   deletedAt DateTime? @db.Timestamptz(6)
+
+//   address       User   @relation(fields: [walletAddress], references: [walletAddress], onDelete: Cascade)
+//   walletAddress String
+//   chainId       Int
+
+//   @@unique([walletAddress, chainId])
+// }
 
 model Session {
   id        String   @id @default(cuid()) @db.Text
@@ -127,13 +147,11 @@ model Profile {
   updatedAt DateTime  @updatedAt @db.Timestamptz(6)
   deletedAt DateTime? @db.Timestamptz(6)
 
-  firstName   String?
-  lastName    String?
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String    @unique
-  email       String?
-  // check
-  // walletAddress String?
+  firstName String?
+  lastName  String?
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String  @unique
+
   address     Address?
   phoneNumber String?
   dateOfBirth DateTime?
@@ -167,8 +185,11 @@ model Sale {
   updatedAt DateTime  @updatedAt @db.Timestamptz(6)
   deletedAt DateTime? @db.Timestamptz(6)
 
-  name                   String
-  catchPhrase            String?
+  name        String
+  catchPhrase String?
+  banner      Document? @relation(fields: [bannerId], references: [id], name: "banner")
+  bannerId    String?   @unique
+
   status                 SaleStatus    @default(CREATED)
   saleCurrency           Currency      @relation(fields: [currency], references: [symbol])
   currency               String
@@ -190,12 +211,14 @@ model Sale {
   saleClosingDate        DateTime
   createdBy              String
   saftCheckbox           Boolean       @default(false)
+  /// Check to add if the sale requires upload of KYC documents
+  requiresKYC            Boolean       @default(false)
   saftContract           SaftContract?
   information            Json?
 
   user         User               @relation(fields: [createdBy], references: [id])
   transactions SaleTransactions[]
-  documents    Document[]
+  documents    Document[]         @relation("sale")
 
   vestingSchedules VestingSchedule[]
 
@@ -293,12 +316,15 @@ model Document {
   url      String
   type     String
 
-  sale   Sale?   @relation(fields: [saleId], references: [id])
-  saleId String?
-
   user   User?   @relation(fields: [userId], references: [id])
   userId String?
 
+  sale   Sale?   @relation(fields: [saleId], references: [id], name: "sale")
+  saleId String?
+
+  saleBanner Sale? @relation("banner")
+
+  @@unique([id, url])
   @@map("documents")
 }
 

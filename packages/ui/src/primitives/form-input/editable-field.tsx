@@ -17,6 +17,7 @@ import {
 import { AnyFieldApi } from '@tanstack/react-form';
 import { FileUpload } from '@mjs/ui/components/file-upload';
 import { FileWithPreview } from '@mjs/ui/hooks/use-file-upload';
+import { cn } from '@mjs/ui/lib/utils';
 
 interface FormFieldData {
   label: string;
@@ -42,6 +43,7 @@ export function EditableFormField({
   const label = fieldValue?.label || 'Field Label';
   const fieldType = fieldValue?.type || 'textarea';
   const value = fieldValue?.value || '';
+  const required = fieldValue?.props?.required || false;
 
   useEffect(() => {
     if (isEditingLabel && labelInputRef.current) {
@@ -92,6 +94,9 @@ export function EditableFormField({
   };
 
   const handleRemove = () => {
+    if (required) {
+      return;
+    }
     onRemove(index);
   };
 
@@ -120,7 +125,11 @@ export function EditableFormField({
         </div>
 
         <div className='flex items-center gap-2'>
-          <Select value={fieldType} onValueChange={handleTypeChange}>
+          <Select
+            value={fieldType}
+            onValueChange={handleTypeChange}
+            disabled={required}
+          >
             <SelectTrigger className='w-24 h-8 text-xs'>
               <SelectValue />
             </SelectTrigger>
@@ -130,14 +139,18 @@ export function EditableFormField({
             </SelectContent>
           </Select>
 
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={handleRemove}
-            className='h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground'
-          >
-            <X className='h-4 w-4' />
-          </Button>
+          {!required && (
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleRemove}
+              className={cn(
+                'h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground'
+              )}
+            >
+              <X className='h-4 w-4' />
+            </Button>
+          )}
         </div>
       </div>
 

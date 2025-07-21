@@ -16,6 +16,8 @@ import { AccountProvider as AccountProviderThirdweb } from 'thirdweb/react';
 import useActiveAccount from '../hooks/use-active-account';
 
 const IS_DEV = process.env.NODE_ENV === 'development';
+// change to true for debug
+const DEBUG = IS_DEV && false;
 
 function AccountProvider({ children }: { children: React.ReactNode }) {
   const { activeAccount, status, signout, isLoading } = useActiveAccount();
@@ -25,7 +27,7 @@ function AccountProvider({ children }: { children: React.ReactNode }) {
   };
 
   // In development we don't care if wallet is connected
-  if (IS_DEV) {
+  if (DEBUG) {
     return (
       <AccountProviderThirdweb
         address={'0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70'}

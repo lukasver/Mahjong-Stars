@@ -29,6 +29,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useSale } from '@/lib/services/api';
 import { getQueryClient } from '@/app/providers';
+import { InformationSchemaAsStrings } from '@/common/schemas/dtos/sales/information';
 
 export const CreateSaleForm = () => {
   const router = useRouter();
@@ -68,10 +69,6 @@ export const CreateSaleForm = () => {
         });
       }
 
-      console.debug(
-        '🚀 ~ index.tsx:73 ~ CreateSaleForm ~ allErrors:',
-        allErrors
-      );
       toast.error(allErrors.join('\n'));
     },
 
@@ -100,8 +97,6 @@ export const CreateSaleForm = () => {
         if (step === 2) {
           const vals = SaleSchemas[2].parse(value);
           const f = formApi.getFieldMeta('content');
-
-          console.debug('🚀 ~ index.tsx:80 ~ onSubmit: ~ f:', f);
 
           if (sale?.saftCheckbox === true && f?.isPristine) {
             toast.error('Please fill in the Saft contract');
@@ -148,12 +143,12 @@ export const CreateSaleForm = () => {
           if (fileValues.length > 0) {
             const uploads = await Promise.all(
               fileValues.map(async ({ value }) => {
-                const fileName = `${saleId}/${value.name}`;
+                const fileName = `${saleId}/${(value as File).name}`;
                 return getFileUploadPresignedUrl({ key: fileName }).then(
                   async (url) => {
                     if (url?.data) {
                       return uploadFile(
-                        { file: value, name: fileName },
+                        { file: value as File, name: fileName },
                         url.data.url
                       );
                     } else {
@@ -168,17 +163,14 @@ export const CreateSaleForm = () => {
               type: 'file',
               label: file.label,
               value: uploads[i]?.fileName!,
+              props: file.props,
             }));
           }
 
-          const submitValues: {
-            type: 'text' | 'textarea' | 'file';
-            value: string;
-            label: string;
-          }[] = [...nonFileValues, ...uploadedFiles];
-
           const result = await informationAction.executeAsync({
-            data: { information: submitValues },
+            data: InformationSchemaAsStrings.parse({
+              information: [...nonFileValues, ...uploadedFiles],
+            }),
             id: saleId,
           });
           if (result?.data) {

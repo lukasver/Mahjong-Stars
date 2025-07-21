@@ -6,12 +6,10 @@ import {
   getContract,
   getExchangeRate,
   getInputOptions,
-  getPendingTransactions,
-  getUserSaleTransactions,
   getUserTransactions,
   getWeb3Contract,
 } from '@/lib/actions';
-import { FOP, TransactionStatus } from '@prisma/client';
+import { FOP } from '@prisma/client';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import {
   getActiveSale,
@@ -22,6 +20,7 @@ import {
   getSaleInvestInfo,
   getSales,
   getSaleSaft,
+  getUserPendingTransactionsForSale,
 } from './fetchers';
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -101,16 +100,6 @@ export function useWeb3Contract(address: string) {
   return { data: data?.data, error: e, status };
 }
 
-// export const usePendingTransactions = () => {
-//   const { data, status, error } = useSuspenseQuery({
-//     queryKey: ['transactions', 'pending'],
-//     queryFn: () => getPendingTransactions(),
-//     staleTime: DEFAULT_STALE_TIME,
-//   });
-//   const e = getError(data, error);
-//   return { data: data?.data, error: e, status };
-// };
-
 export const useSaftStatus = () => {
   const { data, status, error } = useSuspenseQuery({
     queryKey: ['safts'],
@@ -131,40 +120,16 @@ export const useTransactions = () => {
   return { data: data?.data, error: e, status };
 };
 
-export const usePendingTransactions = () => {
-  const { data, status, error } = useSuspenseQuery({
-    queryKey: ['transactions', 'status'],
-    queryFn: () => getPendingTransactions(),
+export const usePendingTransactionsForSale = (saleId: string) => {
+  const { data, status, error } = useQuery({
+    queryKey: ['transactions', saleId, 'pending'],
+    queryFn: ({ queryKey }) =>
+      getUserPendingTransactionsForSale(queryKey[1] as string),
     staleTime: DEFAULT_STALE_TIME,
+    enabled: !!saleId,
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, status };
-};
-
-/**
- * Used to check if there is a pending transaction for current user for a particular sale
- * @param saleId - The ID of the sale to check transactions for
- * @param status - The transaction status to filter by
- */
-export const useUserSaleTransactions = (
-  saleId: string,
-  status?: TransactionStatus
-) => {
-  const {
-    data,
-    status: queryStatus,
-    error,
-  } = useSuspenseQuery({
-    queryKey: ['transactions', saleId, status],
-    queryFn: ({ queryKey }) =>
-      getUserSaleTransactions({
-        saleId: queryKey[1] as string,
-        status: queryKey[2] as TransactionStatus,
-      }),
-    staleTime: DEFAULT_STALE_TIME,
-  });
-  const e = getError(data, error);
-  return { data: data?.data, error: e, status: queryStatus };
 };
 
 /**

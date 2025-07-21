@@ -13,6 +13,17 @@ import { Failure, Success } from '@/common/schemas/dtos/utils';
 import { GetExchangeRate } from '@/common/schemas/dtos/rates';
 import { prisma } from '@/lib/db/prisma';
 
+import { Cacheable } from 'cacheable';
+import 'server-only';
+import { ONE_MINUTE } from '@/common/config/constants';
+
+const cacheTTL =
+  ONE_MINUTE * (process.env.NODE_ENV === 'production' ? 1 : 10 * 60);
+const cache = new Cacheable({
+  namespace: 'feeds::rates:',
+  ttl: cacheTTL,
+});
+
 const PRICE_FEED_CONTRACTS = {
   [bsc.id]: {
     BNBUSD: '0xc5a35fc58efdc4b88ddca51acacd2e8f593504be',
@@ -43,7 +54,40 @@ export class RatesController {
     }
   }
 
+  /**
+   * Generate a unique cache key for a currency pair and chainId.
+   * @param from - Source currency symbol(s)
+   * @param to - Target currency symbol(s)
+   * @param chainId - Chain ID
+   * @returns Cache key string
+   */
+  private getCacheKey(
+    from: string | string[],
+    to: string | string[],
+    chainId: number
+  ): string {
+    const fromKey = Array.isArray(from) ? from.join(',') : from;
+    const toKey = Array.isArray(to) ? to.join(',') : to;
+    return `${fromKey}:${toKey}:chain:${chainId}`;
+  }
+
   async getExchangeRate(
+    from: string | string[],
+    to: string | string[],
+    opts?: { chainId: number }
+  ) {
+    return cache.getOrSet(
+      this.getCacheKey(from, to, opts?.chainId || bsc.id),
+      async () => {
+        return this._getExchangeRate(from, to, opts);
+      }
+    );
+  }
+
+  /**
+   * Non cached version of getExchangeRate
+   */
+  async _getExchangeRate(
     from: string | string[],
     to: string | string[],
     opts?: { chainId: number }

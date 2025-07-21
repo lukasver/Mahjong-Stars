@@ -72,11 +72,11 @@ export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
           render={!!initialTokenQuantity}
         />
         <Row
-          title='Price'
+          title='Price per token'
           value={formatCurrency(tokenPricePerUnit, {
             currency,
             locale,
-            minimumFractionDigits: 2,
+            minimumFractionDigits: 3,
             maximumFractionDigits: 6,
           })}
           render={!!tokenPricePerUnit && !!currency}

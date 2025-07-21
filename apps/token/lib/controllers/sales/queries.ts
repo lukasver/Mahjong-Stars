@@ -37,4 +37,9 @@ export const DEFAULT_SALE_SELECT: Prisma.SaleSelect = {
   currency: true,
   token: TOKEN_QUERY,
   information: true,
+  banner: {
+    select: {
+      url: true,
+    },
+  },
 } as const;

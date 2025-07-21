@@ -60,16 +60,16 @@ const data = {
       icon: Globe,
       items: [
         {
-          title: 'Token Info',
-          url: '/token',
+          title: 'Tokenomics',
+          url: `/docs/${process.env.NEXT_PUBLIC_TOKENOMICS_SLUG}`,
         },
         {
           title: 'Schedule',
-          url: '/schedule',
+          url: `/docs/${process.env.NEXT_PUBLIC_SCHEDULE_SLUG}`,
         },
         {
           title: 'Whitepaper',
-          url: '/whitepaper',
+          url: `/docs/${process.env.NEXT_PUBLIC_WHITEPAPER_SLUG}`,
         },
       ],
     },

@@ -7,7 +7,6 @@ import {
 } from '@mjs/ui/primitives/accordion';
 
 import { FieldDescription } from '@/components/buy/fields';
-import { SaleInformationItem } from '@/common/schemas/dtos/sales';
 
 import { useSaleDocuments } from '@/lib/services/api';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
@@ -17,7 +16,16 @@ import {
   TabsList,
   TabsTrigger,
 } from '@mjs/ui/primitives/tabs';
-import { FileText, ImageIcon, ImagesIcon, Info } from 'lucide-react';
+import {
+  Download,
+  File,
+  FileAudio,
+  FileText,
+  FileVideo,
+  ImageIcon,
+  ImagesIcon,
+  Info,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -28,6 +36,11 @@ import { VisuallyHidden } from '@mjs/ui/primitives/visually-hidden';
 import { cn } from '@mjs/ui/lib/utils';
 import { Placeholder } from '@/components/placeholder';
 import { SaleWithToken } from '@/common/types/sales';
+import ImagesSection from '@/components/images-gallery';
+import { InformationSchemaAsStrings } from '@/common/schemas/dtos/sales/information';
+import { Document } from '@/common/schemas/generated';
+import { Button } from '@mjs/ui/primitives/button';
+import { getBucketUrl } from '@/lib/utils/files';
 
 export const ProjectInformation = ({
   sale,
@@ -102,7 +115,7 @@ export const ProjectInformation = ({
 
 const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
   const information =
-    sale?.information as unknown as Array<SaleInformationItem>;
+    sale?.information as unknown as InformationSchemaAsStrings['information'];
   if (!information) return null;
   return (
     <div className='mt-4'>
@@ -137,9 +150,8 @@ const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
 
 const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
   const { data: docs, isLoading } = useSaleDocuments(sale.id);
-  console.debug('🚀 ~ overview.tsx:138 ~ DocumentsTab ~ docs:', docs);
   if (isLoading) return <div>Loading...</div>;
-  if (!docs)
+  if (!docs?.documents)
     return (
       <Placeholder
         title='No documents found'
@@ -147,8 +159,48 @@ const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
       />
     );
   return (
-    <div>
-      <h1>Documents</h1>
+    <div className='space-y-3'>
+      {docs.documents.map((document, index) => (
+        <Card
+          key={index}
+          className='bg-slate-800/50 border-slate-700 hover:bg-slate-700/50 transition-colors cursor-pointer'
+          onClick={() => handleDownload(document)}
+        >
+          <div className='p-4 flex items-center justify-between'>
+            <div className='flex items-center space-x-4 flex-1 min-w-0'>
+              <div className='flex-shrink-0 text-slate-400'>
+                {getFileIcon(document.type)}
+              </div>
+
+              <div className='flex-1 min-w-0'>
+                <h3 className='text-white font-medium truncate'>
+                  {document.name}
+                </h3>
+                <div className='flex items-center space-x-2 mt-1'>
+                  <span className='text-xs text-slate-400 truncate'>
+                    {document.fileName}
+                  </span>
+                  <span className='text-xs bg-slate-600 text-slate-300 px-2 py-0.5 rounded flex-shrink-0'>
+                    {getFileExtension(document.fileName)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              variant='ghost'
+              size='icon'
+              className='text-slate-400 hover:text-white hover:bg-slate-600 flex-shrink-0'
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownload(document);
+              }}
+            >
+              <Download className='h-4 w-4' />
+            </Button>
+          </div>
+        </Card>
+      ))}
     </div>
   );
 };
@@ -166,8 +218,63 @@ const GalleryTab = ({ sale }: { sale: SaleWithToken }) => {
     );
 
   return (
-    <div>
-      <h1>Gallery</h1>
+    <div className='max-w-lg mx-auto'>
+      <ImagesSection
+        images={docs.images.map((image) => ({
+          src: getBucketUrl(image.url),
+          id: image.id,
+        }))}
+      />
     </div>
   );
+};
+
+const getFileIcon = (type: string) => {
+  const lowerType = type.toLowerCase();
+
+  if (
+    lowerType.includes('pdf') ||
+    lowerType.includes('doc') ||
+    lowerType.includes('txt')
+  ) {
+    return <FileText className='h-5 w-5' />;
+  }
+  if (
+    lowerType.includes('image') ||
+    lowerType.includes('png') ||
+    lowerType.includes('jpg') ||
+    lowerType.includes('jpeg')
+  ) {
+    return <ImageIcon className='h-5 w-5' />;
+  }
+  if (
+    lowerType.includes('video') ||
+    lowerType.includes('mp4') ||
+    lowerType.includes('avi')
+  ) {
+    return <FileVideo className='h-5 w-5' />;
+  }
+  if (
+    lowerType.includes('audio') ||
+    lowerType.includes('mp3') ||
+    lowerType.includes('wav')
+  ) {
+    return <FileAudio className='h-5 w-5' />;
+  }
+  return <File className='h-5 w-5' />;
+};
+
+const getFileExtension = (fileName: string) => {
+  return fileName.split('.').pop()?.toUpperCase() || 'FILE';
+};
+
+const handleDownload = (d: Document) => {
+  // Create a temporary anchor element to trigger download
+  const link = document.createElement('a');
+  link.href = d.url;
+  link.download = d.fileName;
+  link.target = '_blank';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };

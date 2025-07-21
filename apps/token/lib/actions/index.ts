@@ -3,7 +3,6 @@ import 'server-only';
 import { CreateContractStatusDto } from '@/common/schemas/dtos/contracts';
 import { GetSaleDto, GetSalesDto } from '@/common/schemas/dtos/sales';
 import {
-  CreateTransactionDto,
   GetTransactionDto,
   UpdateTransactionDto,
 } from '@/common/schemas/dtos/transactions';
@@ -34,12 +33,18 @@ import {
   verifyJwt,
 } from '../auth/thirdweb';
 import { authActionClient, loginActionClient } from './config';
-import { JWT_EXPIRATION_TIME } from '@/common/config/constants';
+import {
+  FIAT_CURRENCIES,
+  JWT_EXPIRATION_TIME,
+} from '@/common/config/constants';
 import {
   deleteSessionCookie,
   getSessionCookie,
   setSessionCookie,
 } from '../auth/cookies';
+import { env } from '@/common/config/env';
+import { InvestFormSchema } from '@/app/(dash)/dashboard/buy/invest/schemas';
+import { FOP, Prisma } from '@prisma/client';
 
 export const hasActiveSession = async (address: string, token: string) => {
   const sessions = await prisma.session.findMany({
@@ -66,9 +71,7 @@ export const isLoggedIn = loginActionClient
   .schema(z.string())
   .action(async ({ parsedInput }) => {
     const data = await getSessionCookie();
-    console.log('IS LOGGED IN CALLED', data);
     if (!data) return false;
-
     const hasSession = await hasActiveSession(parsedInput, data);
     return hasSession;
   });
@@ -102,6 +105,7 @@ export const login = loginActionClient
     }
     const { payload } = verifiedPayload;
 
+    console.log('VERIFIED PAYLOAD');
     // Here should go the JWT logic
     const [jwt] = await Promise.all([
       generateJWT(payload, {
@@ -118,9 +122,9 @@ export const login = loginActionClient
       },
       chainId: payload.chain_id ? Number(payload.chain_id) : undefined,
     });
-    invariant(user, 'User could not be found/created');
-    console.debug('Redirecting to dashboard...');
-    redirect('/dashboard');
+    invariant(user?.success, 'User could not be found/created');
+
+    redirect(user.data.user.emailVerified ? '/dashboard' : '/onboarding');
   });
 
 export const generatePayload = loginActionClient
@@ -150,7 +154,7 @@ export const logout = loginActionClient.action(async () => {
         })
         .catch((e) => {
           console.error(
-            '🚀 ~ index.ts:122 ~ e:',
+            'index.ts:122 ~ e:',
             e instanceof Error ? e.message : e
           );
         }),
@@ -254,18 +258,28 @@ export const updateUserInfo = authActionClient
     return sales.data;
   });
 
-export const getPendingTransactions = authActionClient.action(
-  async ({ ctx }) => {
-    const sales = await transactionsController.pendingContactTransactions(
-      {},
+export const getPendingTransactionsForSale = authActionClient
+  .schema(
+    z.object({
+      saleId: z.string(),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const sales = await transactionsController.userTransactionsForSale(
+      {
+        saleId: parsedInput.saleId,
+        status: [
+          TransactionStatusSchema.enum.PENDING,
+          TransactionStatusSchema.enum.AWAITING_PAYMENT,
+        ],
+      },
       ctx
     );
     if (!sales.success) {
       throw new Error(sales.message);
     }
     return sales.data;
-  }
-);
+  });
 
 export const getUserSaleTransactions = authActionClient
   .schema(
@@ -299,10 +313,21 @@ export const getUserTransactions = authActionClient
   });
 
 export const createTransaction = authActionClient
-  .schema(CreateTransactionDto)
+  .schema(InvestFormSchema)
   .action(async ({ ctx, parsedInput }) => {
     const transactions = await transactionsController.createTransaction(
-      parsedInput,
+      {
+        tokenSymbol: parsedInput.tokenSymbol,
+        quantity: new Prisma.Decimal(parsedInput.paid.quantity),
+        formOfPayment: FIAT_CURRENCIES.includes(parsedInput.paid.currency)
+          ? FOP.TRANSFER
+          : FOP.CRYPTO,
+        receivingWallet: parsedInput.receivingWallet,
+        saleId: parsedInput.saleId,
+        amountPaid: parsedInput.paid.amount,
+        paidCurrency: parsedInput.paid.currency,
+        comment: null,
+      },
       ctx
     );
     if (!transactions.success) {
@@ -344,24 +369,43 @@ export const getExchangeRate = authActionClient
     return exchangeRate;
   });
 
-// TODO! this should not be a server action, instead happen when user updates email
-// export const createEmailVerification = async (
-//   formData: Partial<EmailVerification>
-// ): CallApiRes<CreateEmailVerificationRes> => {
-//   try {
-//     const { data, status } = await callAPI<CreateEmailVerificationRes>({
-//       url: '/emailVerification',
-//       method: 'POST' as const,
-//       data: formData,
-//     });
-//     if (!isHTTPSuccessStatus(status)) {
-//       throw new Error(GET_UNHANDLED_ERROR);
-//     }
-//     return { success: true, emailVerification: data.emailVerification };
-//   } catch (err) {
-//     return notifyError(err);
-//   }
-// };
+export const createEmailVerification = authActionClient
+  .schema(
+    UserSchema.pick({
+      email: true,
+    }).extend({
+      firstName: z
+        .string()
+        .max(64, 'First name must be less than 64 characters')
+        .optional(),
+      lastName: z
+        .string()
+        .max(64, 'Last name must be less than 64 characters')
+        .optional(),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const { email, ...profile } = parsedInput;
+    const result = await usersController.updateUser(
+      { user: { email }, profile },
+      ctx
+    );
+
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result;
+  });
+
+export const verifyEmail = authActionClient
+  .schema(z.object({ token: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    const result = await usersController.verifyEmail(parsedInput.token, ctx);
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result;
+  });
 
 export const updateContractStatus = authActionClient
   .schema(CreateContractStatusDto)
@@ -427,6 +471,19 @@ export const getFileUploadPresignedUrl = authActionClient
       throw new Error(result.message);
     }
     return result.data;
+  });
+
+export const validateMagicWord = authActionClient
+  .schema(z.object({ invitationCode: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    if (!env.MAGIC_WORD) {
+      // IF not set, then allow access
+      return true;
+    }
+    if (parsedInput.invitationCode !== env.MAGIC_WORD) {
+      throw new Error('Invalid magic word');
+    }
+    return true;
   });
 
 /**

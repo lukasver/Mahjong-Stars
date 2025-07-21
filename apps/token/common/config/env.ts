@@ -56,6 +56,7 @@ export const env = createEnv({
     EXCHANGE_RATES_API_KEY: z.string().min(1),
     EXCHANGE_RATES_API_URL_BACKUP: z.string().url().min(1).optional(),
     EXCHANGE_RATES_API_KEY_BACKUP: z.string().min(1).optional(),
+    MAGIC_WORD: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_THIRDWEB_CLIENT_ID: z.string().min(1),
@@ -68,6 +69,7 @@ export const env = createEnv({
     NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: z.string().min(1),
     NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS: z.string().min(1),
     NEXT_PUBLIC_MAIN_WALLET: z.string().min(1),
+    NEXT_PUBLIC_BUCKET_PUBLIC_URL: z.string().url().min(1),
   },
   runtimeEnv: {
     NEXT_PUBLIC_DOMAIN: getPublicUrl(),
@@ -96,6 +98,8 @@ export const env = createEnv({
     EXCHANGE_RATES_API_KEY: process.env.EXCHANGE_RATES_API_KEY,
     EXCHANGE_RATES_API_URL_BACKUP: process.env.EXCHANGE_RATES_API_URL_BACKUP,
     EXCHANGE_RATES_API_KEY_BACKUP: process.env.EXCHANGE_RATES_API_KEY_BACKUP,
+    NEXT_PUBLIC_BUCKET_PUBLIC_URL: process.env.NEXT_PUBLIC_BUCKET_PUBLIC_URL,
+    MAGIC_WORD: process.env.MAGIC_WORD,
   },
 });
 

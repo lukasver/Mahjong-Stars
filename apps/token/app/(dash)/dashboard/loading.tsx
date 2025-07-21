@@ -5,20 +5,12 @@ import { MetricCardsLoading } from '@/components/skeletons/metric-cards-loading'
 
 function Loading() {
   return (
-    // <div className="min-h-screen bg-background">
-    // 	<HeaderLoading />
-
-    // 	<div className="flex">
-    // 		<SidebarLoading />
-
     <div className='flex-1 p-8 space-y-8'>
       <FundraisingProgressLoading />
       <MetricCardsLoading />
       <LargeCardsLoading />
       <BottomSectionsLoading />
     </div>
-    // 	</div>
-    // </div>
   );
 }
 
