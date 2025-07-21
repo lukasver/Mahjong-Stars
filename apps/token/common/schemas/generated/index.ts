@@ -90,7 +90,7 @@ export const ProfileScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt'
 
 export const AddressScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','city','zipCode','country','state','street','formattedAddress','latitude','longitude']);
 
-export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','catchPhrase','bannerId','status','currency','initialTokenQuantity','availableTokenQuantity','maximumTokenBuyPerUser','minimumTokenBuyPerUser','saleStartDate','tokenContractAddress','tokenContractChainId','tokenId','tokenName','tokenSymbol','tokenTotalSupply','tokenPricePerUnit','toWalletsAddress','saleClosingDate','createdBy','saftCheckbox','information']);
+export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','catchPhrase','bannerId','status','currency','initialTokenQuantity','availableTokenQuantity','maximumTokenBuyPerUser','minimumTokenBuyPerUser','saleStartDate','tokenContractAddress','tokenContractChainId','tokenId','tokenName','tokenSymbol','tokenTotalSupply','tokenPricePerUnit','toWalletsAddress','saleClosingDate','createdBy','saftCheckbox','requiresKYC','information']);
 
 export const SaftContractScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description','url','content','variables','version','parentId','isCurrent','saleId']);
 
@@ -317,6 +317,10 @@ export const SaleSchema = z.object({
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
   saftCheckbox: z.boolean(),
+  /**
+   * Check to add if the sale requires upload of KYC documents
+   */
+  requiresKYC: z.boolean(),
   information: JsonValueSchema.nullable(),
 })
 

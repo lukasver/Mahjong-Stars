@@ -211,6 +211,8 @@ model Sale {
   saleClosingDate        DateTime
   createdBy              String
   saftCheckbox           Boolean       @default(false)
+  /// Check to add if the sale requires upload of KYC documents
+  requiresKYC            Boolean       @default(false)
   saftContract           SaftContract?
   information            Json?
 

@@ -1,4 +1,4 @@
-import amountCalculatorService from '@/lib/services/pricefeeds/amount.service';
+import calculator from '@/lib/services/pricefeeds';
 import { toast } from '@mjs/ui/primitives/sonner';
 import { useState } from 'react';
 import { useEffect } from 'react';
@@ -29,15 +29,14 @@ export const usePricePerUnit = ({
       const fetchData = async () => {
         if (enabled && from && to) {
           try {
-            const { pricePerUnit } =
-              await amountCalculatorService.getAmountAndPricePerUnit({
-                initialCurrency: from,
-                currency: to,
-                quantity: 0,
-                base: base,
-                precision,
-                ...rest,
-              });
+            const { pricePerUnit } = await calculator.getAmountAndPricePerUnit({
+              initialCurrency: from,
+              currency: to,
+              quantity: 0,
+              base: base,
+              precision,
+              ...rest,
+            });
             setPricePerUnit(pricePerUnit);
           } catch (_error) {
             toast.error('Ops! someting wrong.');

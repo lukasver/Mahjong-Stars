@@ -6,7 +6,11 @@ import {
   GetTransactionDto,
   UpdateTransactionDto,
 } from '@/common/schemas/dtos/transactions';
-import { Failure, Success } from '@/common/schemas/dtos/utils';
+import {
+  decimalsToString,
+  Failure,
+  Success,
+} from '@/common/schemas/dtos/utils';
 import { prisma } from '@/db';
 import logger from '@/lib/services/logger.server';
 import { invariant } from '@epic-web/invariant';
@@ -130,64 +134,108 @@ class TransactionsController {
     }
   }
 
+  async getTransactionById(dto: { id: string }, _ctx: ActionCtx) {
+    try {
+      const transaction = await prisma.saleTransactions.findUniqueOrThrow({
+        where: { id: String(dto.id) },
+        select: {
+          sale: {
+            select: {
+              requiresKYC: true,
+              saftCheckbox: true,
+            },
+          },
+          user: {
+            select: {
+              profile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  kyc: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      return Success({ transaction });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
   /**
    * Create a new transaction.
    */
-  async createTransaction(dto: CreateTransactionDto, _ctx: ActionCtx) {
+  async createTransaction(dto: CreateTransactionDto, ctx: ActionCtx) {
     try {
       const {
         tokenSymbol,
         quantity,
         formOfPayment,
         receivingWallet,
-        userId,
         saleId,
         comment,
         amountPaid,
         paidCurrency,
       } = dto;
-      invariant(userId, 'User id missing');
+      const userId = ctx.userId;
       invariant(saleId, 'Sale id missing');
-      const sale = await prisma.sale.findUnique({ where: { id: saleId } });
+      invariant(userId, 'User id missing');
+      const sale = await prisma.sale.findUnique({
+        where: {
+          id: saleId,
+          status: SaleStatus.OPEN,
+          availableTokenQuantity: { gte: quantity.toNumber() },
+        },
+      });
       invariant(sale, 'Sale not found');
 
       if (
-        sale.availableTokenQuantity &&
-        sale.availableTokenQuantity < Number(quantity)
+        new Prisma.Decimal(quantity).greaterThan(sale.availableTokenQuantity)
       ) {
         return Failure('Cannot buy more tokens than available amount', 400);
       }
       // Check for pending transaction
       const pendingTransaction = await prisma.saleTransactions.findFirst({
-        where: { status: TransactionStatus.PENDING, saleId, userId },
+        where: {
+          status: {
+            in: [TransactionStatus.PENDING, TransactionStatus.AWAITING_PAYMENT],
+          },
+          saleId,
+          user: { walletAddress: ctx.address },
+        },
       });
-      if (pendingTransaction) {
-        invariant(
-          false,
-          'Cannot create a new transaction if user has a pending one'
-        );
+      invariant(
+        !pendingTransaction,
+        'Cannot create a new transaction if user has a pending one'
+      );
+
+      // Check requirement
+      if (sale.requiresKYC) {
+        // TODO: Check if user has KYC
       }
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { isSiwe: true },
-      });
-
-      if (user?.isSiwe) {
-        this.checkMaxAllowanceWithoutKYC(quantity.toString(), sale);
+      if (sale.saftCheckbox) {
+        // TODO: Check if user has SAFT
       }
+
+      // this.checkMaxAllowanceWithoutKYC(quantity.toString(), sale);
 
       // TODO: Add contract/SAFT logic if needed
       // TODO: Calculate rawPrice, price, totalAmount correctly
-      const [_updatedSale, transaction] = await Promise.all([
-        prisma.sale.update({
+
+      const transaction = await prisma.$transaction(async (tx) => {
+        tx.sale.update({
           where: { id: saleId },
           data: { availableTokenQuantity: { decrement: Number(quantity) } },
-        }),
-        prisma.saleTransactions.create({
+        });
+        const price = new Prisma.Decimal(amountPaid);
+        return tx.saleTransactions.create({
           data: {
             tokenSymbol,
-            quantity: new Prisma.Decimal(Number(quantity)),
+            quantity: new Prisma.Decimal(quantity),
             formOfPayment,
             receivingWallet,
             comment,
@@ -196,13 +244,24 @@ class TransactionsController {
             paidCurrency,
             saleId,
             userId,
-            rawPrice: '0', // TODO: calculate
-            price: new Prisma.Decimal(0), // TODO: calculate
-            totalAmount: new Prisma.Decimal(0), // TODO: calculate
+            rawPrice: amountPaid,
+            price: price.div(new Prisma.Decimal(quantity)),
+            totalAmount: price,
           },
-        }),
-      ]);
-      return Success({ transaction });
+        });
+      });
+
+      console.debug(
+        '🚀 ~ index.ts:219 ~ TransactionsController ~ transaction ~ transaction:',
+        transaction
+      );
+
+      return Success({
+        transaction: decimalsToString(transaction),
+        saft: sale.saftCheckbox,
+        kyc: sale.requiresKYC,
+        paymentMethod: formOfPayment,
+      });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -385,18 +444,19 @@ class TransactionsController {
    * Get user transactions for a specific sale.
    */
   async userTransactionsForSale(
-    dto: { saleId: string; status?: keyof typeof TransactionStatus },
+    dto: { saleId: string; status?: TransactionStatus[] },
     ctx: ActionCtx
   ) {
     try {
       const { saleId, status: _status } = dto;
-      invariant(ctx.userId, 'User not found');
       invariant(saleId, 'Sale not found');
-      const status: TransactionStatus =
-        (_status && TransactionStatus[_status]) || TransactionStatus.PENDING;
       const transactions = await prisma.saleTransactions.findMany({
         where: {
-          AND: [{ saleId: String(saleId) }, { userId: ctx.userId }, { status }],
+          AND: [
+            { saleId: String(saleId) },
+            { user: { walletAddress: ctx.address } },
+            { status: { in: _status } },
+          ],
         },
       });
       const transaction = transactions[0];

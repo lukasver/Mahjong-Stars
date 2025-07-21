@@ -258,7 +258,7 @@ class UsersController {
           },
         })
       );
-      if (changedEmail && dto.user.email) {
+      if (dto.user.email) {
         promises.push(
           this.emailVerification.createEmailVerification(dto.user.email, ctx)
         );
@@ -272,7 +272,7 @@ class UsersController {
           logger(result.value.message);
         }
       });
-      const [profile, user, email] = results
+      const [profile, user] = results
         .filter((p) => p.status === 'fulfilled')
         .map((p) => p.value);
 

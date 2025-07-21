@@ -58,45 +58,6 @@ const Header = ({ sale }: { sale: SaleWithToken }) => {
         <h1 className='text-4xl font-bold text-white'>{sale.name}</h1>
       </div>
       <p className='text-xl text-gray-300 max-w-2xl mx-auto'>{description}</p>
-      {/* <div className='flex items-center justify-center gap-4 mt-6'>
-        <Badge
-          variant='secondary'
-          className='bg-green-500/20 text-green-400 border-green-500/30'
-        >
-          <div className='w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse' />
-          Presale Active
-        </Badge>
-        <Badge
-          variant='outline'
-          className='border-yellow-500/30 text-yellow-400'
-        >
-          <TrendingUp className='w-4 h-4 mr-1' />
-          Early Bird Bonus: 20%
-        </Badge>
-      </div> */}
     </div>
   );
 };
-
-// <div className='flex flex-col gap-6'>
-//   <div className='flex flex-col items-start py-8 gap-4'>
-//     <h1 className='text-2xl font-bold text-primary'>{sale?.name}</h1>
-//     {/* TODO: Pass correct user object if available */}
-//     {/* {isSaleCreatedByCurrentUser(sale, undefined) ? (
-//       <EditEmailContact sale={sale} mutate={mutate} />
-//     ) : null} */}
-//   </div>
-//   <Card className='w-full aspect-video relative overflow-hidden'>
-//     {/* ImageWithFallback and EditImage are custom, do not refactor */}
-//     {/* <EditImage sale={sale} /> */}
-//   </Card>
-//   {/* Responsive details: show ProjectDetailsTwo below on mobile, right on desktop */}
-//   <div className='block md:hidden mt-8'>
-
-//   </div>
-
-//   {/* Desktop ProjectDetailsTwo */}
-//   <div className='hidden md:flex flex-col items-end pt-8'>
-//     <OverviewFormInvest sale={sale} />
-//   </div>
-// </div>

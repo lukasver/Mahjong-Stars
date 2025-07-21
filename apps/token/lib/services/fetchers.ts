@@ -7,6 +7,7 @@ import {
   Currency,
   Document,
   SaftContract,
+  TransactionStatusSchema,
   User,
 } from '@/common/schemas/generated';
 import { SaleWithToken } from '@/common/types/sales';
@@ -195,6 +196,8 @@ export const getSaleInvestInfo = async (id: string) => {
         | 'saftCheckbox'
         | 'currency'
         | 'token'
+        | 'requiresKYC'
+        | 'tokenSymbol'
       > & {
         blockchain: Pick<Blockchain, 'chainId' | 'name'>;
       };
@@ -222,6 +225,21 @@ export const getCurrencies = async () => {
     const data = await fetcher<{
       currencies: Pick<Currency, 'symbol' | 'name' | 'type'>[];
     }>(`/feeds/currencies`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getUserPendingTransactionsForSale = async (saleId: string) => {
+  const params = new URLSearchParams([
+    ['status', TransactionStatusSchema.enum.PENDING],
+    ['status', TransactionStatusSchema.enum.AWAITING_PAYMENT],
+  ]);
+  try {
+    const data = await fetcher<{ transactions: unknown[] }>(
+      `/transactions/${saleId}?${params.toString()}`
+    );
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };

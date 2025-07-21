@@ -1,9 +1,8 @@
-import { Currency } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { BigNumberish, parseUnits } from 'ethers';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { Sale } from '@/common/schemas/generated';
-import { getExchangeRate } from '../fetchers';
+import { GetExchangeRate } from '@/common/schemas/dtos/rates';
 
 const Decimal = Prisma.Decimal;
 
@@ -23,13 +22,27 @@ type getAmountAndPricePerUnitReturn = {
   currency: string;
 };
 
+type GetRateFetcher = (
+  from: string,
+  to: string
+) => Promise<
+  | {
+      data: GetExchangeRate;
+      error: null;
+    }
+  | {
+      data: null;
+      error: unknown;
+    }
+>;
+
 export class AmountCalculatorService {
   public FIAT_PRECISION: number = 4;
   public CRYPTO_PRECISION: number = 8;
   public BASIS_POINTS: number = new Decimal(2).div(10000).toNumber();
-  private getRateFetcher: typeof getExchangeRate;
+  private getRateFetcher: GetRateFetcher;
 
-  constructor(fetcher: typeof getExchangeRate) {
+  constructor(fetcher: GetRateFetcher) {
     this.getRateFetcher = fetcher;
   }
 
@@ -47,13 +60,11 @@ export class AmountCalculatorService {
     base,
   }: {
     exchangeRate: number;
-    precision: number;
     base: string;
+    precision: number;
   }) {
-    return new Decimal(exchangeRate)
-      .toDecimalPlaces(precision)
-      .mul(base)
-      .toString();
+    const val = new Decimal(exchangeRate).mul(base);
+    return val.toFixed(precision);
   }
 
   /**
@@ -67,7 +78,7 @@ export class AmountCalculatorService {
     precision = this.FIAT_PRECISION,
   }: {
     pricePerUnit: Prisma.Decimal | string;
-    quantity: string;
+    quantity: string | number;
     addFee?: boolean;
     precision?: number;
   }) {
@@ -82,7 +93,7 @@ export class AmountCalculatorService {
       const fees = amount.mul(this.BASIS_POINTS);
       amount = amount.add(fees);
     }
-    return amount.toDecimalPlaces(precision).toString();
+    return amount.toFixed(precision);
   }
 
   /**
@@ -108,7 +119,7 @@ export class AmountCalculatorService {
     // TODO! Ejemplo: "123.12345678" -> parseUnits("123.12345678, 6") -> daría error
     // TODO! por lo que se re-formatea el amount a la cantidad de decimales del token
     const formattedAmount = match
-      ? new Decimal(amount).toDecimalPlaces(decimals).toString()
+      ? new Decimal(amount).toFixed(decimals)
       : amount;
     return parseUnits(formattedAmount, decimals);
   }
@@ -122,6 +133,15 @@ export class AmountCalculatorService {
     precision,
   }: AmountParameters): Promise<getAmountAndPricePerUnitReturn> {
     const frontPrecision = this.getPrecision(currency, precision);
+
+    console.debug('PAYLOADS', {
+      initialCurrency,
+      currency,
+      base,
+      quantity,
+      addFee,
+      precision,
+    });
 
     const res = await this.getRateFetcher(initialCurrency, currency);
     if (res.error) {
@@ -162,7 +182,7 @@ export class AmountCalculatorService {
    * @returns
    */
   calculateAmountToPay = async (args: {
-    quantity: string;
+    quantity: string | number;
     currency: string;
     sale: Pick<Sale, 'currency' | 'tokenPricePerUnit'>;
     pricePerUnit?: string | null;
@@ -180,11 +200,17 @@ export class AmountCalculatorService {
           initialCurrency: sale?.currency,
           currency: currency,
           base: sale.tokenPricePerUnit?.toString(),
-          quantity: Number(quantity) || 0,
+          quantity: Number(quantity) || 1,
           addFee: sale?.currency !== currency,
           precision: tokenDecimals,
         });
 
+      console.debug(
+        '🚀 ~ amount.service.ts:200 ~ AmountCalculatorService ~ newPPU:',
+        newPPU,
+        'amount',
+        amount
+      );
       finalPPU = newPPU;
       amountToPay = amount;
       // Otherwise, we receive the rate from parameters
@@ -218,7 +244,3 @@ export class AmountCalculatorService {
     }
   };
 }
-
-const amountCalculatorService = new AmountCalculatorService(getExchangeRate);
-
-export default amountCalculatorService;

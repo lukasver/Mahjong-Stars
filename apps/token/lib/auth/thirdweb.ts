@@ -5,6 +5,7 @@ import { createThirdwebClient } from 'thirdweb';
 import { createAuth } from 'thirdweb/auth';
 import { privateKeyToAccount } from 'thirdweb/wallets';
 import { LoginParams } from '../actions';
+import { refreshJWT as refreshJWTUtils } from 'thirdweb/utils';
 
 // secretKey for serverside usage, wont be available in client
 export const serverClient = createThirdwebClient({
@@ -58,4 +59,16 @@ export const generateJWT = async (
   ctx?: Record<string, string>
 ) => {
   return auth.generateJWT({ payload, context: ctx });
+};
+
+//Todo should check if is ok to use the admin account.
+export const refreshJWT = async (jwt: string) => {
+  return await refreshJWTUtils({
+    account: privateKeyToAccount({
+      client: serverClient,
+      privateKey: env.THIRDWEB_ADMIN_PRIVATE_KEY,
+    }),
+    jwt,
+    expirationTime: JWT_EXPIRATION_TIME,
+  });
 };

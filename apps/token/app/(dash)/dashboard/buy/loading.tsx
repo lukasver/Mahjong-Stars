@@ -100,6 +100,7 @@ export default function Loading() {
                     { label: 'Name', width: 'w-32' },
                     { label: 'Symbol', width: 'w-12' },
                     { label: 'Total supply', width: 'w-20' },
+                    { label: 'Price per token', width: 'w-14' },
                     { label: 'Sale starts', width: 'w-24' },
                     { label: 'Sale ends', width: 'w-24' },
                   ].map((item, index) => (

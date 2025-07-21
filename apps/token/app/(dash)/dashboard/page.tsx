@@ -4,10 +4,6 @@ import { VisuallyHidden } from '@mjs/ui/primitives/visually-hidden';
 import { QueryClient } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import { FundraisingProgress } from '../../../components/dashboard/fundraising-progress';
-import { IcoPhases } from '../../../components/dashboard/ico-phases';
-import { RecentTransactions } from '../../../components/dashboard/recent-transactions';
-import { TokenMetrics } from '../../../components/dashboard/token-metrics';
-import { TokenStats } from '../../../components/dashboard/token-stats';
 import { getActiveSale } from '@/lib/actions';
 import { cn } from '@mjs/ui/lib/utils';
 
@@ -61,7 +57,7 @@ export default async function DashboardPage(_props: PageProps) {
           </FundraisingProgress>
         </Suspense>
 
-        <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+        {/* <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
           <TokenStats address={'0x8699210141B710c46eC211cDD39D2C2edDA7A63c'} />
         </div>
 
@@ -70,7 +66,7 @@ export default async function DashboardPage(_props: PageProps) {
           <IcoPhases />
         </div>
 
-        <RecentTransactions />
+        <RecentTransactions /> */}
       </div>
       <div
         className={cn(

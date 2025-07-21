@@ -1,13 +1,22 @@
 'use client';
 
-import { useTransition } from 'react';
-import { useAppForm } from '@mjs/ui/primitives/form';
+import { useCallback, useTransition } from 'react';
+import {
+  UseAppForm,
+  useAppForm,
+  useFormContext,
+  useStore,
+} from '@mjs/ui/primitives/form';
 import { FormInput } from '@mjs/ui/primitives/form-input';
 import useActiveAccount from '@/components/hooks/use-active-account';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@mjs/ui/primitives/button';
-import { useInputOptions, useSaleInvestInfo } from '@/lib/services/api';
-import calculator from '@/lib/services/pricefeeds/amount.service';
+import {
+  useInputOptions,
+  usePendingTransactionsForSale,
+  useSaleInvestInfo,
+} from '@/lib/services/api';
+import calculator from '@/lib/services/pricefeeds';
 
 import { Prisma } from '@prisma/client';
 import { toast } from '@mjs/ui/primitives/sonner';
@@ -17,58 +26,74 @@ import { SaleWithToken } from '@/common/types/sales';
 import { Account } from 'thirdweb/wallets';
 import { formatCurrency } from '@mjs/utils/client';
 import { Shield } from 'lucide-react';
+import { FIAT_CURRENCIES } from '@/common/config/constants';
+import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
+import { useAction } from 'next-safe-action/hooks';
+import { InvestFormSchema } from './schemas';
+import { createTransaction } from '@/lib/actions';
+import { TransactionModalTypes } from '@/common/types';
+import { parseAsString, useQueryState } from 'nuqs';
+import { InferSafeActionFnResult } from 'next-safe-action';
 const Decimal = Prisma.Decimal;
-
-// amount paid
-// currency
-// quantity // quantity of tokens being bought
-// tokenSymbol // symbol of the token being bought
-// saleId
-
-const FormSchema = z.object({
-  paid: z.object({
-    amount: z.string().min(1, 'Amount is required'),
-    currency: z.string().min(1, 'Currency is required'),
-    quantity: z.string(),
-    ppu: z.string(),
-  }),
-  base: z.object({
-    ppu: z.string(),
-    currency: z.string(),
-  }),
-  tokenSymbol: z.string(),
-  saleId: z.string(),
-  receivingWallet: z.string().min(1, 'Wallet address is required'),
-});
 
 export const InvestForm = ({
   children,
+  onOpenModal,
   ...props
 }: {
   sale: SaleWithToken;
   children?: React.ReactNode;
+  onOpenModal: (modal: TransactionModalTypes) => void;
 }) => {
   const { activeAccount } = useActiveAccount();
   const { data: options, isLoading: loadingOptions } = useInputOptions();
+  const [_, setTx] = useQueryState(
+    'tx',
+    parseAsString.withOptions({ shallow: false })
+  );
+  const { data: pendingTransactions } = usePendingTransactionsForSale(
+    props.sale.id
+  );
+
   const { data, isLoading } = useSaleInvestInfo(props.sale.id);
   const [isPending, startTransition] = useTransition();
+  const action = useActionListener(useAction(createTransaction), {
+    onSuccess: (d) => {
+      const result = d as unknown as InferSafeActionFnResult<
+        typeof createTransaction
+      >['data'];
+      if (result?.transaction) {
+        setTx(result.transaction.id);
+      }
+    },
+  });
 
   const sale = data?.sale;
 
   const t = useTranslations('Global');
   const locale = useLocale();
   const form = useAppForm({
-    validators: { onSubmit: FormSchema },
+    validators: { onSubmit: InvestFormSchema },
     defaultValues: getDefaultValues(props.sale, activeAccount),
+    onSubmit: ({ value, formApi }) => {
+      // Create transaction in API, book amount of tokens etc etc...
+      // has KYC, ask user to upload documents, etc etc...
+      // if
+      const hasPendingTransaction =
+        pendingTransactions?.transactions?.length &&
+        pendingTransactions.transactions.length > 0;
+
+      if (hasPendingTransaction) {
+        onOpenModal(TransactionModalTypes.PendingTx);
+        return;
+      }
+      action.execute(value);
+    },
   });
 
-  // const [pricePerUnit, setPricePerUnit] = usePricePerUnit({
-  //   from: state.currency,
-  //   to: state.currency,
-  //   base: state.ppu || '',
-  //   onError: () => form.reset(),
-  //   precision: 2,
-  // });
+  const paidCurrency =
+    useStore(form.store, (state) => state.values.paid.currency) ||
+    sale?.currency;
 
   const MAX_BUY_ALLOWANCE =
     sale?.maximumTokenBuyPerUser || sale?.availableTokenQuantity || Infinity;
@@ -107,41 +132,57 @@ export const InvestForm = ({
   };
 
   const handleChangeCurrency = async (v: string) => {
-    // Change to original currency
-    if (v === sale?.currency) {
-      form.setFieldValue('paid.amount', form.state.values.paid.amount);
-      form.setFieldValue('paid.ppu', form.state.values.paid.ppu);
-      form.setFieldValue('paid.currency', v);
-      form.setFieldValue('paid.quantity', form.state.values.paid.quantity);
-      return;
-    }
-
     startTransition(async () => {
       try {
-        const quantity = String(form.state.values.paid.quantity);
+        const q = form.getFieldValue('paid.quantity') || 1;
+        invariant(q, 'Quantity is required');
+
+        // Change to original currency
+        if (v === sale?.currency) {
+          form.setFieldValue('paid.ppu', sale.tokenPricePerUnit.toString());
+          form.setFieldValue('paid.currency', sale.currency);
+          form.setFieldValue(
+            'paid.amount',
+            new Decimal(q)
+              .mul(sale.tokenPricePerUnit)
+              .toFixed(calculator.FIAT_PRECISION)
+          );
+          return;
+        }
+
         const currency = v;
         const decimals = sale?.token?.decimals || 18;
         invariant(sale, 'Sale is required');
-        invariant(quantity, 'Quantity is required');
+        invariant(q, 'Quantity is required');
         invariant(currency, 'Currency is required');
         invariant(decimals, 'Decimals are required');
-        const { pricePerUnit, amount, bigNumber } =
-          await calculator.calculateAmountToPay({
-            quantity,
-            sale: sale,
-            currency,
-            tokenDecimals: decimals,
-          });
+        const { pricePerUnit, amount } = await calculator.calculateAmountToPay({
+          quantity: String(q),
+          sale: sale,
+          currency,
+          // tokenDecimals: decimals,
+        });
 
+        console.debug('PPU', pricePerUnit, 'AMOUNT', amount);
+        // form.reset({})
         form.setFieldValue('paid.amount', amount);
         form.setFieldValue('paid.ppu', pricePerUnit);
         form.setFieldValue('paid.currency', currency);
-        form.setFieldValue('paid.quantity', quantity);
+        form.setFieldValue('paid.quantity', q);
       } catch (e) {
         toast.error(e instanceof Error ? e.message : 'Unknown error');
       }
     });
   };
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      form.handleSubmit();
+    },
+    [form]
+  );
 
   if (isLoading || loadingOptions) {
     return <div>Loading...</div>;
@@ -155,7 +196,7 @@ export const InvestForm = ({
 
   return (
     <form.AppForm>
-      <form className='space-y-4'>
+      <form className='space-y-4' onSubmit={handleSubmit}>
         {/* Wallet */}
         <FormInput
           name='receivingWallet'
@@ -169,9 +210,9 @@ export const InvestForm = ({
         {/* Quantity */}
         <div className='space-y-4'>
           <FormInput
-            name='quantity'
-            label={`${sale.token.symbol} Tokens`}
-            type='text'
+            name='paid.quantity'
+            label={`${sale.tokenSymbol} Tokens`}
+            type='number'
             listeners={{
               onChange: ({ value }) => {
                 handleChangeQuantity(value as string);
@@ -207,26 +248,26 @@ export const InvestForm = ({
           <div className='flex items-end w-full'>
             <FormInput
               className='flex-1'
-              name='totalAmount'
+              name='paid.amount'
               label='To pay'
               type='currency'
               inputProps={{
                 loading: isPending,
-                decimalScale: 3,
+                decimalScale: getDecimalScale(paidCurrency),
                 decimalsLimit: 18,
                 className: 'rounded-r-none pointer-events-none',
                 disabled: true,
                 intlConfig: {
                   locale,
                   currency: sale.currency,
-                  maximumFractionDigits: 6,
+                  maximumFractionDigits: calculator.CRYPTO_PRECISION,
                   minimumFractionDigits: 3,
                 },
               }}
             />
             <FormInput
               className='shrink-0'
-              name='amountPaidCurrency'
+              name='paid.currency'
               label={''}
               type='select'
               listeners={{
@@ -257,7 +298,7 @@ export const InvestForm = ({
 
           {/* Purchase Summary */}
           {children}
-          <PurchaseButton />
+          <PurchaseButton loading={action.isExecuting} disabled={isPending} />
           <SecurityNotice />
 
           {process.env.NODE_ENV === 'development' && (
@@ -276,18 +317,32 @@ export const InvestForm = ({
   );
 };
 
-const PurchaseButton = () => {
+const PurchaseButton = (props: { loading?: boolean; disabled?: boolean }) => {
   const { activeAccount, isConnected } = useActiveAccount();
+  const form = useFormContext() as unknown as UseAppForm;
+
+  // Should check if there is a pending transaction
 
   return (
-    <Button
-      disabled={!isConnected}
-      // || !amount || !paymentMethod}
-      className='w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50'
+    <form.Subscribe
+      selector={(state) => ({
+        isValid: state.isValid,
+        isSubmitting: state.isSubmitting,
+      })}
     >
-      <Shield className='w-4 h-4 mr-2' />
-      {!isConnected ? 'Connect Wallet First' : 'Purchase Tokens'}
-    </Button>
+      {({ isValid, isSubmitting }) => (
+        <Button
+          disabled={!isConnected || props.disabled}
+          // || !amount || !paymentMethod}
+          className='w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50'
+          type='submit'
+          loading={isSubmitting || props.loading}
+        >
+          <Shield className='w-4 h-4 mr-2' />
+          {!isConnected ? 'Connect Wallet First' : 'Purchase Tokens'}
+        </Button>
+      )}
+    </form.Subscribe>
   );
 };
 const SecurityNotice = () => {
@@ -320,20 +375,27 @@ const getDefaultValues = (
   sale: SaleWithToken,
   activeAccount: Account | undefined
 ) => {
+  const initialQ = 1;
   return {
     paid: {
-      amount: '',
-      currency: '',
-      quantity: '',
-      ppu: '',
+      amount: new Prisma.Decimal(sale.tokenPricePerUnit)
+        .mul(initialQ)
+        .toString(),
+      currency: sale.currency,
+      quantity: initialQ,
+      ppu: sale.tokenPricePerUnit.toString(),
     },
     base: {
-      ppu: '',
-      currency: '',
+      ppu: sale.tokenPricePerUnit.toString(),
+      currency: sale.currency,
+      min: sale.minimumTokenBuyPerUser,
+      max: sale.maximumTokenBuyPerUser || 0,
     },
     tokenSymbol: sale?.token?.symbol || '',
     saleId: sale?.id || '',
     receivingWallet: activeAccount?.address || '',
+    requiresSaft: !!sale?.saftCheckbox,
+    requiresKYC: !!sale?.requiresKYC,
     // confirmationId: '',
     // formOfPayment: FOPSchema.enum.CRYPTO,
     // currency: sale.currency,
@@ -362,4 +424,11 @@ const getAmountDescription = (
     })}`;
   }
   return base;
+};
+
+const getDecimalScale = (currency: string | undefined) => {
+  if (currency && FIAT_CURRENCIES.includes(currency)) {
+    return 2;
+  }
+  return calculator.CRYPTO_PRECISION;
 };
