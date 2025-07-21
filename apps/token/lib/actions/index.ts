@@ -312,6 +312,19 @@ export const getUserTransactions = authActionClient
     return transactions.data;
   });
 
+export const getTransactionById = authActionClient
+  .schema(z.object({ id: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    const transactions = await transactionsController.getTransactionById(
+      parsedInput,
+      ctx
+    );
+    if (!transactions.success) {
+      throw new Error(transactions.message);
+    }
+    return transactions.data;
+  });
+
 export const createTransaction = authActionClient
   .schema(InvestFormSchema)
   .action(async ({ ctx, parsedInput }) => {
@@ -491,3 +504,16 @@ export const validateMagicWord = authActionClient
  * =============== MUTATION ACTIONS ===============
  * =====================================
  */
+
+export const deleteOwnTransaction = authActionClient
+  .schema(z.object({ id: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    const result = await transactionsController.deleteOwnTransaction(
+      parsedInput,
+      ctx
+    );
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result;
+  });

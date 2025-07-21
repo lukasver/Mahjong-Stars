@@ -24,12 +24,6 @@ export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
     saleStartDate,
   } = sale || {};
 
-  console.debug(
-    '🚀 ~ overview.tsx:26 ~ OverviewProject ~ tokenPricePerUnit:',
-    tokenPricePerUnit,
-    currency
-  );
-
   const availableTokenQuantity = sale?.availableTokenQuantity || 0;
   const locale = useLocale();
   return (

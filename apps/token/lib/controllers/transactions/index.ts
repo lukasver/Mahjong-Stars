@@ -136,13 +136,19 @@ class TransactionsController {
 
   async getTransactionById(dto: { id: string }, _ctx: ActionCtx) {
     try {
-      const transaction = await prisma.saleTransactions.findUniqueOrThrow({
+      const transaction = await prisma.saleTransactions.findUnique({
         where: { id: String(dto.id) },
         select: {
           sale: {
             select: {
               requiresKYC: true,
               saftCheckbox: true,
+              tokenSymbol: true,
+              saftContract: {
+                select: {
+                  id: true,
+                },
+              },
             },
           },
           user: {
@@ -151,14 +157,33 @@ class TransactionsController {
                 select: {
                   firstName: true,
                   lastName: true,
-                  kyc: true,
+                },
+              },
+              kycVerification: {
+                select: {
+                  status: true,
+                  documents: {
+                    select: {
+                      url: true,
+                      fileName: true,
+                      id: true,
+                      name: true,
+                    },
+                  },
                 },
               },
             },
           },
         },
       });
-      return Success({ transaction });
+
+      invariant(transaction, 'Transaction not found');
+
+      return Success({
+        transaction,
+        requiresKYC: transaction.sale.requiresKYC,
+        requiresSAFT: transaction.sale.saftCheckbox,
+      });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -248,13 +273,38 @@ class TransactionsController {
             price: price.div(new Prisma.Decimal(quantity)),
             totalAmount: price,
           },
+          select: {
+            id: true,
+            tokenSymbol: true,
+            quantity: true,
+            formOfPayment: true,
+            amountPaid: true,
+            paidCurrency: true,
+            receivingWallet: true,
+            comment: true,
+            status: true,
+            rawPrice: true,
+            price: true,
+            totalAmount: true,
+            createdAt: true,
+            updatedAt: true,
+            user: {
+              select: {
+                email: true,
+                walletAddress: true,
+                id: true,
+              },
+            },
+            sale: {
+              select: {
+                id: true,
+                name: true,
+                tokenSymbol: true,
+              },
+            },
+          },
         });
       });
-
-      console.debug(
-        '🚀 ~ index.ts:219 ~ TransactionsController ~ transaction ~ transaction:',
-        transaction
-      );
 
       return Success({
         transaction: decimalsToString(transaction),
@@ -283,13 +333,16 @@ class TransactionsController {
   }
 
   /**
-   * Delete a transaction by id.
+   * Delete own transaction by id.
    */
-  async deleteTransaction(dto: { id: string }, _ctx: ActionCtx) {
+  async deleteOwnTransaction(dto: { id: string }, ctx: ActionCtx) {
     try {
       invariant(dto.id, 'Transaction id missing');
-      await prisma.saleTransactions.delete({ where: { id: String(dto.id) } });
-      return Success({ id: dto.id });
+      invariant(ctx.userId, 'User id missing');
+      const res = await prisma.saleTransactions.delete({
+        where: { id: String(dto.id), userId: ctx.userId },
+      });
+      return Success({ id: res.id });
     } catch (e) {
       logger(e);
       return Failure(e);

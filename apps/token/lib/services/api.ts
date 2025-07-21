@@ -121,7 +121,7 @@ export const useTransactions = () => {
 };
 
 export const usePendingTransactionsForSale = (saleId: string) => {
-  const { data, status, error } = useQuery({
+  const { data, status, error, isLoading } = useQuery({
     queryKey: ['transactions', saleId, 'pending'],
     queryFn: ({ queryKey }) =>
       getUserPendingTransactionsForSale(queryKey[1] as string),
@@ -129,7 +129,7 @@ export const usePendingTransactionsForSale = (saleId: string) => {
     enabled: !!saleId,
   });
   const e = getError(data, error);
-  return { data: data?.data, error: e, status };
+  return { data: data?.data, error: e, status, isLoading: isLoading };
 };
 
 /**

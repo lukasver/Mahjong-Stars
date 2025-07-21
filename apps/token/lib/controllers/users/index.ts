@@ -3,7 +3,7 @@ import { publicUrl } from '@/common/config/env';
 import { ActionCtx } from '@/common/schemas/dtos/sales';
 import { CreateUserDto, GetUserDto } from '@/common/schemas/dtos/users';
 import { Failure, isObject, Success } from '@/common/schemas/dtos/utils';
-import { Profile, User } from '@/common/schemas/generated';
+import { KycStatusSchema, Profile, User } from '@/common/schemas/generated';
 import { prisma } from '@/db';
 import createEmailService from '@/lib/email';
 import { getIpAddress, getUserAgent } from '@/lib/geo';
@@ -46,6 +46,12 @@ class UsersController {
           userRole: {
             select: {
               role: true,
+            },
+          },
+          kycVerification: {
+            select: {
+              id: true,
+              status: true,
             },
           },
           // sessions: {
@@ -163,6 +169,11 @@ class UsersController {
               },
             },
           }),
+          kycVerification: {
+            create: {
+              status: KycStatusSchema.enum.NOT_STARTED,
+            },
+          },
           // ...(chainId
           //   ? {
           //       WalletAddress: {
@@ -213,8 +224,6 @@ class UsersController {
     },
     ctx: ActionCtx
   ) {
-    console.debug('🚀 ~ index.ts:217 ~ UsersController ~ dto:', dto);
-
     try {
       invariant(dto.user, 'User data missing');
 

@@ -25,32 +25,40 @@ import { invariant } from '@epic-web/invariant';
 import { SaleWithToken } from '@/common/types/sales';
 import { Account } from 'thirdweb/wallets';
 import { formatCurrency } from '@mjs/utils/client';
-import { Shield } from 'lucide-react';
+import { FileText, Shield } from 'lucide-react';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
 import { useAction } from 'next-safe-action/hooks';
 import { InvestFormSchema } from './schemas';
 import { createTransaction } from '@/lib/actions';
-import { TransactionModalTypes } from '@/common/types';
-import { parseAsString, useQueryState } from 'nuqs';
 import { InferSafeActionFnResult } from 'next-safe-action';
+import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription } from '@mjs/ui/primitives/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@mjs/ui/primitives/dialog';
+import { PurchaseSummary } from './summary';
+import { TransactionModalTypes } from '@/common/types';
+import { getQueryClient } from '@/app/providers';
 const Decimal = Prisma.Decimal;
 
 export const InvestForm = ({
   children,
-  onOpenModal,
+  openModal,
   ...props
 }: {
   sale: SaleWithToken;
+  openModal: (modal: TransactionModalTypes) => void;
   children?: React.ReactNode;
-  onOpenModal: (modal: TransactionModalTypes) => void;
 }) => {
   const { activeAccount } = useActiveAccount();
+  const router = useRouter();
   const { data: options, isLoading: loadingOptions } = useInputOptions();
-  const [_, setTx] = useQueryState(
-    'tx',
-    parseAsString.withOptions({ shallow: false })
-  );
+
   const { data: pendingTransactions } = usePendingTransactionsForSale(
     props.sale.id
   );
@@ -62,8 +70,11 @@ export const InvestForm = ({
       const result = d as unknown as InferSafeActionFnResult<
         typeof createTransaction
       >['data'];
+      getQueryClient().invalidateQueries({
+        queryKey: ['transactions', props.sale.id, 'pending'],
+      });
       if (result?.transaction) {
-        setTx(result.transaction.id);
+        router.push(`/dashboard/buy/${result.transaction.id}`);
       }
     },
   });
@@ -75,7 +86,9 @@ export const InvestForm = ({
   const form = useAppForm({
     validators: { onSubmit: InvestFormSchema },
     defaultValues: getDefaultValues(props.sale, activeAccount),
-    onSubmit: ({ value, formApi }) => {
+    onSubmit: ({ value }) => {
+      console.debug('🚀 ~ form.tsx:85 ~ value:', value);
+
       // Create transaction in API, book amount of tokens etc etc...
       // has KYC, ask user to upload documents, etc etc...
       // if
@@ -84,7 +97,7 @@ export const InvestForm = ({
         pendingTransactions.transactions.length > 0;
 
       if (hasPendingTransaction) {
-        onOpenModal(TransactionModalTypes.PendingTx);
+        openModal(TransactionModalTypes.PendingTx);
         return;
       }
       action.execute(value);
@@ -131,6 +144,16 @@ export const InvestForm = ({
     }
   };
 
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      console.log('submit');
+      e.preventDefault();
+      e.stopPropagation();
+      form.handleSubmit();
+    },
+    [form]
+  );
+
   const handleChangeCurrency = async (v: string) => {
     startTransition(async () => {
       try {
@@ -175,15 +198,6 @@ export const InvestForm = ({
     });
   };
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      form.handleSubmit();
-    },
-    [form]
-  );
-
   if (isLoading || loadingOptions) {
     return <div>Loading...</div>;
   }
@@ -193,6 +207,9 @@ export const InvestForm = ({
   }
 
   const amountDescription = getAmountDescription(sale, t, locale);
+  const hasPendingTransaction =
+    pendingTransactions?.transactions?.length &&
+    pendingTransactions.transactions.length > 0;
 
   return (
     <form.AppForm>
@@ -286,19 +303,41 @@ export const InvestForm = ({
             />
           </div>
 
-          {/* Payment Method */}
-          {/* <FormInput
-            name='formOfPayment'
-            label='Payment Method'
-            type='select'
-            inputProps={{
-              options: getFormOfPaymentOptions(t),
-            }}
-          /> */}
-
-          {/* Purchase Summary */}
           {children}
-          <PurchaseButton loading={action.isExecuting} disabled={isPending} />
+          {hasPendingTransaction ? (
+            <Button
+              onClick={() => openModal(TransactionModalTypes.PendingTx)}
+              // || !amount || !paymentMethod}
+              className='w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50'
+              type='button'
+            >
+              <Shield className='w-4 h-4 mr-2' />
+              Continue pending transaction
+            </Button>
+          ) : (
+            <PurchaseButton loading={action.isExecuting} disabled={isPending}>
+              <PurchaseSummary sale={sale} />
+              {sale.requiresKYC && (
+                <Alert className='bg-secondary-800/50 border-secondary'>
+                  <Shield className='h-4 w-4 text-secondary' />
+                  <AlertDescription className='text-white/90'>
+                    <span className='font-bold'>KYC Required:</span> You will be
+                    prompted to verify your account in the next step.
+                  </AlertDescription>
+                </Alert>
+              )}
+              {sale.saftCheckbox && (
+                <Alert className='bg-secondary-800/50 border-secondary'>
+                  <FileText className='h-4 w-4 text-secondary' />
+                  <AlertDescription className='text-white/90'>
+                    <span className='font-bold'>SAFT Agreement:</span> You will
+                    be prompted to sign a contract in the next steps.
+                  </AlertDescription>
+                </Alert>
+              )}
+              <SubmitButton form={form} onSubmit={handleSubmit} />
+            </PurchaseButton>
+          )}
           <SecurityNotice />
 
           {process.env.NODE_ENV === 'development' && (
@@ -317,12 +356,13 @@ export const InvestForm = ({
   );
 };
 
-const PurchaseButton = (props: { loading?: boolean; disabled?: boolean }) => {
-  const { activeAccount, isConnected } = useActiveAccount();
-  const form = useFormContext() as unknown as UseAppForm;
-
-  // Should check if there is a pending transaction
-
+const SubmitButton = ({
+  form,
+  onSubmit,
+}: {
+  form: unknown;
+  onSubmit: () => void;
+}) => {
   return (
     <form.Subscribe
       selector={(state) => ({
@@ -332,17 +372,61 @@ const PurchaseButton = (props: { loading?: boolean; disabled?: boolean }) => {
     >
       {({ isValid, isSubmitting }) => (
         <Button
-          disabled={!isConnected || props.disabled}
-          // || !amount || !paymentMethod}
-          className='w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50'
-          type='submit'
-          loading={isSubmitting || props.loading}
+          type={'button'}
+          onClick={onSubmit}
+          disabled={!isValid}
+          loading={isSubmitting}
         >
-          <Shield className='w-4 h-4 mr-2' />
-          {!isConnected ? 'Connect Wallet First' : 'Purchase Tokens'}
+          Proceed
         </Button>
       )}
     </form.Subscribe>
+  );
+};
+
+const PurchaseButton = ({
+  children,
+  ...props
+}: {
+  loading?: boolean;
+  disabled?: boolean;
+  children?: React.ReactNode;
+}) => {
+  const { activeAccount, isConnected } = useActiveAccount();
+  const form = useFormContext() as unknown as UseAppForm;
+
+  // Should check if there is a pending transaction
+
+  return (
+    <Dialog>
+      <form.Subscribe
+        selector={(state) => ({
+          isValid: state.isValid,
+          isSubmitting: state.isSubmitting,
+        })}
+      >
+        {({ isValid, isSubmitting }) => (
+          <DialogTrigger asChild>
+            <Button
+              disabled={!isConnected || props.disabled}
+              // || !amount || !paymentMethod}
+              className='w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50'
+              type='button'
+              loading={isSubmitting || props.loading}
+            >
+              <Shield className='w-4 h-4 mr-2' />
+              {!isConnected ? 'Connect Wallet First' : 'Purchase Tokens'}
+            </Button>
+          </DialogTrigger>
+        )}
+      </form.Subscribe>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Review your purchase</DialogTitle>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
   );
 };
 const SecurityNotice = () => {

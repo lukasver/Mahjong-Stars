@@ -324,6 +324,9 @@ model Document {
 
   saleBanner Sale? @relation("banner")
 
+  kycVerification   KycVerification? @relation("KycDocuments", fields: [kycVerificationId], references: [id])
+  kycVerificationId String?
+
   @@unique([id, url])
   @@map("documents")
 }
@@ -476,10 +479,10 @@ model KycVerification {
   userId          String    @unique
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   status          KycStatus @default(NOT_STARTED)
-  documentType    String?
-  documentNumber  String?
   verifiedAt      DateTime?
   rejectionReason String?
+
+  documents Document[] @relation("KycDocuments")
 
   @@map("kyc_verifications")
 }

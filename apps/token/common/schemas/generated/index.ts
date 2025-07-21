@@ -96,7 +96,7 @@ export const SaftContractScalarFieldEnumSchema = z.enum(['id','createdAt','updat
 
 export const DocumentRecipientScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','fullname','email','role','status','signatureUrl','externalId','address','saftContractId']);
 
-export const DocumentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','fileName','url','type','userId','saleId']);
+export const DocumentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','fileName','url','type','userId','saleId','kycVerificationId']);
 
 export const VestingScheduleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','saleId','name','cliffPeriod','vestingPeriod','releaseFrequency','initialRelease','isEnabled']);
 
@@ -110,7 +110,7 @@ export const ContractStatusScalarFieldEnumSchema = z.enum(['id','createdAt','upd
 
 export const TransactionAuditScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','actionType','fromStatus','toStatus','performedBy','comment']);
 
-export const KycVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','status','documentType','documentNumber','verifiedAt','rejectionReason']);
+export const KycVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','status','verifiedAt','rejectionReason']);
 
 export const RoleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description']);
 
@@ -401,6 +401,7 @@ export const DocumentSchema = z.object({
   type: z.string(),
   userId: z.string().nullable(),
   saleId: z.string().nullable(),
+  kycVerificationId: z.string().nullable(),
 })
 
 export type Document = z.infer<typeof DocumentSchema>
@@ -543,8 +544,6 @@ export const KycVerificationSchema = z.object({
   updatedAt: z.coerce.date(),
   deletedAt: z.coerce.date().nullable(),
   userId: z.string(),
-  documentType: z.string().nullable(),
-  documentNumber: z.string().nullable(),
   verifiedAt: z.coerce.date().nullable(),
   rejectionReason: z.string().nullable(),
 })
