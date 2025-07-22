@@ -91,6 +91,12 @@ export const GET = withAuth(async (req, context, auth) => {
 
       case 'transactions': {
         if (identifier) {
+          if (subIdentifier === 'saft') {
+            const data = await transactions.getSaleSaftForTransaction(
+              identifier
+            );
+            return NextResponse.json(data);
+          }
           const data = await transactions.userTransactionsForSale(
             {
               saleId: identifier,

@@ -1,5 +1,8 @@
 import 'server-only';
-import { MAX_ALLOWANCE_WITHOUT_KYC } from '@/common/config/constants';
+import {
+  FIAT_CURRENCIES,
+  MAX_ALLOWANCE_WITHOUT_KYC,
+} from '@/common/config/constants';
 import { ActionCtx } from '@/common/schemas/dtos/sales';
 import {
   CreateTransactionDto,
@@ -25,6 +28,12 @@ import {
 import { Prisma } from '@prisma/client';
 // import Handlebars from 'handlebars';
 import { DateTime } from 'luxon';
+import {
+  Address,
+  Profile,
+  SaftContract,
+  User,
+} from '@/common/schemas/generated';
 // import { urlContract, UrlContract } from '@/lib/services/adobe.service';
 
 class TransactionsController {
@@ -141,6 +150,7 @@ class TransactionsController {
         select: {
           sale: {
             select: {
+              id: true,
               requiresKYC: true,
               saftCheckbox: true,
               tokenSymbol: true,
@@ -161,6 +171,7 @@ class TransactionsController {
               },
               kycVerification: {
                 select: {
+                  id: true,
                   status: true,
                   documents: {
                     select: {
@@ -339,10 +350,18 @@ class TransactionsController {
     try {
       invariant(dto.id, 'Transaction id missing');
       invariant(ctx.userId, 'User id missing');
-      const res = await prisma.saleTransactions.delete({
+      const tx = await prisma.saleTransactions.findUnique({
         where: { id: String(dto.id), userId: ctx.userId },
+        select: {
+          id: true,
+          saleId: true,
+          quantity: true,
+          userId: true,
+        },
       });
-      return Success({ id: res.id });
+      invariant(tx, 'Transaction not found');
+      await this.cancelTransactionAndRestoreUnits(tx);
+      return Success({ id: tx.id });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -529,6 +548,36 @@ class TransactionsController {
     }
   }
 
+  async getSaleSaftForTransaction(dto: { txId: string }, ctx: ActionCtx) {
+    // We need to retrieve the saft content for the sale.
+    // We need to replace default variables with the ones from the transaction.
+    // We need ot send it to the front end for review with puplated vars
+    try {
+      const transaction = await prisma.saleTransactions.findUnique({
+        where: { id: String(dto.txId) },
+        select: {
+          sale: {
+            select: {
+              saftContract: {
+                select: {
+                  content: true,
+                  variables: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      invariant(transaction, 'Transaction not found');
+      const saftContract = transaction?.sale?.saftContract;
+      invariant(saftContract, 'SAFT template not found in transaction');
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
   private checkMaxAllowanceWithoutKYC(
     boughtTokenQuantity: string,
     sale: Pick<Sale, 'tokenPricePerUnit' | 'currency'>
@@ -554,57 +603,82 @@ class TransactionsController {
       );
     }
   }
-}
 
-async function _cancelTransactionAndRestoreUnits(
-  tx: SaleTransactions,
-  reason?: string
-) {
-  return prisma.$transaction([
-    prisma.sale.update({
-      where: {
-        id: tx.saleId,
-      },
-      data: {
-        availableTokenQuantity: {
-          increment: tx.quantity.toNumber(),
+  private async cancelTransactionAndRestoreUnits(
+    tx: Pick<SaleTransactions, 'id' | 'saleId' | 'quantity' | 'userId'>,
+    reason?: string
+  ) {
+    return prisma.$transaction([
+      prisma.sale.update({
+        where: {
+          id: tx.saleId,
         },
-      },
-    }),
-    prisma.saleTransactions.update({
-      where: {
-        id: tx.id,
-      },
-      data: {
-        status: TransactionStatus.CANCELLED,
-        comment:
-          reason ||
-          'Transaction cancelled for not being confirmed after time limit (Pending in Blockchain)',
-      },
-    }),
-  ]);
-}
-
-async function deleteTransactionAndRestoreUnits(transaction: SaleTransactions) {
-  const { id, saleId, quantity } = transaction;
-
-  await prisma.$transaction([
-    prisma.sale.update({
-      where: {
-        id: saleId,
-      },
-      data: {
-        availableTokenQuantity: {
-          increment: quantity.toNumber(),
+        data: {
+          availableTokenQuantity: {
+            increment: tx.quantity.toNumber(),
+          },
         },
-      },
-    }),
-    prisma.saleTransactions.delete({
-      where: {
-        id,
-      },
-    }),
-  ]);
+      }),
+      prisma.saleTransactions.update({
+        where: {
+          id: tx.id,
+          userId: tx.userId,
+        },
+        data: {
+          status: TransactionStatus.CANCELLED,
+          comment:
+            reason ||
+            'Transaction cancelled for not being confirmed after time limit',
+        },
+      }),
+    ]);
+  }
+
+  parseTransactionVariablesToContract({
+    tx,
+    user,
+    profile,
+    address,
+    sale,
+    contract,
+    variables,
+  }: {
+    tx: SaleTransactions;
+    sale: Pick<Sale, 'currency' | 'tokenPricePerUnit'>;
+    contract: SaftContract['content'];
+    variables: SaftContract['variables'];
+    user?: Partial<User>;
+    profile?: Partial<Profile>;
+    address?: Partial<Address>;
+  }) {
+    const defaultVariables = {
+      // profile
+      'recipient.firstname': profile?.firstName || null,
+      'recipient.lastname': profile?.lastName || null,
+      'recipient.email': user?.email || null,
+      // address
+      'recipient.city': address?.city || null,
+      'recipient.zipcode': address?.zipCode || null,
+      'recipient.state': address?.state || null,
+      'recipient.country': address?.country || null,
+      // Purchase
+      'token.quantity': tx.quantity.toString() || null,
+      'token.symbol': tx.tokenSymbol,
+      'paid.currency': tx.paidCurrency || null,
+      'paid.amount':
+        tx.totalAmount?.toFixed(
+          FIAT_CURRENCIES.includes(tx.paidCurrency) ? 4 : 8
+        ) || null,
+      'sale.currency': sale.currency || null,
+      'equivalent.amount':
+        new Prisma.Decimal(tx.quantity)
+          .mul(sale.tokenPricePerUnit)
+          .toFixed(2) || null,
+      date: new Date().toISOString().split('T')[0],
+    };
+
+    return defaultVariables;
+  }
 }
 
 const _createSaftContract = ({
@@ -635,24 +709,27 @@ const _createSaftContract = ({
     .mul(new Prisma.Decimal(saleTokenPricePerUnit))
     .toFixed(precision);
 
-  const contractVariables = {
-    firstname: profile?.firstName || 'XXXXX',
-    lastname: profile?.lastName || 'XXXXX',
-    email: profile?.email || 'XXXXX',
-    city: address?.city || 'XXXXX',
-    zipcode: address?.zipCode || 'XXXXX',
-    state: address?.state || 'XXXXX',
-    country: address?.country || 'XXXXX',
-    quantity: contractValues?.quantity || 'XXXXX',
-    paidcurrency: contractValues?.currency || 'XXXXX',
-    paidamount:
-      new Prisma.Decimal(contractValues?.amount || 0)
-        .toFixed(precision)
-        .toString() || 'XXXXX',
-    defaultcurrency: saleCurrency || 'XXXXX',
-    paidamountindefaultcurrency: saleAmount?.toString() || 'XXXXX',
-    date: DateTime.now().toFormat('yyyy-MM-dd'),
-  };
+  // const contractVariables = {
+  //   // profile
+  //   firstname: profile?.firstName || 'XXXXX',
+  //   lastname: profile?.lastName || 'XXXXX',
+  //   email: profile?.email || 'XXXXX',
+  //   // address
+  //   city: address?.city || 'XXXXX',
+  //   zipcode: address?.zipCode || 'XXXXX',
+  //   state: address?.state || 'XXXXX',
+  //   country: address?.country || 'XXXXX',
+  //   // Purchase
+  //   quantity: contractValues?.quantity || 'XXXXX',
+  //   currency: contractValues?.currency || 'XXXXX',
+  //   amount:
+  //     new Prisma.Decimal(contractValues?.amount || 0)
+  //       .toFixed(precision)
+  //       .toString() || 'XXXXX',
+  //   'sale.currency':  saleCurrency || 'XXXXX',
+  //   'equivalent.amount': paidamountindefaultcurrency: saleAmount?.toString() || 'XXXXX',
+  //   date: DateTime.now().toFormat('yyyy-MM-dd'),
+  // };
 
   // const template = Handlebars.compile(contract);
   // const fullContract = template(contractVariables);

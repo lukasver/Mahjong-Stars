@@ -6,6 +6,7 @@ import {
   getContract,
   getExchangeRate,
   getInputOptions,
+  getTransactionById,
   getUserTransactions,
   getWeb3Contract,
 } from '@/lib/actions';
@@ -20,6 +21,7 @@ import {
   getSaleInvestInfo,
   getSales,
   getSaleSaft,
+  getSaleSaftForTransaction,
   getUserPendingTransactionsForSale,
 } from './fetchers';
 
@@ -118,6 +120,26 @@ export const useTransactions = () => {
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, status };
+};
+
+export const useTransactionById = (id: string) => {
+  const { data, status, error, isLoading } = useQuery({
+    queryKey: ['transactions', id],
+    queryFn: () => getTransactionById({ id }),
+    staleTime: DEFAULT_STALE_TIME,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, status, isLoading };
+};
+
+export const useSaleSaftForTransaction = (txId: string) => {
+  const { data, status, error, isLoading } = useQuery({
+    queryKey: ['transactions', txId, 'saft'],
+    queryFn: () => getSaleSaftForTransaction(txId),
+    staleTime: DEFAULT_STALE_TIME,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, status, isLoading };
 };
 
 export const usePendingTransactionsForSale = (saleId: string) => {

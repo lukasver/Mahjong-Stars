@@ -270,3 +270,26 @@ export const getUserPendingTransactionsForSale = async (saleId: string) => {
     return { data: null, error: e };
   }
 };
+
+export const getTransactionById = async (id: string) => {
+  try {
+    const data = await fetcher<{
+      transaction: SaleTransactions;
+    }>(`/transactions/${id}`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getSaleSaftForTransaction = async (txId: string) => {
+  try {
+    const data = await fetcher<{
+      saft: SaftContract | null;
+      versions: SaftContract[];
+    }>(`/transactions/${txId}/saft`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
