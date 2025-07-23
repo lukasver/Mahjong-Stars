@@ -101,6 +101,7 @@ export const env = createEnv({
     NEXT_PUBLIC_BUCKET_PUBLIC_URL: process.env.NEXT_PUBLIC_BUCKET_PUBLIC_URL,
     MAGIC_WORD: process.env.MAGIC_WORD,
   },
+  skipValidation: process.env.NODE_ENV === 'test',
 });
 
 //Cannot do this with serverside variables

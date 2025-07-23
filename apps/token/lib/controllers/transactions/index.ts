@@ -26,7 +26,7 @@ import {
   TransactionStatus,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client';
-// import Handlebars from 'handlebars';
+import Handlebars from 'handlebars';
 import { DateTime } from 'luxon';
 import {
   Address,
@@ -555,11 +555,21 @@ class TransactionsController {
     try {
       const transaction = await prisma.saleTransactions.findUnique({
         where: { id: String(dto.txId) },
-        select: {
+        include: {
+          user: {
+            include: {
+              profile: {
+                include: {
+                  address: true,
+                },
+              },
+            },
+          },
           sale: {
-            select: {
+            include: {
               saftContract: {
                 select: {
+                  id: true,
                   content: true,
                   variables: true,
                 },
@@ -568,10 +578,28 @@ class TransactionsController {
           },
         },
       });
-
       invariant(transaction, 'Transaction not found');
       const saftContract = transaction?.sale?.saftContract;
       invariant(saftContract, 'SAFT template not found in transaction');
+
+      // 1) Traer el contenid odel saft y las variables
+      // 2) Reemplazar las variables por los datos de la tx, user, sale y date en el content.
+      // 3) Devolver el content con las variables reemplazadas al front para mostrar.
+      // Seguramente haya variables que faltan, por ejemplo address, eso deberíamos esperarlo de vuelta del front.
+      const contractVariables = this.parseTransactionVariablesToContract({
+        tx: transaction,
+        sale: transaction.sale,
+        contract: saftContract.content,
+        variables: saftContract.variables,
+        user: transaction.user,
+        profile: transaction.user?.profile,
+        address: transaction.user?.profile?.address,
+      });
+
+      return Success({
+        contract: contractVariables.contract,
+        variables: contractVariables.variables,
+      });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -647,37 +675,49 @@ class TransactionsController {
     sale: Pick<Sale, 'currency' | 'tokenPricePerUnit'>;
     contract: SaftContract['content'];
     variables: SaftContract['variables'];
-    user?: Partial<User>;
-    profile?: Partial<Profile>;
-    address?: Partial<Address>;
+    user?: Partial<User> | null;
+    profile?: Partial<Profile> | null;
+    address?: Partial<Address> | null;
+    inputVariables?: Record<string, string>;
   }) {
     const defaultVariables = {
-      // profile
-      'recipient.firstname': profile?.firstName || null,
-      'recipient.lastname': profile?.lastName || null,
-      'recipient.email': user?.email || null,
-      // address
-      'recipient.city': address?.city || null,
-      'recipient.zipcode': address?.zipCode || null,
-      'recipient.state': address?.state || null,
-      'recipient.country': address?.country || null,
+      recipient: {
+        // profile
+        firstName: profile?.firstName || null,
+        lastName: profile?.lastName || null,
+        email: user?.email || null,
+        // address
+        city: address?.city || null,
+        zipcode: address?.zipCode || null,
+        state: address?.state || null,
+        country: address?.country || null,
+      },
       // Purchase
-      'token.quantity': tx.quantity.toString() || null,
-      'token.symbol': tx.tokenSymbol,
-      'paid.currency': tx.paidCurrency || null,
-      'paid.amount':
-        tx.totalAmount?.toFixed(
-          FIAT_CURRENCIES.includes(tx.paidCurrency) ? 4 : 8
-        ) || null,
-      'sale.currency': sale.currency || null,
-      'equivalent.amount':
-        new Prisma.Decimal(tx.quantity)
-          .mul(sale.tokenPricePerUnit)
-          .toFixed(2) || null,
+      token: {
+        quantity: tx.quantity.toString() || null,
+        symbol: tx.tokenSymbol,
+      },
+      paid: {
+        currency: tx.paidCurrency || null,
+        amount:
+          tx.totalAmount?.toFixed(
+            FIAT_CURRENCIES.includes(tx.paidCurrency) ? 4 : 8
+          ) || null,
+      },
+      sale: {
+        currency: sale.currency || null,
+        equivalentAmount:
+          new Prisma.Decimal(tx.quantity)
+            .mul(sale.tokenPricePerUnit)
+            .toFixed(2) || null,
+      },
       date: new Date().toISOString().split('T')[0],
     };
 
-    return defaultVariables;
+    const template = Handlebars.compile(contract);
+    const fullContract = template(defaultVariables);
+
+    return { contract: fullContract, variables: defaultVariables };
   }
 }
 

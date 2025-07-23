@@ -93,7 +93,8 @@ export const GET = withAuth(async (req, context, auth) => {
         if (identifier) {
           if (subIdentifier === 'saft') {
             const data = await transactions.getSaleSaftForTransaction(
-              identifier
+              { txId: identifier },
+              { address: auth.address }
             );
             return NextResponse.json(data);
           }
