@@ -7,7 +7,7 @@ import { PopoverContent } from '@mjs/ui/primitives/popover';
 import { Popover, PopoverTrigger } from '@mjs/ui/primitives/popover';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
 import { toast } from '@mjs/ui/primitives/sonner';
-import { useAppForm } from '@mjs/ui/primitives/tanstack-form';
+import { useAppForm } from '@mjs/ui/primitives/form';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import type { FC } from 'react';
