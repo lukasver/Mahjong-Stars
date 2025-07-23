@@ -15,7 +15,7 @@ import { Button } from '@mjs/ui/primitives/button';
 import { useState } from 'react';
 import { getFileUploadPresignedUrl } from '@/lib/actions';
 import { uploadFile } from '@/lib/utils/files';
-import { useSaleSaft, useTransactionById } from '@/lib/services/api';
+import { useTransactionById } from '@/lib/services/api';
 import { useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 
@@ -191,7 +191,7 @@ const SaftReviewStep = () => {
   ) {
     saleId = String(tx.transaction.sale.id);
   }
-  const { data, error } = useSaleSaft(saleId);
+  const { data, error } = useSaleSaftForTransaction({ saleId, txId });
   const [values, setValues] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
