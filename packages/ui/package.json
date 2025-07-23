@@ -1,8 +1,12 @@
 {
 	"name": "@mjs/ui",
 	"version": "0.0.0",
-	"sideEffects": ["**/*.css"],
-	"files": ["dist"],
+	"sideEffects": [
+		"**/*.css"
+	],
+	"files": [
+		"dist"
+	],
 	"exports": {
 		"./colors": "./dist/lib/colors.js",
 		"./styles.css": "./dist/index.css",
@@ -19,6 +23,8 @@
 		"clean": "rimraf dist node_modules"
 	},
 	"dependencies": {
+		"@mjs/utils": "workspace:*",
+		"@origin-space/image-cropper": "^0.1.9",
 		"@radix-ui/react-accessible-icon": "^1.1.7",
 		"@radix-ui/react-accordion": "^1.2.11",
 		"@radix-ui/react-alert-dialog": "^1.1.14",
@@ -53,21 +59,41 @@
 		"@radix-ui/react-visually-hidden": "^1.2.3",
 		"@tailwindcss/forms": "^0.5.10",
 		"@tanstack/react-form": "^1.11.2",
+		"@tiptap/core": "2.11.2",
+		"@tiptap/extension-color": "^2.11.2",
+		"@tiptap/extension-highlight": "^2.11.2",
+		"@tiptap/extension-horizontal-rule": "^2.11.2",
+		"@tiptap/extension-image": "^2.11.2",
+		"@tiptap/extension-link": "^2.11.2",
+		"@tiptap/extension-placeholder": "^2.11.2",
+		"@tiptap/extension-strike": "^2.11.2",
+		"@tiptap/extension-task-item": "^2.11.2",
+		"@tiptap/extension-task-list": "^2.11.2",
+		"@tiptap/extension-text-align": "^2.11.2",
+		"@tiptap/extension-text-style": "^2.11.2",
+		"@tiptap/extension-underline": "^2.11.2",
+		"@tiptap/starter-kit": "^2.11.2",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
+		"date-fns": "^3.6.0",
 		"embla-carousel-autoplay": "^8.6.0",
 		"embla-carousel-react": "^8.6.0",
 		"lucide-react": "^0.511.0",
+		"luxon": "^3.6.1",
 		"motion": "^12.15.0",
 		"next-themes": "^0.4.6",
-		"react-day-picker": "^8.10.1",
+		"novel": "^0.5.0",
+		"radix-ui": "^1.4.2",
+		"react-currency-input-field": "^3.10.0",
+		"react-day-picker": "^9.8.0",
 		"react-resizable-panels": "^2.1.9",
 		"recharts": "^2.15.3",
 		"sonner": "^1.7.4",
 		"tailwind-merge": "^1.14.0",
 		"usehooks-ts": "^3.1.1",
-		"vaul": "^1.1.2"
+		"vaul": "^1.1.2",
+		"zod": "3.25.67"
 	},
 	"peerDependencies": {
 		"next": "15.3.2",
@@ -77,6 +103,7 @@
 		"@mjs/tailwind-config": "workspace:*",
 		"@mjs/typescript-config": "workspace:*",
 		"@tailwindcss/cli": "^4.1.5",
+		"@types/luxon": "^3.6.2",
 		"@types/react": "19.1.5",
 		"embla-carousel": "^8.6.0",
 		"next": "15.3.2",

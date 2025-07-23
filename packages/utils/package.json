@@ -5,8 +5,9 @@
 	"main": "index.ts",
 	"type": "module",
 	"exports": {
-		".": "./index.ts",
-		"./dist": "./dist/index.mjs"
+		".": "./dist/index.js",
+		"./client": "./dist/client/index.js",
+		"./server/tiptap": "./dist/server/tiptap.js"
 	},
 	"scripts": {
 		"build": "tsup"
@@ -17,13 +18,32 @@
 	"packageManager": "pnpm@10.11.0",
 	"devDependencies": {
 		"@mjs/typescript-config": "workspace:*",
+		"@types/luxon": "^3.6.2",
 		"@types/node": "^24.0.7",
 		"tsup": "^8.5.0",
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
 		"@ai-sdk/google": "^1.2.19",
+		"@tiptap/core": "^2.11.2",
+		"@tiptap/extension-color": "^2.11.2",
+		"@tiptap/extension-highlight": "^2.11.2",
+		"@tiptap/extension-horizontal-rule": "^2.11.2",
+		"@tiptap/extension-image": "^2.11.2",
+		"@tiptap/extension-link": "^2.11.2",
+		"@tiptap/extension-placeholder": "^2.11.2",
+		"@tiptap/extension-strike": "^2.11.2",
+		"@tiptap/extension-task-item": "^2.11.2",
+		"@tiptap/extension-task-list": "^2.11.2",
+		"@tiptap/extension-text-align": "^2.11.2",
+		"@tiptap/extension-text-style": "^2.11.2",
+		"@tiptap/extension-underline": "^2.11.2",
+		"@tiptap/html": "^2.11.2",
+		"@tiptap/starter-kit": "^2.11.2",
 		"ai": "^4.3.16",
-		"handlebars": "^4.7.8"
+		"decimal.js": "^10.6.0",
+		"handlebars": "^4.7.8",
+		"luxon": "^3.7.1",
+		"zod": "3.25.67"
 	}
 }

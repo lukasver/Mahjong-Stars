@@ -1,16 +1,27 @@
-import { RainbowButton } from "@mjs/ui/components/rainbow-button";
-import { cn } from "@mjs/ui/lib/utils";
+import { getActiveSale } from '@/lib/actions';
+import { RainbowButton } from '@mjs/ui/components/rainbow-button';
+import { cn } from '@mjs/ui/lib/utils';
+import Link from 'next/link';
 
 export async function BuyTokenButton({ className }: { className?: string }) {
-	//TODO! fetch data of open sale token to buy
-	return (
-		<RainbowButton
-			className={cn(
-				"font-head border-2 shadow-sm border-solid bg-accent rounded-xl h-full hover:bg-accent/80 transition-all duration-300 hover:scale-105 hover:animate-pulse",
-				className,
-			)}
-		>
-			Buy $MJS
-		</RainbowButton>
-	);
+  const data = await getActiveSale();
+  if (!data?.data) {
+    return null;
+  }
+  const sale = data.data;
+  if (!sale) {
+    return null;
+  }
+  return (
+    <Link prefetch href={`/dashboard/buy`}>
+      <RainbowButton
+        className={cn(
+          'font-head border-2 shadow-sm border-solid bg-accent rounded-xl h-full hover:bg-accent/80 transition-all duration-300 hover:scale-105 hover:animate-pulse',
+          className
+        )}
+      >
+        Buy {sale.tokenSymbol}
+      </RainbowButton>
+    </Link>
+  );
 }
