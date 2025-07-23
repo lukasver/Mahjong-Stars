@@ -1,12 +1,19 @@
 import 'server-only';
-import { MAX_ALLOWANCE_WITHOUT_KYC } from '@/common/config/constants';
+import {
+  FIAT_CURRENCIES,
+  MAX_ALLOWANCE_WITHOUT_KYC,
+} from '@/common/config/constants';
 import { ActionCtx } from '@/common/schemas/dtos/sales';
 import {
   CreateTransactionDto,
   GetTransactionDto,
   UpdateTransactionDto,
 } from '@/common/schemas/dtos/transactions';
-import { Failure, Success } from '@/common/schemas/dtos/utils';
+import {
+  decimalsToString,
+  Failure,
+  Success,
+} from '@/common/schemas/dtos/utils';
 import { prisma } from '@/db';
 import logger from '@/lib/services/logger.server';
 import { invariant } from '@epic-web/invariant';
@@ -19,8 +26,14 @@ import {
   TransactionStatus,
 } from '@prisma/client';
 import { Prisma } from '@prisma/client';
-// import Handlebars from 'handlebars';
+import Handlebars from 'handlebars';
 import { DateTime } from 'luxon';
+import {
+  Address,
+  Profile,
+  SaftContract,
+  User,
+} from '@/common/schemas/generated';
 // import { urlContract, UrlContract } from '@/lib/services/adobe.service';
 
 class TransactionsController {
@@ -130,64 +143,135 @@ class TransactionsController {
     }
   }
 
+  async getTransactionById(dto: { id: string }, _ctx: ActionCtx) {
+    try {
+      const transaction = await prisma.saleTransactions.findUnique({
+        where: { id: String(dto.id) },
+        select: {
+          sale: {
+            select: {
+              id: true,
+              requiresKYC: true,
+              saftCheckbox: true,
+              tokenSymbol: true,
+              saftContract: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          },
+          user: {
+            select: {
+              profile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+              kycVerification: {
+                select: {
+                  id: true,
+                  status: true,
+                  documents: {
+                    select: {
+                      url: true,
+                      fileName: true,
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      invariant(transaction, 'Transaction not found');
+
+      return Success({
+        transaction,
+        requiresKYC: transaction.sale.requiresKYC,
+        requiresSAFT: transaction.sale.saftCheckbox,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
   /**
    * Create a new transaction.
    */
-  async createTransaction(dto: CreateTransactionDto, _ctx: ActionCtx) {
+  async createTransaction(dto: CreateTransactionDto, ctx: ActionCtx) {
     try {
       const {
         tokenSymbol,
         quantity,
         formOfPayment,
         receivingWallet,
-        userId,
         saleId,
         comment,
         amountPaid,
         paidCurrency,
       } = dto;
-      invariant(userId, 'User id missing');
+      const userId = ctx.userId;
       invariant(saleId, 'Sale id missing');
-      const sale = await prisma.sale.findUnique({ where: { id: saleId } });
+      invariant(userId, 'User id missing');
+      const sale = await prisma.sale.findUnique({
+        where: {
+          id: saleId,
+          status: SaleStatus.OPEN,
+          availableTokenQuantity: { gte: quantity.toNumber() },
+        },
+      });
       invariant(sale, 'Sale not found');
 
       if (
-        sale.availableTokenQuantity &&
-        sale.availableTokenQuantity < Number(quantity)
+        new Prisma.Decimal(quantity).greaterThan(sale.availableTokenQuantity)
       ) {
         return Failure('Cannot buy more tokens than available amount', 400);
       }
       // Check for pending transaction
       const pendingTransaction = await prisma.saleTransactions.findFirst({
-        where: { status: TransactionStatus.PENDING, saleId, userId },
+        where: {
+          status: {
+            in: [TransactionStatus.PENDING, TransactionStatus.AWAITING_PAYMENT],
+          },
+          saleId,
+          user: { walletAddress: ctx.address },
+        },
       });
-      if (pendingTransaction) {
-        invariant(
-          false,
-          'Cannot create a new transaction if user has a pending one'
-        );
+      invariant(
+        !pendingTransaction,
+        'Cannot create a new transaction if user has a pending one'
+      );
+
+      // Check requirement
+      if (sale.requiresKYC) {
+        // TODO: Check if user has KYC
       }
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { isSiwe: true },
-      });
-
-      if (user?.isSiwe) {
-        this.checkMaxAllowanceWithoutKYC(quantity.toString(), sale);
+      if (sale.saftCheckbox) {
+        // TODO: Check if user has SAFT
       }
+
+      // this.checkMaxAllowanceWithoutKYC(quantity.toString(), sale);
 
       // TODO: Add contract/SAFT logic if needed
       // TODO: Calculate rawPrice, price, totalAmount correctly
-      const [_updatedSale, transaction] = await Promise.all([
-        prisma.sale.update({
+
+      const transaction = await prisma.$transaction(async (tx) => {
+        tx.sale.update({
           where: { id: saleId },
           data: { availableTokenQuantity: { decrement: Number(quantity) } },
-        }),
-        prisma.saleTransactions.create({
+        });
+        const price = new Prisma.Decimal(amountPaid);
+        return tx.saleTransactions.create({
           data: {
             tokenSymbol,
-            quantity: new Prisma.Decimal(Number(quantity)),
+            quantity: new Prisma.Decimal(quantity),
             formOfPayment,
             receivingWallet,
             comment,
@@ -196,13 +280,49 @@ class TransactionsController {
             paidCurrency,
             saleId,
             userId,
-            rawPrice: '0', // TODO: calculate
-            price: new Prisma.Decimal(0), // TODO: calculate
-            totalAmount: new Prisma.Decimal(0), // TODO: calculate
+            rawPrice: amountPaid,
+            price: price.div(new Prisma.Decimal(quantity)),
+            totalAmount: price,
           },
-        }),
-      ]);
-      return Success({ transaction });
+          select: {
+            id: true,
+            tokenSymbol: true,
+            quantity: true,
+            formOfPayment: true,
+            amountPaid: true,
+            paidCurrency: true,
+            receivingWallet: true,
+            comment: true,
+            status: true,
+            rawPrice: true,
+            price: true,
+            totalAmount: true,
+            createdAt: true,
+            updatedAt: true,
+            user: {
+              select: {
+                email: true,
+                walletAddress: true,
+                id: true,
+              },
+            },
+            sale: {
+              select: {
+                id: true,
+                name: true,
+                tokenSymbol: true,
+              },
+            },
+          },
+        });
+      });
+
+      return Success({
+        transaction: decimalsToString(transaction),
+        saft: sale.saftCheckbox,
+        kyc: sale.requiresKYC,
+        paymentMethod: formOfPayment,
+      });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -224,13 +344,24 @@ class TransactionsController {
   }
 
   /**
-   * Delete a transaction by id.
+   * Delete own transaction by id.
    */
-  async deleteTransaction(dto: { id: string }, _ctx: ActionCtx) {
+  async deleteOwnTransaction(dto: { id: string }, ctx: ActionCtx) {
     try {
       invariant(dto.id, 'Transaction id missing');
-      await prisma.saleTransactions.delete({ where: { id: String(dto.id) } });
-      return Success({ id: dto.id });
+      invariant(ctx.userId, 'User id missing');
+      const tx = await prisma.saleTransactions.findUnique({
+        where: { id: String(dto.id), userId: ctx.userId },
+        select: {
+          id: true,
+          saleId: true,
+          quantity: true,
+          userId: true,
+        },
+      });
+      invariant(tx, 'Transaction not found');
+      await this.cancelTransactionAndRestoreUnits(tx);
+      return Success({ id: tx.id });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -385,18 +516,19 @@ class TransactionsController {
    * Get user transactions for a specific sale.
    */
   async userTransactionsForSale(
-    dto: { saleId: string; status?: keyof typeof TransactionStatus },
+    dto: { saleId: string; status?: TransactionStatus[] },
     ctx: ActionCtx
   ) {
     try {
       const { saleId, status: _status } = dto;
-      invariant(ctx.userId, 'User not found');
       invariant(saleId, 'Sale not found');
-      const status: TransactionStatus =
-        (_status && TransactionStatus[_status]) || TransactionStatus.PENDING;
       const transactions = await prisma.saleTransactions.findMany({
         where: {
-          AND: [{ saleId: String(saleId) }, { userId: ctx.userId }, { status }],
+          AND: [
+            { saleId: String(saleId) },
+            { user: { walletAddress: ctx.address } },
+            { status: { in: _status } },
+          ],
         },
       });
       const transaction = transactions[0];
@@ -409,6 +541,64 @@ class TransactionsController {
         totalCount: transactions?.length,
         transactions,
         contract,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async getSaleSaftForTransaction(dto: { txId: string }, ctx: ActionCtx) {
+    // We need to retrieve the saft content for the sale.
+    // We need to replace default variables with the ones from the transaction.
+    // We need ot send it to the front end for review with puplated vars
+    try {
+      const transaction = await prisma.saleTransactions.findUnique({
+        where: { id: String(dto.txId) },
+        include: {
+          user: {
+            include: {
+              profile: {
+                include: {
+                  address: true,
+                },
+              },
+            },
+          },
+          sale: {
+            include: {
+              saftContract: {
+                select: {
+                  id: true,
+                  content: true,
+                  variables: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      invariant(transaction, 'Transaction not found');
+      const saftContract = transaction?.sale?.saftContract;
+      invariant(saftContract, 'SAFT template not found in transaction');
+
+      // 1) Traer el contenid odel saft y las variables
+      // 2) Reemplazar las variables por los datos de la tx, user, sale y date en el content.
+      // 3) Devolver el content con las variables reemplazadas al front para mostrar.
+      // Seguramente haya variables que faltan, por ejemplo address, eso deberíamos esperarlo de vuelta del front.
+      const contractVariables = this.parseTransactionVariablesToContract({
+        tx: transaction,
+        sale: transaction.sale,
+        contract: saftContract.content,
+        variables: saftContract.variables,
+        user: transaction.user,
+        profile: transaction.user?.profile,
+        address: transaction.user?.profile?.address,
+      });
+
+      return Success({
+        contract: contractVariables.contract,
+        variables: contractVariables.variables,
       });
     } catch (e) {
       logger(e);
@@ -441,57 +631,94 @@ class TransactionsController {
       );
     }
   }
-}
 
-async function _cancelTransactionAndRestoreUnits(
-  tx: SaleTransactions,
-  reason?: string
-) {
-  return prisma.$transaction([
-    prisma.sale.update({
-      where: {
-        id: tx.saleId,
-      },
-      data: {
-        availableTokenQuantity: {
-          increment: tx.quantity.toNumber(),
+  private async cancelTransactionAndRestoreUnits(
+    tx: Pick<SaleTransactions, 'id' | 'saleId' | 'quantity' | 'userId'>,
+    reason?: string
+  ) {
+    return prisma.$transaction([
+      prisma.sale.update({
+        where: {
+          id: tx.saleId,
         },
-      },
-    }),
-    prisma.saleTransactions.update({
-      where: {
-        id: tx.id,
-      },
-      data: {
-        status: TransactionStatus.CANCELLED,
-        comment:
-          reason ||
-          'Transaction cancelled for not being confirmed after time limit (Pending in Blockchain)',
-      },
-    }),
-  ]);
-}
-
-async function deleteTransactionAndRestoreUnits(transaction: SaleTransactions) {
-  const { id, saleId, quantity } = transaction;
-
-  await prisma.$transaction([
-    prisma.sale.update({
-      where: {
-        id: saleId,
-      },
-      data: {
-        availableTokenQuantity: {
-          increment: quantity.toNumber(),
+        data: {
+          availableTokenQuantity: {
+            increment: tx.quantity.toNumber(),
+          },
         },
+      }),
+      prisma.saleTransactions.update({
+        where: {
+          id: tx.id,
+          userId: tx.userId,
+        },
+        data: {
+          status: TransactionStatus.CANCELLED,
+          comment:
+            reason ||
+            'Transaction cancelled for not being confirmed after time limit',
+        },
+      }),
+    ]);
+  }
+
+  parseTransactionVariablesToContract({
+    tx,
+    user,
+    profile,
+    address,
+    sale,
+    contract,
+    variables,
+  }: {
+    tx: SaleTransactions;
+    sale: Pick<Sale, 'currency' | 'tokenPricePerUnit'>;
+    contract: SaftContract['content'];
+    variables: SaftContract['variables'];
+    user?: Partial<User> | null;
+    profile?: Partial<Profile> | null;
+    address?: Partial<Address> | null;
+    inputVariables?: Record<string, string>;
+  }) {
+    const defaultVariables = {
+      recipient: {
+        // profile
+        firstName: profile?.firstName || null,
+        lastName: profile?.lastName || null,
+        email: user?.email || null,
+        // address
+        city: address?.city || null,
+        zipcode: address?.zipCode || null,
+        state: address?.state || null,
+        country: address?.country || null,
       },
-    }),
-    prisma.saleTransactions.delete({
-      where: {
-        id,
+      // Purchase
+      token: {
+        quantity: tx.quantity.toString() || null,
+        symbol: tx.tokenSymbol,
       },
-    }),
-  ]);
+      paid: {
+        currency: tx.paidCurrency || null,
+        amount:
+          tx.totalAmount?.toFixed(
+            FIAT_CURRENCIES.includes(tx.paidCurrency) ? 4 : 8
+          ) || null,
+      },
+      sale: {
+        currency: sale.currency || null,
+        equivalentAmount:
+          new Prisma.Decimal(tx.quantity)
+            .mul(sale.tokenPricePerUnit)
+            .toFixed(2) || null,
+      },
+      date: new Date().toISOString().split('T')[0],
+    };
+
+    const template = Handlebars.compile(contract);
+    const fullContract = template(defaultVariables);
+
+    return { contract: fullContract, variables: defaultVariables };
+  }
 }
 
 const _createSaftContract = ({
@@ -522,24 +749,27 @@ const _createSaftContract = ({
     .mul(new Prisma.Decimal(saleTokenPricePerUnit))
     .toFixed(precision);
 
-  const contractVariables = {
-    firstname: profile?.firstName || 'XXXXX',
-    lastname: profile?.lastName || 'XXXXX',
-    email: profile?.email || 'XXXXX',
-    city: address?.city || 'XXXXX',
-    zipcode: address?.zipCode || 'XXXXX',
-    state: address?.state || 'XXXXX',
-    country: address?.country || 'XXXXX',
-    quantity: contractValues?.quantity || 'XXXXX',
-    paidcurrency: contractValues?.currency || 'XXXXX',
-    paidamount:
-      new Prisma.Decimal(contractValues?.amount || 0)
-        .toFixed(precision)
-        .toString() || 'XXXXX',
-    defaultcurrency: saleCurrency || 'XXXXX',
-    paidamountindefaultcurrency: saleAmount?.toString() || 'XXXXX',
-    date: DateTime.now().toFormat('yyyy-MM-dd'),
-  };
+  // const contractVariables = {
+  //   // profile
+  //   firstname: profile?.firstName || 'XXXXX',
+  //   lastname: profile?.lastName || 'XXXXX',
+  //   email: profile?.email || 'XXXXX',
+  //   // address
+  //   city: address?.city || 'XXXXX',
+  //   zipcode: address?.zipCode || 'XXXXX',
+  //   state: address?.state || 'XXXXX',
+  //   country: address?.country || 'XXXXX',
+  //   // Purchase
+  //   quantity: contractValues?.quantity || 'XXXXX',
+  //   currency: contractValues?.currency || 'XXXXX',
+  //   amount:
+  //     new Prisma.Decimal(contractValues?.amount || 0)
+  //       .toFixed(precision)
+  //       .toString() || 'XXXXX',
+  //   'sale.currency':  saleCurrency || 'XXXXX',
+  //   'equivalent.amount': paidamountindefaultcurrency: saleAmount?.toString() || 'XXXXX',
+  //   date: DateTime.now().toFormat('yyyy-MM-dd'),
+  // };
 
   // const template = Handlebars.compile(contract);
   // const fullContract = template(contractVariables);

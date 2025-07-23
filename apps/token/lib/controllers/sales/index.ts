@@ -750,6 +750,7 @@ class SalesController {
           tokenSymbol: true,
           saleClosingDate: true,
           saftCheckbox: true,
+          requiresKYC: true,
         },
       });
 

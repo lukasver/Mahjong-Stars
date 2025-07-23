@@ -211,6 +211,8 @@ model Sale {
   saleClosingDate        DateTime
   createdBy              String
   saftCheckbox           Boolean       @default(false)
+  /// Check to add if the sale requires upload of KYC documents
+  requiresKYC            Boolean       @default(false)
   saftContract           SaftContract?
   information            Json?
 
@@ -321,6 +323,9 @@ model Document {
   saleId String?
 
   saleBanner Sale? @relation("banner")
+
+  kycVerification   KycVerification? @relation("KycDocuments", fields: [kycVerificationId], references: [id])
+  kycVerificationId String?
 
   @@unique([id, url])
   @@map("documents")
@@ -474,10 +479,10 @@ model KycVerification {
   userId          String    @unique
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   status          KycStatus @default(NOT_STARTED)
-  documentType    String?
-  documentNumber  String?
   verifiedAt      DateTime?
   rejectionReason String?
+
+  documents Document[] @relation("KycDocuments")
 
   @@map("kyc_verifications")
 }

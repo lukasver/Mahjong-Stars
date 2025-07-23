@@ -7,4 +7,5 @@ export enum TransactionModalTypes {
   CryptoWarning = 'cryptowarning',
   Contract = 'contract',
   PendingContract = 'pendingContract',
+  UploadKyc = 'uploadKyc',
 }

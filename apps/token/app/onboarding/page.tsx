@@ -29,19 +29,21 @@ export default async function Onboarding({ searchParams }: PageProps) {
 
 const Container = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div
-      className={cn(
-        'bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center w-full h-full -z-50!'
-      )}
-    >
-      <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
-        <div className='grid min-h-[100dvh] grid-rows-[auto_1fr_auto]'>
-          <header className='invisible'>a</header>
-          <main className='container mx-auto grid place-items-center bg-cover bg-center relative z-20'>
-            {children}
-          </main>
-          <footer className='invisible'>a</footer>
-        </div>
+    <div className={cn('relative size-full')}>
+      <div className='grid min-h-[100dvh] grid-rows-[auto_1fr_auto]'>
+        <header className='invisible'>a</header>
+        <main className='container mx-auto grid place-items-center bg-cover bg-center relative z-20'>
+          {children}
+        </main>
+        <footer className='invisible'>a</footer>
+      </div>
+      <div
+        className={cn(
+          'bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center w-full h-full -z-50!',
+          'size-full absolute inset-0'
+        )}
+      >
+        <div className='absolute inset-0 bg-gradient-to-b from-primary to-5% to-transparent -z-40!' />
       </div>
     </div>
   );

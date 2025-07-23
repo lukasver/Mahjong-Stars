@@ -73,7 +73,7 @@ export function Stepper({
               </div>
             </div>
             {index < steps.length - 1 && (
-              <div className='flex-1 mx-4 sm:mx-8 min-w-[60px] sm:min-w-[100px]'>
+              <div className='flex-1 mx-4 sm:mx-8 min-w-[60px]'>
                 <div
                   className={cn(
                     'h-0.5 w-full transition-colors',

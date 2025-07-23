@@ -11,6 +11,8 @@ import { useLocale } from 'next-intl';
 import { Invest } from '../(dash)/dashboard/buy/invest';
 import { useActiveSale } from '@/lib/services/api';
 import { InputOptionsProvider } from '@/components/hooks/use-input-options';
+import { ConnectWallet } from '@/components/connect-wallet';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 const FormSchema = z.object({
   // content: z.coerce.string(),
@@ -120,34 +122,17 @@ export default function Page() {
   }
 
   return (
-    <InputOptionsProvider>
-      <div className='container mx-auto'>
-        {/* <form.AppForm>
-          <form onSubmit={handleSubmit} className='space-y-4'> */}
-        {/* <div className='max-w-lg'>
-            <SaftEditor saleId={saleId} placeholder={initialText} />
-            <div className='flex justify-end'>
-              <Button
-                className='w-full'
-                loading={isExecuting}
-                type='submit'
-                onClick={() => {
-                  const content = form.getFieldValue('content');
-                  console.log(content);
-                }}
-              >
-                Save
-              </Button>
-            </div>
-          </div> */}
+    <NuqsAdapter>
+      <InputOptionsProvider>
+        <div className='container mx-auto'>
+          <div className='flex justify-end my-4'>
+            <ConnectWallet autoConnect />
+          </div>
 
-        {/* <ProjectInformation saleId={saleId} /> */}
-
-        {/* </form>
-        </form.AppForm> */}
-        <Invest sale={sale} />
-      </div>
-    </InputOptionsProvider>
+          <Invest sale={sale} />
+        </div>
+      </InputOptionsProvider>
+    </NuqsAdapter>
   );
 }
 {

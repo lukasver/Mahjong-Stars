@@ -19,6 +19,7 @@
 		"db:push:stage": "dotenv -e .env.stage.local -- npx prisma db push",
 		"build:bundle": "ANALYZE=true next build",
 		"knip": "knip",
+		"test": "vitest",
 		"e2e": "playwright test",
 		"e2e:debug": "PWDEBUG=1 playwright test",
 		"e2e:console": "PWDEBUG='console' playwright test",
@@ -111,14 +112,19 @@
 		"@types/react-dom": "^19.1.5",
 		"@types/sanitize-html": "^2.16.0",
 		"@types/sinon": "^17.0.3",
+		"@vitejs/plugin-react": "^4.7.0",
+		"dotenv": "^16.5.0",
 		"dotenv-cli": "^8.0.0",
 		"eslint-config-next": "^15.3.0",
+		"nock": "^14.0.6",
 		"pino-pretty": "^13.0.0",
 		"prisma": "6.8.2",
 		"rimraf": "^6.0.1",
 		"sinon": "^20.0.0",
 		"tsx": "^4.20.3",
 		"typescript": "5.8.3",
+		"vite-tsconfig-paths": "^5.1.4",
+		"vitest": "^3.2.4",
 		"wrangler": "^4.24.3"
 	}
 }

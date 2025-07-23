@@ -7,9 +7,13 @@ import {
   Currency,
   Document,
   SaftContract,
+  Sale,
+  SaleTransactions,
+  TransactionStatusSchema,
   User,
 } from '@/common/schemas/generated';
 import { SaleWithToken } from '@/common/types/sales';
+import { FOP } from '@prisma/client';
 
 export type FetcherOptions = Omit<RequestInit, 'body'> & {
   baseUrl?: string;
@@ -195,6 +199,8 @@ export const getSaleInvestInfo = async (id: string) => {
         | 'saftCheckbox'
         | 'currency'
         | 'token'
+        | 'requiresKYC'
+        | 'tokenSymbol'
       > & {
         blockchain: Pick<Blockchain, 'chainId' | 'name'>;
       };
@@ -222,6 +228,66 @@ export const getCurrencies = async () => {
     const data = await fetcher<{
       currencies: Pick<Currency, 'symbol' | 'name' | 'type'>[];
     }>(`/feeds/currencies`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getUserPendingTransactionsForSale = async (saleId: string) => {
+  const params = new URLSearchParams([
+    ['status', TransactionStatusSchema.enum.PENDING],
+    ['status', TransactionStatusSchema.enum.AWAITING_PAYMENT],
+  ]);
+  try {
+    const data = await fetcher<{
+      transactions: (Pick<
+        SaleTransactions,
+        | 'id'
+        | 'quantity'
+        | 'amountPaid'
+        | 'paidCurrency'
+        | 'tokenSymbol'
+        | 'formOfPayment'
+        | 'receivingWallet'
+        | 'comment'
+        | 'status'
+        | 'rawPrice'
+        | 'price'
+        | 'totalAmount'
+        | 'createdAt'
+        | 'updatedAt'
+      > & {
+        user: Pick<User, 'email' | 'walletAddress' | 'id'>;
+        sale: Pick<Sale, 'id' | 'name' | 'tokenSymbol'>;
+      })[];
+      saft: boolean;
+      kyc: boolean;
+      paymentMethod: FOP;
+    }>(`/transactions/${saleId}?${params.toString()}`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getTransactionById = async (id: string) => {
+  try {
+    const data = await fetcher<{
+      transaction: SaleTransactions;
+    }>(`/transactions/${id}`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getSaleSaftForTransaction = async (txId: string) => {
+  try {
+    const data = await fetcher<{
+      saft: SaftContract | null;
+      versions: SaftContract[];
+    }>(`/transactions/${txId}/saft`);
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };

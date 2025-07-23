@@ -4,6 +4,8 @@ import { withAuth } from './_auth';
 import { NextResponse } from 'next/server';
 import rates from '@/lib/controllers/feeds/rates';
 import { env } from '@/common/config/env';
+import transactions from '@/lib/controllers/transactions';
+import { TransactionStatusSchema } from '@/common/schemas/generated';
 
 /**
  * Handles GET requests for the proxy route with authentication.
@@ -84,6 +86,30 @@ export const GET = withAuth(async (req, context, auth) => {
 
           return NextResponse.json(data);
         }
+        return NextResponse.json({ error: 'Bad request' }, { status: 404 });
+      }
+
+      case 'transactions': {
+        if (identifier) {
+          if (subIdentifier === 'saft') {
+            const data = await transactions.getSaleSaftForTransaction(
+              { txId: identifier },
+              { address: auth.address }
+            );
+            return NextResponse.json(data);
+          }
+          const data = await transactions.userTransactionsForSale(
+            {
+              saleId: identifier,
+              status: TransactionStatusSchema.array().parse(
+                qParams.getAll('status') || []
+              ),
+            },
+            { address: auth.address }
+          );
+          return NextResponse.json(data);
+        }
+        return NextResponse.json({ error: 'Bad request' }, { status: 404 });
       }
     }
 

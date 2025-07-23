@@ -194,7 +194,7 @@ export function SaleDetailsModal({
               <DetailRow
                 label='Price per Unit'
                 value={formatCurrency(sale.tokenPricePerUnit, {
-                  locale: 'en-US',
+                  locale,
                   currency: sale.currency,
                 })}
               />

@@ -11,42 +11,79 @@ import {
 import { FormInput } from '@mjs/ui/primitives/form-input';
 import { useAppForm } from '@mjs/ui/primitives/form';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useTransition } from 'react';
 import { z } from 'zod';
 import { useAction } from 'next-safe-action/hooks';
-import { createEmailVerification, verifyEmail } from '@/lib/actions';
+import {
+  createEmailVerification,
+  validateMagicWord,
+  verifyEmail,
+} from '@/lib/actions';
 import { AnimatePresence, motion } from '@mjs/ui/components/motion';
 import { Button } from '@mjs/ui/primitives/button';
 import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
+import useActiveAccount from './hooks/use-active-account';
+import { useLocalStorage } from 'usehooks-ts';
+
+const titleMapping = {
+  1: {
+    title: 'Magic word',
+    description: 'Please enter your invitation code if you have one',
+  },
+  2: {
+    title: 'Enter your email',
+    description: 'Please enter your email to continue.',
+  },
+  3: {
+    title: 'Verify email',
+    description: 'Please enter the code sent to your email.',
+  },
+};
+
+const MW_KEY = 'mjs-mw';
 
 export function VerifyEmail({ token }: { token: string }) {
-  const [step, setStep] = useState<1 | 2>(token ? 2 : 1);
+  const [magicWord] = useLocalStorage(MW_KEY, '');
+  const [step, setStep] = useState<1 | 2 | 3>(token ? 3 : magicWord ? 2 : 1);
   const router = useRouter();
 
   const handleCancel = async () => {
     router.push('/dashboard');
   };
 
+  const handleNextStep = (step: 1 | 2 | 3) => {
+    setStep(step);
+  };
+
   return (
     <Card className='shadow-2xl'>
       <CardHeader>
-        <CardTitle>Verify your email</CardTitle>
-        <CardDescription>
-          Please enter the code sent to your email if asked.
-        </CardDescription>
+        <CardTitle>{titleMapping[step]?.title}</CardTitle>
+        <CardDescription>{titleMapping[step]?.description}</CardDescription>
       </CardHeader>
 
       <CardContent className='space-y-4'>
         <AnimatePresence>
           {step === 1 && (
-            <VerifyEmailForm
+            <MagicWordForm
               key={1}
               onCancel={handleCancel}
-              onSuccess={() => setStep(2)}
+              onSuccess={() => handleNextStep(2)}
             />
           )}
           {step === 2 && (
-            <VerifyTokenForm key={2} token={token} onCancel={handleCancel} />
+            <VerifyEmailForm
+              key={2}
+              onCancel={handleCancel}
+              onSuccess={() => handleNextStep(3)}
+            />
+          )}
+          {step === 3 && (
+            <VerifyTokenForm
+              key={2}
+              token={token}
+              onCancel={() => setStep((pv) => (pv - 1) as 1 | 2 | 3)}
+            />
           )}
         </AnimatePresence>
       </CardContent>
@@ -60,6 +97,100 @@ const ValidateEmailSchema = z.object({
   lastName: z.string().trim(),
 });
 
+/**
+ * MagicWordForm component for entering the invitation code.
+ * @param onCancel - Callback when the user cancels the form.
+ * @param onSuccess - Callback when the form is successfully submitted.
+ */
+const MagicWordForm = ({
+  onSuccess,
+}: {
+  onCancel: () => void;
+  onSuccess: () => void;
+}) => {
+  const [magicWord, setMagicWord] = useLocalStorage(MW_KEY, '');
+  const { signout, isConnected } = useActiveAccount();
+
+  const action = useActionListener(useAction(validateMagicWord), {
+    onSuccess: () => {
+      setMagicWord(MW_KEY);
+      onSuccess?.();
+    },
+  });
+
+  const [isLoading, startTransition] = useTransition();
+  const form = useAppForm({
+    validators: {
+      onSubmit: z.object({
+        invitationCode: z
+          .string()
+          .min(1, { message: 'Invitation code is required' })
+          .trim(),
+      }),
+    },
+    defaultValues: {
+      invitationCode: '',
+    },
+    onSubmit: ({ value }) =>
+      action.execute({ invitationCode: value.invitationCode }),
+  });
+
+  const handleCancel = useCallback(() => {
+    startTransition(async () => {
+      await signout();
+    });
+  }, [isConnected, signout, startTransition]);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      form.handleSubmit();
+    },
+    [form]
+  );
+
+  return (
+    <motion.div {...animation}>
+      <form.AppForm>
+        <form onSubmit={handleSubmit} className='space-y-4'>
+          <FormInput
+            name='invitationCode'
+            type='text'
+            label='Invitation code'
+            inputProps={{
+              placeholder: 'Enter your invitation code',
+              autoComplete: 'off',
+              required: true,
+            }}
+          />
+          <CardFooter className='flex gap-2 justify-between p-0'>
+            <Button
+              variant='outline'
+              className='flex-1'
+              type='button'
+              onClick={handleCancel}
+              loading={isLoading}
+              disabled={action.isExecuting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant='accent'
+              className='flex-1'
+              type='submit'
+              disabled={isLoading}
+              loading={action.isExecuting}
+            >
+              Continue
+            </Button>
+          </CardFooter>
+        </form>
+      </form.AppForm>
+    </motion.div>
+  );
+};
+
 const VerifyEmailForm = ({
   onCancel,
   onSuccess,
@@ -69,7 +200,10 @@ const VerifyEmailForm = ({
 }) => {
   const { execute, isExecuting } = useActionListener(
     useAction(createEmailVerification),
-    { onSuccess }
+    {
+      onSuccess,
+      successMessage: 'Verification code sent to your email address',
+    }
   );
 
   const onSubmit = (values: z.infer<typeof ValidateEmailSchema>) => {
@@ -219,7 +353,7 @@ const VerifyTokenForm = ({
               type='button'
               onClick={onCancel}
             >
-              Skip
+              back
             </Button>
             <Button
               variant='accent'

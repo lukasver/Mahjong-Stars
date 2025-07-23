@@ -3,7 +3,6 @@ import 'server-only';
 import { CreateContractStatusDto } from '@/common/schemas/dtos/contracts';
 import { GetSaleDto, GetSalesDto } from '@/common/schemas/dtos/sales';
 import {
-  CreateTransactionDto,
   GetTransactionDto,
   UpdateTransactionDto,
 } from '@/common/schemas/dtos/transactions';
@@ -34,12 +33,18 @@ import {
   verifyJwt,
 } from '../auth/thirdweb';
 import { authActionClient, loginActionClient } from './config';
-import { JWT_EXPIRATION_TIME } from '@/common/config/constants';
+import {
+  FIAT_CURRENCIES,
+  JWT_EXPIRATION_TIME,
+} from '@/common/config/constants';
 import {
   deleteSessionCookie,
   getSessionCookie,
   setSessionCookie,
 } from '../auth/cookies';
+import { env } from '@/common/config/env';
+import { InvestFormSchema } from '@/app/(dash)/dashboard/buy/invest/schemas';
+import { FOP, Prisma } from '@prisma/client';
 
 export const hasActiveSession = async (address: string, token: string) => {
   const sessions = await prisma.session.findMany({
@@ -253,18 +258,28 @@ export const updateUserInfo = authActionClient
     return sales.data;
   });
 
-export const getPendingTransactions = authActionClient.action(
-  async ({ ctx }) => {
-    const sales = await transactionsController.pendingContactTransactions(
-      {},
+export const getPendingTransactionsForSale = authActionClient
+  .schema(
+    z.object({
+      saleId: z.string(),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const sales = await transactionsController.userTransactionsForSale(
+      {
+        saleId: parsedInput.saleId,
+        status: [
+          TransactionStatusSchema.enum.PENDING,
+          TransactionStatusSchema.enum.AWAITING_PAYMENT,
+        ],
+      },
       ctx
     );
     if (!sales.success) {
       throw new Error(sales.message);
     }
     return sales.data;
-  }
-);
+  });
 
 export const getUserSaleTransactions = authActionClient
   .schema(
@@ -297,11 +312,35 @@ export const getUserTransactions = authActionClient
     return transactions.data;
   });
 
+export const getTransactionById = authActionClient
+  .schema(z.object({ id: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    const transactions = await transactionsController.getTransactionById(
+      parsedInput,
+      ctx
+    );
+    if (!transactions.success) {
+      throw new Error(transactions.message);
+    }
+    return transactions.data;
+  });
+
 export const createTransaction = authActionClient
-  .schema(CreateTransactionDto)
+  .schema(InvestFormSchema)
   .action(async ({ ctx, parsedInput }) => {
     const transactions = await transactionsController.createTransaction(
-      parsedInput,
+      {
+        tokenSymbol: parsedInput.tokenSymbol,
+        quantity: new Prisma.Decimal(parsedInput.paid.quantity),
+        formOfPayment: FIAT_CURRENCIES.includes(parsedInput.paid.currency)
+          ? FOP.TRANSFER
+          : FOP.CRYPTO,
+        receivingWallet: parsedInput.receivingWallet,
+        saleId: parsedInput.saleId,
+        amountPaid: parsedInput.paid.amount,
+        paidCurrency: parsedInput.paid.currency,
+        comment: null,
+      },
       ctx
     );
     if (!transactions.success) {
@@ -447,8 +486,34 @@ export const getFileUploadPresignedUrl = authActionClient
     return result.data;
   });
 
+export const validateMagicWord = authActionClient
+  .schema(z.object({ invitationCode: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    if (!env.MAGIC_WORD) {
+      // IF not set, then allow access
+      return true;
+    }
+    if (parsedInput.invitationCode !== env.MAGIC_WORD) {
+      throw new Error('Invalid magic word');
+    }
+    return true;
+  });
+
 /**
  * =====================================
  * =============== MUTATION ACTIONS ===============
  * =====================================
  */
+
+export const deleteOwnTransaction = authActionClient
+  .schema(z.object({ id: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    const result = await transactionsController.deleteOwnTransaction(
+      parsedInput,
+      ctx
+    );
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result;
+  });
