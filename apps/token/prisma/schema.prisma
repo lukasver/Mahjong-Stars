@@ -281,6 +281,7 @@ model DocumentRecipient {
   saftContractId String?       @db.Text
 
   @@index([email])
+  @@index([address, saftContractId])
   @@map("signable_document_recipient")
 }
 

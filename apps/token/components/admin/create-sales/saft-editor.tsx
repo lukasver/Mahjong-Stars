@@ -136,12 +136,15 @@ export function SaftEditor({
         children={(field) => {
           return (
             <>
-              <Label className='mb-1'>Create new version</Label>
+              <p className='mb-1'>Create new version</p>
               <div className='relative min-h-[500px] w-full h-full bg-white sm:rounded-lg sm:shadow-lg border-2 border-black'>
                 <Editor
                   setEditor={setEditor}
-                  className='prose bg-white text-black h-full border-none!'
+                  className='bg-white text-black h-full border-none!'
                   output='html'
+                  classes={{
+                    editor: 'max-w-full!',
+                  }}
                   onChange={(value) => {
                     field.handleChange(value as string);
                   }}

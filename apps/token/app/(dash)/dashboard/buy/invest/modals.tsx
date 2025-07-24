@@ -212,6 +212,7 @@ const PendingTransactionModal = ({ sale }: { sale: SaleWithToken }) => {
             variant={'accent'}
             onClick={handleConfirmTx}
             disabled={isPending}
+            loading={isPending}
           >
             Confirm
           </Button>

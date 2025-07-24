@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/pdf-gen_tsbuildinfo",
+    // Modern runtime features
+    "lib": ["ES2022"],
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "allowJs": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": false,
+
+    // Treat files as modules even if it doesn't use import/export
+    "moduleDetection": "force",
+
+    // Allow JSON modules to be imported
+    "resolveJsonModule": true,
+
+    // Use correct ESM import behavior
+    "esModuleInterop": true,
+
+    // Disallow features that require cross-file awareness
+    "isolatedModules": true,
+
+    // Monorepo specific
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    // Best practices
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Some stricter flags (disabled by default)
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Additional configurations from base.json
+    "forceConsistentCasingInFileNames": true,
+    "inlineSources": false,
+    "preserveWatchOutput": true,
+    "alwaysStrict": true,
+    "verbatimModuleSyntax": true,
+    "useUnknownInCatchVariables": true,
+    "allowUnreachableCode": false
+  },
+  "include": ["src/**/*", "reset.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}
