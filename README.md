@@ -11,6 +11,7 @@ This monorepo is a Turborepo which includes the following packages/apps:
 - `@mjs/docs`: an SSG [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
 - `@mjs/token`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
 - `@mjs/web`: a SSG [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
+- `@mjs/pdf-gen`: a container to run Puppeteer for PDF generation with webhook support
 - `@mjs/ui`: an internal React component library with [Tailwind CSS](https://tailwindcss.com/) and [Shadcn/ui](https://ui.shadcn.com/)
 - `@mjs/transactional`: a package containing transactional email templates shared by applications
 - `@mjs/i18n`: a pkg that contains global and specific localized texts for apps
