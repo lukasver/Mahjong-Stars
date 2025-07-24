@@ -42,3 +42,5 @@ dist/
 
 _pagefind
 *_tsbuildinfo
+
+.wrangler
