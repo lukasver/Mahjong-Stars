@@ -12,7 +12,8 @@
 	},
 	"Global": {
 		"soon": "Coming soon",
-		"goDashboard": "Go to dashboard"
+		"goDashboard": "Go to dashboard",
+		"goTransactions": "Go to transactions"
 	},
 	"admin": {
 		"sales": {
@@ -82,281 +83,42 @@
 			}
 		}
 	},
-	"globalError": {
-		"required": "This field is required",
-		"check": "To continue, confirm is mandatory",
-		"email": "Invalid e-mail format",
-		"patternError": "pattern",
-		"nonEditableField": "This field will not be editable after approval",
-		"nonEditableField2": "This field will not be editable",
-		"increasableField": "This field will only be increasable after approval",
-		"increasableField2": "This field will only be increasable",
-		"privateDocument": "To unlock this information, please click on “View more information” and sign the NDA."
-	},
-	"globalNetWrokError": {
-		"error": "Oop something went wrongs"
-	},
-	"Session": {
-		"sessionTimeOut": "Your session has expired. Please relogin"
-	},
-	"adobe": {
-		"adobeError": "Adobe error"
-	},
-	"User": {
-		"error": {
-			"username": "To continue, please type your e-mail address",
-			"password": "To continue, please type your password",
-			"emailToken": "Email token doesn't match",
-			"verifyToken": "Please enter the token received",
-			"setPassword": "To continue, please type your password",
-			"setConfirmPassword": "To continue, please confirm your passwordd",
-			"passwordNotMatch": "Passwords don't match",
-			"title": "To continue, please select your title",
-			"firstName": "To continue, please type your first name",
-			"lastName": "To continue, please type your last name",
-			"country": "To continue, please select your country of residence",
-			"countryCallingCode": "",
-			"phoneNumber": "To continue, please type your phone number"
+	"transactions": {
+		"success": {
+			"title": "Transaction successful!",
+			"description": "Thank you for investing in {projectName}. The distribution will be carried out according to the sale policy, stay tuned for updates.",
+			"supportText": "If you have any questions, please contact us at",
+			"transactionLink": "View transaction details",
+			"button": "Go to Transactions"
 		}
 	},
-	"title": [
-		{
-			"key": "",
-			"value": ""
+	"status": {
+		"failure": {
+			"title": "Transaction failed!",
+			"text": "Sorry, something went wrong with your transaction.",
+			"transactionLink": "If you want to see the transaction click here",
+			"button": "Back to your Dashboard"
 		},
-		{
-			"key": "Mr",
-			"value": "Mr"
-		},
-		{
-			"key": "Mrs",
-			"value": "Mrs"
-		}
-	],
-	"company": {
-		"error": {
-			"legalName": "To continue, please type your company's legal name",
-			"email": "To continue, please type your company's email address",
-			"city": "To continue, please type your company's city",
-			"country": "To continue, please select your company's country",
-			"street": "To continue, please type your company's address",
-			"zipCode": "To continue, please type your company's zip code",
-			"correspondenceCity": "To continue, please type your company's city of correspondence",
-			"correspondenceStreet": "To continue, please type your company's address of correspondence"
+		"pending": {
+			"title": "Pending transaction!",
+			"text": "Your transaction is in review status.",
+			"transactionLink": "If you want to see the transaction click here",
+			"button": "Back to your Dashboard"
 		}
 	},
-	"registrationDocument": {
-		"error": {
-			"identityDocumentType": "To continue, please select your ID type",
-			"identityDocument": "To continue, please upload your identity document",
-			"fimaRegistrationLicense": "To continue, please upload your company's license (FINMA or other)",
-			"tradeRegister": "To continue, please upload the trade register extract of the company",
-			"proofOfLegalRepresentation": "To continue, please upload proof of your legal representation of the company"
+	"dashboard": {
+		"fundraisingProgress": {
+			"description": "Current ICO round ends in {days} days",
+			"tokensSold": "{sold} / {total} {tokenSymbol}",
+			"percentage": "{percentage}%",
+			"noActiveSale": "No active sale"
 		}
 	},
-	"client": {
-		"error": {
-			"username": "To continue, please type a username to identify your client",
-			"title": "To continue, please choose how to address your client",
-			"firstName": "To continue, please type your client's first name",
-			"lastName": "To continue, please type your client's last name"
-		}
-	},
-	"projectInfo": {
-		"error": {
-			"projectName": "To continue, please type the project name",
-			"projectDescription": "This field is required",
-			"issuer": "To continue, please type the name of the issuer of the project",
-			"companyName": "This field is required",
-			"issuerBank": "This field is required",
-			"issuerBankEmail": "This field is required",
-			"isin": "To continue, please select an ISIN number"
-		}
-	},
-	"assetInfo": {
-		"error": {
-			"description": "This field is required",
-			"propertyType": "To continue, please select the type of establishment",
-			"estimatedValue": "To continue, please input the estimated market value and currency of the property",
-			"country": "To continue, please select the country of the property",
-			"address": "To continue, please type the address of the property",
-			"zipCode": "To continue, please type the zip code of the property",
-			"city": "To continue, please type the city of the property",
-			"assetPurpose": "This field is required",
-			"assetStatus": "This field is required"
-		}
-	},
-	"investmentInfo": {
-		"error": {
-			"investment": "This field is required",
-			"jurisdiction": "This field is required",
-			"structurer": "This field is required",
-			"paying": "This field is required",
-			"series": "This field is required",
-			"date": "This field is required",
-			"denomination": "This field is required",
-			"expectedReturnPerAnnum": "This field is required",
-			"expectedMultipleOfInvestmentCapital": "This field is required",
-			"interestPA": "This field is required",
-			"paymentPeriodicity": "This field is required",
-			"maturity": "This field is required",
-			"maturityTime": "This field is required",
-			"dividend": "This field is required",
-			"earlyRedemptionDate": "This field is required",
-			"invalidRedemptionDate": "Early redemption date can't be a date in the past",
-			"lastPrice": "This field is required",
-			"fundraisingPeriod": "This field is required",
-			"softCap": "This field is required",
-			"hardCap": "This field is required",
-			"pricePerUnit": "This field is required",
-			"faceValuePerUnitCurrency": "This field is required",
-			"noOfUnit": "This field is required",
-			"paymentPeriodicityTime": "This field is required",
-			"mainProvision": "This field is required",
-			"corporateRules": "This field is required",
-			"exitProvisions": "This field is required",
-			"errorCap": "Soft cap must not exceed hard cap",
-			"errorUnits": "Minimum number of investment units must not exceed total investable units (Hard cap / denomination)",
-			"hardCapIncrasement": "You only increase hard cap value.",
-			"softCapIncrease": "You only increase soft cap value."
-		}
-	},
-	"businessInfo": {
-		"error": "This field is required"
-	},
-	"KPI": {
-		"error": {
-			"loanToValue": "This field is required",
-			"covering": "This field is required",
-			"occupation": "This field is required",
-			"capEX": "This field is required",
-			"revenue": "This field is required",
-			"ebitda": "This field is required",
-			"debtToEquity": "This field is required",
-			"currentCompanyValuationCurrency": "Missing current company valuation currency"
-		}
-	},
-	"nonFinancialInfo": {
-		"error": {
-			"areaDynamic": "This field is required",
-			"socialConstribution": "This field is required",
-			"economyImpact": "This field is required",
-			"enviromentImpact": "This field is required"
-		}
-	},
-	"guaranteeForm": {
-		"error": {
-			"guarantee": "To continue, please specify the extent of coverage of the guarantee",
-			"guaranteeType": "To continue, please select the type of guarantee",
-			"guaranteeRank": "To continue, please select the guarantee rank"
-		}
-	},
-	"documents": {
-		"error": {
-			"project": {
-				"statements": "This field is required",
-				"projections": "This field is required",
-				"summary": "This field is required",
-				"memorandum": "This field is required"
-			},
-			"legal": {
-				"incorporation": "This field is required",
-				"byLaws": "This field is required",
-				"shareholder": "This field is required",
-				"capTable": "This field is required"
-			},
-			"financial": {
-				"termSheet": "To continue, please upload a term sheet document",
-				"subscription": "This field is required",
-				"otherDocument": "This field is required"
-			}
-		}
-	},
-	"importInvestment": {
-		"error": {
-			"client": "To continue, please select the client with a position in this project",
-			"isin": "To continue, please type an ISIN number",
-			"unitsOwned": "To continue, please specify the number of project units owned",
-			"acquisitionPrice": "To continue, please specify the adquisition price",
-			"currency": "To continue, please select the currency",
-			"documentation": "To continue, please upload proof of ownership of project shares",
-			"project": "To continue, please select the project",
-			"bank": "To continue, please select the bank",
-			"check": "You must agree to the terms of service before continuing."
-		}
-	},
-	"bank": {
-		"error": {
-			"iban": "To continue, please type the IBAN / account number",
-			"bankName": "To continue, please type your Bank's name",
-			"accountManagerName": "To continue, please type your account manager's name",
-			"accountManagerEmail": "To continue, please type your account manager's email",
-			"phoneAccountManager": "To continue, please type your account manager's phone"
-		}
-	},
-	"postNewOrder": {
-		"error": {
-			"client": "To continue, please select the client posting this order",
-			"orderType": "To continue, please select order type",
-			"project": "To continue, please select the project",
-			"isin": "To continue, please select an ISIN number",
-			"bankId": "Please select the bank where the funds or units are held",
-			"totalUnit": "To continue, please type the number of units to buy or sell",
-			"pricePerUnit": "To continue, please type the price at which you wish to buy/sell",
-			"validUntil": "To continue, please select valid unit date"
-		}
-	},
-	"investmetOnPrimaryMarket": {
-		"error": {
-			"client": "To continue, please select the client investing in this project",
-			"investmentValue": "To continue, please enter investment vlaue",
-			"investmentUnit": "To continue, please enter investment unit",
-			"investmentError": "Minimum number of investment units not reached"
-		}
-	},
-	"login": {
-		"message": {
-			"success": "Successfully logged in",
-			"error": "Username and password don't match"
-		}
-	},
-	"registration": {
-		"userUnderRegistration": "You must complete registration before using the platform",
-		"message": {
-			"completed": "Thank you for your registration.  Please login with your credentials"
-		}
-	},
-	"updatePassword": {
-		"error": {
-			"currentPassword": "Please enter current credentials",
-			"password": "Please enter your new password",
-			"confirmPassword": "Please confirm your new password",
-			"notmatched": "Password and confirm password doesn't match"
-		}
-	},
-	"updatePersonalInfo": {
-		"error": {
-			"countryCallingCode": "Please select country calling code",
-			"phoneNumber": "Please enter enter phone number"
-		}
-	},
-	"shareLink": {
-		"lable": {
-			"share": "Link copied to clipboard"
-		}
-	},
-	"noData": {
-		"portfolio": "There are no projects yet",
-		"transactions": "There are no transactions yet",
-		"clients": "There are no clients yet",
-		"notifications": "There are no notifications yet",
-		"orders": "There are no orders yet",
-		"projectMovement": "There is no movement list",
-		"smatCornerList": "There is no smat corner list",
-		"smatCornerMultimedia": "There is no multimedia content yet",
-		"projectShare": "There are no users yet"
-	},
-	"newCampaign": {
-		"errorDates": "Issue date must be before maturity date"
+	"notFound": {
+		"title": "Oops! 404",
+		"description": "Looks like this page took a wrong turn!",
+		"subDescription": "Don't worry, even the best players get lost sometimes.",
+		"mobileDescription": "Don't worry, even the best players get lost sometimes.",
+		"backToHome": "Back to Home"
 	}
 }

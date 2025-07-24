@@ -16,6 +16,7 @@ import {
   getActiveSale,
   getCurrencies,
   getCurrentUser,
+  getSaftForTransactionDetails,
   getSale,
   getSaleDocuments,
   getSaleInvestInfo,
@@ -253,6 +254,20 @@ export const useCurrencies = () => {
     queryKey: ['currencies'],
     queryFn: () => getCurrencies(),
     staleTime: DEFAULT_STALE_TIME,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, isLoading, refetch };
+};
+
+export const useSaftForTransactionDetails = (
+  recipientId: string,
+  enabled: boolean = true
+) => {
+  const { data, isLoading, refetch, error } = useQuery({
+    queryKey: ['saft', 'details', recipientId],
+    queryFn: () => getSaftForTransactionDetails(recipientId),
+    staleTime: 7 * 1000, // 7 seconds
+    enabled: Boolean(recipientId && enabled),
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, isLoading, refetch };

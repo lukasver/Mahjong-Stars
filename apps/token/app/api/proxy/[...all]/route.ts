@@ -19,10 +19,6 @@ export const GET = withAuth(async (req, context, auth) => {
   const identifier = all[1];
   const subIdentifier = all[2];
 
-  console.debug(
-    '🚀 ~ route.ts:20',
-    `${controller} ${identifier} ${subIdentifier}`
-  );
   if (!controller) {
     return NextResponse.json({ error: 'Bad request' }, { status: 404 });
   }
@@ -109,6 +105,21 @@ export const GET = withAuth(async (req, context, auth) => {
           );
           return NextResponse.json(data);
         }
+        return NextResponse.json({ error: 'Bad request' }, { status: 404 });
+      }
+
+      case 'saft': {
+        if (identifier === 'details') {
+          if (subIdentifier) {
+            const data = await transactions.getSaftForTransactionDetails(
+              { recipientId: subIdentifier },
+              { address: auth.address }
+            );
+            return NextResponse.json(data);
+          }
+          return NextResponse.json({ error: 'Bad request' }, { status: 404 });
+        }
+
         return NextResponse.json({ error: 'Bad request' }, { status: 404 });
       }
     }

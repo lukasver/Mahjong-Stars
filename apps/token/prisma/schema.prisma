@@ -302,6 +302,7 @@ enum DocumentSignatureStatus {
   EXPIRED
   REJECTED
   OPENED
+  ERROR
 
   @@map("document_signature_status")
 }
