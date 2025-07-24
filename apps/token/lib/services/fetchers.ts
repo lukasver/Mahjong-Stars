@@ -25,6 +25,7 @@ export type FetcherOptions = Omit<RequestInit, 'body'> & {
       }
     | {
         rawBody?: false | never;
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         body?: any;
       }
   );
@@ -285,8 +286,9 @@ export const getTransactionById = async (id: string) => {
 export const getSaleSaftForTransaction = async (txId: string) => {
   try {
     const data = await fetcher<{
-      saft: SaftContract | null;
-      versions: SaftContract[];
+      id: string;
+      content: string;
+      missingVariables: string[];
     }>(`/transactions/${txId}/saft`);
     return { data, error: null };
   } catch (e) {

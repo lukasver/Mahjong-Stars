@@ -12,15 +12,17 @@ import {
 } from '@mjs/ui/primitives/card';
 import { FileUpload } from '@mjs/ui/components/file-upload';
 import { Button } from '@mjs/ui/primitives/button';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { getFileUploadPresignedUrl } from '@/lib/actions';
 import { uploadFile } from '@/lib/utils/files';
 import {
   useSaleSaftForTransaction,
   useTransactionById,
 } from '@/lib/services/api';
-import { useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
+import { useAppForm } from '@mjs/ui/primitives/form';
+import { z } from 'zod';
+import { FormInput } from '@mjs/ui/primitives/form-input';
 
 /**
  * Type guard for FileWithPreview
@@ -181,58 +183,41 @@ const KycUploadDocument = () => {
  */
 const SaftReviewStep = () => {
   const { tx: txId } = useParams();
-  const { data: tx, isLoading } = useTransactionById(txId as string);
+  // const { data: tx, isLoading } = useTransactionById(txId as string);
+  const { data, error, isLoading } = useSaleSaftForTransaction(txId as string);
 
-  let saleId: string = '';
-  if (
-    !isLoading &&
-    tx &&
-    tx.transaction &&
-    'sale' in tx.transaction &&
-    tx.transaction.sale &&
-    'id' in tx.transaction.sale
-  ) {
-    saleId = String(tx.transaction.sale.id);
-  }
-  const { data, error } = useSaleSaftForTransaction(txId as string);
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
+  console.debug('🚀 ~ confirmation.tsx:186 ~ SaftReviewStep ~ data:', data);
 
-  // Use .template if available, otherwise .content
-  const saft: Record<string, unknown> | undefined =
-    data?.saft && typeof data.saft === 'object' && data.saft !== null
-      ? (data.saft as Record<string, unknown>)
-      : undefined;
-  const template =
-    (saft &&
-      (typeof saft.template === 'string'
-        ? saft.template
-        : typeof saft.content === 'string'
-        ? saft.content
-        : '')) ||
-    '';
-  const variables = useMemo(
-    () => extractTemplateVariables(template),
-    [template]
+  const form = useAppForm({
+    validators: {
+      onSubmit: z.object({
+        contractId: z.string().min(1),
+        variables: z.record(z.string(), z.string()),
+      }),
+    },
+    defaultValues: {
+      contractId: data?.id,
+      variables: data?.missingVariables.reduce((acc, v) => {
+        acc[v] = '';
+        return acc;
+      }, {} as Record<string, string>),
+    },
+  });
+
+  const variables = data?.missingVariables || [];
+  const template = data?.content as string;
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      form.handleSubmit();
+    },
+    [form]
   );
 
-  useEffect(() => {
-    setValues((prev) => {
-      const next = { ...prev };
-      variables.forEach((v) => {
-        if (!(v in next)) next[v] = '';
-      });
-      return next;
-    });
-  }, [variables]);
-
-  const handleChange = (key: string, value: string) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const isValid = variables.every((v) => values[v]?.trim());
-
   if (isLoading) return <CardContent>Loading SAFT...</CardContent>;
+
   if (error)
     return (
       <CardContent className='text-destructive'>
@@ -243,7 +228,7 @@ const SaftReviewStep = () => {
     return <CardContent>No SAFT template found for this sale.</CardContent>;
 
   return (
-    <CardContent>
+    <>
       <CardHeader>
         <CardTitle>SAFT Review</CardTitle>
         <CardDescription>
@@ -251,48 +236,75 @@ const SaftReviewStep = () => {
           This is a preview; signature will be handled separately.
         </CardDescription>
       </CardHeader>
-      <form
-        className='space-y-4'
-        onSubmit={(e) => {
-          e.preventDefault();
-          setSubmitted(true);
-        }}
-      >
-        {variables.map((v) => (
-          <div key={v} className='flex flex-col gap-1'>
-            <label htmlFor={`saft-var-${v}`} className='font-medium'>
-              {v.charAt(0).toUpperCase() + v.slice(1)}
-            </label>
-            <input
-              id={`saft-var-${v}`}
-              className='input input-bordered px-3 py-2 rounded border'
-              value={values[v] || ''}
-              onChange={(e) => handleChange(v, e.target.value)}
-              required
-            />
-            {submitted && !values[v]?.trim() && (
-              <span className='text-xs text-destructive'>
-                This field is required.
-              </span>
-            )}
-          </div>
-        ))}
+      <CardContent>
+        <form.AppForm>
+          <form className='space-y-4' onSubmit={handleSubmit}>
+            <div className='grid grid-cols-2 gap-4'>
+              {variables.map((v) => (
+                <FormInput
+                  key={v}
+                  name={`variables.${v}`}
+                  type='text'
+                  label={getLabel(v)}
+                />
+                // <div key={v} className='flex flex-col gap-1'>
+                //   <label htmlFor={`saft-var-${v}`} className='font-medium'>
+                //     {v.charAt(0).toUpperCase() + v.slice(1)}
+                //   </label>
+                //   <input
+                //     id={`saft-var-${v}`}
+                //     className='input input-bordered px-3 py-2 rounded border'
+                //     value={values[v] || ''}
+                //     onChange={(e) => handleChange(v, e.target.value)}
+                //     required
+                //   />
+                //   {submitted && !values[v]?.trim() && (
+                //     <span className='text-xs text-destructive'>
+                //       This field is required.
+                //     </span>
+                //   )}
+                // </div>
+              ))}
+            </div>
 
-        <div className='mt-6'>
-          <CardTitle className='text-base mb-2'>Contract Preview</CardTitle>
-          <div
-            className='whitespace-pre-wrap border rounded p-3 prose prose-invert'
-            dangerouslySetInnerHTML={{
-              __html: renderTemplate(template, values),
-            }}
-          />
-        </div>
-        <Button type='submit' className='w-full' disabled={!isValid}>
-          Sign Contract
-        </Button>
-      </form>
-    </CardContent>
+            <div className='mt-6'>
+              <CardTitle className='text-base mb-2'>Contract Preview</CardTitle>
+              <div
+                className='border rounded p-3 prose prose-invert w-full max-w-none!'
+                dangerouslySetInnerHTML={{
+                  __html: template,
+                }}
+              />
+            </div>
+            <Button type='submit' className='w-full'>
+              Sign Contract
+            </Button>
+          </form>
+        </form.AppForm>
+      </CardContent>
+    </>
   );
+};
+
+const labelMapping = {
+  'recipient.firstName': 'Your First Name',
+  'recipient.lastLame': 'Your Last Name',
+  'recipient.address': 'Your Address',
+  'recipient.city': 'Your City',
+  'recipient.zipcode': 'Your Zipcode',
+  'recipient.country': 'Your Country',
+  'recipient.taxId': 'Your Tax ID',
+  'recipient.state': 'Your State',
+  'recipient.email': 'Recipient Email',
+  'recipient.phone': 'Recipient Phone',
+};
+
+const getLabel = (v: string) => {
+  const label = labelMapping[v as keyof typeof labelMapping];
+  if (!label) {
+    return v.charAt(0).toUpperCase() + v.slice(1);
+  }
+  return label;
 };
 
 /**

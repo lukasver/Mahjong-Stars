@@ -18,7 +18,6 @@ import { prisma } from '@/db';
 import logger from '@/lib/services/logger.server';
 import { invariant } from '@epic-web/invariant';
 import {
-  Currency,
   FOP,
   Sale,
   SaleStatus,
@@ -32,11 +31,18 @@ import {
   Address,
   Profile,
   SaftContract,
+  SignableDocumentRoleSchema,
   User,
 } from '@/common/schemas/generated';
-// import { urlContract, UrlContract } from '@/lib/services/adobe.service';
+import documentsController from '../documents';
 
 class TransactionsController {
+  private documents;
+
+  constructor() {
+    this.documents = documentsController;
+  }
+
   /**
    * Get all transactions (admin only).
    */
@@ -413,7 +419,7 @@ class TransactionsController {
       if (transactions.length > 0) {
         await Promise.all(
           transactions.map((transaction) =>
-            deleteTransactionAndRestoreUnits(transaction)
+            this.cancelTransactionAndRestoreUnits(transaction)
           )
         );
       }
@@ -548,7 +554,88 @@ class TransactionsController {
     }
   }
 
-  async getSaleSaftForTransaction(dto: { txId: string }, ctx: ActionCtx) {
+  async generateContractForTransaction(
+    dto: {
+      transactionId: string;
+      contractId: string;
+      variables?: Record<string, string>;
+    },
+    ctx: ActionCtx
+  ) {
+    // Here we need to get the contract, update the variables with new information and call the documenso service to generate
+    // contract. generate an ID in and store it in our DB, respond FASt. cannot wait for documenso generateion will need to add webhook.
+    try {
+      //TODO! add own user check?
+      // 1) Fetch contract and recompute variables
+      const result = await this.getSaleSaftForTransaction(
+        { txId: dto.transactionId },
+        ctx
+      );
+      invariant(result.success, 'Failed to get sale saft for transaction');
+      const { content, missingVariables } = result.data;
+      const user = await prisma.user.findUnique({
+        where: { walletAddress: ctx.address },
+        select: {
+          email: true,
+          profile: { select: { firstName: true, lastName: true } },
+        },
+      });
+      invariant(user, 'User not found');
+      const fullname =
+        user?.profile?.firstName || user.profile?.lastName
+          ? `${user.profile?.firstName} ${user.profile?.lastName}`
+          : '';
+
+      // 2) Generate contract reference in our own DB and call documenso service to generate the HTML
+      const recipient = await prisma.documentRecipient.create({
+        data: {
+          email: user.email,
+          fullname,
+          role: SignableDocumentRoleSchema.enum.SIGNER,
+          address: ctx.address,
+          saftContractId: dto.contractId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      // TODO!:
+      void this.documents.generatePDF(recipient.id, content).catch((e) => {
+        logger(e);
+      });
+
+      return Success({
+        id: recipient.id,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async getContractForTransaction(
+    dto: { txId: string; recipientId: string },
+    ctx: ActionCtx
+  ) {
+    try {
+      //TODO! add own user check?
+      const recipient = await prisma.documentRecipient.findUnique({
+        where: { id: dto.recipientId },
+      });
+      return Success({
+        recipient,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async getSaleSaftForTransaction(
+    dto: { txId: string; variables?: Record<string, string> },
+    _ctx: ActionCtx
+  ) {
     // We need to retrieve the saft content for the sale.
     // We need to replace default variables with the ones from the transaction.
     // We need ot send it to the front end for review with puplated vars
@@ -582,23 +669,27 @@ class TransactionsController {
       const saftContract = transaction?.sale?.saftContract;
       invariant(saftContract, 'SAFT template not found in transaction');
 
-      // 1) Traer el contenid odel saft y las variables
-      // 2) Reemplazar las variables por los datos de la tx, user, sale y date en el content.
-      // 3) Devolver el content con las variables reemplazadas al front para mostrar.
-      // Seguramente haya variables que faltan, por ejemplo address, eso deberíamos esperarlo de vuelta del front.
+      // These are the variables from the information we have of the tx, sale, user, etc...
       const contractVariables = this.parseTransactionVariablesToContract({
         tx: transaction,
         sale: transaction.sale,
         contract: saftContract.content,
-        variables: saftContract.variables,
         user: transaction.user,
         profile: transaction.user?.profile,
         address: transaction.user?.profile?.address,
+        inputVariables: dto.variables,
       });
 
+      // variables is an array of strings, we should compute the missing variables, wich are the ones in the array that has no value in the contractVariables object.
+      const missingVariables = this.computeMissingVariables(
+        saftContract.variables,
+        contractVariables.variables
+      );
+
       return Success({
-        contract: contractVariables.contract,
-        variables: contractVariables.variables,
+        id: saftContract.id,
+        content: contractVariables.contract,
+        missingVariables,
       });
     } catch (e) {
       logger(e);
@@ -632,6 +723,10 @@ class TransactionsController {
     }
   }
 
+  /**
+   * Helper function used to cancel a transaction and restore the available token quantity.
+   * Should always be called when cancelling a transaction to ensure units are restored.
+   */
   private async cancelTransactionAndRestoreUnits(
     tx: Pick<SaleTransactions, 'id' | 'saleId' | 'quantity' | 'userId'>,
     reason?: string
@@ -662,6 +757,95 @@ class TransactionsController {
     ]);
   }
 
+  /**
+   * Compute missing variables by comparing required variables with available ones.
+   * @param requiredVariables - Array of required variable names from the SAFT contract
+   * @param availableVariables - Object containing available variables with their values
+   * @returns Array of variable names that are missing or have null/undefined values
+   */
+  private computeMissingVariables(
+    requiredVariables: SaftContract['variables'],
+    availableVariables: Record<string, unknown>
+  ): string[] {
+    if (!Array.isArray(requiredVariables)) {
+      return [];
+    }
+
+    const missingVariables: string[] = [];
+
+    for (const variable of requiredVariables) {
+      if (typeof variable !== 'string') {
+        continue;
+      }
+
+      // Check if the variable exists in the available variables
+      const value = this.getNestedValue(availableVariables, variable);
+
+      // Consider null, undefined, or empty string as missing
+      if (value === null || value === undefined || value === '') {
+        missingVariables.push(variable);
+      }
+    }
+
+    return missingVariables;
+  }
+
+  /**
+   * Get a nested value from an object using dot notation (e.g., "recipient.firstName").
+   * @param obj - The object to search in
+   * @param path - The dot-notation path to the value
+   * @returns The value at the path or undefined if not found
+   */
+  private getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+    const keys = path.split('.');
+    let current: unknown = obj;
+
+    for (const key of keys) {
+      if (
+        current === null ||
+        current === undefined ||
+        typeof current !== 'object'
+      ) {
+        return undefined;
+      }
+      current = (current as Record<string, unknown>)[key];
+    }
+
+    return current;
+  }
+
+  /**
+   * Helper to set a value in an object using dot notation, creating nested objects as needed.
+   * @param obj - The object to modify
+   * @param path - The dot-notated path (e.g., 'recipient.firstName')
+   * @param value - The value to set
+   */
+  private setNestedValue(
+    obj: Record<string, unknown>,
+    path: string,
+    value: unknown
+  ) {
+    if (!path) return;
+    const keys = path.split('.').filter(Boolean);
+    if (keys.length === 0) return;
+    let current: Record<string, unknown> = obj;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i]!;
+      if (
+        !(key in current) ||
+        typeof current[key] !== 'object' ||
+        current[key] === null
+      ) {
+        current[key] = {};
+      }
+      current = current[key] as Record<string, unknown>;
+    }
+    current[keys[keys.length - 1]!] = value;
+  }
+
+  /**
+   * Helper function used to populate tx/user/sale information into the contract variables object.
+   */
   parseTransactionVariablesToContract({
     tx,
     user,
@@ -669,18 +853,17 @@ class TransactionsController {
     address,
     sale,
     contract,
-    variables,
+    inputVariables,
   }: {
     tx: SaleTransactions;
     sale: Pick<Sale, 'currency' | 'tokenPricePerUnit'>;
     contract: SaftContract['content'];
-    variables: SaftContract['variables'];
+    inputVariables?: Record<string, string>;
     user?: Partial<User> | null;
     profile?: Partial<Profile> | null;
     address?: Partial<Address> | null;
-    inputVariables?: Record<string, string>;
   }) {
-    const defaultVariables = {
+    const computedVariables = {
       recipient: {
         // profile
         firstName: profile?.firstName || null,
@@ -714,68 +897,18 @@ class TransactionsController {
       date: new Date().toISOString().split('T')[0],
     };
 
-    const template = Handlebars.compile(contract);
-    const fullContract = template(defaultVariables);
+    // Merge inputVariables into computedVariables using dot notation
+    if (inputVariables && Object.keys(inputVariables).length > 0) {
+      for (const key in inputVariables) {
+        this.setNestedValue(computedVariables, key, inputVariables[key]);
+      }
+    }
 
-    return { contract: fullContract, variables: defaultVariables };
+    const template = Handlebars.compile(contract);
+    const fullContract = template(computedVariables);
+
+    return { contract: fullContract, variables: computedVariables };
   }
 }
-
-const _createSaftContract = ({
-  contract,
-  userData,
-  contractValues,
-  saleCurrency,
-  saleTokenPricePerUnit,
-}: {
-  contract: string;
-  //TODO! check this was UserWithProfileAndAddress
-  userData: any;
-  contractValues: {
-    currency: Currency;
-    amount: string | number;
-    quantity: number;
-    formOfPayment: FOP;
-  };
-  saleCurrency: Currency;
-  saleTokenPricePerUnit: number;
-}) => {
-  const profile = userData?.profile;
-  const address = profile?.address;
-
-  const precision = contractValues?.formOfPayment === FOP.CRYPTO ? 8 : 2;
-
-  const saleAmount = new Prisma.Decimal(contractValues?.quantity || 0)
-    .mul(new Prisma.Decimal(saleTokenPricePerUnit))
-    .toFixed(precision);
-
-  // const contractVariables = {
-  //   // profile
-  //   firstname: profile?.firstName || 'XXXXX',
-  //   lastname: profile?.lastName || 'XXXXX',
-  //   email: profile?.email || 'XXXXX',
-  //   // address
-  //   city: address?.city || 'XXXXX',
-  //   zipcode: address?.zipCode || 'XXXXX',
-  //   state: address?.state || 'XXXXX',
-  //   country: address?.country || 'XXXXX',
-  //   // Purchase
-  //   quantity: contractValues?.quantity || 'XXXXX',
-  //   currency: contractValues?.currency || 'XXXXX',
-  //   amount:
-  //     new Prisma.Decimal(contractValues?.amount || 0)
-  //       .toFixed(precision)
-  //       .toString() || 'XXXXX',
-  //   'sale.currency':  saleCurrency || 'XXXXX',
-  //   'equivalent.amount': paidamountindefaultcurrency: saleAmount?.toString() || 'XXXXX',
-  //   date: DateTime.now().toFormat('yyyy-MM-dd'),
-  // };
-
-  // const template = Handlebars.compile(contract);
-  // const fullContract = template(contractVariables);
-
-  // return fullContract;
-  return '';
-};
 
 export default new TransactionsController();

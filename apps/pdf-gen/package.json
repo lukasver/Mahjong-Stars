@@ -1,0 +1,29 @@
+{
+  "name": "@mjs/pdf-gen",
+  "version": "0.0.0",
+  "module": "src/index.ts",
+  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx --watch --env-file=.env ./src/index.ts",
+    "lint": "eslint src --fix && npm run type-check",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@documenso/sdk-typescript": "^0.3.1",
+    "pdf-lib": "1.17.1",
+    "puppeteer": "24.3.0",
+    "zod": "3.25.67"
+  },
+  "devDependencies": {
+    "@mjs/typescript-config": "workspace:*",
+    "@total-typescript/ts-reset": "^0.5.1",
+    "@types/node": "^22.11.0",
+    "tsx": "4.17.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.2"
+  }
+}

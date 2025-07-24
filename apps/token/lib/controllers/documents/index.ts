@@ -170,6 +170,8 @@ class DocumentsController {
     }
   }
 
+  async generatePDF(reference: string, content: string) {}
+
   private generateHTMLFromJSONContent = (content: JSONContent) => {
     if (!content || typeof content !== 'object') {
       return '';
