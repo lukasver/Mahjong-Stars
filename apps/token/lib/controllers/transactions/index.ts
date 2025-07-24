@@ -154,6 +154,17 @@ class TransactionsController {
       const transaction = await prisma.saleTransactions.findUnique({
         where: { id: String(dto.id) },
         select: {
+          id: true,
+          amountPaid: true,
+          amountPaidCurrency: true,
+          totalAmount: true,
+          paidCurrency: true,
+          formOfPayment: true,
+          receivingWallet: true,
+          comment: true,
+          status: true,
+          rawPrice: true,
+          price: true,
           sale: {
             select: {
               id: true,
@@ -197,7 +208,7 @@ class TransactionsController {
       invariant(transaction, 'Transaction not found');
 
       return Success({
-        transaction,
+        transaction: decimalsToString(transaction),
         requiresKYC: transaction.sale.requiresKYC,
         requiresSAFT: transaction.sale.saftCheckbox,
       });
@@ -558,7 +569,7 @@ class TransactionsController {
     dto: {
       transactionId: string;
       contractId: string;
-      variables?: Record<string, string>;
+      variables?: Record<string, string | Record<string, string>>;
     },
     ctx: ActionCtx
   ) {
@@ -568,15 +579,16 @@ class TransactionsController {
       //TODO! add own user check?
       // 1) Fetch contract and recompute variables
       const result = await this.getSaleSaftForTransaction(
-        { txId: dto.transactionId },
+        { txId: dto.transactionId, variables: dto.variables },
         ctx
       );
       invariant(result.success, 'Failed to get sale saft for transaction');
-      const { content, missingVariables } = result.data;
+      const { content } = result.data;
       const user = await prisma.user.findUnique({
         where: { walletAddress: ctx.address },
         select: {
           email: true,
+          id: true,
           profile: { select: { firstName: true, lastName: true } },
         },
       });
@@ -600,10 +612,16 @@ class TransactionsController {
         },
       });
 
-      // TODO!:
-      void this.documents.generatePDF(recipient.id, content).catch((e) => {
-        logger(e);
-      });
+      void this.documents
+        .generatePDF({
+          content,
+          title: `Token SAFT | tx:${dto.transactionId} | ${user.id}:${user.email}`,
+          recipients: [{ email: user.email, name: fullname }],
+          reference: recipient.id,
+        })
+        .catch((e) => {
+          logger(e);
+        });
 
       return Success({
         id: recipient.id,
@@ -633,7 +651,10 @@ class TransactionsController {
   }
 
   async getSaleSaftForTransaction(
-    dto: { txId: string; variables?: Record<string, string> },
+    dto: {
+      txId: string;
+      variables?: Record<string, string | Record<string, string>>;
+    },
     _ctx: ActionCtx
   ) {
     // We need to retrieve the saft content for the sale.
@@ -690,6 +711,33 @@ class TransactionsController {
         id: saftContract.id,
         content: contractVariables.contract,
         missingVariables,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async getSaftForTransactionDetails(
+    dto: { recipientId: string },
+    ctx: ActionCtx
+  ) {
+    try {
+      const recipient = await prisma.documentRecipient.findUnique({
+        where: { id: dto.recipientId, address: ctx.address },
+        select: {
+          id: true,
+          saftContractId: true,
+          externalId: true,
+          status: true,
+          signatureUrl: true,
+          email: true,
+          fullname: true,
+        },
+      });
+      invariant(recipient, 'Recipient not found');
+      return Success({
+        recipient,
       });
     } catch (e) {
       logger(e);
@@ -858,11 +906,12 @@ class TransactionsController {
     tx: SaleTransactions;
     sale: Pick<Sale, 'currency' | 'tokenPricePerUnit'>;
     contract: SaftContract['content'];
-    inputVariables?: Record<string, string>;
+    inputVariables?: Record<string, string | Record<string, string>>;
     user?: Partial<User> | null;
     profile?: Partial<Profile> | null;
     address?: Partial<Address> | null;
   }) {
+    const DISALLOWED_VARIABLES = ['token', 'paid', 'sale', 'date'];
     const computedVariables = {
       recipient: {
         // profile
@@ -900,7 +949,13 @@ class TransactionsController {
     // Merge inputVariables into computedVariables using dot notation
     if (inputVariables && Object.keys(inputVariables).length > 0) {
       for (const key in inputVariables) {
-        this.setNestedValue(computedVariables, key, inputVariables[key]);
+        // Check to aovoid modifying the computed variables
+        if (DISALLOWED_VARIABLES.includes(key)) {
+          continue;
+        }
+        if (inputVariables[key]) {
+          this.setNestedValue(computedVariables, key, inputVariables[key]);
+        }
       }
     }
 

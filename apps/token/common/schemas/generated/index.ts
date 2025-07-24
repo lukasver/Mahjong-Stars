@@ -136,7 +136,7 @@ export const SignableDocumentRoleSchema = z.enum(['CC','SIGNER','VIEWER','APPROV
 
 export type SignableDocumentRoleType = `${z.infer<typeof SignableDocumentRoleSchema>}`
 
-export const DocumentSignatureStatusSchema = z.enum(['CREATED','SENT_FOR_SIGNATURE','WAITING_FOR_COUNTERPARTY','SIGNED','EXPIRED','REJECTED','OPENED']);
+export const DocumentSignatureStatusSchema = z.enum(['CREATED','SENT_FOR_SIGNATURE','WAITING_FOR_COUNTERPARTY','SIGNED','EXPIRED','REJECTED','OPENED','ERROR']);
 
 export type DocumentSignatureStatusType = `${z.infer<typeof DocumentSignatureStatusSchema>}`
 

@@ -56,10 +56,10 @@ async function main(req: IncomingMessage, res: ServerResponse) {
 
   const start = performance.now();
 
-  try {
-    // Get parsed body
-    const parsed = bodySchema.safeParse(await parseJsonBody(req));
+  // Get parsed body
+  const parsed = bodySchema.safeParse(await parseJsonBody(req));
 
+  try {
     if (!parsed.success) {
       res.writeHead(400, { 'Content-Type': 'text/plain' });
       res.end('Invalid request body');
@@ -96,6 +96,7 @@ async function main(req: IncomingMessage, res: ServerResponse) {
     console.time('document-sending');
     await docService.sendForDocumentSigning(document.documentId).then((res) => {
       if (res) {
+        console.debug('RESULT', res);
         return callWebhook({
           externalId: res.externalId || body.reference,
           status: res.status,
@@ -121,6 +122,21 @@ async function main(req: IncomingMessage, res: ServerResponse) {
     res.end('OK');
   } catch (error) {
     console.error('Error generating PDF:', error);
+    if (parsed.data) {
+      // clal the webhook to update the status of the document ot errored
+      callWebhook({
+        externalId: parsed.data.reference,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Unknown error generating PDF',
+      }).catch((err) => {
+        console.error(
+          `Error calling webhook for doc ${parsed.data.reference}: `,
+          err?.message
+        );
+      });
+    }
     res.writeHead(500, { 'Content-Type': 'text/plain' });
     res.end('Internal server error');
   } finally {

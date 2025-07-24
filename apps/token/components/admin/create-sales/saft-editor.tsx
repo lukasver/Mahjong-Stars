@@ -23,6 +23,7 @@ import {
 import Editor from '../../Editor';
 import { SaftContract } from '@/common/schemas/generated';
 import { safeJsonParse } from '@mjs/utils/client';
+import VariablesPanel from './variables-panel';
 
 function FieldInfo({ field }: { field: AnyFieldApi }) {
   return (
@@ -130,45 +131,54 @@ export function SaftEditor({
         </div>
       ) : null}
 
-      <form.Field
-        name='content'
-        // biome-ignore lint/correctness/noChildrenProp: <explanation>
-        children={(field) => {
-          return (
-            <>
-              <p className='mb-1'>Create new version</p>
-              <div className='relative min-h-[500px] w-full h-full bg-white sm:rounded-lg sm:shadow-lg border-2 border-black'>
-                <Editor
-                  setEditor={setEditor}
-                  className='bg-white text-black h-full border-none!'
-                  output='html'
-                  classes={{
-                    editor: 'max-w-full!',
-                  }}
-                  onChange={(value) => {
-                    field.handleChange(value as string);
-                  }}
-                  initialValue={{
-                    type: 'doc',
-                    content: [
-                      {
-                        type: 'paragraph',
-                        content: [
-                          {
-                            type: 'text',
-                            text: placeholder,
-                          },
-                        ],
-                      },
-                    ],
-                  }}
-                />
-                <FieldInfo field={field} />
-              </div>
-            </>
-          );
-        }}
-      />
+      <div>
+        <p className='mb-1'>Create new version</p>
+        <div className='grid grid-cols-3 gap-4'>
+          <div className='col-span-2'>
+            <form.Field
+              name='content'
+              // biome-ignore lint/correctness/noChildrenProp: <explanation>
+              children={(field) => {
+                return (
+                  <>
+                    <div className='relative min-h-[500px] w-full h-full bg-white sm:rounded-lg sm:shadow-lg border-2 border-black'>
+                      <Editor
+                        setEditor={setEditor}
+                        className='bg-white text-black h-full border-none! overflow-y-auto'
+                        output='html'
+                        classes={{
+                          editor: 'max-w-full!',
+                        }}
+                        onChange={(value) => {
+                          field.handleChange(value as string);
+                        }}
+                        initialValue={{
+                          type: 'doc',
+                          content: [
+                            {
+                              type: 'paragraph',
+                              content: [
+                                {
+                                  type: 'text',
+                                  text: placeholder,
+                                },
+                              ],
+                            },
+                          ],
+                        }}
+                      />
+                      <FieldInfo field={field} />
+                    </div>
+                  </>
+                );
+              }}
+            />
+          </div>
+          <div className='col-span-1'>
+            <VariablesPanel className='w-full' />
+          </div>
+        </div>
+      </div>
     </>
   );
 }

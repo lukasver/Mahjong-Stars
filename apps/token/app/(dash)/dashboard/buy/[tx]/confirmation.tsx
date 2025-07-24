@@ -13,9 +13,13 @@ import {
 import { FileUpload } from '@mjs/ui/components/file-upload';
 import { Button } from '@mjs/ui/primitives/button';
 import { useCallback, useState } from 'react';
-import { getFileUploadPresignedUrl } from '@/lib/actions';
+import {
+  generateContractForTransaction,
+  getFileUploadPresignedUrl,
+} from '@/lib/actions';
 import { uploadFile } from '@/lib/utils/files';
 import {
+  useSaftForTransactionDetails,
   useSaleSaftForTransaction,
   useTransactionById,
 } from '@/lib/services/api';
@@ -23,6 +27,22 @@ import { useParams } from 'next/navigation';
 import { useAppForm } from '@mjs/ui/primitives/form';
 import { z } from 'zod';
 import { FormInput } from '@mjs/ui/primitives/form-input';
+import { useAction } from 'next-safe-action/hooks';
+import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
+import { parseAsString, useQueryState } from 'nuqs';
+import { invariant } from '@epic-web/invariant';
+import { toast } from '@mjs/ui/primitives/sonner';
+import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
+import Image from 'next/image';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@mjs/ui/primitives/alert-dialog';
+import { useBeforeUnload } from '@/components/hooks/use-before-unload';
+import { DialogFooter } from '@mjs/ui/primitives/dialog';
 
 /**
  * Type guard for FileWithPreview
@@ -185,22 +205,59 @@ const SaftReviewStep = () => {
   const { tx: txId } = useParams();
   // const { data: tx, isLoading } = useTransactionById(txId as string);
   const { data, error, isLoading } = useSaleSaftForTransaction(txId as string);
+  const [cid, setCid] = useQueryState('cid', parseAsString);
+  const [openDialog, setOpenDialog] = useState(!!cid);
 
-  console.debug('🚀 ~ confirmation.tsx:186 ~ SaftReviewStep ~ data:', data);
+  const action = useActionListener(useAction(generateContractForTransaction), {
+    successMessage: 'Document generation in process, please stand by...',
+    onSuccess: (data) => {
+      console.debug('🚀 ~ confirmation.tsx:195 ~ SaftReviewStep ~ data:', data);
+      if (data.id) {
+        setCid(data.id);
+        setOpenDialog(true);
+      } else {
+        toast.error('Error generating contract');
+      }
+    },
+  });
 
   const form = useAppForm({
     validators: {
       onSubmit: z.object({
+        transactionId: z.string().min(1),
         contractId: z.string().min(1),
-        variables: z.record(z.string(), z.string()),
+        variables: z
+          .record(z.string(), z.string().or(z.record(z.string(), z.string())))
+          .optional(),
       }),
     },
     defaultValues: {
       contractId: data?.id,
-      variables: data?.missingVariables.reduce((acc, v) => {
-        acc[v] = '';
-        return acc;
-      }, {} as Record<string, string>),
+      transactionId: txId as string,
+      variables: getVariablesAsNestedObjects(data?.missingVariables || []),
+    },
+
+    onSubmitError: (error) => {
+      console.error(
+        '🚀 ~ confirmation.tsx:226 ~ SaftReviewStep ~ error:',
+        error
+      );
+    },
+    onSubmit: ({ value }) => {
+      // Avoid executing multiple times
+      if (action.isExecuting) return;
+      console.debug(
+        '🚀 ~ confirmation.tsx:206 ~ SaftReviewStep ~ data:',
+        value
+      );
+      invariant(data, 'Error retrieving sale saft data');
+      const formData = {
+        ...value,
+        contractId: value.contractId || data.id,
+        transactionId: value.transactionId || (txId as string),
+      };
+
+      action.execute(formData);
     },
   });
 
@@ -269,20 +326,117 @@ const SaftReviewStep = () => {
 
             <div className='mt-6'>
               <CardTitle className='text-base mb-2'>Contract Preview</CardTitle>
-              <div
-                className='border rounded p-3 prose prose-invert w-full max-w-none!'
-                dangerouslySetInnerHTML={{
-                  __html: template,
-                }}
-              />
+              <div className='max-h-3xl overflow-y-auto'>
+                <div
+                  className='border rounded p-3 prose prose-invert w-full max-w-none!'
+                  dangerouslySetInnerHTML={{
+                    __html: template,
+                  }}
+                />
+              </div>
             </div>
-            <Button type='submit' className='w-full'>
+            <Button
+              type='submit'
+              className='w-full'
+              loading={action.isExecuting}
+            >
               Sign Contract
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={() => {
+                console.log('ERRORS', form.getAllErrors());
+                console.log('VALS', form.state.values);
+              }}
+            >
+              Reset
             </Button>
           </form>
         </form.AppForm>
       </CardContent>
+      <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+        <SaftGenerationDialog enabled={openDialog} id={cid} />
+      </AlertDialog>
     </>
+  );
+};
+
+const SaftGenerationDialog = ({
+  id,
+  enabled,
+}: {
+  enabled: boolean;
+  id: string | null;
+}) => {
+  useBeforeUnload(
+    'Make sure to sign the contract before closing the page. You can always come back to it later.'
+  );
+  const { data, isLoading, error } = useSaftForTransactionDetails(
+    id as string,
+    enabled
+  );
+
+  console.debug('🚀 ~ confirmation.tsx:376 ~ data:', data);
+
+  if (!enabled || !id) return null;
+
+  const status = data?.recipient.status;
+
+  if (isLoading || status === 'CREATED') {
+    return (
+      <>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Loading...</AlertDialogTitle>
+            <AlertDialogDescription className='text-secondary'>
+              This process can take up to 2 minutes. Please do not close the
+              window.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className='flex items-center gap-2'>
+            <span className='aspect-square animate-pulse'>
+              <Image
+                height={100}
+                width={100}
+                src={MahjongStarsIconXl}
+                alt='Mahjong Stars Logo'
+                className='animate-spin aspect-square'
+              />
+            </span>
+            <span className='text-xl font-bold font-head'>
+              Generating contract...
+            </span>
+          </div>
+        </AlertDialogContent>
+      </>
+    );
+  }
+
+  if (data && status && ['SIGNED', 'SENT_FOR_SIGNATURE'].includes(status)) {
+    return (
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Contract sent to your email</AlertDialogTitle>
+          <AlertDialogDescription className='text-secondary'>
+            Please review and sign the agreement on your email to proceed.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <DialogFooter>
+          <Button variant={'accent'} className='w-full'>
+            Confirm contract is signed
+          </Button>
+        </DialogFooter>
+      </AlertDialogContent>
+    );
+  }
+
+  return (
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Contract Generation Failed</AlertDialogTitle>
+      </AlertDialogHeader>
+    </AlertDialogContent>
   );
 };
 
@@ -323,9 +477,13 @@ const PaymentStep = () => {
   if (!tx) return <CardContent>Transaction not found.</CardContent>;
 
   // TODO: Confirm the correct path for payment fields and type properly
-  const paymentMethod = (tx.transaction as { formOfPayment?: string })
-    ?.formOfPayment;
-  const currency = (tx.transaction as { paidCurrency?: string })?.paidCurrency;
+  const paymentMethod = tx?.transaction?.formOfPayment;
+
+  console.debug(
+    '🚀 ~ confirmation.tsx:483 ~ PaymentStep ~ paymentMethod:',
+    paymentMethod
+  );
+  const currency = tx?.transaction?.paidCurrency;
   // Example bank details (replace with real data as needed)
   const bankDetails = {
     accountName: 'Example Corp',
@@ -358,69 +516,72 @@ const PaymentStep = () => {
   };
 
   return (
-    <CardContent>
+    <>
       <CardHeader>
         <CardTitle>Payment</CardTitle>
         <CardDescription>
           Please follow the instructions below to complete your payment.
         </CardDescription>
       </CardHeader>
-      {paymentMethod === 'TRANSFER' ? (
-        <form className='space-y-4' onSubmit={handleSubmit}>
-          <div>
-            <div className='font-medium mb-1'>Bank Details</div>
-            <div className='text-sm'>
-              <div>Bank Name: {bankDetails.bankName}</div>
-              <div>Account Name: {bankDetails.accountName}</div>
-              <div>IBAN: {bankDetails.iban}</div>
-              <div>SWIFT: {bankDetails.swift}</div>
-              <div>Bank Address: {bankDetails.address}</div>
-              <div>Currency: {currency}</div>
+      <CardContent>
+        {paymentMethod === 'TRANSFER' ? (
+          <form className='space-y-4' onSubmit={handleSubmit}>
+            <div>
+              <div className='font-medium mb-1'>Bank Details</div>
+              <div className='text-sm'>
+                <div>Bank Name: {bankDetails.bankName}</div>
+                <div>Account Name: {bankDetails.accountName}</div>
+                <div>IBAN: {bankDetails.iban}</div>
+                <div>SWIFT: {bankDetails.swift}</div>
+                <div>Bank Address: {bankDetails.address}</div>
+                <div>Currency: {currency}</div>
+              </div>
+            </div>
+            <div>
+              <label htmlFor='confirmation-id' className='font-medium'>
+                Payment Reference / Confirmation Number
+              </label>
+              <input
+                id='confirmation-id'
+                className='input input-bordered px-3 py-2 rounded border w-full'
+                value={confirmationId}
+                onChange={(e) => setConfirmationId(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className='font-medium'>Upload Bank Slip (optional)</label>
+              <FileUpload
+                type='all'
+                maxSizeMB={5}
+                className='w-full'
+                multiple={false}
+                onFilesChange={handleBankSlipChange}
+              />
+            </div>
+            {error && <div className='text-destructive mt-2'>{error}</div>}
+            {success && (
+              <div className='text-success mt-2'>
+                Payment confirmation submitted!
+              </div>
+            )}
+            <Button type='submit' className='w-full' disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Submit Payment Confirmation'}
+            </Button>
+          </form>
+        ) : (
+          <div className='py-8 text-center'>
+            <div className='mb-2'>
+              <span className='font-medium'>Crypto payment</span> (coming soon)
+            </div>
+            <div className='text-muted-foreground'>
+              Please follow the instructions for crypto payment in the next
+              step.
             </div>
           </div>
-          <div>
-            <label htmlFor='confirmation-id' className='font-medium'>
-              Payment Reference / Confirmation Number
-            </label>
-            <input
-              id='confirmation-id'
-              className='input input-bordered px-3 py-2 rounded border w-full'
-              value={confirmationId}
-              onChange={(e) => setConfirmationId(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className='font-medium'>Upload Bank Slip (optional)</label>
-            <FileUpload
-              type='all'
-              maxSizeMB={5}
-              className='w-full'
-              multiple={false}
-              onFilesChange={handleBankSlipChange}
-            />
-          </div>
-          {error && <div className='text-destructive mt-2'>{error}</div>}
-          {success && (
-            <div className='text-success mt-2'>
-              Payment confirmation submitted!
-            </div>
-          )}
-          <Button type='submit' className='w-full' disabled={isSubmitting}>
-            {isSubmitting ? 'Submitting...' : 'Submit Payment Confirmation'}
-          </Button>
-        </form>
-      ) : (
-        <div className='py-8 text-center'>
-          <div className='mb-2'>
-            <span className='font-medium'>Crypto payment</span> (coming soon)
-          </div>
-          <div className='text-muted-foreground'>
-            Please follow the instructions for crypto payment in the next step.
-          </div>
-        </div>
-      )}
-    </CardContent>
+        )}
+      </CardContent>
+    </>
   );
 };
 
@@ -471,3 +632,25 @@ export function TransactionConfirmation({
     </ErrorBoundary>
   );
 }
+
+const getVariablesAsNestedObjects = (variables: string[]) => {
+  variables.reduce(
+    (acc, v) => {
+      const keys = v.split('.');
+      let curr = acc;
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (i === keys.length - 1) {
+          curr[key] = '';
+        } else {
+          if (!curr[key] || typeof curr[key] !== 'object') {
+            curr[key] = {};
+          }
+          curr = curr[key] as Record<string, string>;
+        }
+      }
+      return acc;
+    },
+    {} as Record<string, string | Record<string, string>>
+  );
+};

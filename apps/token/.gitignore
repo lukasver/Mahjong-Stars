@@ -36,3 +36,5 @@ playwright-report/
 
 src/__tests__/config/states/*.json
 data/*.production.json
+
+.wrangler

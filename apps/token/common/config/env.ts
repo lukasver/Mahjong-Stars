@@ -57,6 +57,9 @@ export const env = createEnv({
     EXCHANGE_RATES_API_URL_BACKUP: z.string().url().min(1).optional(),
     EXCHANGE_RATES_API_KEY_BACKUP: z.string().min(1).optional(),
     MAGIC_WORD: z.string().min(1).optional(),
+    PDF_WEBHOOK_API_KEY: z.string().min(1),
+    PDF_SERVICE_URL: z.string().min(1),
+    PDF_SERVICE_API_KEY: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_THIRDWEB_CLIENT_ID: z.string().min(1),
@@ -100,6 +103,9 @@ export const env = createEnv({
     EXCHANGE_RATES_API_KEY_BACKUP: process.env.EXCHANGE_RATES_API_KEY_BACKUP,
     NEXT_PUBLIC_BUCKET_PUBLIC_URL: process.env.NEXT_PUBLIC_BUCKET_PUBLIC_URL,
     MAGIC_WORD: process.env.MAGIC_WORD,
+    PDF_WEBHOOK_API_KEY: process.env.PDF_WEBHOOK_API_KEY,
+    PDF_SERVICE_URL: process.env.PDF_SERVICE_URL,
+    PDF_SERVICE_API_KEY: process.env.PDF_SERVICE_API_KEY,
   },
   skipValidation: process.env.NODE_ENV === 'test',
 });
