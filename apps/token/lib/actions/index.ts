@@ -285,7 +285,7 @@ export const getUserSaleTransactions = authActionClient
   .schema(
     z.object({
       saleId: z.string(),
-      status: TransactionStatusSchema.optional(),
+      status: TransactionStatusSchema.array().optional(),
     })
   )
   .action(async ({ ctx, parsedInput }) => {
