@@ -111,7 +111,10 @@
 				"R2_BUCKET",
 				"EXCHANGE_RATES_API_URL",
 				"EXCHANGE_RATES_API_KEY",
-				"DATABASE_URL"
+				"DATABASE_URL",
+				"PDF_WEBHOOK_API_KEY",
+				"PDF_SERVICE_URL",
+				"PDF_SERVICE_API_KEY"
 			]
 		},
 		"@mjs/i18n#build": {
