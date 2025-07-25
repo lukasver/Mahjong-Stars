@@ -45,7 +45,7 @@ export const formSchemaShape = {
   currency: z.enum(
     FIAT_CURRENCIES as unknown as [
       string,
-      ...(typeof FIAT_CURRENCIES)[number][]
+      ...(typeof FIAT_CURRENCIES)[number][],
     ],
     {
       required_error: 'Sale currency required',
@@ -93,6 +93,7 @@ export const formSchemaShape = {
       'Maximum buy per user must be 0 or greater'
     ),
   saftCheckbox: z.boolean().default(false),
+  requiresKYC: z.boolean().default(false),
 } satisfies Record<SaleKeys, z.ZodType>;
 
 export const SaleFormSchema = z

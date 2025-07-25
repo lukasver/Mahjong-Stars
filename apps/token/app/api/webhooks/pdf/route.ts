@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export const mappingStatus = {
+const mappingStatus = {
   DRAFT: DocumentSignatureStatusSchema.enum.CREATED,
   PENDING: DocumentSignatureStatusSchema.enum.SENT_FOR_SIGNATURE,
   COMPLETED: DocumentSignatureStatusSchema.enum.SIGNED,

@@ -45,8 +45,40 @@ const titleMapping = {
   },
   [TransactionModalTypes.WalletLogin]: {
     title: 'Wallet Login',
+    description: 'Please connect your wallet to continue.',
   },
-} as const;
+  [TransactionModalTypes.Contract]: {
+    title: 'Review Contract',
+    description: 'Please review and sign the contract to continue.',
+  },
+  [TransactionModalTypes.Loading]: {
+    title: 'Processing',
+    description: 'Please wait while we process your request.',
+  },
+  [TransactionModalTypes.ConfirmPayment]: {
+    title: 'Confirm Payment',
+    description: 'Please confirm your payment details.',
+  },
+  [TransactionModalTypes.ManualTransfer]: {
+    title: 'Bank Transfer Details',
+    description: 'Please use these details to complete your bank transfer.',
+  },
+  [TransactionModalTypes.CryptoWarning]: {
+    title: 'Crypto Payment Warning',
+    description: 'Please review important information about crypto payments.',
+  },
+  [TransactionModalTypes.PendingContract]: {
+    title: 'Pending Contract',
+    description: 'You have a contract waiting to be signed.',
+  },
+  [TransactionModalTypes.UploadKyc]: {
+    title: 'Upload KYC',
+    description: 'Please upload your KYC documents to continue.',
+  },
+} satisfies Record<
+  TransactionModalTypes,
+  { title: string; description: string }
+>;
 
 export const TokenInvestModals = (props: TokenModalProps) => {
   if (!props.open) {
