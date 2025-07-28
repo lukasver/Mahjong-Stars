@@ -62,7 +62,7 @@ export default async function CommingSoon() {
       >
         <div className='relative w-screen h-screen sm:h-[468px] lg:h-auto overflow-hidden xl:h-[calc(100dvh-10px)]'>
           <ErrorBoundary fallback={<BackgroundImage poster={poster} />}>
-            <Suspense fallback={<BackgroundImage poster={poster} />}>
+            <Suspense fallback={null}>
               <DynamicVideo />
             </Suspense>
           </ErrorBoundary>
