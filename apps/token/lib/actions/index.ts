@@ -447,13 +447,14 @@ export const deleteContractStatus = authActionClient
   });
 
 export const confirmContractSignature = authActionClient
-  .schema(z.void())
+  //recipientId
+  .schema(z.object({ id: z.string() }))
   .action(async ({ ctx, parsedInput }) => {
     const result = await contractController.confirmSignature(parsedInput, ctx);
     if (!result.success) {
       throw new Error(result.message);
     }
-    return result;
+    return result.data;
   });
 
 export const getContract = authActionClient.action(async ({ ctx }) => {
@@ -472,14 +473,42 @@ export const getInputOptions = authActionClient.action(async ({ ctx }) => {
   return result;
 });
 
-export const getFileUploadPresignedUrl = authActionClient
+/**
+ * Used to upload a file to the public bucket
+ */
+export const getFileUploadPublicPresignedUrl = authActionClient
   .schema(
     z.object({
       key: z.string().min(1),
     })
   )
   .action(async ({ ctx, parsedInput }) => {
-    const result = await documentsController.getPresignedUrl(parsedInput.key);
+    const result = await documentsController.getPresignedUrl(
+      parsedInput.key,
+      'public',
+      'write'
+    );
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result.data;
+  });
+
+/**
+ * Used to upload a file to the public bucket
+ */
+export const getFileUploadPrivatePresignedUrl = authActionClient
+  .schema(
+    z.object({
+      key: z.string().min(1),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const result = await documentsController.getPresignedUrl(
+      parsedInput.key,
+      'private',
+      'write'
+    );
     if (!result.success) {
       throw new Error(result.message);
     }
@@ -531,6 +560,29 @@ export const generateContractForTransaction = authActionClient
   .action(async ({ ctx, parsedInput }) => {
     // transactions controller should
     const result = await transactionsController.generateContractForTransaction(
+      parsedInput,
+      ctx
+    );
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result.data;
+  });
+
+export const associateDocumentsToUser = authActionClient
+  .schema(
+    z.object({
+      documents: z.array(
+        z.object({
+          id: z.string().optional(),
+          key: z.string(),
+        })
+      ),
+      type: z.enum(['KYC']).optional().default('KYC'),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const result = await documentsController.associateDocumentsToUser(
       parsedInput,
       ctx
     );

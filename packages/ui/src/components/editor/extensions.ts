@@ -25,6 +25,14 @@ const tiptapLink = TiptapLink.configure({
       'text-muted-foreground underline underline-offset-[3px] hover:text-primary transition-colors cursor-pointer'
     ),
   },
+  isAllowedUri(url, _ctx) {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  },
 });
 
 const tiptapImage = TiptapImage.extend({

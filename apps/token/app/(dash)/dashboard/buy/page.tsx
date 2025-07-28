@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { ComingSoon } from './coming-soon';
 import { TokenSale } from './sale';
-import { cn } from '@mjs/ui/lib/utils';
+import BackgroundWrapper from '@/components/bg-wrapper';
 
 export default async function BuyPage() {
   const queryClient = new QueryClient();
@@ -21,17 +21,13 @@ export default async function BuyPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ErrorBoundary fallback={<ComingSoon />}>
-        <main
-          className={cn(
-            'bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center -z-50!'
-          )}
-        >
+        <BackgroundWrapper>
           <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
-            <div className='container mx-auto z-10'>
+            <main className='container mx-auto z-10'>
               <TokenSale />
-            </div>
+            </main>
           </div>
-        </main>
+        </BackgroundWrapper>
       </ErrorBoundary>
     </HydrationBoundary>
   );

@@ -43,6 +43,7 @@
 		"@coinbase/onchainkit": "latest",
 		"@documenso/sdk-typescript": "^0.3.1",
 		"@epic-web/invariant": "^1.0.0",
+		"@google-cloud/storage": "^7.16.0",
 		"@mjs/tailwind-config": "workspace:*",
 		"@mjs/transactional": "workspace:*",
 		"@mjs/typescript-config": "workspace:*",

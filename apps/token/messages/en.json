@@ -78,6 +78,10 @@
 					"saftCheckbox": {
 						"label": "SAFT Agreement",
 						"description": "Tick the box if this sale requires a SAFT agreement for users to buy"
+					},
+					"requiresKYC": {
+						"label": "KYC Required",
+						"description": "Tick the box if this sale requires KYC verification for users to buy"
 					}
 				}
 			}
@@ -86,7 +90,7 @@
 	"transactions": {
 		"success": {
 			"title": "Transaction successful!",
-			"description": "Thank you for investing in {projectName}. The distribution will be carried out according to the sale policy, stay tuned for updates.",
+			"description": "Thank you for purchasing {tokenSymbol}. The distribution will be carried out according to the sale policy, stay tuned for updates.",
 			"supportText": "If you have any questions, please contact us at",
 			"transactionLink": "View transaction details",
 			"button": "Go to Transactions"

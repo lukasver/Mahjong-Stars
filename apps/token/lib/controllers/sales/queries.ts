@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, SaleStatus } from '@prisma/client';
 
 export const TOKEN_QUERY = {
   select: {
@@ -43,3 +43,22 @@ export const DEFAULT_SALE_SELECT: Prisma.SaleSelect = {
     },
   },
 } as const;
+
+const GetAllQueryValidator = Prisma.validator<Prisma.SaleFindManyArgs>();
+const SalesWithRelations = GetAllQueryValidator({
+  select: DEFAULT_SALE_SELECT,
+});
+const ActiveSalesQueryValidator = GetAllQueryValidator({
+  where: {
+    status: SaleStatus.OPEN,
+  },
+  select: DEFAULT_SALE_SELECT,
+});
+
+export type ActiveSalesWithRelationsArgs = typeof ActiveSalesQueryValidator;
+export type SalesWithRelationsArgs = typeof SalesWithRelations;
+export type GetSalesArgs =
+  | SalesWithRelationsArgs
+  | ActiveSalesWithRelationsArgs;
+
+export type SalesWithRelations = Prisma.SaleGetPayload<GetSalesArgs>;

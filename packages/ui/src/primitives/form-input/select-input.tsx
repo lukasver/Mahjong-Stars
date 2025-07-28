@@ -62,6 +62,8 @@ export function SelectInput({ options, ...rest }: SelectInputProps) {
     onChange?.(String(v));
   };
 
+  console.debug('NAME', rest.name, rest.value);
+
   return (
     <Select onValueChange={onValueChange} defaultValue={value} {...rest}>
       <SelectTrigger

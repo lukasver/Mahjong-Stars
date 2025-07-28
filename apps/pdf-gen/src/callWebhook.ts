@@ -3,13 +3,13 @@ import { request as secureRequest } from 'node:https';
 
 export interface WebhookErrorPayload {
   error: string;
-  externalId: string;
+  documentId: string;
 }
 
 export interface WebhookPayload {
   status: string;
-  externalId: string;
-  documentId: number;
+  externalId: number;
+  documentId: string;
 }
 
 const WEBHOOK_URL = process.env.PDF_WEBHOOK_URL!;

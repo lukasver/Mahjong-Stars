@@ -32,13 +32,20 @@ const getInputProps = (
   t: ReturnType<typeof useTranslations>
 ) => {
   const inputProps = InputProps[key];
+
+  if (inputProps.type === 'hidden') {
+    return null;
+  }
+
   return {
     name: key,
     type: inputProps.type,
     label: t(`${key}.label`),
     description: t(`${key}.description`),
-    optionKey: inputProps.optionKey,
-    props: inputProps.inputProps || {},
+    //@ts-expect-error fixme
+    optionKey: inputProps?.optionKey,
+    //@ts-expect-error fixme
+    props: inputProps?.inputProps || {},
   };
 };
 
@@ -62,6 +69,13 @@ export const TokenInformation = ({
     }
   }, [data, isLoading]);
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, []);
+
   return (
     <motion.div {...animation}>
       <CardContainer
@@ -71,12 +85,15 @@ export const TokenInformation = ({
       >
         <ul className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
           {Object.keys(formSchemaShape).map((key) => {
-            const { name, type, label, description, props, optionKey } =
-              getInputProps(key as keyof typeof formSchemaShape, t);
+            const input = getInputProps(key as keyof typeof formSchemaShape, t);
+            if (!input) {
+              return null;
+            }
+            const { name, type, label, description, props, optionKey } = input;
             if (optionKey && options) {
-              //@ts-expect-error - TODO: fix this
               props.options = options[optionKey as keyof typeof options];
             }
+
             return (
               <li key={key} className=''>
                 <FormInput
@@ -103,6 +120,12 @@ export const SaftInformation = ({
   saleId?: string;
   className?: string;
 }) => {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, []);
   if (!saleId) {
     //TODO! improve
     return <div>No saleId</div>;
@@ -134,6 +157,12 @@ export const ProjectInformation = ({
 }) => {
   const form = useFormContext() as unknown as UseAppForm;
   const stepValue = form.getFieldValue('information');
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, []);
 
   const handleAddField = (
     field: ProjectInfoField | ProjectInfoField[] = {

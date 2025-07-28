@@ -1,6 +1,6 @@
 import 'server-only';
+import mime from 'mime-types';
 import { env } from '@/common/config/env';
-import { DocumensoSdk } from '@/lib/documents/documenso';
 import sanitizeHtml from 'sanitize-html';
 import { ActionCtx } from '@/common/schemas/dtos/sales';
 import { prisma } from '@/db';
@@ -14,25 +14,23 @@ import {
   JSONContent,
   generateHTML,
 } from '@mjs/utils/server/tiptap';
-
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { StorageService } from './storage';
+import { z } from 'zod';
+import { KycStatusSchema } from '@/common/schemas/generated';
+import { Prisma } from '@prisma/client';
 
 class DocumentsController {
-  private documenso: DocumensoSdk;
-  private s3: S3Client;
-  private bucket: string = env.R2_BUCKET;
+  private s3: StorageService;
+  private buckets: {
+    public: string;
+    private: string;
+  } = {
+    public: env.PUBLIC_BUCKET,
+    private: env.PRIVATE_BUCKET,
+  };
 
-  constructor() {
-    this.documenso = new DocumensoSdk(env);
-    this.s3 = new S3Client({
-      region: 'auto',
-      endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: env.R2_ACCESS_KEY_ID,
-        secretAccessKey: env.R2_SECRET_ACCESS_KEY,
-      },
-    });
+  constructor(private readonly storage: StorageService) {
+    this.s3 = this.storage;
   }
 
   // this.service.getDocumentPresignedUrl(user, payload)
@@ -149,21 +147,30 @@ class DocumentsController {
    */
   async getPresignedUrl(
     key: string,
-    expiresIn: number = 3600,
-    metadata?: Record<string, string>
+    bucket: 'public' | 'private',
+    type: 'read' | 'write',
+    expiresIn: number = 3600
+    // metadata?: Record<string, string>
   ) {
     try {
-      const res = await getSignedUrl(
-        this.s3,
-        new PutObjectCommand({
-          Bucket: this.bucket,
-          Key: key,
-          Metadata: metadata,
-        }),
-        { expiresIn }
-      );
+      let url: string = '';
+      if (type === 'read') {
+        url = await this.s3.generateReadSignedUrl(bucket, key, {
+          expires: expiresIn,
+        });
+      }
 
-      return Success({ url: res });
+      if (type === 'write') {
+        url =
+          (
+            await this.s3.getPresignedUrlForUpload({
+              bucket,
+              fileName: key,
+              expiresInMinutes: expiresIn / 60,
+            })
+          )?.url || '';
+      }
+      return Success({ url });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -196,6 +203,89 @@ class DocumentsController {
       throw new Error(`Failed to generate PDF: ${res.statusText}`);
     }
     return res.json();
+  }
+
+  async associateDocumentsToUser(
+    dto: {
+      documents: {
+        id?: string;
+        key: string;
+      }[];
+      type: 'KYC';
+    },
+    _ctx: ActionCtx
+  ) {
+    const { documents, type = 'KYC' } = dto;
+    const { userId } = _ctx;
+
+    const shouldUpsert = z
+      .object({
+        id: z.string(),
+        key: z.string(),
+      })
+      .array()
+      .safeParse(documents);
+
+    // If ID is present, we should update
+    if (shouldUpsert.success) {
+      const [docs] = await Promise.all([
+        documents.map((d) => {
+          return prisma.document.update({
+            where: {
+              id: d.id,
+            },
+            data: {
+              fileName: d.key,
+              type: mime.lookup(d.key) || 'application/octet-stream',
+              name: d.key.split('/').pop() || '',
+              url: this.s3.getFileUrl('private', d.key),
+            },
+          });
+        }),
+      ]);
+      return Success({ documents: docs });
+    } else {
+      // Else we should create
+      const promises = [];
+      promises.push(
+        prisma.document.createManyAndReturn({
+          data: documents.map((d) => {
+            const url = this.s3.getFileUrl('private', d.key);
+            console.log('URL', url, d.key);
+            return {
+              userId,
+              fileName: d.key,
+              type: mime.lookup(d.key) || 'application/octet-stream',
+              name: d.key.split('/').pop() || '',
+              url: this.s3.getFileUrl('private', d.key),
+            } satisfies Prisma.DocumentCreateManyInput;
+          }),
+          skipDuplicates: true,
+        })
+      );
+      if (type === 'KYC') {
+        promises.push(
+          prisma.kycVerification.upsert({
+            where: {
+              userId,
+            },
+            create: {
+              user: {
+                connect: {
+                  id: userId,
+                },
+              },
+              status: KycStatusSchema.enum.SUBMITTED,
+            },
+            update: {
+              status: KycStatusSchema.enum.SUBMITTED,
+            },
+          })
+        );
+      }
+      const [docs] = await Promise.all(promises);
+      return Success({ documents: docs });
+    }
   }
 
   private generateHTMLFromJSONContent = (content: JSONContent) => {
@@ -285,6 +375,7 @@ class DocumentsController {
     } else {
       stringifiedTemplate = this.generateHTMLFromJSONContent(template);
     }
+
     const ast = Handlebars.parse(stringifiedTemplate);
     const variables = new Set<string>();
     this.collectVariablesFromDocument(ast, variables);
@@ -292,4 +383,4 @@ class DocumentsController {
   }
 }
 
-export default new DocumentsController();
+export default new DocumentsController(new StorageService());

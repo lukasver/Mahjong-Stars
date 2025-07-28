@@ -170,6 +170,7 @@ export function FormInput({
   );
 }
 
+//TODO! controlled props needs to be added here to remove most expect errors
 function InputWrapper({ type, ...props }: InputWrapperProps) {
   switch (type) {
     case 'text':
@@ -183,7 +184,8 @@ function InputWrapper({ type, ...props }: InputWrapperProps) {
     case 'textarea':
       return <Textarea {...props} />;
     case 'checkbox':
-      return <Checkbox {...props} />;
+      // @ts-expect-error fixme
+      return <Checkbox checked={!!props.value} {...props} />;
     case 'select':
       return <SelectInput {...(props as SelectorInputProps)} />;
     case 'date':

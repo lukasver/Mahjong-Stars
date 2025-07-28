@@ -69,6 +69,7 @@ const Editor = ({
           handleDOMEvents: {
             keydown: (_view, event) => handleCommandNavigation(event),
           },
+
           ...(onUpload && {
             handlePaste: (view, event) =>
               handleImagePaste(view, event, uploadFn(onUpload)),

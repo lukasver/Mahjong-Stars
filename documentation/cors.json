@@ -1,0 +1,25 @@
+[
+  {
+    "origin": [
+      "http://localhost:3000",
+      "http://localhost:4444",
+      "http://localhost:3001",
+      "http://localhost:6006",
+      "https://*.mahjongstars.com",
+      "https://*.vercel.app"
+    ],
+    "method": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE"
+    ],
+    "responseHeader": [
+      "Content-Type",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Headers"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

@@ -29,6 +29,7 @@ import Handlebars from 'handlebars';
 import { DateTime } from 'luxon';
 import {
   Address,
+  DocumentSignatureStatusSchema,
   Profile,
   SaftContract,
   SignableDocumentRoleSchema,
@@ -168,6 +169,7 @@ class TransactionsController {
           sale: {
             select: {
               id: true,
+              name: true,
               requiresKYC: true,
               saftCheckbox: true,
               tokenSymbol: true,
@@ -619,7 +621,13 @@ class TransactionsController {
           recipients: [{ email: user.email, name: fullname }],
           reference: recipient.id,
         })
-        .catch((e) => {
+        .catch(async (e) => {
+          await prisma.documentRecipient.update({
+            where: { id: recipient.id },
+            data: {
+              status: DocumentSignatureStatusSchema.enum.ERROR,
+            },
+          });
           logger(e);
         });
 

@@ -27,14 +27,14 @@ const bodySchema = z.object({
 async function main(req: IncomingMessage, res: ServerResponse) {
   if (req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('OK');
+    res.end(JSON.stringify({ success: true }));
     return;
   }
 
   // Only accept POST requests
   if (req.method !== 'POST') {
-    res.writeHead(405, { 'Content-Type': 'text/plain' });
-    res.end('Method not allowed');
+    res.writeHead(405, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, error: 'Method not allowed' }));
     return;
   }
 
@@ -49,8 +49,8 @@ async function main(req: IncomingMessage, res: ServerResponse) {
           : ''
     )
   ) {
-    res.writeHead(401, { 'Content-Type': 'text/plain' });
-    res.end('Unauthorized');
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, error: 'Unauthorized' }));
     return;
   }
 
@@ -61,8 +61,10 @@ async function main(req: IncomingMessage, res: ServerResponse) {
 
   try {
     if (!parsed.success) {
-      res.writeHead(400, { 'Content-Type': 'text/plain' });
-      res.end('Invalid request body');
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({ success: false, error: 'Invalid request body' })
+      );
 
       return;
     }
@@ -98,9 +100,9 @@ async function main(req: IncomingMessage, res: ServerResponse) {
       if (res) {
         console.debug('RESULT', res);
         return callWebhook({
-          externalId: res.externalId || body.reference,
+          externalId: document.documentId,
           status: res.status,
-          documentId: document.documentId,
+          documentId: res.externalId || body.reference,
         }).catch((err) => {
           console.error(
             `Error calling webhook for doc ${document.documentId} with reference ${body.reference}: `,
@@ -116,16 +118,16 @@ async function main(req: IncomingMessage, res: ServerResponse) {
       `[${new Date().toISOString()}] PDF generation completed in ${((performance.now() - start) / 1000).toFixed(2)}s`
     );
     res.writeHead(200, {
-      'Content-Type': 'text/plain',
+      'Content-Type': 'application/json',
       'X-Page-Count': pageCount.toString(),
     });
-    res.end('OK');
+    res.end(JSON.stringify({ success: true }));
   } catch (error) {
     console.error('Error generating PDF:', error);
     if (parsed.data) {
       // clal the webhook to update the status of the document ot errored
       callWebhook({
-        externalId: parsed.data.reference,
+        documentId: parsed.data.reference,
         error:
           error instanceof Error
             ? error.message
@@ -137,8 +139,8 @@ async function main(req: IncomingMessage, res: ServerResponse) {
         );
       });
     }
-    res.writeHead(500, { 'Content-Type': 'text/plain' });
-    res.end('Internal server error');
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, error: 'Internal server error' }));
   } finally {
     const end = performance.now();
     console.log(`Code run in ${((end - start) / 1000).toFixed(2)}s`);

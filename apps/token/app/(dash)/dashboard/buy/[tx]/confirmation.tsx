@@ -14,14 +14,16 @@ import { FileUpload } from '@mjs/ui/components/file-upload';
 import { Button } from '@mjs/ui/primitives/button';
 import { useCallback, useState } from 'react';
 import {
+  associateDocumentsToUser,
   generateContractForTransaction,
-  getFileUploadPresignedUrl,
+  getFileUploadPrivatePresignedUrl,
 } from '@/lib/actions';
 import { uploadFile } from '@/lib/utils/files';
 import {
   useSaftForTransactionDetails,
   useSaleSaftForTransaction,
   useTransactionById,
+  useUser,
 } from '@/lib/services/api';
 import { useParams } from 'next/navigation';
 import { useAppForm } from '@mjs/ui/primitives/form';
@@ -32,17 +34,13 @@ import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
 import { parseAsString, useQueryState } from 'nuqs';
 import { invariant } from '@epic-web/invariant';
 import { toast } from '@mjs/ui/primitives/sonner';
-import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
-import Image from 'next/image';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@mjs/ui/primitives/alert-dialog';
+import { AlertDialog } from '@mjs/ui/primitives/alert-dialog';
 import { useBeforeUnload } from '@/components/hooks/use-before-unload';
-import { DialogFooter } from '@mjs/ui/primitives/dialog';
+import { ContractDialogFailed } from '@/components/buy/contract/dialog-failed';
+import { ContractDialogConfirmSignature } from '@/components/buy/contract/dialog-confirm-signature';
+import { ContractDialogLoading } from '@/components/buy/contract/dialog-loading';
+import { SuccessContent } from './[status]/success';
+import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 
 /**
  * Type guard for FileWithPreview
@@ -62,7 +60,8 @@ function isFileWithPreview(obj: unknown): obj is { file: File } {
  * Uses FileUpload component for file selection and removal.
  * On submit, uploads files using presigned URLs.
  */
-const KycUploadDocument = () => {
+const KycUploadDocument = ({ onSuccess }: { onSuccess: () => void }) => {
+  const { data: user } = useUser();
   const [files, setFiles] = useState<unknown[]>([]); // Array of FileWithPreview
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,16 +78,6 @@ const KycUploadDocument = () => {
   };
 
   /**
-   * Removes a file from the list by index.
-   * @param index - Index of the file to remove
-   */
-  const handleRemoveFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setError(null);
-    setSuccess(false);
-  };
-
-  /**
    * Handles the upload of all selected files.
    */
   const handleSubmit = async () => {
@@ -96,19 +85,32 @@ const KycUploadDocument = () => {
     setError(null);
     setSuccess(false);
     try {
+      invariant(user, 'User id could not be found');
       const validFiles = files
         .map((f) => (isFileWithPreview(f) ? f.file : null))
         .filter((f): f is File => !!f);
-      await Promise.all(
+      const response = await Promise.all(
         validFiles.map(async (file) => {
-          const key = `kyc/${file.name}`;
-          const urlRes = await getFileUploadPresignedUrl({ key });
+          const key = `user/${user.id}/kyc/${file.name}`;
+          const urlRes = await getFileUploadPrivatePresignedUrl({ key });
           if (!urlRes?.data?.url) throw new Error('Failed to get upload URL');
-          await uploadFile(file, urlRes.data.url);
+          await uploadFile(file, urlRes.data.url).then();
+          // Here i need to update our backend with refernece to the file
+          return key;
         })
       );
+
+      const keys = response.flatMap((key) => ({ key }));
+      console.debug('🚀 ~ confirmation.tsx:119 ~ keys:', keys);
+      const result = await associateDocumentsToUser({
+        documents: keys,
+      });
+
+      console.debug('🚀 ~ confirmation.tsx:123 ~ result:', result);
+
       setSuccess(true);
       setFiles([]);
+      onSuccess();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Upload failed');
     } finally {
@@ -125,7 +127,6 @@ const KycUploadDocument = () => {
           / proof of tax residence).
         </CardDescription>
       </CardHeader>
-
       <FileUpload
         type='all'
         maxSizeMB={5}
@@ -133,28 +134,7 @@ const KycUploadDocument = () => {
         multiple
         onFilesChange={handleFilesChange}
       />
-      {/* List of selected files with remove buttons */}
-      {files.length > 0 && (
-        <div className='mt-4 space-y-2'>
-          {files.map((f, i) =>
-            isFileWithPreview(f) ? (
-              <div
-                key={i}
-                className='flex items-center justify-between border rounded px-3 py-2'
-              >
-                <span className='truncate'>{f.file.name}</span>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  onClick={() => handleRemoveFile(i)}
-                >
-                  Remove
-                </Button>
-              </div>
-            ) : null
-          )}
-        </div>
-      )}
+
       {error && <div className='text-destructive mt-2'>{error}</div>}
       {success && (
         <div className='text-success mt-2'>Files uploaded successfully!</div>
@@ -162,6 +142,7 @@ const KycUploadDocument = () => {
       <Button
         className='mt-4 w-full'
         onClick={handleSubmit}
+        variant='accent'
         disabled={isSubmitting || files.length === 0}
       >
         {isSubmitting ? 'Uploading...' : 'Submit KYC Documents'}
@@ -174,7 +155,7 @@ const KycUploadDocument = () => {
  * Step 2: SAFT Review and Variable Input
  * Fetches the SAFT contract, renders input fields for variables, and shows a live preview.
  */
-const SaftReviewStep = () => {
+const SaftReviewStep = ({ onSuccess }: { onSuccess: () => void }) => {
   const { tx: txId } = useParams();
   // const { data: tx, isLoading } = useTransactionById(txId as string);
   const { data, error, isLoading } = useSaleSaftForTransaction(txId as string);
@@ -214,10 +195,6 @@ const SaftReviewStep = () => {
     onSubmit: ({ value }) => {
       // Avoid executing multiple times
       if (action.isExecuting) return;
-      console.debug(
-        '🚀 ~ confirmation.tsx:206 ~ SaftReviewStep ~ data:',
-        value
-      );
       invariant(data, 'Error retrieving sale saft data');
       const formData = {
         ...value,
@@ -272,23 +249,6 @@ const SaftReviewStep = () => {
                   type='text'
                   label={getLabel(v)}
                 />
-                // <div key={v} className='flex flex-col gap-1'>
-                //   <label htmlFor={`saft-var-${v}`} className='font-medium'>
-                //     {v.charAt(0).toUpperCase() + v.slice(1)}
-                //   </label>
-                //   <input
-                //     id={`saft-var-${v}`}
-                //     className='input input-bordered px-3 py-2 rounded border'
-                //     value={values[v] || ''}
-                //     onChange={(e) => handleChange(v, e.target.value)}
-                //     required
-                //   />
-                //   {submitted && !values[v]?.trim() && (
-                //     <span className='text-xs text-destructive'>
-                //       This field is required.
-                //     </span>
-                //   )}
-                // </div>
               ))}
             </div>
 
@@ -296,7 +256,7 @@ const SaftReviewStep = () => {
               <CardTitle className='text-base mb-2'>Contract Preview</CardTitle>
               <div className='max-h-3xl overflow-y-auto'>
                 <div
-                  className='border rounded p-3 prose prose-invert w-full max-w-none!'
+                  className='border rounded p-3 prose prose-invert w-full max-w-none! max-h-96 sm:max-h-svh overflow-y-auto'
                   dangerouslySetInnerHTML={{
                     __html: template,
                   }}
@@ -305,6 +265,7 @@ const SaftReviewStep = () => {
             </div>
             <Button
               type='submit'
+              variant='accent'
               className='w-full'
               loading={action.isExecuting}
             >
@@ -324,93 +285,84 @@ const SaftReviewStep = () => {
         </form.AppForm>
       </CardContent>
       <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
-        <SaftGenerationDialog enabled={openDialog} id={cid} />
+        <SaftGenerationDialog
+          enabled={openDialog}
+          id={cid}
+          onClose={() => setOpenDialog(false)}
+          onConfirmSignature={() => {
+            setOpenDialog(false);
+            toast.success('Document signed');
+            // Remove the cid from the parameters once signature is done
+            setCid(null);
+            onSuccess();
+          }}
+        />
       </AlertDialog>
     </>
+  );
+};
+
+const ConfirmationStep = () => {
+  return (
+    <div>
+      <SuccessContent />
+    </div>
   );
 };
 
 const SaftGenerationDialog = ({
   id,
   enabled,
+  onClose,
+  onConfirmSignature,
 }: {
   enabled: boolean;
   id: string | null;
+  onClose: () => void;
+  onConfirmSignature: () => void;
 }) => {
   useBeforeUnload(
     'Make sure to sign the contract before closing the page. You can always come back to it later.'
   );
+  const [_, setCid] = useQueryState('cid', parseAsString);
   const { data, isLoading } = useSaftForTransactionDetails(
     id as string,
     enabled
   );
 
-  console.debug('🚀 ~ confirmation.tsx:376 ~ data:', data);
-
   if (!enabled || !id) return null;
 
   const status = data?.recipient.status;
 
+  const handleCancelGeneration = () => {
+    // Close the dialog and reset the state
+    // This will be handled by the parent component through the AlertDialog onOpenChange
+    console.log('Contract generation cancelled by user');
+    setCid(null);
+    onClose?.();
+  };
+
   if (isLoading || status === 'CREATED') {
     return (
-      <>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Loading...</AlertDialogTitle>
-            <AlertDialogDescription className='text-secondary'>
-              This process can take up to 2 minutes. Please do not close the
-              window.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className='flex items-center gap-2'>
-            <span className='aspect-square animate-pulse'>
-              <Image
-                height={100}
-                width={100}
-                src={MahjongStarsIconXl}
-                alt='Mahjong Stars Logo'
-                className='animate-spin aspect-square'
-              />
-            </span>
-            <span className='text-xl font-bold font-head'>
-              Generating contract...
-            </span>
-          </div>
-        </AlertDialogContent>
-      </>
+      <ContractDialogLoading
+        onCancel={handleCancelGeneration}
+        status={status || undefined}
+      />
     );
   }
 
   if (data && status && ['SIGNED', 'SENT_FOR_SIGNATURE'].includes(status)) {
     return (
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Contract sent to your email</AlertDialogTitle>
-          <AlertDialogDescription className='text-secondary'>
-            Please review and sign the agreement on your email to proceed.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <DialogFooter>
-          <Button variant={'accent'} className='w-full'>
-            Confirm contract is signed
-          </Button>
-        </DialogFooter>
-      </AlertDialogContent>
+      <ContractDialogConfirmSignature id={id} onSuccess={onConfirmSignature} />
     );
   }
 
-  return (
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Contract Generation Failed</AlertDialogTitle>
-      </AlertDialogHeader>
-    </AlertDialogContent>
-  );
+  return <ContractDialogFailed onClose={handleCancelGeneration} />;
 };
 
 const labelMapping = {
   'recipient.firstName': 'Your First Name',
-  'recipient.lastLame': 'Your Last Name',
+  'recipient.lastName': 'Your Last Name',
   'recipient.address': 'Your Address',
   'recipient.city': 'Your City',
   'recipient.zipcode': 'Your Zipcode',
@@ -447,10 +399,8 @@ const PaymentStep = () => {
   // TODO: Confirm the correct path for payment fields and type properly
   const paymentMethod = tx?.transaction?.formOfPayment;
 
-  console.debug(
-    '🚀 ~ confirmation.tsx:483 ~ PaymentStep ~ paymentMethod:',
-    paymentMethod
-  );
+  // WE need to get the transfer details
+
   const currency = tx?.transaction?.paidCurrency;
   // Example bank details (replace with real data as needed)
   const bankDetails = {
@@ -506,19 +456,9 @@ const PaymentStep = () => {
               </div>
             </div>
             <div>
-              <label htmlFor='confirmation-id' className='font-medium'>
-                Payment Reference / Confirmation Number
+              <label className='font-medium'>
+                Upload Bank Transfer Receipt
               </label>
-              <input
-                id='confirmation-id'
-                className='input input-bordered px-3 py-2 rounded border w-full'
-                value={confirmationId}
-                onChange={(e) => setConfirmationId(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className='font-medium'>Upload Bank Slip (optional)</label>
               <FileUpload
                 type='all'
                 maxSizeMB={5}
@@ -533,7 +473,12 @@ const PaymentStep = () => {
                 Payment confirmation submitted!
               </div>
             )}
-            <Button type='submit' className='w-full' disabled={isSubmitting}>
+            <Button
+              type='submit'
+              className='w-full'
+              disabled={isSubmitting}
+              variant='accent'
+            >
               {isSubmitting ? 'Submitting...' : 'Submit Payment Confirmation'}
             </Button>
           </form>
@@ -565,7 +510,7 @@ const FormStepper = ({
   setStep: (step: number) => void;
 }) => {
   return (
-    <Card className='px-4'>
+    <Card className={getGlassyCardClassName('px-4')}>
       <Stepper
         currentStep={step}
         steps={steps}
@@ -578,22 +523,47 @@ const FormStepper = ({
 
 export function TransactionConfirmation({
   steps,
-  initialStep = 1,
+  initialStep,
 }: {
   steps: { id: number; name: string; description: string }[];
-  initialStep: number;
+  initialStep: { id: number; name: string; description: string };
 }) {
-  const [step, setStep] = useState(initialStep);
+  const [step, setStep] = useState<(typeof steps)[number]>(
+    initialStep || steps[0]
+  );
+  const handleStepChange = (step: number) => {
+    const foundStep = steps.find((s) => s.id === step);
+    if (foundStep) {
+      setStep(foundStep);
+    }
+  };
+
   return (
     <ErrorBoundary fallback={<div>Error with transaction confirmation</div>}>
       <div className='container mx-auto p-4 space-y-4 max-w-3xl'>
-        <FormStepper steps={steps} step={step} setStep={setStep} />
-        <Card>
+        <FormStepper steps={steps} step={step.id} setStep={handleStepChange} />
+        <Card className={getGlassyCardClassName()}>
           <AnimatePresence>
-            {step === 1 && <KycUploadDocument />}
-            {step === 2 && <SaftReviewStep />}
-            {step === 3 && <PaymentStep />}
-            {step === 4 && <div>Confirmation</div>}
+            {step.name === 'KYC' && (
+              <KycUploadDocument
+                onSuccess={() => setStep(steps.find((s) => s.name === 'SAFT'))}
+              />
+            )}
+            {step.name === 'SAFT' && (
+              <SaftReviewStep
+                onSuccess={() =>
+                  setStep(steps.find((s) => s.name === 'Payment'))
+                }
+              />
+            )}
+            {step.name === 'Payment' && (
+              <PaymentStep
+                onSuccess={() =>
+                  setStep(steps.find((s) => s.name === 'Confirmation'))
+                }
+              />
+            )}
+            {step.name === 'Confirmation' && <ConfirmationStep />}
           </AnimatePresence>
         </Card>
       </div>

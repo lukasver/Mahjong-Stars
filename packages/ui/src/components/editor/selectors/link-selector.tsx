@@ -2,13 +2,14 @@
 import { cn } from '@mjs/ui/lib/utils';
 import { Check, Trash } from 'lucide-react';
 import { useEditor } from 'novel';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@mjs/ui/primitives/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@mjs/ui/primitives/popover';
+import { toast } from 'sonner';
 
 export function isValidUrl(url: string) {
   try {
@@ -19,12 +20,15 @@ export function isValidUrl(url: string) {
   }
 }
 export function getUrlFromString(str: string) {
+  console.debug('🚀 ~ link-selector.tsx:24 ~ str:', str);
+
   if (isValidUrl(str)) return str;
   try {
     if (str.includes('.') && !str.includes(' ')) {
       return new URL(`https://${str}`).toString();
     }
   } catch {
+    toast.error('Invalid URL');
     return null;
   }
 }
@@ -35,12 +39,24 @@ interface LinkSelectorProps {
 
 export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [url, setUrl] = useState<string | null>(null);
+
   const { editor } = useEditor();
 
   // Autofocus on input by default
   useEffect(() => {
     inputRef.current && inputRef.current?.focus();
   });
+
+  const handleConfirm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const _url = getUrlFromString(url || '');
+    if (_url && editor) {
+      editor.chain().focus().setLink({ href: _url }).run();
+      onOpenChange(false);
+    }
+  };
+
   if (!editor) return null;
 
   return (
@@ -63,21 +79,16 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
         </Button>
       </PopoverTrigger>
       <PopoverContent align='start' className='w-60 p-0' sideOffset={10}>
-        <form
-          onSubmit={(e) => {
-            const target = e.currentTarget as HTMLFormElement;
-            e.preventDefault();
-            const input = target[0] as HTMLInputElement;
-            const url = getUrlFromString(input.value);
-            if (url) {
-              editor.chain().focus().setLink({ href: url }).run();
-              onOpenChange(false);
-            }
-          }}
-          className='flex p-1'
-        >
+        <div className='flex p-1'>
           <input
             ref={inputRef}
+            onChange={(e) => setUrl(e.target.value)}
+            onPaste={(e) => {
+              const url = getUrlFromString(e.clipboardData.getData('text'));
+              if (url) {
+                setUrl(url);
+              }
+            }}
             type='text'
             placeholder='Paste a link'
             className='bg-background flex-1 p-1 text-sm outline-none'
@@ -97,11 +108,16 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
               <Trash className='h-4 w-4' />
             </Button>
           ) : (
-            <Button size='icon' className='h-8'>
+            <Button
+              size='icon'
+              className='h-8'
+              type='button'
+              onClick={handleConfirm}
+            >
               <Check className='h-4 w-4' />
             </Button>
           )}
-        </form>
+        </div>
       </PopoverContent>
     </Popover>
   );

@@ -24,21 +24,32 @@ import {
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import mime from 'mime-types';
 import { Document } from '@/common/schemas/generated';
-import { DEFAULT_SALE_SELECT, TOKEN_QUERY } from './queries';
+import {
+  DEFAULT_SALE_SELECT,
+  GetSalesArgs,
+  SalesWithRelations,
+  TOKEN_QUERY,
+} from './queries';
 import { SaleWithRelations, SaleWithToken } from '@/common/types/sales';
 import { z } from 'zod';
 import { SaleInformationItem } from '@/common/schemas/dtos/sales/information';
+import { StorageService } from '../documents/storage';
 
-const QUERY_MAPPING: { active: Prisma.SaleFindFirstArgs } = {
+const QUERY_MAPPING = {
   active: {
     where: {
       status: SaleStatus.OPEN,
     },
     select: DEFAULT_SALE_SELECT,
   },
-};
+} as const;
 
 class SalesController {
+  private storage: StorageService;
+  constructor(storage: StorageService) {
+    this.storage = storage;
+  }
+
   async getSales(
     { active }: GetSalesDto = { active: false },
     _ctx?: ActionCtx
@@ -49,12 +60,12 @@ class SalesController {
       }>
     | Failure
   > {
-    let query = {};
     const isActiveSaleReq = active;
+    let query: GetSalesArgs = { select: DEFAULT_SALE_SELECT };
     if (isActiveSaleReq) {
       query = QUERY_MAPPING['active'];
     }
-    let sales: Sale[] = [];
+    let sales: SalesWithRelations[] = [];
     try {
       sales = await prisma.sale.findMany({
         ...query,
@@ -76,6 +87,7 @@ class SalesController {
 
       if (isActiveSaleReq && sales?.length) {
         const activeSale = sales[0];
+
         invariant(activeSale, 'Active sale not found');
         const isSaleFinished =
           DateTime.fromJSDate(activeSale.saleClosingDate) <= DateTime.now();
@@ -88,8 +100,29 @@ class SalesController {
         }
       }
 
+      sales.forEach((sale) => {
+        if (sale.banner?.url) {
+          sale.banner.url = this.storage.getFileUrl('public', sale.banner.url, {
+            encode: true,
+          });
+        }
+        sale.information =
+          sale.information && Array.isArray(sale.information)
+            ? (sale.information as SaleInformationItem[]).map((info) => {
+                if (info.type === 'file') {
+                  info.value = this.storage.getFileUrl(
+                    'public',
+                    info.value as string
+                  );
+                }
+                return info;
+              })
+            : sale.information;
+      });
+
       return Success({
         sales: sales.map((sale) =>
+          // @ts-expect-error FIXME
           this.decimalsToString(this.parseTokenData(sale))
         ),
         quantity: sales?.length,
@@ -709,9 +742,15 @@ class SalesController {
       const documents = data.documents.reduce(
         (acc: { images: Document[]; documents: Document[] }, doc) => {
           if (doc.type.startsWith('image/')) {
-            acc.images.push(doc);
+            acc.images.push({
+              ...doc,
+              url: this.storage.getFileUrl('public', doc.url),
+            });
           } else {
-            acc.documents.push(doc);
+            acc.documents.push({
+              ...doc,
+              url: this.storage.getFileUrl('public', doc.url),
+            });
           }
           return acc;
         },
@@ -770,10 +809,12 @@ class SalesController {
       contractAddress: data?.token?.TokensOnBlockchains?.[0]?.contractAddress,
       decimals: data?.token?.TokensOnBlockchains?.[0]?.decimals,
       symbol: data?.token?.symbol,
-      image: data?.token?.image,
+      image: data?.token?.image
+        ? this.storage.getFileUrl('public', data?.token?.image)
+        : null,
     };
     return Object.assign(data, { token: tokenData }) as SaleWithToken;
   }
 }
 
-export default new SalesController();
+export default new SalesController(new StorageService());

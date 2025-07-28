@@ -75,13 +75,17 @@ const titleMapping = {
     title: 'Upload KYC',
     description: 'Please upload your KYC documents to continue.',
   },
+  [TransactionModalTypes.VerifyEmail]: {
+    title: 'Verify Email',
+    description: 'Please verify your email address to continue.',
+  },
 } satisfies Record<
   TransactionModalTypes,
   { title: string; description: string }
 >;
 
 export const TokenInvestModals = (props: TokenModalProps) => {
-  if (!props.open) {
+  if (!props.open || props.open === TransactionModalTypes.VerifyEmail) {
     return null;
   }
 

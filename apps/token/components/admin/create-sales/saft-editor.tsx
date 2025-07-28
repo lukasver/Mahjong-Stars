@@ -57,11 +57,7 @@ const getVersions = (
   return arg?.versions || [];
 };
 
-export function SaftEditor({
-  saleId,
-  placeholder,
-  className,
-}: SaftEditorProps) {
+export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
   const { data, isLoading } = useSaleSaft(saleId);
 
   const versions = data?.versions || [];
@@ -93,6 +89,7 @@ export function SaftEditor({
     if (editor && data && !isLoading) {
       if (data?.saft?.content) {
         editor.commands.setContent(data.saft.content as string | JSONContent);
+        form.setFieldValue('content', data.saft.content);
       }
     }
   }, [!!editor, !!data, isLoading]);

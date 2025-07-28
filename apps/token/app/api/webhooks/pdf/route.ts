@@ -7,13 +7,13 @@ import { z } from 'zod';
 const API_KEY = env.PDF_WEBHOOK_API_KEY;
 
 const successSchema = z.object({
-  externalId: z.string(),
+  externalId: z.number(),
   status: z.string(),
-  documentId: z.number(),
+  documentId: z.string(),
 });
 const errorSchema = z.object({
   error: z.string(),
-  externalId: z.string(),
+  documentId: z.string(),
 });
 const bodySchema = z.union([successSchema, errorSchema]);
 
@@ -35,20 +35,23 @@ export async function POST(req: NextRequest) {
 
   try {
     const parsed = successSchema.safeParse(body);
+
     if (parsed.success) {
       const status =
         mappingStatus[parsed.data.status as keyof typeof mappingStatus] ||
         DocumentSignatureStatusSchema.enum.SENT_FOR_SIGNATURE;
 
       await prisma.documentRecipient.update({
-        where: { id: body.externalId },
-        data: { status },
+        where: { id: parsed.data.documentId },
+        data: { status, externalId: parsed.data.externalId },
       });
     } else {
-      await prisma.documentRecipient.update({
-        where: { id: body.externalId },
-        data: { status: 'ERROR' },
-      });
+      if (body.documentId) {
+        await prisma.documentRecipient.update({
+          where: { id: body.documentId },
+          data: { status: 'ERROR' },
+        });
+      }
     }
 
     return NextResponse.json({ success: true });

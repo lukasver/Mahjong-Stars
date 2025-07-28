@@ -8,4 +8,5 @@ export enum TransactionModalTypes {
   Contract = 'contract',
   PendingContract = 'pendingContract',
   UploadKyc = 'uploadKyc',
+  VerifyEmail = 'verifyEmail',
 }

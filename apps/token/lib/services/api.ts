@@ -267,6 +267,7 @@ export const useSaftForTransactionDetails = (
     queryKey: ['saft', 'details', recipientId],
     queryFn: () => getSaftForTransactionDetails(recipientId),
     staleTime: 7 * 1000, // 7 seconds
+    refetchInterval: 7 * 1000,
     enabled: Boolean(recipientId && enabled),
   });
   const e = getError(data, error);

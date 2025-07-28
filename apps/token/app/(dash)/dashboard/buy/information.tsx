@@ -158,48 +158,60 @@ const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
         description='There are no documents to display in this section.'
       />
     );
+
+  docs.documents.forEach((document) => {
+    console.debug('🚀 ~ information.tsx:162 ~ url:', document.url);
+  });
+
   return (
     <div className='space-y-3'>
       {docs.documents.map((document, index) => (
-        <Card
+        <a
+          href={document.url}
+          target='_blank'
           key={index}
-          className='bg-slate-800/50 border-slate-700 hover:bg-slate-700/50 transition-colors cursor-pointer'
-          onClick={() => handleDownload(document)}
+          download
+          rel='noreferrer'
         >
-          <div className='p-4 flex items-center justify-between'>
-            <div className='flex items-center space-x-4 flex-1 min-w-0'>
-              <div className='flex-shrink-0 text-slate-400'>
-                {getFileIcon(document.type)}
-              </div>
+          <Card
+            className='bg-slate-800/50 border-slate-700 hover:bg-slate-700/50 transition-colors cursor-pointer'
+            // onClick={() => handleDownload(document)}
+          >
+            <div className='p-4 flex items-center justify-between'>
+              <div className='flex items-center space-x-4 flex-1 min-w-0'>
+                <div className='flex-shrink-0 text-slate-400'>
+                  {getFileIcon(document.type)}
+                </div>
 
-              <div className='flex-1 min-w-0'>
-                <h3 className='text-white font-medium truncate'>
-                  {document.name}
-                </h3>
-                <div className='flex items-center space-x-2 mt-1'>
-                  <span className='text-xs text-slate-400 truncate'>
-                    {document.fileName}
-                  </span>
-                  <span className='text-xs bg-slate-600 text-slate-300 px-2 py-0.5 rounded flex-shrink-0'>
-                    {getFileExtension(document.fileName)}
-                  </span>
+                <div className='flex-1 min-w-0'>
+                  <h3 className='text-white font-medium truncate'>
+                    {document.name}
+                  </h3>
+                  <div className='flex items-center space-x-2 mt-1'>
+                    <span className='text-xs text-slate-400 truncate'>
+                      {document.fileName}
+                    </span>
+                    <span className='text-xs bg-slate-600 text-slate-300 px-2 py-0.5 rounded flex-shrink-0'>
+                      {getFileExtension(document.fileName)}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <Button
-              variant='ghost'
-              size='icon'
-              className='text-slate-400 hover:text-white hover:bg-slate-600 flex-shrink-0'
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDownload(document);
-              }}
-            >
-              <Download className='h-4 w-4' />
-            </Button>
-          </div>
-        </Card>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='text-slate-400 hover:text-white hover:bg-slate-600 flex-shrink-0'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownload(document);
+                }}
+              >
+                <Download className='h-4 w-4' />
+              </Button>
+            </div>
+          </Card>
+        </a>
       ))}
     </div>
   );

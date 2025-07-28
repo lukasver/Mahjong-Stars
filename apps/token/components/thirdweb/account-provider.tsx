@@ -14,6 +14,7 @@ import { Button } from '@mjs/ui/primitives/button';
 import React from 'react';
 import { AccountProvider as AccountProviderThirdweb } from 'thirdweb/react';
 import useActiveAccount from '../hooks/use-active-account';
+import { PointerEventsGuard } from './pointer-events-guard';
 
 const IS_DEV = process.env.NODE_ENV === 'development';
 // change to true for debug
@@ -85,9 +86,14 @@ function AccountProvider({ children }: { children: React.ReactNode }) {
 
   if (activeAccount) {
     return (
-      <AccountProviderThirdweb address={activeAccount.address} client={client}>
-        {children}
-      </AccountProviderThirdweb>
+      <PointerEventsGuard>
+        <AccountProviderThirdweb
+          address={activeAccount.address}
+          client={client}
+        >
+          {children}
+        </AccountProviderThirdweb>
+      </PointerEventsGuard>
     );
   }
 

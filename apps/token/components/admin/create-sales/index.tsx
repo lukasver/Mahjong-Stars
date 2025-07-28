@@ -16,7 +16,7 @@ import {
 import { Card } from '@mjs/ui/primitives/card';
 import { toast } from '@mjs/ui/primitives/sonner';
 import { uploadFile } from '@/lib/utils/files';
-import { getFileUploadPresignedUrl } from '@/lib/actions';
+import { getFileUploadPublicPresignedUrl } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import { FormFooter } from './sections/footer';
@@ -67,20 +67,26 @@ export const CreateSaleForm = () => {
             allErrors.push(`${fieldName}: ${error.message}`);
           });
         });
+        toast.error(allErrors.join('\n'));
+      } else {
+        toast.error('Please check errors in the form');
       }
-
-      toast.error(allErrors.join('\n'));
     },
 
     onSubmit: async ({ value, formApi }) => {
-      console.debug('SUBMITTING', value);
       const queryClient = getQueryClient();
 
       try {
         if (step === 1) {
           const vals = SaleSchemas[1].parse(value);
+          if (saleId) {
+            vals.id = saleId;
+          }
           //Create sale and update query params to reflect the current saleId
           const res = await saleAction.executeAsync(vals);
+
+          console.debug('🚀 ~ index.tsx:86 ~ res:', res);
+
           if (res?.data) {
             setSaleId(res.data.sale.id);
             // Go to next step
@@ -98,7 +104,9 @@ export const CreateSaleForm = () => {
           const vals = SaleSchemas[2].parse(value);
           const f = formApi.getFieldMeta('content');
 
-          if (sale?.saftCheckbox === true && f?.isPristine) {
+          console.debug('🚀 ~ index.tsx:107 ~ f:', f);
+
+          if (sale?.saftCheckbox === true && !vals.content) {
             toast.error('Please fill in the Saft contract');
             return;
           }
@@ -143,8 +151,8 @@ export const CreateSaleForm = () => {
           if (fileValues.length > 0) {
             const uploads = await Promise.all(
               fileValues.map(async ({ value }) => {
-                const fileName = `${saleId}/${(value as File).name}`;
-                return getFileUploadPresignedUrl({ key: fileName }).then(
+                const fileName = `sale/${saleId}/${(value as File).name}`;
+                return getFileUploadPublicPresignedUrl({ key: fileName }).then(
                   async (url) => {
                     if (url?.data) {
                       return uploadFile(
@@ -219,9 +227,7 @@ export const CreateSaleForm = () => {
         </FadeAnimation>
         {process.env.NODE_ENV === 'development' && (
           <>
-            <Button
-              onClick={() => console.debug(form.getFieldValue('information'))}
-            >
+            <Button onClick={() => console.debug(form.state.values)}>
               checkvalue
             </Button>
             <Button onClick={() => console.debug(form.getAllErrors())}>

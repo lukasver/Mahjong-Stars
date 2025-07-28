@@ -9,18 +9,14 @@ import { TokenInvestModals } from './modals';
 import { SaleWithToken } from '@/common/types/sales';
 import { InvestForm } from './form';
 import { DiscountBanner } from './summary';
-import { usePendingTransactionsForSale } from '@/lib/services/api';
+import { usePendingTransactionsForSale, useUser } from '@/lib/services/api';
+import { VerifyMandatoryEmail } from '@/components/buy/verify-mandatory-email';
 
 export function Invest({ sale }: { sale: SaleWithToken }) {
   const [open, setOpen] = useState<TransactionModalTypes | null>(null);
+  const { data: user } = useUser();
 
-  const { data, isLoading } = usePendingTransactionsForSale(sale.id);
-
-  console.debug(
-    '🚀 ~ index.tsx:19 ~ Invest ~ isLoading:',
-    isLoading,
-    data?.transactions
-  );
+  const { data } = usePendingTransactionsForSale(sale.id);
 
   useEffect(() => {
     if (data?.transactions.length && !open) {
@@ -43,6 +39,9 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
         </InvestForm>
       </div>
       <TokenInvestModals open={open} handleModal={setOpen} sale={sale} />
+      {open && open === TransactionModalTypes.VerifyEmail && (
+        <VerifyMandatoryEmail email={user?.email || ''} />
+      )}
     </CardContainer>
   );
 }

@@ -398,6 +398,9 @@ export const DocumentSchema = z.object({
   name: z.string(),
   fileName: z.string(),
   url: z.string(),
+  /**
+   * MIME type of the file
+   */
   type: z.string(),
   userId: z.string().nullable(),
   saleId: z.string().nullable(),

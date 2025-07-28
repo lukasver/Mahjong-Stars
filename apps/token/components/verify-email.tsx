@@ -24,6 +24,7 @@ import { Button } from '@mjs/ui/primitives/button';
 import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
 import useActiveAccount from './hooks/use-active-account';
 import { useLocalStorage } from 'usehooks-ts';
+import { cn } from '@mjs/ui/lib/utils';
 
 const titleMapping = {
   1: {
@@ -108,7 +109,7 @@ const MagicWordForm = ({
   onCancel: () => void;
   onSuccess: () => void;
 }) => {
-  const [magicWord, setMagicWord] = useLocalStorage(MW_KEY, '');
+  const [_, setMagicWord] = useLocalStorage(MW_KEY, '');
   const { signout, isConnected } = useActiveAccount();
 
   const action = useActionListener(useAction(validateMagicWord), {
@@ -191,12 +192,16 @@ const MagicWordForm = ({
   );
 };
 
-const VerifyEmailForm = ({
+export const VerifyEmailForm = ({
   onCancel,
   onSuccess,
+  canSkip = true,
+  defaultEmail,
 }: {
-  onCancel: () => void;
+  onCancel?: () => void;
   onSuccess: () => void;
+  canSkip?: boolean;
+  defaultEmail?: string;
 }) => {
   const { execute, isExecuting } = useActionListener(
     useAction(createEmailVerification),
@@ -218,7 +223,7 @@ const VerifyEmailForm = ({
       onSubmit: ValidateEmailSchema,
     },
     defaultValues: {
-      email: '',
+      email: defaultEmail ?? '',
       firstName: '',
       lastName: '',
     },
@@ -270,22 +275,24 @@ const VerifyEmailForm = ({
             }}
           />
           <CardFooter className='flex gap-2 justify-between p-0'>
-            <Button
-              variant='outline'
-              className='flex-1'
-              disabled={isLoading}
-              type='button'
-              onClick={onCancel}
-            >
-              Skip
-            </Button>
+            {canSkip && (
+              <Button
+                variant='outline'
+                className='flex-1'
+                disabled={isLoading}
+                type='button'
+                onClick={onCancel}
+              >
+                Skip
+              </Button>
+            )}
             <Button
               variant='accent'
-              className='flex-1'
+              className={cn('flex-1')}
               type='submit'
               loading={isLoading}
             >
-              Continue
+              {canSkip ? 'Continue' : 'Send code'}
             </Button>
           </CardFooter>
         </form>
@@ -294,18 +301,28 @@ const VerifyEmailForm = ({
   );
 };
 
-const VerifyTokenForm = ({
+export const VerifyTokenForm = ({
   token,
   onCancel,
+  onSuccess,
+  noMessage = false,
 }: {
   token: string;
   onCancel: () => void;
+  onSuccess?: () => void;
+  noMessage?: boolean;
 }) => {
   const router = useRouter();
   const { execute, isExecuting } = useActionListener(useAction(verifyEmail), {
-    successMessage: 'Email verified, redirecting to dashboard...',
+    successMessage: noMessage
+      ? undefined
+      : 'Email verified, redirecting to dashboard...',
     onSuccess: () => {
-      router.push('/dashboard');
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/dashboard');
+      }
     },
   });
   const form = useAppForm({

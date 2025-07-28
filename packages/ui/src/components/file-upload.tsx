@@ -10,6 +10,7 @@ import {
 
 import {
   FileUploadOptions,
+  FileWithPreview,
   useFileUpload,
 } from '@mjs/ui/hooks/use-file-upload';
 import { Button } from '@mjs/ui/primitives/button';
@@ -84,14 +85,24 @@ export function FileUpload({ type = 'all', ...props }: FileUploadProps) {
             aria-label='Upload file'
           />
           {previewUrl ? (
-            type === 'image' || isImage(fileName) ? (
+            props.multiple ? (
+              <MultipleFilesPreview
+                files={files}
+                type={type}
+                onRemoveFile={removeFile}
+              />
+            ) : type === 'image' || isImage(fileName) ? (
               <ImagePreview url={previewUrl} type={type} fileName={fileName} />
             ) : (
               <DocumentPreview fileName={fileName} size={files[0]?.file.size} />
             )
           ) : (
             <div className='flex flex-col items-center justify-center px-4 py-3 text-center'>
-              <FileUploadHeader type={type} maxSizeMB={maxSizeMB} />
+              <FileUploadHeader
+                type={type}
+                maxSizeMB={maxSizeMB}
+                multiple={props.multiple}
+              />
               <Button
                 variant='outline'
                 className='mt-4'
@@ -101,13 +112,14 @@ export function FileUpload({ type = 'all', ...props }: FileUploadProps) {
                   className='-ms-1 size-4 opacity-60'
                   aria-hidden='true'
                 />
-                Select {type === 'image' ? 'image' : 'file'}
+                Select{' '}
+                {props.multiple ? 'files' : type === 'image' ? 'image' : 'file'}
               </Button>
             </div>
           )}
         </div>
 
-        {previewUrl && (
+        {previewUrl && !props.multiple && (
           <div className='absolute top-4 right-4'>
             <button
               type='button'
@@ -138,9 +150,11 @@ export function FileUpload({ type = 'all', ...props }: FileUploadProps) {
 const FileUploadHeader = ({
   type,
   maxSizeMB,
+  multiple,
 }: {
   type: NonNullable<FileUploadProps['type']>;
   maxSizeMB: number;
+  multiple?: boolean;
 }) => {
   return (
     <div className='flex flex-col items-center justify-center text-center'>
@@ -163,13 +177,69 @@ const FileUploadHeader = ({
         )}
       </div>
       <p className='mb-1.5 text-sm font-medium'>
-        {type === 'image' ? 'Drop your image here' : 'Upload file'}
+        {multiple
+          ? 'Drop your files here'
+          : type === 'image'
+            ? 'Drop your image here'
+            : 'Upload file'}
       </p>
       <p className='text-muted-foreground text-xs'>
-        {type === 'image'
-          ? `SVG, PNG, JPG or GIF (max. ${maxSizeMB}MB)`
-          : `Drag & drop or click to browse (max. ${maxSizeMB}MB)`}
+        {multiple
+          ? `Drag & drop or click to browse (max. ${maxSizeMB}MB per file)`
+          : type === 'image'
+            ? `SVG, PNG, JPG or GIF (max. ${maxSizeMB}MB)`
+            : `Drag & drop or click to browse (max. ${maxSizeMB}MB)`}
       </p>
+    </div>
+  );
+};
+
+const MultipleFilesPreview = ({
+  files,
+  type,
+  onRemoveFile,
+}: {
+  files: FileWithPreview[];
+  type: string;
+  onRemoveFile: (id: string) => void;
+}) => {
+  return (
+    <div className='space-y-2 w-full'>
+      {files.map((file) => (
+        <div key={file.id} className='relative'>
+          <div className='flex items-center justify-between gap-2 rounded-xl border px-4 py-2 w-full'>
+            <div className='flex items-center gap-3 overflow-hidden w-full'>
+              {type === 'image' || isImage(file.file.name) ? (
+                <ImageIcon
+                  className='size-4 shrink-0 opacity-60'
+                  aria-hidden='true'
+                />
+              ) : (
+                <PaperclipIcon
+                  className='size-4 shrink-0 opacity-60'
+                  aria-hidden='true'
+                />
+              )}
+              <div className='min-w-0 flex-1'>
+                <p className='truncate text-[13px] font-medium'>
+                  {file.file.name}
+                </p>
+              </div>
+              <span className='shrink-0 text-muted-foreground text-sm'>
+                ({((file.file.size || 0) / 1024).toFixed(1)} KB)
+              </span>
+            </div>
+            <button
+              type='button'
+              className='flex size-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px] focus-visible:ring-ring/50'
+              onClick={() => onRemoveFile(file.id)}
+              aria-label='Remove file'
+            >
+              <XIcon className='size-3' aria-hidden='true' />
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

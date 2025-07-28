@@ -7,8 +7,14 @@ import {
   QueryClient,
 } from '@tanstack/react-query';
 import { TransactionConfirmation } from './confirmation';
-import { KycStatusSchema } from '@/common/schemas/generated';
-import { notFound } from 'next/navigation';
+import {
+  KycStatusSchema,
+  TransactionStatusSchema,
+} from '@/common/schemas/generated';
+import { notFound, redirect } from 'next/navigation';
+import { Suspense } from 'react';
+import { VerifyMandatoryEmail } from '@/components/buy/verify-mandatory-email';
+import { TransactionStatus } from '@prisma/client';
 
 const idGen = () => {
   let id = 1;
@@ -16,6 +22,13 @@ const idGen = () => {
     return id++;
   };
 };
+
+const STEP_NAMES = {
+  KYC: 'KYC',
+  SAFT: 'SAFT',
+  Payment: 'Payment',
+  Confirmation: 'Confirmation',
+} as const;
 
 const getSteps = (
   user: Awaited<ReturnType<typeof getCurrentUser>>,
@@ -29,7 +42,7 @@ const getSteps = (
 ) => {
   const id = idGen();
 
-  const steps = [];
+  const steps: { id: number; name: string; description: string }[] = [];
 
   const kyc = user?.data?.kycVerification?.status;
   // If sale requires KYC and user has not done it, then add the step
@@ -43,21 +56,21 @@ const getSteps = (
   ) {
     steps.push({
       id: id(),
-      name: 'KYC',
+      name: STEP_NAMES.KYC,
       description: 'KYC',
     });
   }
   if (requiresSAFT) {
     steps.push({
       id: id(),
-      name: 'SAFT',
+      name: STEP_NAMES.SAFT,
       description: 'SAFT',
     });
   }
 
   return steps.concat([
-    { id: id(), name: 'Payment', description: 'Payment' },
-    { id: id(), name: 'Confirmation', description: 'Confirmation' },
+    { id: id(), name: STEP_NAMES.Payment, description: 'Payment' },
+    { id: id(), name: STEP_NAMES.Confirmation, description: 'Confirmation' },
   ]);
 };
 
@@ -82,6 +95,20 @@ export default async function TransactionConfiramationPage({
 
   const requiresKYC = tx?.data?.requiresKYC;
   const requiresSAFT = tx?.data?.requiresSAFT;
+  const steps = getSteps(user, {
+    requiresKYC,
+    requiresSAFT,
+  });
+  const status = tx.data.transaction.status;
+  if (
+    status === TransactionStatusSchema.enum.CANCELLED ||
+    status === 'REJECTED'
+  ) {
+    redirect(`/dashboard/buy/${tx.data.transaction.id}/failure`);
+  }
+  if (status === TransactionStatusSchema.enum.PAYMENT_SUBMITTED) {
+    redirect(`/dashboard/buy/${tx.data.transaction.id}/pending`);
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -93,17 +120,39 @@ export default async function TransactionConfiramationPage({
         >
           <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
             <div className='container mx-auto z-10'>
-              <TransactionConfirmation
-                steps={getSteps(user, {
-                  requiresKYC,
-                  requiresSAFT,
-                })}
-                initialStep={1}
-              />
+              <Suspense fallback={null} key={steps.length}>
+                <TransactionConfirmation
+                  steps={steps}
+                  initialStep={getInitialStep(
+                    tx.data.transaction.status,
+                    steps
+                  )}
+                />
+              </Suspense>
             </div>
           </div>
         </main>
+        {(!user?.data?.emailVerified || !user?.data?.email) && (
+          <VerifyMandatoryEmail email={user?.data?.email || ''} />
+        )}
       </ErrorBoundary>
     </HydrationBoundary>
   );
 }
+
+const getInitialStep = (
+  status: TransactionStatus,
+  steps: { id: number; name: string; description: string }[]
+) => {
+  const defaultStep = steps[0]!;
+  switch (status) {
+    case TransactionStatusSchema.enum.AWAITING_PAYMENT:
+      return steps.find((s) => s.name === STEP_NAMES.Payment) || defaultStep;
+    case TransactionStatusSchema.enum.PAYMENT_VERIFIED:
+      return (
+        steps.find((s) => s.name === STEP_NAMES.Confirmation) || defaultStep
+      );
+    default:
+      return defaultStep;
+  }
+};

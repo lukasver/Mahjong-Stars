@@ -76,7 +76,7 @@ export const GlassyCard = ({
   className?: string;
 }) => {
   return (
-    <CardPrimitive className={cn('glassy text-foreground', className)}>
+    <CardPrimitive className={getGlassyCardClassName(className)}>
       <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
         <CardTitle className='text-xl font-bold'>{title}</CardTitle>
         <Icon icon={icon} className='h-4 w-4' />
@@ -85,6 +85,10 @@ export const GlassyCard = ({
     </CardPrimitive>
   );
 };
+
+export function getGlassyCardClassName(className?: string) {
+  return cn('glassy text-foreground', className);
+}
 
 export const CardContainer = ({
   children,

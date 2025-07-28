@@ -83,11 +83,23 @@ export default () => {
         },
         {
           protocol: 'https',
-          hostname: '*.r2.cloudflarestorage.com',
+          hostname: 'storage.googleapis.com',
+          pathname: '/mjs-public/**',
         },
         {
           protocol: 'https',
-          hostname: '*.r2.dev',
+          hostname: 'storage.googleapis.com',
+          pathname: '/mjs-public-dev/**',
+        },
+        {
+          protocol: 'https',
+          hostname: 'storage.googleapis.com',
+          pathname: '/mjs-private/**',
+        },
+        {
+          protocol: 'https',
+          hostname: 'storage.googleapis.com',
+          pathname: '/mjs-private-dev/**',
         },
       ],
     },

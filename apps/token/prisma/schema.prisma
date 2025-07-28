@@ -316,6 +316,7 @@ model Document {
   name     String
   fileName String
   url      String
+  /// MIME type of the file
   type     String
 
   user   User?   @relation(fields: [userId], references: [id])

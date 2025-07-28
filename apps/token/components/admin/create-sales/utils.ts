@@ -14,7 +14,6 @@ type SaleKeys = Partial<
     Sale,
     | 'status'
     | 'catchPhrase'
-    | 'id'
     | 'createdAt'
     | 'updatedAt'
     | 'deletedAt'
@@ -27,6 +26,7 @@ type SaleKeys = Partial<
 >;
 
 export const formSchemaShape = {
+  id: z.string().optional(),
   name: z.string().min(1, 'Sale name required'),
   tokenName: z.string().min(1, 'Token name required'),
   tokenSymbol: z
@@ -117,6 +117,7 @@ export const SaleFormSchema = z
         path: ['tokenContractChainId'],
       });
     }
+    console.debug('🚀 ~ utils.ts:120 ~ data:', data);
     if (data.availableTokenQuantity > data.initialTokenQuantity) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -133,7 +134,8 @@ export const SaleFormSchema = z
     }
     if (
       data.maximumTokenBuyPerUser &&
-      data.maximumTokenBuyPerUser > data.minimumTokenBuyPerUser
+      data.maximumTokenBuyPerUser < data.minimumTokenBuyPerUser &&
+      Number(data.maximumTokenBuyPerUser) !== 0
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -150,6 +152,7 @@ export type InputProps<T extends string> = {
 };
 
 export const InputProps = {
+  id: { type: 'hidden' },
   name: { type: 'text' },
   tokenName: { type: 'text' },
   tokenSymbol: { type: 'text' },
@@ -196,7 +199,8 @@ export const InputProps = {
     inputProps: { inputMode: 'decimal', autoComplete: 'off' },
   },
   saftCheckbox: { type: 'checkbox' },
-} as InputProps<keyof typeof formSchemaShape>;
+  requiresKYC: { type: 'checkbox' },
+} satisfies InputProps<keyof typeof formSchemaShape>;
 
 export const saleInformationSchema = {
   summary: z.string().min(1, 'Summary is required'),

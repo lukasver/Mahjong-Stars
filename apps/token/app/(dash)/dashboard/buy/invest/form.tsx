@@ -15,6 +15,7 @@ import {
   useInputOptions,
   usePendingTransactionsForSale,
   useSaleInvestInfo,
+  useUser,
 } from '@/lib/services/api';
 import calculator from '@/lib/services/pricefeeds';
 
@@ -56,6 +57,7 @@ export const InvestForm = ({
   children?: React.ReactNode;
 }) => {
   const { activeAccount } = useActiveAccount();
+  const { data: user } = useUser();
   const router = useRouter();
   const { data: options, isLoading: loadingOptions } = useInputOptions();
 
@@ -88,8 +90,6 @@ export const InvestForm = ({
     validators: { onSubmit: InvestFormSchema },
     defaultValues: getDefaultValues(props.sale, activeAccount),
     onSubmit: ({ value }) => {
-      console.debug('🚀 ~ form.tsx:85 ~ value:', value);
-
       // Create transaction in API, book amount of tokens etc etc...
       // has KYC, ask user to upload documents, etc etc...
       // if
@@ -101,6 +101,12 @@ export const InvestForm = ({
         openModal(TransactionModalTypes.PendingTx);
         return;
       }
+
+      if (!user?.email || !user?.emailVerified) {
+        openModal(TransactionModalTypes.VerifyEmail);
+        return;
+      }
+
       // @ts-expect-error fixme
       action.execute(value);
     },
