@@ -1,3 +1,4 @@
+import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 import { Card } from '@mjs/ui/primitives/card';
 import { CardContent, CardHeader } from '@mjs/ui/primitives/card';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
@@ -32,7 +33,7 @@ function SalesPageLoader() {
         <StatsCardsLoader />
 
         {/* Main Content Card Loader */}
-        <Card>
+        <Card className={getGlassyCardClassName('rounded-2xl border')}>
           <CardHeader>
             <div className='space-y-1'>
               <Skeleton className='h-6 w-24' />
@@ -56,7 +57,10 @@ function StatsCardsLoader() {
   return (
     <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
       {Array.from({ length: 4 }).map((_, index) => (
-        <Card key={index}>
+        <Card
+          key={index}
+          className={getGlassyCardClassName('rounded-2xl border')}
+        >
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <Skeleton className='h-4 w-20' />
             <Skeleton className='h-4 w-4' />

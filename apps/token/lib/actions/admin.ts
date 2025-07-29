@@ -22,6 +22,7 @@ import transactionsController from '@/lib/controllers/transactions';
 import { TransactionStatus } from '@prisma/client';
 import { z } from 'zod';
 import { type JSONContent } from '@mjs/utils/server/tiptap';
+import { BankDetailsSchema } from '@/components/admin/create-sales/utils';
 
 const isAdmin = adminCache.wrap(async (walletAddress: string) => {
   return await prisma.user.findUniqueOrThrow({
@@ -126,6 +127,42 @@ export const updateSale = adminClient
   .schema(UpdateSaleDto)
   .action(async ({ ctx, parsedInput }) => {
     const sales = await salesController.updateSale(parsedInput, ctx);
+    if (!sales.success) {
+      throw new Error(sales.message);
+    }
+    return sales.data;
+  });
+
+export const associateBankDetailsToSale = adminClient
+  .schema(
+    z.object({
+      banks: z.array(BankDetailsSchema),
+      saleId: z.string(),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const sales = await salesController.associateBankDetailsToSale(
+      parsedInput,
+      ctx
+    );
+    if (!sales.success) {
+      throw new Error(sales.message);
+    }
+    return sales.data;
+  });
+
+export const disassociateBankDetailsFromSale = adminClient
+  .schema(
+    z.object({
+      saleId: z.string(),
+      bankId: z.string().or(z.array(z.string())),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const sales = await salesController.disassociateBankDetailsFromSale(
+      parsedInput,
+      ctx
+    );
     if (!sales.success) {
       throw new Error(sales.message);
     }

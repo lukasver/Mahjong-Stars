@@ -18,6 +18,7 @@ import {
   getCurrentUser,
   getSaftForTransactionDetails,
   getSale,
+  getSaleBanks,
   getSaleDocuments,
   getSaleInvestInfo,
   getSales,
@@ -279,6 +280,17 @@ export const useSaftForTransactionDetails = (
  * =============== ADMIN ===============
  * =====================================
  */
+
+export const useSaleBanks = (saleId: string) => {
+  const { data, isLoading, refetch, error } = useQuery({
+    queryKey: ['sales', saleId, 'banks'],
+    queryFn: () => getSaleBanks(saleId),
+    staleTime: DEFAULT_STALE_TIME,
+    enabled: !!saleId,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, isLoading, refetch };
+};
 
 // export const useAdminTransactions = () => {
 //   const { data, status, error } = useSuspenseQuery({

@@ -1,8 +1,11 @@
 'use client';
 
+import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
+
 import { ConnectWallet } from '@/components/connect-wallet';
 import { client } from '@/lib/auth/thirdweb-client';
 import { Icons } from '@mjs/ui/components/icons';
+import { LoadingAnimation } from '@mjs/ui/components/motion';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -15,6 +18,7 @@ import React from 'react';
 import { AccountProvider as AccountProviderThirdweb } from 'thirdweb/react';
 import useActiveAccount from '../hooks/use-active-account';
 import { PointerEventsGuard } from './pointer-events-guard';
+import Image from 'next/image';
 
 const IS_DEV = process.env.NODE_ENV === 'development';
 // change to true for debug
@@ -73,11 +77,21 @@ function AccountProvider({ children }: { children: React.ReactNode }) {
       <AlertDialog open={true}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Connecting...</AlertDialogTitle>
-            <AlertDialogDescription>Please wait</AlertDialogDescription>
+            <AlertDialogTitle>Connecting wallet...</AlertDialogTitle>
+            <AlertDialogDescription className='text-secondary'>
+              Please wait
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <div className='flex items-center justify-center h-full w-full'>
-            <Icons.loader className='w-10 h-10 animate-spin' />
+            <LoadingAnimation className='aspect-square'>
+              <Image
+                height={80}
+                width={80}
+                src={MahjongStarsIconXl}
+                alt='Mahjong Stars Logo'
+                className='aspect-square'
+              />
+            </LoadingAnimation>
           </div>
         </AlertDialogContent>
       </AlertDialog>

@@ -20,8 +20,8 @@ export const PercentBar = ({
         indicatorClassName='bg-primary rounded'
       />
       <div className='flex flex-col items-end mt-1'>
-        <span className='text-xs font-bold text-gray-500'>{textValue}</span>
-        <span className='text-xs text-gray-500'>{caption ?? 'Hard Cap'}</span>
+        <span className='text-xs font-bold text-secondary'>{textValue}</span>
+        <span className='text-xs text-secondary'>{caption ?? 'Hard Cap'}</span>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import {
 } from '@mjs/ui/primitives/card';
 import { FileUpload } from '@mjs/ui/components/file-upload';
 import { Button } from '@mjs/ui/primitives/button';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   associateDocumentsToUser,
   generateContractForTransaction,
@@ -21,6 +21,7 @@ import {
 import { uploadFile } from '@/lib/utils/files';
 import {
   useSaftForTransactionDetails,
+  useSaleBanks,
   useSaleSaftForTransaction,
   useTransactionById,
   useUser,
@@ -41,6 +42,13 @@ import { ContractDialogConfirmSignature } from '@/components/buy/contract/dialog
 import { ContractDialogLoading } from '@/components/buy/contract/dialog-loading';
 import { SuccessContent } from './[status]/success';
 import { getGlassyCardClassName } from '@mjs/ui/components/cards';
+import {
+  BankDetailsCard,
+  BankDetailsSkeleton,
+} from '@/components/bank-details';
+import { copyToClipboard } from '@mjs/utils/client';
+import { Skeleton } from '@mjs/ui/primitives/skeleton';
+import { VisuallyHidden } from '@mjs/ui/primitives/visually-hidden';
 
 /**
  * Type guard for FileWithPreview
@@ -226,7 +234,17 @@ const SaftReviewStep = ({ onSuccess }: { onSuccess: () => void }) => {
       </CardContent>
     );
   if (!template)
-    return <CardContent>No SAFT template found for this sale.</CardContent>;
+    return (
+      <CardContent>
+        <CardHeader>
+          <CardTitle>No SAFT template found for this sale.</CardTitle>
+          <CardDescription>You can proceed to next step</CardDescription>
+          <Button variant='accent' onClick={() => onSuccess()} className='mt-4'>
+            Next
+          </Button>
+        </CardHeader>
+      </CardContent>
+    );
 
   return (
     <>
@@ -270,16 +288,18 @@ const SaftReviewStep = ({ onSuccess }: { onSuccess: () => void }) => {
             >
               Sign Contract
             </Button>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => {
-                console.log('ERRORS', form.getAllErrors());
-                console.log('VALS', form.state.values);
-              }}
-            >
-              Reset
-            </Button>
+            {process.env.NODE_ENV === 'development' && (
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => {
+                  console.log('ERRORS', form.getAllErrors());
+                  console.log('VALS', form.state.values);
+                }}
+              >
+                Reset
+              </Button>
+            )}
           </form>
         </form.AppForm>
       </CardContent>
@@ -302,10 +322,21 @@ const SaftReviewStep = ({ onSuccess }: { onSuccess: () => void }) => {
 };
 
 const ConfirmationStep = () => {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, []);
   return (
-    <div>
+    <CardContent>
+      <CardHeader>
+        <VisuallyHidden>
+          <CardTitle>Confirmation</CardTitle>
+        </VisuallyHidden>
+      </CardHeader>
       <SuccessContent />
-    </div>
+    </CardContent>
   );
 };
 
@@ -384,37 +415,47 @@ const getLabel = (v: string) => {
  * Step 3: Payment Step
  * Shows payment instructions and collects payment confirmation info.
  */
-const PaymentStep = () => {
+const PaymentStep = ({ onSuccess }: { onSuccess: () => void }) => {
   const { tx: txId } = useParams();
   const { data: tx, isLoading } = useTransactionById(txId as string);
-  const [confirmationId, setConfirmationId] = useState('');
+
+  const { data: banks, isLoading: isBanksLoading } = useSaleBanks(
+    tx?.transaction?.sale?.id || ''
+  );
+  const [files, setFiles] = useState<unknown[]>([]); // Array of FileWithPreview
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  if (isLoading) return <CardContent>Loading payment details...</CardContent>;
+  if (isLoading)
+    return (
+      <CardContent>
+        <CardHeader>
+          <CardTitle>Payment</CardTitle>
+          <CardDescription>
+            Please follow the instructions below to complete your payment.
+          </CardDescription>
+        </CardHeader>
+        <div className='space-y-4'>
+          {[1, 2, 3].map((i) => (
+            <BankDetailsSkeleton key={i} />
+          ))}
+        </div>
+      </CardContent>
+    );
   if (!tx) return <CardContent>Transaction not found.</CardContent>;
 
   // TODO: Confirm the correct path for payment fields and type properly
   const paymentMethod = tx?.transaction?.formOfPayment;
 
-  // WE need to get the transfer details
-
-  const currency = tx?.transaction?.paidCurrency;
-  // Example bank details (replace with real data as needed)
-  const bankDetails = {
-    accountName: 'Example Corp',
-    iban: 'DE89 3704 0044 0532 0130 00',
-    swift: 'COBADEFFXXX',
-    bankName: 'Commerzbank',
-    address: 'Kaiserplatz, 60311 Frankfurt am Main, Germany',
-  };
-
   /**
    * Handles the upload of the bank slip file.
    */
-  const handleBankSlipChange = () => {
-    // No-op for now
+  const handleBankSlipChange = (fileList: unknown[]) => {
+    setFiles(fileList.slice(0, 1));
+    setError(null);
+    setSuccess(false);
   };
 
   /**
@@ -425,11 +466,42 @@ const PaymentStep = () => {
     setIsSubmitting(true);
     setError(null);
     setSuccess(false);
-    // TODO: Implement actual submission logic (call server action)
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      invariant(tx, 'Transaction id could not be found');
+
+      const saleId = tx.transaction.sale.id;
+      const txId = tx.transaction.id;
+
+      const validFiles = files
+        .map((f) => (isFileWithPreview(f) ? f.file : null))
+        .filter((f): f is File => !!f);
+      const response = await Promise.all(
+        validFiles.map(async (file) => {
+          const key = `sale/${saleId}/tx/${txId}/${file.name}`;
+          const urlRes = await getFileUploadPrivatePresignedUrl({ key });
+          if (!urlRes?.data?.url) throw new Error('Failed to get upload URL');
+          await uploadFile(file, urlRes.data.url).then();
+          // Here i need to update our backend with refernece to the file
+          return key;
+        })
+      );
+
+      const keys = response.flatMap((key) => ({ key }));
+      const result = await associateDocumentsToUser({
+        documents: keys,
+        type: 'PAYMENT',
+      });
+
+      console.debug('🚀 ~ confirmation.tsx:108 ~ result:', result);
+
       setSuccess(true);
-    }, 1000);
+      setFiles([]);
+      onSuccess();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -442,45 +514,69 @@ const PaymentStep = () => {
       </CardHeader>
       <CardContent>
         {paymentMethod === 'TRANSFER' ? (
-          <form className='space-y-4' onSubmit={handleSubmit}>
-            <div>
-              <div className='font-medium mb-1'>Bank Details</div>
-              <div className='text-sm'>
-                <div>Bank Name: {bankDetails.bankName}</div>
-                <div>Account Name: {bankDetails.accountName}</div>
-                <div>IBAN: {bankDetails.iban}</div>
-                <div>SWIFT: {bankDetails.swift}</div>
-                <div>Bank Address: {bankDetails.address}</div>
-                <div>Currency: {currency}</div>
+          <div className='space-y-4'>
+            <p className='text-sm text-foreground'>
+              Proceed to pay{' '}
+              <span className='font-medium '>
+                {tx?.transaction?.amountPaid} {tx?.transaction?.paidCurrency}
+              </span>{' '}
+              to one of the following bank accounts & upload a proof of payment:
+            </p>
+            <ul className='space-y-4 max-h-[600px] overflow-y-auto'>
+              {isBanksLoading ? (
+                <Skeleton className='h-10 w-full' />
+              ) : (
+                banks?.banks.map((bank, index) => (
+                  <li key={bank.id || index}>
+                    <BankDetailsCard
+                      noSelectable
+                      onCopy={() => {
+                        copyToClipboard(bank.iban);
+                        toast.success('IBAN copied to clipboard');
+                      }}
+                      data={{
+                        bankName: bank.bankName,
+                        iban: bank.iban,
+                        currency: bank.currency,
+                        accountName: bank.accountName || '',
+                        swift: bank.swift || '',
+                        address: bank.address || '',
+                        memo: bank.memo || '',
+                      }}
+                    />
+                  </li>
+                ))
+              )}
+            </ul>
+            <form className='space-y-4' onSubmit={handleSubmit}>
+              <div>
+                <label className='font-medium'>
+                  Upload Bank Transfer Receipt
+                </label>
+                <FileUpload
+                  type='all'
+                  maxSizeMB={5}
+                  className='w-full'
+                  multiple={false}
+                  onFilesChange={handleBankSlipChange}
+                />
               </div>
-            </div>
-            <div>
-              <label className='font-medium'>
-                Upload Bank Transfer Receipt
-              </label>
-              <FileUpload
-                type='all'
-                maxSizeMB={5}
+              {error && <div className='text-destructive mt-2'>{error}</div>}
+              {success && (
+                <div className='text-success mt-2'>
+                  Payment confirmation submitted!
+                </div>
+              )}
+              <Button
+                type='submit'
                 className='w-full'
-                multiple={false}
-                onFilesChange={handleBankSlipChange}
-              />
-            </div>
-            {error && <div className='text-destructive mt-2'>{error}</div>}
-            {success && (
-              <div className='text-success mt-2'>
-                Payment confirmation submitted!
-              </div>
-            )}
-            <Button
-              type='submit'
-              className='w-full'
-              disabled={isSubmitting}
-              variant='accent'
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Payment Confirmation'}
-            </Button>
-          </form>
+                disabled={isSubmitting}
+                variant='accent'
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Payment Confirmation'}
+              </Button>
+            </form>
+          </div>
         ) : (
           <div className='py-8 text-center'>
             <div className='mb-2'>
@@ -514,7 +610,13 @@ const FormStepper = ({
         currentStep={step}
         steps={steps}
         className={className}
-        onStepClick={setStep}
+        onStepClick={(e) => {
+          if (process.env.NODE_ENV === 'production') {
+            return;
+          }
+          setStep(e);
+        }}
+        disableClick={process.env.NODE_ENV === 'production'}
       />
     </Card>
   );
@@ -541,16 +643,22 @@ export function TransactionConfirmation({
     <ErrorBoundary fallback={<div>Error with transaction confirmation</div>}>
       <div className='container mx-auto p-4 space-y-4 max-w-3xl'>
         <FormStepper steps={steps} step={step.id} setStep={handleStepChange} />
-        <Card className={getGlassyCardClassName()}>
+        <Card
+          className={getGlassyCardClassName(
+            'min-h-[80dvh] flex flex-col justify-center'
+          )}
+        >
           <AnimatePresence>
             {step.name === 'KYC' && (
               <KycUploadDocument
+                // @ts-expect-error wontfix
                 onSuccess={() => setStep(steps.find((s) => s.name === 'SAFT'))}
               />
             )}
             {step.name === 'SAFT' && (
               <SaftReviewStep
                 onSuccess={() =>
+                  // @ts-expect-error wontfix
                   setStep(steps.find((s) => s.name === 'Payment'))
                 }
               />
@@ -558,6 +666,7 @@ export function TransactionConfirmation({
             {step.name === 'Payment' && (
               <PaymentStep
                 onSuccess={() =>
+                  // @ts-expect-error wontfix
                   setStep(steps.find((s) => s.name === 'Confirmation'))
                 }
               />

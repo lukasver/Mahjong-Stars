@@ -578,7 +578,7 @@ export const associateDocumentsToUser = authActionClient
           key: z.string(),
         })
       ),
-      type: z.enum(['KYC']).optional().default('KYC'),
+      type: z.enum(['KYC', 'PAYMENT']).optional().default('KYC'),
     })
   )
   .action(async ({ ctx, parsedInput }) => {

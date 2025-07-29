@@ -205,7 +205,7 @@ class DocumentsController {
         id?: string;
         key: string;
       }[];
-      type: 'KYC';
+      type: 'KYC' | 'PAYMENT';
     },
     _ctx: ActionCtx
   ) {
@@ -276,6 +276,9 @@ class DocumentsController {
             },
           })
         );
+      }
+      if (type === 'PAYMENT') {
+        //TODO check fi we want to associate something or if it is enought with linking to user
       }
       const [docs] = await Promise.all(promises);
       return Success({ documents: docs });

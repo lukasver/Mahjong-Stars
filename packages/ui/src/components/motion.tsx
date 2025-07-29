@@ -61,6 +61,34 @@ export function FadeAnimation({
   );
 }
 
+export function LoadingAnimation({
+  children,
+  className,
+  duration = 1.5,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  duration?: number;
+}) {
+  return (
+    <motion.div
+      animate={{
+        scale: [1, 1.1, 1],
+        opacity: [1, 0.7, 1],
+      }}
+      transition={{
+        duration,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        times: [0, 0.5, 1],
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export {
   motion,
   AnimatePresence,

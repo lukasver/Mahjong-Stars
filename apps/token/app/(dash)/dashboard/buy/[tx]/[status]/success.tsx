@@ -9,6 +9,7 @@ import { metadata } from '@/common/config/site';
 import BackgroundWrapper from '@/components/bg-wrapper';
 import { useTransactionById } from '@/lib/services/api';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
+import { cn } from '@mjs/ui/lib/utils';
 
 /**
  * Success status page for dashboard actions.
@@ -17,12 +18,12 @@ import { Skeleton } from '@mjs/ui/primitives/skeleton';
 const Success = () => {
   return (
     <BackgroundWrapper>
-      <SuccessContent />
+      <SuccessContent className='min-h-screen grid place-content-center bg-gradient-to-b from-primary to-5% to-transparent h-full' />
     </BackgroundWrapper>
   );
 };
 
-export const SuccessContent = () => {
+export const SuccessContent = ({ className }: { className?: string }) => {
   const router = useRouter();
   const { tx } = useParams();
   const { data, isLoading } = useTransactionById(tx as string);
@@ -39,7 +40,7 @@ export const SuccessContent = () => {
   const supportEmail =
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL || metadata.supportEmail;
   return (
-    <div className='min-h-screen grid place-content-center bg-gradient-to-b from-primary to-5% to-transparent h-full'>
+    <div className={cn(className)}>
       <div className='flex flex-col items-center justify-center h-full w-full p-8 rounded-xl gap-6 -mt-10'>
         <div className='w-24 flex justify-center'>
           <Logo variant='iconXl' />

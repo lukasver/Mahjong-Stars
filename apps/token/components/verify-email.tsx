@@ -25,6 +25,7 @@ import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
 import useActiveAccount from './hooks/use-active-account';
 import { useLocalStorage } from 'usehooks-ts';
 import { cn } from '@mjs/ui/lib/utils';
+import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 
 const titleMapping = {
   1: {
@@ -57,7 +58,7 @@ export function VerifyEmail({ token }: { token: string }) {
   };
 
   return (
-    <Card className='shadow-2xl'>
+    <Card className={getGlassyCardClassName('shadow-2xl')}>
       <CardHeader>
         <CardTitle>{titleMapping[step]?.title}</CardTitle>
         <CardDescription>{titleMapping[step]?.description}</CardDescription>

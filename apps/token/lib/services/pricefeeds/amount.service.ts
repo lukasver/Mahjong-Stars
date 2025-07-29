@@ -134,15 +134,6 @@ export class AmountCalculatorService {
   }: AmountParameters): Promise<getAmountAndPricePerUnitReturn> {
     const frontPrecision = this.getPrecision(currency, precision);
 
-    console.debug('PAYLOADS', {
-      initialCurrency,
-      currency,
-      base,
-      quantity,
-      addFee,
-      precision,
-    });
-
     const res = await this.getRateFetcher(initialCurrency, currency);
     if (res.error) {
       throw new Error('Error fetching exchange rate');

@@ -150,8 +150,9 @@ const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
 
 const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
   const { data: docs, isLoading } = useSaleDocuments(sale.id);
+
   if (isLoading) return <div>Loading...</div>;
-  if (!docs?.documents)
+  if (!docs?.documents?.length)
     return (
       <Placeholder
         title='No documents found'
@@ -216,7 +217,7 @@ const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
 const GalleryTab = ({ sale }: { sale: SaleWithToken }) => {
   const { data: docs, isLoading } = useSaleDocuments(sale.id);
   if (isLoading) return <div>Loading...</div>;
-  if (!docs)
+  if (!docs?.images?.length)
     return (
       <Placeholder
         icon={ImagesIcon}

@@ -12,6 +12,7 @@ type InputOptionsContextType = Pick<
     fiatCurrencies: SelectOption[];
     blockchain: SelectOption[];
     token: SelectOption[];
+    banks: SelectOption[];
   } | null;
 };
 

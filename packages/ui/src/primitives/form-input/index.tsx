@@ -32,7 +32,6 @@ type InputUnionProps =
 export type FormInputProps = {
   id?: string;
   name: string;
-  placeholder?: string;
   label?: string;
   description?: string;
   message?: true | null;

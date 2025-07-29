@@ -34,6 +34,7 @@ import { SaleWithRelations, SaleWithToken } from '@/common/types/sales';
 import { z } from 'zod';
 import { SaleInformationItem } from '@/common/schemas/dtos/sales/information';
 import { StorageService } from '../documents/storage';
+import { BankDetailsForm } from '@/components/admin/create-sales/utils';
 
 const QUERY_MAPPING = {
   active: {
@@ -96,7 +97,8 @@ class SalesController {
           activeSale.availableTokenQuantity < 0;
         // if sale closing date is expired or no more available units to sell, then update status to finished.
         if (isSaleFinished || isSaleCompleted) {
-          sales = await changeActiveSaleToFinish(activeSale);
+          await changeActiveSaleToFinish(activeSale);
+          sales = [];
         }
       }
 
@@ -466,7 +468,7 @@ class SalesController {
 
       const updatedSale = await prisma.$transaction(async (tx) => {
         // handle banner and token image creation individually
-        let individualPromises: Promise<any>[] = [];
+        let individualPromises: Promise<unknown>[] = [];
         if (docs.images?.length) {
           const separated = docs.images.filter(
             (image) => image.isBanner || image.isTokenImage
@@ -648,6 +650,11 @@ class SalesController {
             swift: true,
             address: true,
             memo: true,
+            currency: {
+              select: {
+                symbol: true,
+              },
+            },
           },
         }),
       ]);
@@ -701,6 +708,8 @@ class SalesController {
             swift: b.swift,
             address: b.address,
             memo: b.memo,
+            currency: b.currency?.symbol,
+            bankName: b.bankName,
           },
         })),
       });
@@ -819,6 +828,147 @@ class SalesController {
       const parsedToken = this.parseTokenData(data);
       return Success({
         sale: this.decimalsToString({ ...data, token: parsedToken }),
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async associateBankDetailsToSale(
+    { banks, saleId }: { banks: BankDetailsForm[]; saleId: string },
+    _ctx: ActionCtx
+  ) {
+    try {
+      const sale = await prisma.sale.findUniqueOrThrow({
+        where: { id: saleId },
+        select: {
+          id: true,
+        },
+      });
+
+      const existing = banks.filter((bank) => bank.id);
+
+      if (existing.length) {
+        await Promise.all(
+          existing.map(async (bank) => {
+            await prisma.bankDetails.update({
+              where: { id: bank.id as string },
+              data: {
+                ...bank,
+                currency: {
+                  connect: {
+                    symbol: bank.currency,
+                  },
+                },
+                sales: {
+                  connect: {
+                    id: saleId,
+                  },
+                },
+              },
+            });
+          })
+        );
+      }
+      const nonExisting = banks.filter((bank) => !bank.id);
+      if (nonExisting.length) {
+        await Promise.all(
+          nonExisting.map(async ({ currency, ...bank }) => {
+            await prisma.bankDetails.create({
+              data: {
+                ...bank,
+                currency: {
+                  connect: {
+                    symbol: currency,
+                  },
+                },
+                sales: {
+                  connect: {
+                    id: saleId,
+                  },
+                },
+              },
+            });
+          })
+        );
+      }
+
+      return Success({ sale });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async disassociateBankDetailsFromSale(
+    { saleId, bankId }: { saleId: string; bankId: string | string[] },
+    _ctx: ActionCtx
+  ): Promise<Success<{ saleId: string }> | Failure> {
+    try {
+      invariant(saleId, 'Sale id is required');
+      invariant(bankId, 'Bank id is required');
+
+      await prisma.sale.findUniqueOrThrow({
+        where: { id: saleId },
+        select: {
+          id: true,
+        },
+      });
+
+      // Disconnect specific bank details from the sale
+      const bankIds = Array.isArray(bankId) ? bankId : [bankId];
+
+      // For many-to-many relationships, we need to update each bank detail individually
+      await Promise.all(
+        bankIds.map(async (bankId) => {
+          await prisma.bankDetails.update({
+            where: {
+              id: bankId,
+            },
+            data: {
+              sales: {
+                disconnect: {
+                  id: saleId,
+                },
+              },
+            },
+          });
+        })
+      );
+
+      return Success({ saleId });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async getSaleBanks(saleId: string, _ctx: ActionCtx) {
+    try {
+      const data = await prisma.bankDetails.findMany({
+        where: { sales: { some: { id: saleId } } },
+        select: {
+          id: true,
+          bankName: true,
+          accountName: true,
+          iban: true,
+          swift: true,
+          address: true,
+          memo: true,
+          currency: {
+            select: {
+              symbol: true,
+            },
+          },
+        },
+      });
+
+      return Success({
+        banks: data.map((b) => ({
+          ...b,
+          currency: b.currency?.symbol,
+        })),
       });
     } catch (e) {
       logger(e);

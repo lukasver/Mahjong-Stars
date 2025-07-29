@@ -4,14 +4,21 @@ import { useInputOptionsContext } from '@/components/hooks/use-input-options';
 import { motion } from '@mjs/ui/components/motion';
 import { Button } from '@mjs/ui/primitives/button';
 import { FormInput } from '@mjs/ui/primitives/form-input';
-import { UseAppForm, useFormContext } from '@mjs/ui/primitives/form/index';
+import {
+  useAppForm,
+  UseAppForm,
+  useFormContext,
+} from '@mjs/ui/primitives/form/index';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { formSchemaShape, InputProps } from '../utils';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  BankDetailsForm,
+  BankDetailsSchema,
+  formSchemaShape,
+  InputProps,
+} from '../utils';
 import { SaftEditor } from '../saft-editor';
 import {
-  Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -20,26 +27,31 @@ import { Icons } from '@mjs/ui/components/icons';
 import { EditableFormField } from '@mjs/ui/primitives/form-input/editable-field';
 import { CardContainer } from '@mjs/ui/components/cards';
 import { cn } from '@mjs/ui/lib/utils';
-import { useSale } from '@/lib/services/api';
+import { useSale, useSaleBanks } from '@/lib/services/api';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@mjs/ui/primitives/dialog';
-import { RadioGroup, RadioGroupItem } from '@mjs/ui/primitives/radio-group';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@mjs/ui/primitives/tabs';
-import { Label } from '@mjs/ui/primitives/label';
-import { Building2 } from 'lucide-react';
-import { Input } from '@mjs/ui/primitives/input';
-import { Textarea } from '@mjs/ui/primitives/textarea';
+import { Banknote } from 'lucide-react';
+import { SelectOption } from '@mjs/ui/primitives/form-input/types';
+import { Placeholder } from '@/components/placeholder';
+import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
+import { useAction } from 'next-safe-action/hooks';
+import { disassociateBankDetailsFromSale } from '@/lib/actions/admin';
+import { useSearchParams } from 'next/navigation';
+import { getQueryClient } from '@/app/providers';
+import { BankDetailsCard } from '@/components/bank-details';
 
 type ProjectInfoField = {
   label: string;
@@ -269,15 +281,24 @@ export const ProjectInformation = ({
 };
 
 export const PaymentInformation = ({
-  saleId,
   className,
+  saleId,
 }: {
-  saleId?: string;
   className?: string;
+  saleId?: string;
 }) => {
   const { options } = useInputOptionsContext();
+  const { data: saleBanks, isLoading } = useSaleBanks(saleId || '');
+
+  const bankList = options?.banks;
+  const query = useSearchParams();
+
   const form = useFormContext() as unknown as UseAppForm;
-  const stepValue = form.getFieldValue('banks');
+  const action = useActionListener(useAction(disassociateBankDetailsFromSale), {
+    successMessage: 'Bank details removed from sale',
+    errorMessage: 'Error removing bank details from sale',
+  });
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -285,28 +306,70 @@ export const PaymentInformation = ({
     });
   }, []);
 
-  const handleAddField = (
-    field: ProjectInfoField | ProjectInfoField[] = {
-      label: 'New Field',
-      type: 'textarea',
-      value: '',
+  const handleAddBankToForm = (field: BankDetailsForm | BankDetailsForm[]) => {
+    const value = (form.getFieldValue('banks') as BankDetailsForm[]) || [];
+    const newFields = Array.isArray(field) ? field : [field];
+
+    // Filter out duplicates based on id OR iban + currency combination
+    const uniqueNewFields = newFields.filter((newField) => {
+      const isDuplicate = value.some((existingField) => {
+        // Check by id if both have ids
+        if (
+          newField.id &&
+          existingField.id &&
+          newField.id === existingField.id
+        ) {
+          return true;
+        }
+        // Check by iban + currency combination
+        if (
+          newField.iban &&
+          existingField.iban &&
+          newField.currency &&
+          existingField.currency &&
+          newField.iban === existingField.iban &&
+          newField.currency === existingField.currency
+        ) {
+          return true;
+        }
+        return false;
+      });
+      return !isDuplicate;
+    });
+
+    form.setFieldValue('banks', value.concat(uniqueNewFields));
+  };
+
+  const handleRemoveBankFromSale = (fieldId: string) => {
+    console.log('REMOVE', fieldId, form.getFieldValue('banks'));
+    const saleId = form.getFieldValue('saleId') || query.get('saleId');
+
+    console.debug('🚀 ~ index.tsx:312 ~ saleId:', saleId);
+
+    if (fieldId && saleId) {
+      action
+        .executeAsync({
+          saleId: saleId as string,
+          bankId: fieldId,
+        })
+        .then(() => {
+          const queryClient = getQueryClient();
+          queryClient.invalidateQueries({
+            queryKey: ['sales', saleId, 'banks'],
+          });
+        });
     }
-  ) => {
-    const value = (form.getFieldValue('banks') as unknown[]) || [];
-    form.setFieldValue(
-      'banks',
-      value.concat(Array.isArray(field) ? field : [field])
-    );
   };
 
   useEffect(() => {
-    if (!stepValue) {
-      const value = form.getFieldValue('banks') as unknown[];
-      if (!value?.length) {
-        handleAddField(initialFields);
-      }
+    if (
+      saleBanks &&
+      !isLoading &&
+      !(form.getFieldValue('banks') as unknown[])?.length
+    ) {
+      handleAddBankToForm(saleBanks.banks as unknown as BankDetailsForm[]);
     }
-  }, [stepValue]);
+  }, [saleBanks, isLoading]);
 
   return (
     <motion.div {...animation}>
@@ -323,7 +386,6 @@ export const PaymentInformation = ({
                     variant='outline'
                     size='icon'
                     className='shrink-0'
-                    onClick={() => handleAddField()}
                     type='button'
                   >
                     <Icons.plus className='w-4 h-4' />
@@ -341,12 +403,37 @@ export const PaymentInformation = ({
           <ul className='flex flex-col gap-4'>
             <form.Field name='banks' mode='array'>
               {(field) => {
+                if (!(field.state.value as unknown[])?.length) {
+                  return (
+                    <Placeholder
+                      title='No bank accounts found'
+                      description='Add a new bank account to get started'
+                      icon={Banknote}
+                    />
+                  );
+                }
                 return (
                   <>
                     {(field.state.value as unknown[])?.map((_, index) => (
                       <form.Field key={index} name={`banks[${index}]`}>
                         {(itemField) => {
-                          return <div className='grid grid-cols-2 gap-4'></div>;
+                          return (
+                            <BankDetailsCard
+                              data={itemField.state.value as BankDetailsForm}
+                              //@ts-expect-error wontfix
+                              key={itemField.state.value?.iban || index}
+                              index={index}
+                              onRemove={(idx) => {
+                                //@ts-expect-error wontfix
+                                const id = itemField.state.value?.id;
+                                field.removeValue(Number(idx));
+                                if (id) {
+                                  const fieldId = String(id);
+                                  handleRemoveBankFromSale(fieldId);
+                                }
+                              }}
+                            />
+                          );
                         }}
                       </form.Field>
                     ))}
@@ -365,65 +452,99 @@ export const PaymentInformation = ({
           <DialogHeader>
             <DialogTitle>Add bank details</DialogTitle>
           </DialogHeader>
-          <BankDetailsTabs />
+          {bankList && (
+            <form.Subscribe
+              selector={(state) => ({
+                //@ts-expect-error wontfix
+                banks: state.values?.banks || [],
+              })}
+            >
+              {({ banks }) => (
+                <BankDetailsTabs
+                  bankList={bankList}
+                  initialSelected={banks}
+                  onAdd={handleAddBankToForm}
+                  currencies={options?.fiatCurrencies || []}
+                />
+              )}
+            </form.Subscribe>
+          )}
         </DialogContent>
       </Dialog>
     </motion.div>
   );
 };
 
-interface BankAccountForm {
-  bankName: string;
-  accountName: string;
-  iban: string;
-  swift: string;
-  address: string;
-  memo: string;
-}
+const BankDetailsTabs = ({
+  bankList,
+  onAdd,
+  currencies,
+  initialSelected,
+}: {
+  bankList: SelectOption[];
+  currencies: SelectOption[];
+  selected?: string;
+  setSelected?: (value: string) => void;
+  initialSelected?: BankDetailsForm[];
+  onAdd: (value: BankDetailsForm | BankDetailsForm[]) => void;
+}) => {
+  const closeBtn = useRef<HTMLButtonElement>(null);
+  const [activeTab, setActiveTab] = useState(
+    !bankList?.length ? 'new' : 'existing'
+  );
+  const [selectedAccounts, setSelectedAccounts] = useState<BankDetailsForm[]>(
+    initialSelected || []
+  );
+  const [existingAccounts, setExistingAccounts] = useState<BankDetailsForm[]>(
+    bankList?.map(
+      ({ meta, id }) => ({ ...meta, id }) as unknown as BankDetailsForm
+    ) || []
+  );
 
-const BankDetailsTabs = () => {
-  const existingAccounts = [
-    {
-      id: '1',
-      bankName: 'Bank of America',
-      accountName: 'Company Account',
-      iban: 'US123456789',
-      swift: 'BOFAUS3N',
-      address: '100 Main St, New York, NY 10001',
-      memo: 'Primary business account',
+  const form = useAppForm({
+    validators: {
+      //@ts-expect-error wontfix
+      onSubmit: BankDetailsSchema,
     },
-    {
-      id: '2',
-      bankName: 'Chase Bank',
-      accountName: 'Operating Account',
-      iban: 'US987654321',
-      swift: 'CHASUS33',
-      address: '200 Park Ave, New York, NY 10002',
-      memo: 'Secondary business account',
+    onSubmit: ({ value }) => {
+      setExistingAccounts((prev) => {
+        return [...prev, value];
+      });
+      onAdd(value);
+      form.reset();
+      closeBtn.current?.click();
     },
-    {
-      id: '3',
-      bankName: 'Wells Fargo',
-      accountName: 'Corporate Account',
-      iban: 'US456789123',
-      swift: 'WFBIUS6S',
-      address: '300 Madison Ave, New York, NY 10003',
-      memo: 'Reserve account',
+    defaultValues: {
+      bankName: '',
+      accountName: '',
+      iban: '',
+      swift: '',
+      currency: '',
+      address: '',
+      memo: '',
     },
-  ];
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('existing');
-  const [selectedAccount, setSelectedAccount] = useState('');
-  const [formData, setFormData] = useState<BankAccountForm>({
-    bankName: '',
-    accountName: '',
-    iban: '',
-    swift: '',
-    address: '',
-    memo: '',
   });
 
-  const handleInputChange = () => {};
+  const handleSubmit = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      form.handleSubmit();
+    },
+    [form]
+  );
+
+  const handleSelectAccounts = () => {
+    onAdd(selectedAccounts as unknown as BankDetailsForm[]);
+    closeBtn.current?.click();
+  };
+
+  useEffect(() => {
+    if (initialSelected?.length) {
+      setSelectedAccounts(initialSelected);
+    }
+  }, [initialSelected]);
+
   return (
     <>
       <div className='max-h-[500px] overflow-y-auto'>
@@ -434,145 +555,133 @@ const BankDetailsTabs = () => {
           </TabsList>
 
           <TabsContent value='existing' className='space-y-4'>
-            <RadioGroup
-              value={selectedAccount}
-              onValueChange={setSelectedAccount}
-            >
-              <div className='space-y-3'>
-                {existingAccounts.map((account) => (
-                  <div key={account.id}>
-                    <RadioGroupItem
-                      value={account.id}
-                      id={account.id}
-                      className='peer sr-only'
+            <div className='space-y-3'>
+              {existingAccounts?.length ? (
+                existingAccounts.map((data) => (
+                  <div key={data.id}>
+                    <BankDetailsCard
+                      key={data.id}
+                      data={data as unknown as BankDetailsForm}
+                      selected={selectedAccounts.some(
+                        (account) => account.id === data.id
+                      )}
+                      onSelect={(da) => {
+                        setSelectedAccounts((prev) => {
+                          if (prev.some((account) => account.id === da.id)) {
+                            return prev.filter(
+                              (account) => account.id !== da.id
+                            );
+                          }
+                          return [...prev, da];
+                        });
+                      }}
                     />
-                    <Label htmlFor={account.id} className='flex cursor-pointer'>
-                      <Card className='w-full transition-colors hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent/50'>
-                        <CardHeader className='pb-3'>
-                          <div className='flex items-center gap-3'>
-                            <Building2 className='h-5 w-5 text-muted-foreground' />
-                            <div className='flex-1'>
-                              <CardTitle className='text-base'>
-                                {account.bankName}
-                              </CardTitle>
-                              {account.accountName && (
-                                <CardDescription className='text-sm'>
-                                  {account.accountName}
-                                </CardDescription>
-                              )}
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className='pt-0'>
-                          <div className='grid grid-cols-1 gap-2 text-sm text-muted-foreground'>
-                            {account.iban && (
-                              <div>
-                                <span className='font-medium'>IBAN:</span>{' '}
-                                {account.iban}
-                              </div>
-                            )}
-                            {account.swift && (
-                              <div>
-                                <span className='font-medium'>SWIFT:</span>{' '}
-                                {account.swift}
-                              </div>
-                            )}
-                            {account.address && (
-                              <div>
-                                <span className='font-medium'>Address:</span>{' '}
-                                {account.address}
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Label>
                   </div>
-                ))}
-              </div>
-            </RadioGroup>
+                ))
+              ) : (
+                <Placeholder
+                  title='No bank accounts found'
+                  description='Add a new bank account to get started'
+                  icon={Banknote}
+                />
+              )}
+            </div>
           </TabsContent>
 
-          <TabsContent value='new' className='space-y-4'>
-            <div className='grid gap-4'>
-              <div className='grid gap-2'>
-                <Label htmlFor='bankName'>
-                  Bank Name <span className='text-red-500'>*</span>
-                </Label>
-                <Input
-                  id='bankName'
-                  placeholder='Enter bank name'
-                  value={formData.bankName}
-                  onChange={(e) =>
-                    handleInputChange('bankName', e.target.value)
-                  }
+          <TabsContent value='new' className='space-y-4 p-[1.5px]'>
+            <form.AppForm>
+              <div className='grid gap-4'>
+                <FormInput
+                  name='bankName'
+                  type='text'
+                  label='Bank Name'
+                  inputProps={{
+                    autoComplete: 'off',
+                    placeholder: 'Enter bank name',
+                    required: true,
+                  }}
                 />
-              </div>
 
-              <div className='grid gap-2'>
-                <Label htmlFor='accountName'>Account Name</Label>
-                <Input
-                  id='accountName'
-                  placeholder='Enter account name (optional)'
-                  value={formData.accountName}
-                  onChange={(e) =>
-                    handleInputChange('accountName', e.target.value)
-                  }
-                />
-              </div>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <FormInput
+                    name='accountName'
+                    type='text'
+                    label='Account Name'
+                    inputProps={{
+                      autoComplete: 'off',
+                      placeholder: 'Enter account name (optional)',
+                      required: false,
+                    }}
+                  />
+                  <FormInput
+                    name='currency'
+                    type='select'
+                    label='Accepted currency'
+                    inputProps={{
+                      autoComplete: 'off',
 
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='grid gap-2'>
-                  <Label htmlFor='iban'>IBAN</Label>
-                  <Input
-                    id='iban'
-                    placeholder='Enter IBAN (optional)'
-                    value={formData.iban}
-                    onChange={(e) => handleInputChange('iban', e.target.value)}
+                      required: false,
+                      options: currencies || [],
+                    }}
                   />
                 </div>
 
-                <div className='grid gap-2'>
-                  <Label htmlFor='swift'>SWIFT Code</Label>
-                  <Input
-                    id='swift'
-                    placeholder='Enter SWIFT code (optional)'
-                    value={formData.swift}
-                    onChange={(e) => handleInputChange('swift', e.target.value)}
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <FormInput
+                    name='iban'
+                    type='text'
+                    label='IBAN'
+                    inputProps={{
+                      placeholder: 'Enter IBAN',
+                      required: true,
+                    }}
+                  />
+
+                  <FormInput
+                    name='swift'
+                    type='text'
+                    label='SWIFT Code'
+                    inputProps={{
+                      placeholder: 'Enter SWIFT code (optional)',
+                      required: false,
+                    }}
                   />
                 </div>
-              </div>
 
-              <div className='grid gap-2'>
-                <Label htmlFor='address'>Bank Address</Label>
-                <Textarea
-                  id='address'
-                  placeholder='Enter bank address (optional)'
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  rows={3}
+                <FormInput
+                  name='address'
+                  type='text'
+                  label='Bank Address'
+                  inputProps={{
+                    placeholder: 'Enter bank address (optional)',
+                    required: false,
+                  }}
+                />
+
+                <FormInput
+                  name='memo'
+                  type='text'
+                  label='Memo'
+                  inputProps={{
+                    placeholder: 'Add any additional notes (optional)',
+                    required: false,
+                  }}
                 />
               </div>
-
-              <div className='grid gap-2'>
-                <Label htmlFor='memo'>Memo</Label>
-                <Input
-                  id='memo'
-                  placeholder='Add any additional notes (optional)'
-                  value={formData.memo}
-                  onChange={(e) => handleInputChange('memo', e.target.value)}
-                />
-              </div>
-            </div>
+            </form.AppForm>
           </TabsContent>
         </Tabs>
       </div>
 
       <DialogFooter>
-        <Button variant='outline' onClick={() => setIsOpen(false)}>
-          Cancel
-        </Button>
-        <Button>
+        <DialogClose asChild ref={closeBtn}>
+          <Button variant='outline'>Cancel</Button>
+        </DialogClose>
+        <Button
+          onClick={
+            activeTab === 'existing' ? handleSelectAccounts : handleSubmit
+          }
+        >
           {activeTab === 'existing' ? 'Select Account' : 'Add Account'}
         </Button>
       </DialogFooter>

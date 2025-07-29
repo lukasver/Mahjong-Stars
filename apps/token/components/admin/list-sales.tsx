@@ -71,6 +71,7 @@ import { updateSaleStatus } from '@/lib/actions/admin';
 import { toast } from '@mjs/ui/primitives/sonner';
 import { getQueryClient } from '@/app/providers';
 import { SaleStatusType } from '@/common/schemas/generated';
+import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 
 export function ListSales({
   children,
@@ -212,7 +213,7 @@ export function ListSales({
       {children}
 
       {/* Filters and Search */}
-      <Card className='bg-card shadow'>
+      <Card className={getGlassyCardClassName('shadow')}>
         <CardHeader className='flex flex-col sm:flex-row gap-2 justify-between'>
           <div className='flex flex-col'>
             {title && <CardTitle>{title}</CardTitle>}

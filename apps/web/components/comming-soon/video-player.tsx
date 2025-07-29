@@ -66,8 +66,6 @@ function VideoPlayer({
   }, [isMobile, mobileSrc, src]);
 
   if (isMobile) {
-    console.debug('🚀 ~ video-player.tsx:73 ~ mobileSrc:', mobileSrc);
-
     if (!mobileSrc) {
       return null;
     }

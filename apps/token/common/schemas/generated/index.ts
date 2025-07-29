@@ -114,7 +114,7 @@ export const KycVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','up
 
 export const RoleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description']);
 
-export const BankDetailsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','bankName','accountName','iban','swift','address','memo','currencyId','saleId']);
+export const BankDetailsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','bankName','accountName','iban','swift','address','memo','currencyId']);
 
 export const UserRoleScalarFieldEnumSchema = z.enum(['createdAt','updatedAt','deletedAt','userId','roleId']);
 
@@ -581,12 +581,11 @@ export const BankDetailsSchema = z.object({
   deletedAt: z.coerce.date().nullable(),
   bankName: z.string(),
   accountName: z.string().nullable(),
-  iban: z.string().nullable(),
+  iban: z.string(),
   swift: z.string().nullable(),
   address: z.string().nullable(),
   memo: z.string().nullable(),
   currencyId: z.string().nullable(),
-  saleId: z.string().nullable(),
 })
 
 export type BankDetails = z.infer<typeof BankDetailsSchema>

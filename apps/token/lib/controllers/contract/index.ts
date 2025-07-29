@@ -117,8 +117,16 @@ class ContractController {
           logger(e);
           return null;
         });
+
       if (document) {
-        const mapped = DocumensoStatusToContractStatusMapping[document.status];
+        let mapped = DocumensoStatusToContractStatusMapping[document.status];
+        const signer = document.recipients.find((r) => r.role === 'SIGNER');
+
+        console.debug('🚀 ~ index.ts:127 ~ signer:', signer);
+
+        if (signer?.signingStatus === 'SIGNED') {
+          mapped = 'SIGNED';
+        }
         if (mapped !== status) {
           await prisma.documentRecipient.update({
             where: { id: recipient.id },

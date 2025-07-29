@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { FileType, getSteps, SaleFormSchema, SaleSchemas } from './utils';
 import { useAction } from 'next-safe-action/hooks';
 import {
+  associateBankDetailsToSale,
   createSaftContract,
   updateSale,
   upsertSale,
@@ -31,6 +32,7 @@ import { useTranslations } from 'next-intl';
 import { useSale } from '@/lib/services/api';
 import { getQueryClient } from '@/app/providers';
 import { InformationSchemaAsStrings } from '@/common/schemas/dtos/sales/information';
+import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 
 export const CreateSaleForm = () => {
   const router = useRouter();
@@ -50,6 +52,7 @@ export const CreateSaleForm = () => {
   const saleAction = useAction(upsertSale);
   const saftAction = useAction(createSaftContract);
   const informationAction = useAction(updateSale);
+  const bankDetailsAction = useAction(associateBankDetailsToSale);
 
   const form = useAppForm({
     validators: {
@@ -133,7 +136,36 @@ export const CreateSaleForm = () => {
           }
         }
         if (step === 3) {
-          const values = SaleSchemas[3].parse(value);
+          const vals = SaleSchemas[3].parse(value);
+
+          //Create sale and update query params to reflect the current saleId
+          const res = await bankDetailsAction.executeAsync({
+            banks: vals.banks,
+            saleId,
+          });
+
+          if (res?.data) {
+            [
+              ['input', 'options'],
+              ['sales', saleId, 'banks'],
+              ['sales', saleId],
+            ].forEach((key) => {
+              queryClient.invalidateQueries({
+                queryKey: key,
+              });
+            });
+
+            setStep((pv) => pv + 1);
+          } else {
+            throw new Error(
+              res?.serverError ||
+                res?.validationErrors?._errors?.join(', ') ||
+                'Error associating bank details'
+            );
+          }
+        }
+        if (step === 4) {
+          const values = SaleSchemas[4].parse(value);
           const fileValues = values.information.filter(
             (item) => item.type === 'file'
           ) as unknown as FileType[];
@@ -252,7 +284,7 @@ const FormStepper = ({
     parseAsInteger.withDefault(1).withOptions({ shallow: true })
   );
   return (
-    <Card>
+    <Card className={getGlassyCardClassName(className)}>
       <Stepper
         currentStep={step}
         steps={steps}

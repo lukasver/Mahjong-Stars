@@ -12,6 +12,7 @@ import { formatCurrency } from '@mjs/utils/client';
 import { DateTime } from 'luxon';
 import { useLocale } from 'next-intl';
 import { SaleWithToken } from '@/common/types/sales';
+import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 
 export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
   const {
@@ -27,7 +28,7 @@ export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
   const availableTokenQuantity = sale?.availableTokenQuantity || 0;
   const locale = useLocale();
   return (
-    <Card className='w-full shadow-lg rounded-xl p-6'>
+    <Card className={getGlassyCardClassName('w-full shadow-lg rounded-xl p-6')}>
       <CardHeader className='pb-2 gap-4 p-0 mb-4'>
         <CardTitle className='text-secondary'>Overview</CardTitle>
         <Separator className='bg-secondary' orientation='horizontal' />

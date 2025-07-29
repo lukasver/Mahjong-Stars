@@ -282,17 +282,25 @@ export const SaftSchema = z.object({
 });
 
 export const BankDetailsSchema = z.object({
-  accountName: z.string().min(1, 'Account name is required'),
-  iban: z.string().min(1, 'IBAN is required'),
-  swift: z.string().min(1, 'SWIFT is required'),
-  bankName: z.string().min(1, 'Bank name is required'),
-  address: z.string().min(1, 'Address is required'),
+  id: z.string().optional(),
+  accountName: z.string().trim().optional(),
+  iban: z.string().min(1, 'IBAN is required').trim(),
+  swift: z.string().trim().optional(),
+  bankName: z.string().min(1, 'Bank name is required').trim(),
+  address: z.string().trim().optional(),
+  memo: z.string().trim().optional(),
+  currency: z
+    .string()
+    .min(1, 'Currency is required')
+    .trim()
+    .max(5, 'Currency is too long'),
 });
+export type BankDetailsForm = z.infer<typeof BankDetailsSchema>;
 
 export const SaleSchemas = {
   1: SaleFormSchema,
   2: SaftSchema,
-  3: BankDetailsSchema,
+  3: z.object({ banks: z.array(BankDetailsSchema) }),
   4: InformationSchema,
 } as const;
 

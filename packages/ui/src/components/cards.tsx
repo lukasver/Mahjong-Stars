@@ -97,6 +97,7 @@ export const CardContainer = ({
   className,
   header,
   contentClassName,
+  glassy = true,
 }: {
   children?: React.ReactNode;
   title?: string;
@@ -104,9 +105,12 @@ export const CardContainer = ({
   className?: string;
   header?: React.ReactNode;
   contentClassName?: string;
+  glassy?: boolean;
 }) => {
   return (
-    <CardPrimitive className={className}>
+    <CardPrimitive
+      className={cn(glassy ? getGlassyCardClassName(className) : className)}
+    >
       {header ? (
         header
       ) : (

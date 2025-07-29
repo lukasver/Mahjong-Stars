@@ -39,6 +39,12 @@ export const GET = withAuth(async (req, context, auth) => {
             const data = await sales.getSaleInvestInfo(identifier);
             return NextResponse.json(data);
           }
+          if (subIdentifier === 'banks') {
+            const data = await sales.getSaleBanks(identifier, {
+              address: auth.address,
+            });
+            return NextResponse.json(data);
+          }
 
           const data = await sales.getSale(
             { id: identifier },

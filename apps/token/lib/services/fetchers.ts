@@ -13,7 +13,7 @@ import {
   User,
 } from '@/common/schemas/generated';
 import { SaleWithToken } from '@/common/types/sales';
-import { DocumentSignatureStatus, FOP } from '@prisma/client';
+import { BankDetails, DocumentSignatureStatus, FOP } from '@prisma/client';
 
 export type FetcherOptions = Omit<RequestInit, 'body'> & {
   baseUrl?: string;
@@ -307,6 +307,30 @@ export const getSaftForTransactionDetails = async (recipientId: string) => {
         fullname: string;
       };
     }>(`/saft/details/${recipientId}`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+/** Get banks associated with a sale */
+export const getSaleBanks = async (saleId: string) => {
+  try {
+    const data = await fetcher<{
+      banks: (Pick<
+        Omit<BankDetails, 'currency'>,
+        | 'id'
+        | 'bankName'
+        | 'accountName'
+        | 'iban'
+        | 'swift'
+        | 'address'
+        | 'memo'
+      > & {
+        currency: string;
+      })[];
+    }>(`/sales/${saleId}/banks`);
+
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };

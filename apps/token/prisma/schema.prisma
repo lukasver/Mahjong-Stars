@@ -512,17 +512,15 @@ model BankDetails {
 
   bankName    String
   accountName String?
-  iban        String?
+  iban        String
   swift       String?
   address     String?
   memo        String?
 
   currency   Currency? @relation(fields: [currencyId], references: [id])
   currencyId String?
-  sale       Sale?     @relation(fields: [saleId], references: [id])
-  saleId     String?
+  sales      Sale[]
 
-  @@unique([saleId, currencyId])
   @@map("bank_details")
 }
 
