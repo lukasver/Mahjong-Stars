@@ -611,7 +611,7 @@ class SalesController {
 
   async getInputOptions(_ctx: ActionCtx) {
     try {
-      const [currencies, blockchains, tokens] = await Promise.all([
+      const [currencies, blockchains, tokens, banks] = await Promise.all([
         prisma.currency.findMany({
           select: {
             symbol: true,
@@ -637,6 +637,17 @@ class SalesController {
                 chainId: true,
               },
             },
+          },
+        }),
+        prisma.bankDetails.findMany({
+          select: {
+            id: true,
+            bankName: true,
+            accountName: true,
+            iban: true,
+            swift: true,
+            address: true,
+            memo: true,
           },
         }),
       ]);
@@ -679,6 +690,18 @@ class SalesController {
           id: id,
           value: symbol,
           label: TokensOnBlockchains[0]?.name || symbol,
+        })),
+        banks: banks.map((b) => ({
+          id: b.id,
+          value: b.bankName,
+          label: `${b.bankName} (${b.iban})`,
+          meta: {
+            accountName: b.accountName,
+            iban: b.iban,
+            swift: b.swift,
+            address: b.address,
+            memo: b.memo,
+          },
         })),
       });
     } catch (error) {

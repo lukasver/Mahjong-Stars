@@ -114,6 +114,8 @@ export const KycVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','up
 
 export const RoleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description']);
 
+export const BankDetailsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','bankName','accountName','iban','swift','address','memo','currencyId','saleId']);
+
 export const UserRoleScalarFieldEnumSchema = z.enum(['createdAt','updatedAt','deletedAt','userId','roleId']);
 
 export const TokenScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','symbol','totalSupply','image']);
@@ -567,6 +569,27 @@ export const RoleSchema = z.object({
 })
 
 export type Role = z.infer<typeof RoleSchema>
+
+/////////////////////////////////////////
+// BANK DETAILS SCHEMA
+/////////////////////////////////////////
+
+export const BankDetailsSchema = z.object({
+  id: z.string().cuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  deletedAt: z.coerce.date().nullable(),
+  bankName: z.string(),
+  accountName: z.string().nullable(),
+  iban: z.string().nullable(),
+  swift: z.string().nullable(),
+  address: z.string().nullable(),
+  memo: z.string().nullable(),
+  currencyId: z.string().nullable(),
+  saleId: z.string().nullable(),
+})
+
+export type BankDetails = z.infer<typeof BankDetailsSchema>
 
 /////////////////////////////////////////
 // USER ROLE SCHEMA

@@ -61,10 +61,13 @@ class UsersController {
       });
       invariant(user, 'User not found');
       const { userRole, ...rest } = user;
-      const roles = userRole.reduce((acc, role) => {
-        acc[role.role.name as keyof typeof ROLES] = role.role.id;
-        return acc;
-      }, {} as Record<keyof typeof ROLES, string>);
+      const roles = userRole.reduce(
+        (acc, role) => {
+          acc[role.role.name as keyof typeof ROLES] = role.role.id;
+          return acc;
+        },
+        {} as Record<keyof typeof ROLES, string>
+      );
       return Success({ ...rest, roles });
     } catch (error) {
       logger(error);
@@ -236,8 +239,6 @@ class UsersController {
           email: true,
         },
       });
-
-      console.debug('🚀 ~ index.ts:229 ~ UsersController ~ _user:', _user);
 
       const changedEmail = !!dto.user.email && dto.user.email !== _user.email;
 

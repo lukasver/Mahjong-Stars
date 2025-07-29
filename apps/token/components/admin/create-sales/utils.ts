@@ -117,7 +117,6 @@ export const SaleFormSchema = z
         path: ['tokenContractChainId'],
       });
     }
-    console.debug('🚀 ~ utils.ts:120 ~ data:', data);
     if (data.availableTokenQuantity > data.initialTokenQuantity) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -272,7 +271,8 @@ export const saleInformationInputProps = {
 export const getSteps = (_t: ReturnType<typeof useTranslations>) => [
   { id: 1, name: 'Create', description: 'Basic information' },
   { id: 2, name: 'Contract', description: 'Contract details' },
-  { id: 3, name: 'Additional Information', description: 'Final details' },
+  { id: 3, name: 'Payment', description: 'Payment details' },
+  { id: 4, name: 'Additional Information', description: 'Final details' },
 ];
 
 export const SaftSchema = z.object({
@@ -281,10 +281,19 @@ export const SaftSchema = z.object({
   description: z.string().default(''),
 });
 
+export const BankDetailsSchema = z.object({
+  accountName: z.string().min(1, 'Account name is required'),
+  iban: z.string().min(1, 'IBAN is required'),
+  swift: z.string().min(1, 'SWIFT is required'),
+  bankName: z.string().min(1, 'Bank name is required'),
+  address: z.string().min(1, 'Address is required'),
+});
+
 export const SaleSchemas = {
   1: SaleFormSchema,
   2: SaftSchema,
-  3: InformationSchema,
+  3: BankDetailsSchema,
+  4: InformationSchema,
 } as const;
 
 export type FileType = Extract<SaleInformationItem, { type: 'file' }>;

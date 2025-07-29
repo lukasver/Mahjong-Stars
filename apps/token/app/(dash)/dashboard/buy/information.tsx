@@ -159,10 +159,6 @@ const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
       />
     );
 
-  docs.documents.forEach((document) => {
-    console.debug('🚀 ~ information.tsx:162 ~ url:', document.url);
-  });
-
   return (
     <div className='space-y-3'>
       {docs.documents.map((document, index) => (

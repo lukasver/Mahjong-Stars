@@ -205,12 +205,6 @@ export class AmountCalculatorService {
           precision: tokenDecimals,
         });
 
-      console.debug(
-        '🚀 ~ amount.service.ts:200 ~ AmountCalculatorService ~ newPPU:',
-        newPPU,
-        'amount',
-        amount
-      );
       finalPPU = newPPU;
       amountToPay = amount;
       // Otherwise, we receive the rate from parameters

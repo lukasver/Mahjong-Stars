@@ -20,8 +20,6 @@ export function isValidUrl(url: string) {
   }
 }
 export function getUrlFromString(str: string) {
-  console.debug('🚀 ~ link-selector.tsx:24 ~ str:', str);
-
   if (isValidUrl(str)) return str;
   try {
     if (str.includes('.') && !str.includes(' ')) {

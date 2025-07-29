@@ -101,12 +101,11 @@ const KycUploadDocument = ({ onSuccess }: { onSuccess: () => void }) => {
       );
 
       const keys = response.flatMap((key) => ({ key }));
-      console.debug('🚀 ~ confirmation.tsx:119 ~ keys:', keys);
       const result = await associateDocumentsToUser({
         documents: keys,
       });
 
-      console.debug('🚀 ~ confirmation.tsx:123 ~ result:', result);
+      console.debug('🚀 ~ confirmation.tsx:108 ~ result:', result);
 
       setSuccess(true);
       setFiles([]);

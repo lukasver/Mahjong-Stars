@@ -32,8 +32,6 @@ export const SuccessContent = () => {
   const saleName = data?.transaction.sale.name;
   const tokenSymbol = data?.transaction.sale.tokenSymbol;
 
-  console.debug('🚀 ~ success.tsx:25 ~ saleName:', saleName);
-
   const handleClick = () => {
     router.push('/dashboard');
   };

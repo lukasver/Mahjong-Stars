@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import { FormFooter } from './sections/footer';
 import {
+  PaymentInformation,
   ProjectInformation,
   SaftInformation,
   SectionContainer,
@@ -85,8 +86,6 @@ export const CreateSaleForm = () => {
           //Create sale and update query params to reflect the current saleId
           const res = await saleAction.executeAsync(vals);
 
-          console.debug('🚀 ~ index.tsx:86 ~ res:', res);
-
           if (res?.data) {
             setSaleId(res.data.sale.id);
             // Go to next step
@@ -103,8 +102,6 @@ export const CreateSaleForm = () => {
         if (step === 2) {
           const vals = SaleSchemas[2].parse(value);
           const f = formApi.getFieldMeta('content');
-
-          console.debug('🚀 ~ index.tsx:107 ~ f:', f);
 
           if (sale?.saftCheckbox === true && !vals.content) {
             toast.error('Please fill in the Saft contract');
@@ -219,7 +216,10 @@ export const CreateSaleForm = () => {
     <form.AppForm>
       <form onSubmit={handleSubmit}>
         <FadeAnimation delay={0.1} duration={0.5}>
-          <SectionContainer title='Create a new sale' className='col-span-2'>
+          <SectionContainer
+            title={saleId ? 'Edit Sale' : 'Create a new sale'}
+            className='col-span-2'
+          >
             <FormStepper steps={steps} />
             <SectionForm />
             <FormFooter steps={steps} />
@@ -277,7 +277,8 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
         <AnimatePresence>
           {step === 1 && <TokenInformation key={1} saleId={saleId} />}
           {step === 2 && <SaftInformation key={2} saleId={saleId} />}
-          {step === 3 && <ProjectInformation key={3} saleId={saleId} />}
+          {step === 3 && <PaymentInformation key={3} saleId={saleId} />}
+          {step === 4 && <ProjectInformation key={4} saleId={saleId} />}
         </AnimatePresence>
         {children}
       </div>

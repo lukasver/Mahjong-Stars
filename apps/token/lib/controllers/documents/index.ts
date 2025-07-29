@@ -50,7 +50,6 @@ class DocumentsController {
     },
     _ctx: ActionCtx
   ) {
-    console.debug('🚀 ~ index.ts:41 ~ dto:', dto);
     console.group('content');
     console.log(JSON.stringify(dto.content));
     console.groupEnd();
@@ -186,11 +185,6 @@ class DocumentsController {
     }>;
     reference: string;
   }) {
-    console.debug(
-      '🚀 ~ index.ts:182 ~ args:',
-      env.PDF_SERVICE_URL,
-      env.PDF_SERVICE_API_KEY
-    );
     const res = await fetch(env.PDF_SERVICE_URL, {
       method: 'POST',
       headers: {

@@ -221,6 +221,7 @@ model Sale {
   documents    Document[]         @relation("sale")
 
   vestingSchedules VestingSchedule[]
+  banks            BankDetails[]
 
   @@map("sales")
 }
@@ -503,6 +504,28 @@ model Role {
   @@map("roles")
 }
 
+model BankDetails {
+  id        String    @id @default(cuid()) @db.Text
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+
+  bankName    String
+  accountName String?
+  iban        String?
+  swift       String?
+  address     String?
+  memo        String?
+
+  currency   Currency? @relation(fields: [currencyId], references: [id])
+  currencyId String?
+  sale       Sale?     @relation(fields: [saleId], references: [id])
+  saleId     String?
+
+  @@unique([saleId, currencyId])
+  @@map("bank_details")
+}
+
 model UserRole {
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt DateTime  @updatedAt @db.Timestamptz(6)
@@ -585,6 +608,7 @@ model Currency {
 
   Sale             Sale[]
   SaleTransactions SaleTransactions[]
+  banks            BankDetails[]
 }
 
 enum CurrencyType {

@@ -69,10 +69,6 @@ async function main(req: IncomingMessage, res: ServerResponse) {
       return;
     }
     const body = parsed.data;
-    console.debug('🚀 ~ main.ts:44 ~ main ~ body:', body);
-
-    // res.end('ok');
-    // return;
 
     console.log(`Starting PDF generation...`);
     console.time('PDF generated');
