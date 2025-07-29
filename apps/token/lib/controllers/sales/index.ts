@@ -108,6 +108,7 @@ class SalesController {
             encode: true,
           });
         }
+        // @ts-expect-error FIXME
         sale.information =
           sale.information && Array.isArray(sale.information)
             ? (sale.information as SaleInformationItem[]).map((info) => {

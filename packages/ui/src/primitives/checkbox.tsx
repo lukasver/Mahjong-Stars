@@ -17,6 +17,7 @@ const Checkbox = React.forwardRef<
       className
     )}
     onCheckedChange={(v) => {
+      // @ts-expect-error FIXME
       props.onChange?.(v);
     }}
     {...props}

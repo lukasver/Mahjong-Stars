@@ -28,7 +28,13 @@ export default async function DashboardPage(_props: PageProps) {
           <TokenDetails />
         </Suspense>
 
-        <ErrorBoundary fallback={<ComingSoonContent to={undefined} />}>
+        <ErrorBoundary
+          fallback={
+            <div className='flex flex-col items-center justify-center min-h-[80dvh] h-full'>
+              <ComingSoonContent to={undefined} />
+            </div>
+          }
+        >
           <Suspense fallback={<FundraisingProgressLoading />}>
             <FundraisingProgress>
               <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
