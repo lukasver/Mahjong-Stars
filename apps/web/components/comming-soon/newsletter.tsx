@@ -188,7 +188,7 @@ const NewsletterForm: FC<{
                 autoComplete: 'email',
                 disabled: disabled || isPending || !LSCanSubmit,
                 className: cn(
-                  'flex-1 bg-white/90 border-0 text-black placeholder:text-gray-600 rounded-tl-lg rounded-bl-lg rounded-tr-none rounded-br-none',
+                  'flex-1 bg-white/90 border-0 text-black placeholder:text-gray-600 rounded-tl-lg rounded-bl-lg sm:rounded-tr-none rounded-br-none',
                   `shadow-[inset_0px_4px_4px_0px_rgba(0,0,0,0.25)]`
                 ),
               }}

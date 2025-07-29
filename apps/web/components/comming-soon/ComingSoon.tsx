@@ -71,8 +71,10 @@ export default async function CommingSoon() {
         )}
       >
         <div className='relative w-screen h-screen sm:h-[468px] lg:h-auto overflow-hidden xl:h-[calc(100dvh-10px)]'>
-          <ErrorBoundary fallback={null}>
-            <Suspense fallback={null}>
+          <ErrorBoundary
+            fallback={<BackgroundImage poster={mMapping[mNumber]} />}
+          >
+            <Suspense fallback={<BackgroundImage poster={mMapping[mNumber]} />}>
               <DynamicVideo />
             </Suspense>
           </ErrorBoundary>
@@ -138,6 +140,7 @@ const DynamicVideo = async () => {
 
   return (
     <VideoPlayer
+      mNumber={mNumber}
       src={[
         {
           src: `/static/videos/comingsoon-${mNumber}.webm`,
