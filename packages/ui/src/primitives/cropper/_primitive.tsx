@@ -203,7 +203,7 @@ const CropperRoot: React.FC<CropperRootProps> = ({
     const element = containerRef.current;
     if (!element) return;
     const observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         const { width, height } = entry.contentRect;
         if (width > 0 && height > 0) updateCropAreaDimensions(width, height);
       }
@@ -532,11 +532,16 @@ const CropperRoot: React.FC<CropperRootProps> = ({
 
   const getPinchDistance = (touches: TouchList): number =>
     Math.sqrt(
+      // @ts-expect-error fixme
       Math.pow(touches[1].clientX - touches[0].clientX, 2) +
+        // @ts-expect-error fixme
         Math.pow(touches[1].clientY - touches[0].clientY, 2)
     );
+
   const getPinchCenter = (touches: TouchList): { x: number; y: number } => ({
+    // @ts-expect-error fixme
     x: (touches[0].clientX + touches[1].clientX) / 2,
+    // @ts-expect-error fixme
     y: (touches[0].clientY + touches[1].clientY) / 2,
   });
 
@@ -555,7 +560,9 @@ const CropperRoot: React.FC<CropperRootProps> = ({
         setIsDragging(true);
         isPinchingRef.current = false;
         dragStartPointRef.current = {
+          // @ts-expect-error fixme
           x: touches[0].clientX,
+          // @ts-expect-error fixme
           y: touches[0].clientY,
         };
         dragStartOffsetRef.current = {
@@ -589,7 +596,9 @@ const CropperRoot: React.FC<CropperRootProps> = ({
 
       if (touches.length === 1 && isDragging && !isPinchingRef.current) {
         // Panning
+        // @ts-expect-error fixme
         const deltaX = touches[0].clientX - dragStartPointRef.current.x;
+        // @ts-expect-error fixme
         const deltaY = touches[0].clientY - dragStartPointRef.current.y;
         const targetOffsetX = dragStartOffsetRef.current.x + deltaX;
         const targetOffsetY = dragStartOffsetRef.current.y + deltaY;
@@ -668,7 +677,9 @@ const CropperRoot: React.FC<CropperRootProps> = ({
           // Transition to drag
           setIsDragging(true);
           dragStartPointRef.current = {
+            // @ts-expect-error fixme
             x: touches[0].clientX,
+            // @ts-expect-error fixme
             y: touches[0].clientY,
           };
           dragStartOffsetRef.current = {

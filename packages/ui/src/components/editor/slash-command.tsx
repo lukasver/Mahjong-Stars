@@ -11,7 +11,12 @@ import {
   Text,
   TextQuote,
 } from 'lucide-react';
-import { createSuggestionItems, Command, renderItems } from 'novel/extensions';
+import {
+  createSuggestionItems,
+  Command,
+  renderItems,
+  SuggestionItem,
+} from 'novel/extensions';
 import { uploadFn } from './image-upload';
 
 export const getSuggestionItems = (
@@ -169,7 +174,7 @@ export const getSuggestionItems = (
           input.click();
         },
       },
-    ].filter(Boolean)
+    ].filter(Boolean) as SuggestionItem[]
   );
 
 export const getSlashCommands = (onUpload?: (file: File) => Promise<unknown>) =>

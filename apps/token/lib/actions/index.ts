@@ -285,7 +285,7 @@ export const getUserSaleTransactions = authActionClient
   .schema(
     z.object({
       saleId: z.string(),
-      status: TransactionStatusSchema.optional(),
+      status: TransactionStatusSchema.array().optional(),
     })
   )
   .action(async ({ ctx, parsedInput }) => {
@@ -516,4 +516,26 @@ export const deleteOwnTransaction = authActionClient
       throw new Error(result.message);
     }
     return result;
+  });
+
+export const generateContractForTransaction = authActionClient
+  .schema(
+    z.object({
+      transactionId: z.string(),
+      contractId: z.string(),
+      variables: z
+        .record(z.string(), z.string().or(z.record(z.string(), z.string())))
+        .optional(),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    // transactions controller should
+    const result = await transactionsController.generateContractForTransaction(
+      parsedInput,
+      ctx
+    );
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result.data;
   });

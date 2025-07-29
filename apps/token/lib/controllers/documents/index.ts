@@ -170,6 +170,34 @@ class DocumentsController {
     }
   }
 
+  async generatePDF(args: {
+    content: string;
+    title: string;
+    recipients: Array<{
+      email: string;
+      name?: string;
+    }>;
+    reference: string;
+  }) {
+    console.debug(
+      '🚀 ~ index.ts:182 ~ args:',
+      env.PDF_SERVICE_URL,
+      env.PDF_SERVICE_API_KEY
+    );
+    const res = await fetch(env.PDF_SERVICE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.PDF_SERVICE_API_KEY,
+      },
+      body: JSON.stringify(args),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to generate PDF: ${res.statusText}`);
+    }
+    return res.json();
+  }
+
   private generateHTMLFromJSONContent = (content: JSONContent) => {
     if (!content || typeof content !== 'object') {
       return '';

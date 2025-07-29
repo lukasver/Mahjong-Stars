@@ -3,7 +3,7 @@
 import { cn } from '@mjs/ui/lib/utils';
 import { useEffect, useRef } from 'react';
 import { useWindowSize } from 'usehooks-ts';
-
+import { motion } from '@mjs/ui/components/motion';
 import { useVideoPlayer } from '../use-video-player';
 
 function VideoPlayer({
@@ -67,8 +67,16 @@ function VideoPlayer({
     if (!mobileSrc) {
       return null;
     }
+
     return (
-      <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{
+          duration: 0.4,
+          scale: { type: 'tween', visualDuration: 0.4, bounce: 0.5 },
+        }}
+      >
         <video
           id='video'
           ref={videoRef}
@@ -101,31 +109,40 @@ function VideoPlayer({
           )}
         />
         {/* Optionally, show a custom play button if !isPlaying */}
-      </>
+      </motion.div>
     );
   }
 
   return (
-    <video
-      ref={videoRef}
-      autoPlay
-      muted
-      loop
-      playsInline
-      style={{ height: 'inherit' }}
-      className={cn(
-        'absolute inset-0 w-full xl:object-contain hidden md:block 3xl:min-h-screen',
-        className
-      )}
-      {...(poster ? { poster } : {})}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{
+        duration: 0.4,
+        scale: { type: 'tween', visualDuration: 0.4, bounce: 0.5 },
+      }}
     >
-      {Array.isArray(src) ? (
-        src.map((props) => <source key={props.src} {...props} />)
-      ) : (
-        <source {...src} />
-      )}
-      Your browser does not support the video tag.
-    </video>
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        loop
+        playsInline
+        style={{ height: 'inherit' }}
+        className={cn(
+          'absolute inset-0 w-full xl:object-contain hidden md:block 3xl:min-h-screen',
+          className
+        )}
+        {...(poster ? { poster } : {})}
+      >
+        {Array.isArray(src) ? (
+          src.map((props) => <source key={props.src} {...props} />)
+        ) : (
+          <source {...src} />
+        )}
+        Your browser does not support the video tag.
+      </video>
+    </motion.div>
   );
 }
 

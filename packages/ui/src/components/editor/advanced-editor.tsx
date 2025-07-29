@@ -37,6 +37,9 @@ export interface EditorProps {
   // If SSR set to false
   immediatelyRender?: boolean;
   onUpload?: (file: File) => Promise<unknown>;
+  classes?: {
+    editor?: string;
+  };
 }
 const Editor = ({
   initialValue,
@@ -44,8 +47,9 @@ const Editor = ({
   className,
   output = 'json',
   setEditor,
-  immediatelyRender = true,
+  // immediatelyRender = true,
   onUpload,
+  classes = {},
 }: EditorProps) => {
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
@@ -72,7 +76,10 @@ const Editor = ({
               handleImageDrop(view, event, moved, uploadFn(onUpload)),
           }),
           attributes: {
-            class: `prose !text-base dark:prose-invert prose-headings:font-title font-common focus:outline-none max-w-full`,
+            class: cn(
+              `prose !text-base dark:prose-invert prose-headings:font-title font-common focus:outline-none`,
+              classes.editor
+            ),
           },
         }}
         onUpdate={({ editor }) => {

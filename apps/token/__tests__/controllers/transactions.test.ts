@@ -4,6 +4,7 @@ import * as db from '@/lib/db/prisma';
 import { Prisma, SaleTransactions, Sale, SaftContract } from '@prisma/client';
 import TransactionsController from '@/lib/controllers/transactions';
 import { mockTransactions, mockUsers } from '../mocks/helpers';
+const Decimal = Prisma.Decimal;
 
 vi.mock('server-only', () => ({}));
 
@@ -134,7 +135,7 @@ describe('TransactionsController', () => {
    * Ensures all variables are replaced and returned correctly.
    */
   describe('parseTransactionVariablesToContract', () => {
-    it.only('should populate all contract variables correctly', () => {
+    it('should populate all contract variables correctly', () => {
       // Arrange: create mocks for tx, sale, user, profile, address
       const tx = mockTransactions({
         quantity: new Prisma.Decimal(42),
@@ -218,9 +219,136 @@ describe('TransactionsController', () => {
       expect(resultVars.paid.currency).toBe(tx.paidCurrency);
       expect(resultVars.sale.currency).toBe(sale.currency);
       expect(resultVars.sale.equivalentAmount).toBe(
-        new Prisma.Decimal(tx.quantity).mul(sale.tokenPricePerUnit).toFixed(2)
+        new Decimal(tx.quantity).mul(sale.tokenPricePerUnit).toFixed(2)
       );
       expect(resultVars['date']).toMatch(/\d{4}-\d{2}-\d{2}/);
+    });
+  });
+
+  describe('computeMissingVariables', () => {
+    it('should return missing variables correctly', () => {
+      // Only these variables are required (in the variables array)
+
+      const toBeMissing = [
+        'recipient.city',
+        'recipient.zipcode',
+        'missing.variable',
+      ];
+      const requiredVariables = [
+        'recipient.firstName',
+        'token.quantity',
+        ...toBeMissing,
+      ];
+
+      const availableVariables = {
+        recipient: {
+          firstName: 'John',
+          lastName: 'Doe', // This is NOT in requiredVariables, so it's ignored even if null
+          email: 'john@example.com', // This is NOT in requiredVariables, so it's ignored even if null
+          city: null, // missing - in requiredVariables
+          zipcode: '', // missing - in requiredVariables
+          state: 'CA', // This is NOT in requiredVariables, so it's ignored
+          country: 'USA', // This is NOT in requiredVariables, so it's ignored
+        },
+        token: {
+          quantity: '100', // present - in requiredVariables
+          symbol: 'TKN', // This is NOT in requiredVariables, so it's ignored
+        },
+        paid: {
+          currency: 'USD', // This is NOT in requiredVariables, so it's ignored
+          amount: '1000.00', // This is NOT in requiredVariables, so it's ignored
+        },
+        sale: {
+          currency: 'USD', // This is NOT in requiredVariables, so it's ignored
+          equivalentAmount: '1000.00', // This is NOT in requiredVariables, so it's ignored
+        },
+        date: '2024-01-01', // This is NOT in requiredVariables, so it's ignored
+      };
+
+      const missingVariables = TransactionsController[
+        'computeMissingVariables'
+      ](requiredVariables, availableVariables);
+
+      // Only variables that are in requiredVariables AND missing should be returned
+      expect(missingVariables).toEqual(toBeMissing);
+    });
+
+    it('should handle empty required variables array', () => {
+      const missingVariables = TransactionsController[
+        'computeMissingVariables'
+      ]([], { some: 'data' });
+
+      expect(missingVariables).toEqual([]);
+    });
+
+    it('should handle non-array required variables', () => {
+      const missingVariables = TransactionsController[
+        'computeMissingVariables'
+      ]('not an array' as unknown as SaftContract['variables'], {
+        some: 'data',
+      });
+
+      expect(missingVariables).toEqual([]);
+    });
+
+    it('should handle nested object access', () => {
+      const requiredVariables = ['deeply.nested.value'];
+      const availableVariables = {
+        deeply: {
+          nested: {
+            value: 'exists',
+          },
+        },
+      };
+
+      const missingVariables = TransactionsController[
+        'computeMissingVariables'
+      ](requiredVariables, availableVariables);
+
+      expect(missingVariables).toEqual([]);
+    });
+
+    it('should handle missing nested paths', () => {
+      const requiredVariables = ['deeply.nested.missing'];
+      const availableVariables = {
+        deeply: {
+          nested: {
+            value: 'exists',
+          },
+        },
+      };
+
+      const missingVariables = TransactionsController[
+        'computeMissingVariables'
+      ](requiredVariables, availableVariables);
+
+      expect(missingVariables).toEqual(['deeply.nested.missing']);
+    });
+
+    it('should ignore variables not in required array even if they have null values', () => {
+      const requiredVariables = ['recipient.firstName', 'token.quantity'];
+      const availableVariables = {
+        recipient: {
+          firstName: 'John',
+          lastName: null, // This is NOT in requiredVariables, so it's ignored
+          email: undefined, // This is NOT in requiredVariables, so it's ignored
+        },
+        token: {
+          quantity: '100',
+          symbol: '', // This is NOT in requiredVariables, so it's ignored
+        },
+        paid: {
+          currency: null, // This is NOT in requiredVariables, so it's ignored
+          amount: undefined, // This is NOT in requiredVariables, so it's ignored
+        },
+      };
+
+      const missingVariables = TransactionsController[
+        'computeMissingVariables'
+      ](requiredVariables, availableVariables);
+
+      // Should return empty array since all required variables have values
+      expect(missingVariables).toEqual([]);
     });
   });
 });

@@ -5,6 +5,7 @@ import {
   ArrowUp,
   Bitcoin,
   BoxesIcon,
+  Copy,
   DollarSign,
   FacebookIcon,
   GithubIcon,
@@ -32,6 +33,7 @@ export type Icon =
 
 export const Icons = {
   check: Check,
+  copy: Copy,
   sale: HandCoins,
   subscribe: Rss,
   arrowUp: ArrowUp,

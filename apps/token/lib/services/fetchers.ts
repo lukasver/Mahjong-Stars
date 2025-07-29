@@ -13,7 +13,7 @@ import {
   User,
 } from '@/common/schemas/generated';
 import { SaleWithToken } from '@/common/types/sales';
-import { FOP } from '@prisma/client';
+import { DocumentSignatureStatus, FOP } from '@prisma/client';
 
 export type FetcherOptions = Omit<RequestInit, 'body'> & {
   baseUrl?: string;
@@ -25,6 +25,7 @@ export type FetcherOptions = Omit<RequestInit, 'body'> & {
       }
     | {
         rawBody?: false | never;
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         body?: any;
       }
   );
@@ -285,9 +286,27 @@ export const getTransactionById = async (id: string) => {
 export const getSaleSaftForTransaction = async (txId: string) => {
   try {
     const data = await fetcher<{
-      saft: SaftContract | null;
-      versions: SaftContract[];
+      id: string;
+      content: string;
+      missingVariables: string[];
     }>(`/transactions/${txId}/saft`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getSaftForTransactionDetails = async (recipientId: string) => {
+  try {
+    const data = await fetcher<{
+      recipient: {
+        id: string;
+        status: DocumentSignatureStatus;
+        signatureUrl: string;
+        email: string;
+        fullname: string;
+      };
+    }>(`/saft/details/${recipientId}`);
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };

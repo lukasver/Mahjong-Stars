@@ -1,0 +1,103 @@
+ARG NODE_VERSION=22.11.0
+ARG PUPPETEER_VERSION=24.3.0
+
+# Stage 1: Build the application
+FROM node:${NODE_VERSION} AS base
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ARG PNPM_VERSION=9.7.0
+
+RUN echo "Installing pnpm ${PNPM_VERSION}" && \
+    corepack enable pnpm && \
+    corepack install -g pnpm@${PNPM_VERSION} && \
+    npm i turbo@^2 --global && \
+    turbo telemetry disable && \
+    pnpm config set store-dir ${PNPM_HOME}/.pnpm-store
+
+# Step 2: Prune projects with turbo to get related packages and dependencies
+FROM base AS pruner
+ARG PROJECT="@mjs/pdf-gen"
+ARG CI=false
+
+WORKDIR /app
+COPY . .
+RUN turbo prune ${PROJECT} --docker
+
+# Step 3: Build the application with all needed dependencies
+FROM base AS builder
+WORKDIR /app
+ARG PORT=8080 \
+    HOSTNAME=0.0.0.0 \
+    PROJECT="@mjs/pdf-gen"
+ENV PORT=${PORT} \
+    HOSTNAME=${HOSTNAME} \
+    NODE_ENV=production \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true 
+
+# Copy lockfile and package.json's of isolated subworkspace
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=pruner /app/out/full .
+
+# Install dependencies
+RUN --mount=type=cache,id=pnpm,target=${PNPM_HOME}/.pnpm-store pnpm install --frozen-lockfile --prod
+
+# Build the project
+RUN turbo build --filter ${PROJECT}
+
+# Final image - Using a more optimized Puppeteer image
+FROM node:${NODE_VERSION}-alpine AS runner
+
+RUN addgroup --system --gid 1001 pptruser
+RUN adduser --system --uid 1001 pptruser
+
+ARG PORT=8080 \
+    HOSTNAME=0.0.0.0
+
+ENV PORT=${PORT} \
+    HOSTNAME=${HOSTNAME} \
+    NODE_ENV=production
+
+USER root
+
+# Set up PM2 and install dumb-init in a single layer
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    dumb-init && \
+    npm install -g pm2 && \
+    mkdir -p /app/.pm2/logs && \
+    chown -R pptruser:pptruser /app/.pm2
+
+ENV PM2_HOME=/app/.pm2 \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_CACHE_DIR=/home/pptruser/.cache/puppeteer \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+WORKDIR /app
+
+# Copy only the necessary files
+COPY --from=builder --chown=pptruser:pptruser /app/package.json ./package.json
+COPY --from=builder --chown=pptruser:pptruser /app/pnpm-* ./
+COPY --from=builder --chown=pptruser:pptruser /app/node_modules ./node_modules
+
+COPY --from=builder --chown=pptruser:pptruser /app/apps/pdf-gen/dist ./apps/pdf-gen/dist
+COPY --from=builder --chown=pptruser:pptruser /app/apps/pdf-gen/package.json ./apps/pdf-gen/package.json
+COPY --from=builder --chown=pptruser:pptruser /app/apps/pdf-gen/node_modules ./apps/pdf-gen/node_modules
+
+# Set workdir to the application root
+WORKDIR /app/apps/pdf-gen
+
+# Switch back to pptruser for security
+USER pptruser
+
+EXPOSE ${PORT}
+
+# Start the application using pm2
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["pm2-runtime", "start", "dist/index.js"]
