@@ -1,5 +1,9 @@
 import mobilePoster from '@/public/static/images/mobileposter.webp';
+import mobilePoster2 from '@/public/static/images/poster2-mobile.webp';
+import mobilePoster3 from '@/public/static/images/poster3-mobile.webp';
 import poster from '@/public/static/images/poster.webp';
+import poster2 from '@/public/static/images/poster2.webp';
+import poster3 from '@/public/static/images/poster3.webp';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
@@ -48,6 +52,12 @@ export default async function CommingSoon() {
     ),
   });
 
+  const mMapping = {
+    1: poster,
+    2: poster2,
+    3: poster3,
+  };
+
   return (
     <VideoPlayerProvider>
       <WebMSupportDetector
@@ -61,14 +71,14 @@ export default async function CommingSoon() {
         )}
       >
         <div className='relative w-screen h-screen sm:h-[468px] lg:h-auto overflow-hidden xl:h-[calc(100dvh-10px)]'>
-          <ErrorBoundary fallback={<BackgroundImage poster={poster} />}>
+          <ErrorBoundary fallback={null}>
             <Suspense fallback={null}>
               <DynamicVideo />
             </Suspense>
           </ErrorBoundary>
 
           {/* Static Image Background - Mobile */}
-          {MOBILE_OPTIMIZED && <BackgroundImage poster={poster} />}
+          {MOBILE_OPTIMIZED && <BackgroundImage poster={mMapping[mNumber]} />}
           {/* Overlay */}
           <div className='absolute inset-0 bg-red-900/20' />
 
@@ -116,8 +126,16 @@ export default async function CommingSoon() {
 
 const DynamicVideo = async () => {
   const mNumber = getMNumber();
+
   const headersList = await headers();
   const agent = userAgent({ headers: headersList });
+
+  const mMapping = {
+    1: agent?.device?.type === 'mobile' ? mobilePoster.src : poster.src,
+    2: agent?.device?.type === 'mobile' ? mobilePoster2.src : poster2.src,
+    3: agent?.device?.type === 'mobile' ? mobilePoster3.src : poster3.src,
+  };
+
   return (
     <VideoPlayer
       src={[
@@ -144,7 +162,7 @@ const DynamicVideo = async () => {
               },
             ]
       }
-      poster={agent?.device?.type === 'mobile' ? mobilePoster.src : poster.src}
+      poster={mMapping[mNumber]}
     />
   );
 };
