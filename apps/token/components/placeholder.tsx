@@ -5,11 +5,13 @@ export function Placeholder({
   title = 'No documents found',
   description = 'There are no documents to display in this section.',
   className = '',
+  children,
 }: {
   icon?: React.ElementType;
   title: string;
   description: string;
   className?: string;
+  children?: React.ReactNode;
 }) {
   return (
     <div
@@ -20,6 +22,7 @@ export function Placeholder({
       </div>
       <h3 className='font-medium text-sm text-foreground mb-1'>{title}</h3>
       <p className='text-xs text-secondary max-w-[250px]'>{description}</p>
+      {children}
     </div>
   );
 }

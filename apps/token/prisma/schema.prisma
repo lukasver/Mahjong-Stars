@@ -281,6 +281,8 @@ model DocumentRecipient {
   SaftContract   SaftContract? @relation(fields: [saftContractId], references: [id])
   saftContractId String?       @db.Text
 
+  // TODO! maybe link to a transaction??
+
   @@index([email])
   @@index([address, saftContractId])
   @@map("signable_document_recipient")

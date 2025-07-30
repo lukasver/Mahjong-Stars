@@ -1,10 +1,10 @@
-import sales from '@/lib/controllers/sales';
-import users from '@/lib/controllers/users';
+import sales from '@/lib/repositories/sales';
+import users from '@/lib/repositories/users';
 import { withAuth } from './_auth';
 import { NextResponse } from 'next/server';
-import rates from '@/lib/controllers/feeds/rates';
+import rates from '@/lib/repositories/feeds/rates';
 import { env } from '@/common/config/env';
-import transactions from '@/lib/controllers/transactions';
+import transactions from '@/lib/repositories/transactions';
 import { TransactionStatusSchema } from '@/common/schemas/generated';
 
 /**
@@ -124,6 +124,17 @@ export const GET = withAuth(async (req, context, auth) => {
             return NextResponse.json(data);
           }
           return NextResponse.json({ error: 'Bad request' }, { status: 404 });
+        }
+
+        if (identifier === 'recipient') {
+          if (!subIdentifier) {
+            return NextResponse.json({ error: 'Bad request' }, { status: 404 });
+          }
+          const data = await transactions.getRecipientForCurrentTransactionSaft(
+            { saftContractId: subIdentifier },
+            { address: auth.address }
+          );
+          return NextResponse.json(data);
         }
 
         return NextResponse.json({ error: 'Bad request' }, { status: 404 });

@@ -1,4 +1,4 @@
-import { TOKEN_QUERY } from '@/lib/controllers/sales/queries';
+import { TOKEN_QUERY } from '@/lib/repositories/sales/queries';
 import { Prisma } from '@prisma/client';
 
 const saleWithRelations = Prisma.validator<Prisma.SaleDefaultArgs>()({

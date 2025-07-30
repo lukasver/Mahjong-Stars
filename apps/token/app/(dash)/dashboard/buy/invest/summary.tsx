@@ -2,8 +2,7 @@
 import { UseAppForm, useFormContext } from '@mjs/ui/primitives/form';
 import { useStore } from '@mjs/ui/primitives/form';
 import { Separator } from '@mjs/ui/primitives/separator';
-import { formatCurrency } from '@mjs/utils/client';
-import calculator from '@/lib/services/pricefeeds';
+import { safeFormatCurrency } from '@mjs/utils/client';
 
 import { SaleWithToken } from '@/common/types/sales';
 import { Prisma } from '@prisma/client';
@@ -93,34 +92,17 @@ export const PurchaseSummaryCard = ({
         <div className='flex justify-between'>
           <span className='text-gray-400'>Total amount to pay</span>
           <span className='text-white font-bold'>
-            {safeFormatCurrency(paid, locale)}
+            {safeFormatCurrency(paid, {
+              locale,
+              precision: FIAT_CURRENCIES.includes(paid.currency)
+                ? 'FIAT'
+                : 'CRYPTO',
+            })}
           </span>
         </div>
       </div>
     </div>
   );
-};
-
-const safeFormatCurrency = (
-  paidAmount: { totalAmount: string; currency: string },
-  locale: string
-) => {
-  try {
-    return formatCurrency(paidAmount.totalAmount, {
-      locale,
-      currency: paidAmount.currency,
-      ...(FIAT_CURRENCIES.includes(paidAmount.currency)
-        ? {}
-        : {
-            minimumFractionDigits: calculator.FIAT_PRECISION,
-            maximumFractionDigits: calculator.CRYPTO_PRECISION,
-          }),
-    });
-  } catch {
-    return `${new Prisma.Decimal(paidAmount.totalAmount).toFixed(
-      calculator.CRYPTO_PRECISION
-    )} ${paidAmount.currency}`;
-  }
 };
 
 /**

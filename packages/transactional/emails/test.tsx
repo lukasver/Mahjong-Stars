@@ -1,14 +1,18 @@
-import { Button, Html } from "@react-email/components";
+import { Button, Html } from '@react-email/components';
+import * as styles from './shared-styles';
+
+type TestEmailProps = {};
 
 export const TestEmail = () => {
-	return (
-		<Html>
-			<Button
-				href="https://example.com"
-				style={{ background: "#000", color: "#fff", padding: "12px 20px" }}
-			>
-				Click me
-			</Button>
-		</Html>
-	);
+  return (
+    <Html>
+      <Button href='https://example.com' style={styles.button}>
+        Click me
+      </Button>
+    </Html>
+  );
 };
+
+TestEmail.PreviewProps = {} satisfies TestEmailProps;
+
+export default TestEmail;

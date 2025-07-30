@@ -12,12 +12,12 @@ import {
   UserSchema,
 } from '@/common/schemas/generated';
 import { prisma } from '@/db';
-import contractController from '@/lib/controllers/contract';
-import documentsController from '@/lib/controllers/documents';
-import ratesController from '@/lib/controllers/feeds/rates';
-import salesController from '@/lib/controllers/sales';
-import transactionsController from '@/lib/controllers/transactions';
-import usersController from '@/lib/controllers/users';
+import contractController from '@/lib/repositories/contract';
+import documentsController from '@/lib/repositories/documents';
+import ratesController from '@/lib/repositories/feeds/rates';
+import salesController from '@/lib/repositories/sales';
+import transactionsController from '@/lib/repositories/transactions';
+import usersController from '@/lib/repositories/users';
 import { invariant } from '@epic-web/invariant';
 import { redirect } from 'next/navigation';
 import { defineChain, getContract as getContractThirdweb } from 'thirdweb';
@@ -325,6 +325,20 @@ export const getTransactionById = authActionClient
     return transactions.data;
   });
 
+export const getTransactionAvailabilityForSale = authActionClient
+  .schema(z.object({ id: z.string() }))
+  .action(async ({ ctx, parsedInput }) => {
+    const transactions =
+      await transactionsController.getTransactionAvailabilityForSale(
+        parsedInput,
+        ctx
+      );
+    if (!transactions.success) {
+      throw new Error(transactions.message);
+    }
+    return transactions.data;
+  });
+
 export const createTransaction = authActionClient
   .schema(InvestFormSchema)
   .action(async ({ ctx, parsedInput }) => {
@@ -356,7 +370,7 @@ export const confirmTransaction = authActionClient
     })
   )
   .action(async ({ ctx, parsedInput }) => {
-    const transaction = await transactionsController.updateTransactionById(
+    const transaction = await transactionsController.confirmTransaction(
       parsedInput,
       ctx
     );

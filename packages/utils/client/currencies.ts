@@ -3,7 +3,10 @@ import { Decimal } from 'decimal.js';
 
 export const formatCurrency = (
   value: string | number | Decimal,
-  options: Intl.NumberFormatOptions & { locale: string } = { locale: 'en-US' }
+  options: Intl.NumberFormatOptions & {
+    locale: string;
+    precision?: 'CRYPTO' | 'FIAT';
+  } = { locale: 'en-US', precision: 'FIAT' }
 ) => {
   if (value === undefined || value === null) return value;
   const formated = new Decimal(value).toNumber();
@@ -13,10 +16,36 @@ export const formatCurrency = (
   if (Intl) {
     return new Intl.NumberFormat(locale || 'en-US', {
       ...(currency && { style: 'currency', currency }),
+      ...(options.precision === 'CRYPTO'
+        ? {
+            minimumFractionDigits: 4,
+            maximumFractionDigits: 8,
+          }
+        : {}),
       ...options,
     }).format(formated);
   }
   return currency ? `${currency} ${formated.toFixed(2)}` : formated.toFixed(2);
+};
+
+export const safeFormatCurrency = (
+  paidAmount: { totalAmount: string; currency: string },
+  { locale, precision }: { locale: string; precision?: 'CRYPTO' | 'FIAT' } = {
+    locale: 'en-US',
+    precision: 'FIAT',
+  }
+) => {
+  try {
+    return formatCurrency(paidAmount.totalAmount, {
+      locale,
+      currency: paidAmount.currency,
+      precision,
+    });
+  } catch {
+    return `${Decimal(paidAmount.totalAmount).toFixed(
+      precision === 'CRYPTO' ? 8 : 2
+    )} ${paidAmount.currency}`;
+  }
 };
 
 /**

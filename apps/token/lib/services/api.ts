@@ -6,6 +6,7 @@ import {
   getContract,
   getExchangeRate,
   getInputOptions,
+  getTransactionAvailabilityForSale,
   getTransactionById,
   getUserTransactions,
   getWeb3Contract,
@@ -16,6 +17,7 @@ import {
   getActiveSale,
   getCurrencies,
   getCurrentUser,
+  getRecipientForCurrentTransactionSaft,
   getSaftForTransactionDetails,
   getSale,
   getSaleBanks,
@@ -124,11 +126,38 @@ export const useTransactions = () => {
   return { data: data?.data, error: e, status };
 };
 
-export const useTransactionById = (id: string) => {
+export const useTransactionById = (
+  id: string,
+  opts: {
+    refetchInterval?: number;
+    staleTime?: number;
+    enabled?: boolean;
+  } = {}
+) => {
   const { data, status, error, isLoading } = useQuery({
     queryKey: ['transactions', id],
     queryFn: () => getTransactionById({ id }),
     staleTime: DEFAULT_STALE_TIME,
+    ...opts,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, status, isLoading };
+};
+
+export const useTransactionAvailabilityForSale = (
+  id: string,
+  opts: {
+    refetchInterval?: number;
+    staleTime?: number;
+    enabled?: boolean;
+  } = {}
+) => {
+  const { data, status, error, isLoading } = useQuery({
+    queryKey: ['transactions', id, 'availability'],
+    //TODO should move to fetcher instead of server action?, we don't want to cache this so for now should be ok
+    queryFn: () => getTransactionAvailabilityForSale({ id }),
+    staleTime: DEFAULT_STALE_TIME,
+    ...opts,
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, status, isLoading };
@@ -139,6 +168,19 @@ export const useSaleSaftForTransaction = (txId: string) => {
     queryKey: ['transactions', txId, 'saft'],
     queryFn: () => getSaleSaftForTransaction(txId),
     staleTime: DEFAULT_STALE_TIME,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, status, isLoading };
+};
+
+export const useRecipientForCurrentTransactionSaft = (
+  saftContractId: string | undefined
+) => {
+  const { data, status, error, isLoading } = useQuery({
+    queryKey: ['saft', 'recipient', saftContractId],
+    queryFn: () => getRecipientForCurrentTransactionSaft(saftContractId!),
+    staleTime: DEFAULT_STALE_TIME,
+    enabled: !!saftContractId,
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, status, isLoading };

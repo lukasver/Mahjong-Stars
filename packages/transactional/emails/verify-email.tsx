@@ -1,6 +1,5 @@
 import {
   Body,
-  Button,
   Container,
   Head,
   Heading,
@@ -10,40 +9,57 @@ import {
   Section,
   Text,
 } from '@react-email/components';
+import * as styles from './shared-styles';
+
+type EmailVerificationProps = {
+  url: string;
+  logoUrl: string;
+  token?: string;
+};
 
 export const EmailVerification = ({
   url,
   logoUrl,
-}: {
-  url: string;
-  logoUrl: string;
-}) => {
+  token,
+}: EmailVerificationProps) => {
   return (
     <Html>
       <Head />
       <Preview>Email Verification</Preview>
-      <Body style={main}>
-        <Container style={container}>
+      <Body style={styles.main}>
+        <Container style={styles.container}>
           <Section>
             <Heading>
               {logoUrl && (
-                <Img src={logoUrl} alt={'logo'} width='215' style={logo} />
+                <Img
+                  src={logoUrl}
+                  alt={'logo'}
+                  width='100'
+                  style={styles.logo}
+                />
               )}
             </Heading>
           </Section>
-          <Text style={heading}>Verify your email</Text>
-          <Text style={text}>
+          <Text style={styles.heading}>Verify your email</Text>
+          <Text style={styles.text}>
             Thank you for being a part of the community. To verify your email,
             we kindly request you to paste the following code on the page.
           </Text>
-          <Container style={tokenContainer}>
-            <Button style={buttonStyles} href={url}>
-              Verify Email
-            </Button>
-            <Text style={text}>
+          <Container style={styles.tokenContainer}>
+            {token && (
+              <Section style={styles.verificationSection}>
+                <Text style={styles.verifyText}>Verification code</Text>
+
+                <Text style={styles.codeText}>{token}</Text>
+                <Text style={styles.validityText}>
+                  (This code is valid for 10 minutes)
+                </Text>
+              </Section>
+            )}
+            <Text style={styles.text}>
               Or paste the following url in your browser:
             </Text>
-            <Text style={fontToken}> {url}</Text>
+            <Text style={styles.fontToken}> {url}</Text>
           </Container>
         </Container>
       </Body>
@@ -51,52 +67,11 @@ export const EmailVerification = ({
   );
 };
 
-const main = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  fontFamily: 'arial, helvetica, sans-serif',
-};
+EmailVerification.PreviewProps = {
+  url: 'https://example.com',
+  logoUrl:
+    'https://storage.googleapis.com/mjs-public/branding/icon-120x120.png',
+  token: '596853',
+} satisfies EmailVerificationProps;
 
-const buttonStyles = {
-  backgroundColor: '#ffffff',
-  color: '#4a0000',
-  padding: '10px 20px',
-  borderRadius: '5px',
-  textDecoration: 'none',
-};
-
-const container = {
-  margin: '10px auto',
-  display: 'flex',
-  alignItem: 'center',
-  justifyContent: 'center',
-  justifyItems: 'center',
-};
-const heading = {
-  fontSize: '18px',
-  letterSpacing: '-0.5px',
-  lineHeight: '1.3',
-  fontWeight: '400',
-  color: '#4a0000',
-  padding: '17px 0 0',
-};
-
-const logo = {
-  margin: '0 auto',
-};
-
-const text = {
-  color: '#3c4149',
-  fontSize: '14px',
-  lineHeight: '24px',
-  margin: '0 0 40px',
-};
-
-const fontToken = {
-  color: '#000000',
-  fontSize: '12px',
-};
-
-const tokenContainer = {
-  textAlign: 'center' as const,
-};
+export default EmailVerification;

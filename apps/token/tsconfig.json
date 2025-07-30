@@ -18,7 +18,7 @@
       "@/app/*": ["./app/*"],
       "@/messages/*": ["./messages/*"],
       "@/db": ["./lib/db/prisma.ts"],
-      "@/controllers/*": ["./lib/controllers/*"],
+      "@/controllers/*": ["lib/repositories/*"],
       "@/services/*": ["./lib/services/*"],
       "@/schemas": ["./common/schemas/generated/index.ts"],
       "@/utils/*": ["./lib/utils/*"]

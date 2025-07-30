@@ -296,6 +296,23 @@ export const getSaleSaftForTransaction = async (txId: string) => {
   }
 };
 
+export const getRecipientForCurrentTransactionSaft = async (
+  saftContractId: string
+) => {
+  try {
+    const data = await fetcher<{
+      recipient: null | {
+        id: string;
+        status: DocumentSignatureStatus;
+        email: string;
+      };
+    }>(`/saft/recipient/${saftContractId}`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
 export const getSaftForTransactionDetails = async (recipientId: string) => {
   try {
     const data = await fetcher<{

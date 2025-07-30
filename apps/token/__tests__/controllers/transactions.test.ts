@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import nock from 'nock';
 import * as db from '@/lib/db/prisma';
 import { Prisma, SaleTransactions, Sale, SaftContract } from '@prisma/client';
-import TransactionsController from '@/lib/controllers/transactions';
+import TransactionsController from '@/lib/repositories/transactions';
 import { mockTransactions, mockUsers } from '../mocks/helpers';
 const Decimal = Prisma.Decimal;
 

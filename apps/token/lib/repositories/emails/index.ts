@@ -96,7 +96,8 @@ export class EmailVerificationService {
         'emailVerification',
         {
           url: `${publicUrl}/verify-email?token=${verification.token}`,
-          logoUrl: `${publicUrl}/static/favicons/apple-touch-icon-120x120.png`,
+          logoUrl: `https://storage.googleapis.com/mjs-public/branding/icon-120x120.png`,
+          token: verification.token,
         },
         { to: { email }, subject: 'Email Verification' }
       );

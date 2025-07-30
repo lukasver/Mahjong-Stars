@@ -18,6 +18,7 @@ import { prisma } from '@/db';
 import logger from '@/lib/services/logger.server';
 import { invariant } from '@epic-web/invariant';
 import {
+  DocumentSignatureStatus,
   FOP,
   Sale,
   SaleStatus,
@@ -36,12 +37,18 @@ import {
   User,
 } from '@/common/schemas/generated';
 import documentsController from '../documents';
+import notificatorService, { Notificator } from '../notifications';
+import { publicUrl } from '@/common/config/env';
+import { metadata } from '@/common/config/site';
+import { TransactionValidator } from './validator';
 
 class TransactionsController {
   private documents;
+  private readonly notificator: Notificator;
 
-  constructor() {
+  constructor(readonly _notificator: Notificator) {
     this.documents = documentsController;
+    this.notificator = _notificator;
   }
 
   /**
@@ -238,48 +245,22 @@ class TransactionsController {
       const userId = ctx.userId;
       invariant(saleId, 'Sale id missing');
       invariant(userId, 'User id missing');
-      const sale = await prisma.sale.findUnique({
-        where: {
-          id: saleId,
-          status: SaleStatus.OPEN,
-          availableTokenQuantity: { gte: quantity.toNumber() },
-        },
-      });
-      invariant(sale, 'Sale not found');
 
-      if (
-        new Prisma.Decimal(quantity).greaterThan(sale.availableTokenQuantity)
-      ) {
-        return Failure('Cannot buy more tokens than available amount', 400);
-      }
-      // Check for pending transaction
-      const pendingTransaction = await prisma.saleTransactions.findFirst({
-        where: {
-          status: {
-            in: [TransactionStatus.PENDING, TransactionStatus.AWAITING_PAYMENT],
-          },
+      // Use the validator to validate transaction creation
+      const validationResult =
+        await TransactionValidator.validateTransactionCreation({
+          userId,
           saleId,
-          user: { walletAddress: ctx.address },
-        },
-      });
-      invariant(
-        !pendingTransaction,
-        'Cannot create a new transaction if user has a pending one'
-      );
+          tokenSymbol,
+          quantity: quantity.toNumber(),
+          formOfPayment,
+          amountPaid,
+          paidCurrency,
+          receivingWallet: receivingWallet || undefined,
+          comment: comment || undefined,
+        });
 
-      // Check requirement
-      if (sale.requiresKYC) {
-        // TODO: Check if user has KYC
-      }
-
-      if (sale.saftCheckbox) {
-        // TODO: Check if user has SAFT
-      }
-
-      // this.checkMaxAllowanceWithoutKYC(quantity.toString(), sale);
-
-      // TODO: Add contract/SAFT logic if needed
-      // TODO: Calculate rawPrice, price, totalAmount correctly
+      const { sale } = validationResult;
 
       const transaction = await prisma.$transaction(async (tx) => {
         tx.sale.update({
@@ -631,6 +612,8 @@ class TransactionsController {
           logger(e);
         });
 
+      console.log('SIGUE?', recipient.id);
+
       return Success({
         id: recipient.id,
       });
@@ -747,6 +730,220 @@ class TransactionsController {
       return Success({
         recipient,
       });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async confirmTransaction(
+    {
+      id,
+    }: {
+      id: string;
+    },
+    ctx: ActionCtx
+  ) {
+    try {
+      // Only the user who created the transaction can confirm it
+      const [tx, admins] = await Promise.all([
+        prisma.saleTransactions.findUniqueOrThrow({
+          where: { id, userId: ctx.userId },
+          include: {
+            sale: {
+              select: {
+                availableTokenQuantity: true,
+                name: true,
+                tokenSymbol: true,
+                currency: true,
+                tokenPricePerUnit: true,
+              },
+            },
+            user: {
+              select: {
+                email: true,
+                emailVerified: true,
+                profile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+        prisma.user.findMany({
+          where: {
+            userRole: {
+              some: {
+                role: { name: { in: ['ADMIN', 'SUPER_ADMIN'] } },
+              },
+            },
+            emailVerified: true,
+          },
+          select: {
+            id: true,
+            email: true,
+          },
+        }),
+      ]);
+
+      // Check if the sale has enough tokens available
+      if (
+        new Prisma.Decimal(tx.sale.availableTokenQuantity).lessThan(tx.quantity)
+      ) {
+        invariant(false, 'Not enough tokens available to confirm transaction');
+      }
+
+      const shouldFinishSale = new Prisma.Decimal(
+        tx.sale.availableTokenQuantity
+      ).equals(tx.quantity);
+
+      await prisma.$transaction([
+        prisma.saleTransactions.update({
+          where: { id },
+          data: { status: TransactionStatus.PAYMENT_SUBMITTED },
+        }),
+        prisma.sale.update({
+          where: { id: tx.saleId },
+          data: {
+            ...(shouldFinishSale && { status: SaleStatus.FINISHED }),
+            availableTokenQuantity: {
+              decrement: tx.quantity.toNumber(),
+            },
+          },
+        }),
+      ]);
+
+      await Promise.allSettled([
+        // Notify admin
+        this.notificator.send({
+          template: 'adminTransactionConfirmed',
+          to: admins.map((admin) => ({
+            email: admin.email,
+          })),
+          subject: `Sale: ${tx.sale.name} Transaction Confirmed | ${tx.id}`,
+          props: {
+            adminName: 'Admin',
+            userName:
+              tx.user.profile?.firstName || tx.user.profile?.lastName || 'User',
+            userEmail: tx.user.email,
+            tokenName: tx.sale.name,
+            tokenSymbol: tx.sale.tokenSymbol,
+            purchaseAmount: tx.totalAmount.toString(),
+            tokenAmount: tx.quantity.toString(),
+            transactionId: tx.id,
+            transactionHash: tx.id,
+            transactionTime: new Date().toISOString(),
+          },
+        }),
+        // Notify user
+        this.notificator.send({
+          template: 'userTransactionConfirmed',
+          subject: `${tx.sale.name} Transaction Confirmed | ${tx.id}`,
+          to: {
+            email: tx.user.email,
+            name:
+              tx.user.profile?.firstName || tx.user.profile?.lastName || 'user',
+          },
+          props: {
+            userName:
+              tx.user.profile?.firstName || tx.user.profile?.lastName || 'user',
+            tokenName: tx.sale.name,
+            tokenSymbol: tx.sale.tokenSymbol,
+            purchaseAmount: tx.totalAmount.toFixed(
+              tx.formOfPayment === 'CRYPTO' ? 8 : 2
+            ),
+            tokenAmount: tx.quantity.toString(),
+            transactionHash: tx.id,
+            transactionTime: new Date().toISOString(),
+            paymentMethod: tx.formOfPayment,
+            walletAddress: tx.receivingWallet || '',
+            transactionId: tx.id,
+            dashboardUrl: `${publicUrl}/dashboard/transactions`,
+            transactionUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
+            supportEmail: metadata.supportEmail,
+          },
+        }),
+      ]);
+
+      if (shouldFinishSale) {
+        // notify
+        this.notificator.send({
+          template: 'saleEnded',
+          to: admins.map((admin) => ({
+            email: admin.email,
+          })),
+          subject: `Sale: ${tx.sale.name} Ended`,
+          props: {
+            adminName: 'Admin',
+            tokenSymbol: tx.sale.tokenSymbol,
+            endReason: 'Maximum number of tokens sold',
+            saleEndTime: new Date().toISOString(),
+            // totalRaised: new Decimal(tx.totalAmount).toFixed(2),
+            // tokensDistributed: tx.quantity.toString() || '0',
+            dashboardUrl: `${publicUrl}/dashboard/sales`,
+            supportEmail: metadata.supportEmail,
+          },
+        });
+      }
+
+      return Success({ transaction: tx });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async getTransactionAvailabilityForSale(dto: { id: string }, ctx: ActionCtx) {
+    try {
+      const transaction = await prisma.saleTransactions.findUnique({
+        where: { id: dto.id },
+      });
+      invariant(transaction, 'Transaction not found');
+      return Success({
+        transaction: true,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  /**
+   * Retrieves teh Recipient information for the user and current transaction in case it exists
+   */
+  async getRecipientForCurrentTransactionSaft(
+    dto: { saftContractId: string },
+    ctx: ActionCtx
+  ) {
+    try {
+      const recipient = await prisma.documentRecipient.findMany({
+        where: {
+          saftContractId: dto.saftContractId,
+          address: {
+            equals: ctx.address,
+          },
+          status: {
+            in: [DocumentSignatureStatus.SENT_FOR_SIGNATURE],
+          },
+        },
+        select: {
+          id: true,
+          status: true,
+          email: true,
+        },
+      });
+
+      if (!recipient) {
+        return Success({ recipient: null });
+      }
+      if (recipient.length > 1) {
+        return Success({ recipient: null });
+      }
+
+      return Success({ recipient: recipient[0] });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -974,4 +1171,4 @@ class TransactionsController {
   }
 }
 
-export default new TransactionsController();
+export default new TransactionsController(notificatorService);

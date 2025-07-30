@@ -26,7 +26,7 @@ import { invariant } from '@epic-web/invariant';
 import { SaleWithToken } from '@/common/types/sales';
 import { Account } from 'thirdweb/wallets';
 import { formatCurrency } from '@mjs/utils/client';
-import { FileText, Shield } from 'lucide-react';
+import { AlertTriangle, FileText, Shield } from 'lucide-react';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
 import { useAction } from 'next-safe-action/hooks';
@@ -45,6 +45,10 @@ import {
 import { PurchaseSummary } from './summary';
 import { TransactionModalTypes } from '@/common/types';
 import { getQueryClient } from '@/app/providers';
+
+import { Card, CardContent } from '@mjs/ui/primitives/card';
+import { Skeleton } from '@mjs/ui/primitives/skeleton';
+import { Input } from '@mjs/ui/primitives/input';
 const Decimal = Prisma.Decimal;
 
 export const InvestForm = ({
@@ -207,11 +211,24 @@ export const InvestForm = ({
   };
 
   if (isLoading || loadingOptions) {
-    return <div>Loading...</div>;
+    return <InvestSkeleton />;
   }
 
   if (!sale) {
-    return <div>No sale</div>;
+    return (
+      <Alert className='border-primary-200 bg-primary-100 dark:border-red-800 dark:bg-red-950/50'>
+        <AlertTriangle className='h-4 w-4 text-red-500' />
+        <AlertDescription className='text-white/90 space-y-1'>
+          <h4 className='text-sm font-medium text-red-800 dark:text-red-200'>
+            Investment Period Ended
+          </h4>
+          <p className='text-xs text-red-700 dark:text-red-300'>
+            This token sale has concluded and is no longer accepting new
+            investments. Thank you for your interest.
+          </p>
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   const amountDescription = getAmountDescription(sale, locale);
@@ -527,4 +544,73 @@ const getDecimalScale = (currency: string | undefined) => {
     return 2;
   }
   return calculator.CRYPTO_PRECISION;
+};
+
+const InvestSkeleton = () => {
+  return (
+    <div className='space-y-6'>
+      {/* Receiving wallet address section */}
+      <div className='space-y-3'>
+        <Skeleton className='h-5 w-48' />
+        <div className='relative'>
+          <Input disabled placeholder='' />
+          <Skeleton className='absolute inset-2 h-4 rounded' />
+        </div>
+      </div>
+
+      {/* tMJS Tokens section */}
+      <div className='space-y-3'>
+        <Skeleton className='h-5 w-24' />
+        <div className='relative'>
+          <Input disabled placeholder='' />
+          <Skeleton className='absolute inset-2 h-4 w-4 rounded' />
+        </div>
+        <Skeleton className='h-4 w-32' />
+      </div>
+
+      {/* To pay section */}
+      <div className='space-y-3'>
+        <Skeleton className='h-5 w-16' />
+        <div className='flex gap-2'>
+          <div className='relative flex-1'>
+            <Input
+              disabled
+              className='bg-muted/50 border-muted'
+              placeholder=''
+            />
+            <Skeleton className='absolute inset-2 h-4 w-12 rounded' />
+          </div>
+          <div className='relative w-20'>
+            <Button variant='outline' disabled className='w-full bg-muted/50'>
+              <Skeleton className='h-4 w-8' />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Purchase button */}
+      <Button disabled className='w-full h-12 bg-muted/50'>
+        <Shield className='w-4 h-4 mr-2 opacity-50' />
+        <Skeleton className='h-4 w-28' />
+      </Button>
+
+      {/* Security notice */}
+      <Card className='border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/50'>
+        <CardContent className='p-4'>
+          <div className='flex gap-3'>
+            <div className='flex-shrink-0 mt-0.5'>
+              <Skeleton className='h-4 w-4 rounded-full' />
+            </div>
+            <div className='space-y-2 flex-1'>
+              <Skeleton className='h-4 w-28' />
+              <div className='space-y-1'>
+                <Skeleton className='h-3 w-full' />
+                <Skeleton className='h-3 w-3/4' />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 };

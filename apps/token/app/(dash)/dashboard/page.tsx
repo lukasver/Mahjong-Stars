@@ -24,7 +24,7 @@ export default async function DashboardPage(_props: PageProps) {
             Dashboard
           </h1>
         </VisuallyHidden>
-        <Suspense fallback={<div>Loading tdrsc...</div>}>
+        <Suspense fallback={null}>
           <TokenDetails />
         </Suspense>
 

@@ -1,6 +1,6 @@
 'use server';
 import 'server-only';
-import documentsController from '@/lib/controllers/documents';
+import documentsController from '@/lib/repositories/documents';
 import { ROLES } from '@/common/config/constants';
 import { prisma } from '@/db';
 import { adminCache } from '@/lib/auth/cache';
@@ -17,8 +17,8 @@ import {
   CancelAllTransactionsDto,
   UpdateTransactionDto,
 } from '@/common/schemas/dtos/transactions';
-import salesController from '@/lib/controllers/sales';
-import transactionsController from '@/lib/controllers/transactions';
+import salesController from '@/lib/repositories/sales';
+import transactionsController from '@/lib/repositories/transactions';
 import { TransactionStatus } from '@prisma/client';
 import { z } from 'zod';
 import { type JSONContent } from '@mjs/utils/server/tiptap';
