@@ -30,12 +30,20 @@ const metadata = {
 
 const getFooterLinks = (t: (k: string) => string) => {
   return [
-    { href: '/web', title: t('Footer.links.home') },
-    { href: '/docs', title: t('Footer.links.docs') },
-    { href: '/web/about', title: t('Footer.links.whoWeAre') },
-    { href: '/web/terms', title: t('Footer.links.termsAndConditions') },
-    { href: '/web/privacy', title: t('Footer.links.privacyPolicy') },
-    { href: '/web/contact', title: t('Footer.links.contact') },
+    { href: '/web', title: t('Footer.links.home'), prefetch: false },
+    { href: '/docs', title: t('Footer.links.docs'), prefetch: false },
+    { href: '/web/about', title: t('Footer.links.whoWeAre'), prefetch: false },
+    {
+      href: '/web/terms',
+      title: t('Footer.links.termsAndConditions'),
+      prefetch: false,
+    },
+    {
+      href: '/web/privacy',
+      title: t('Footer.links.privacyPolicy'),
+      prefetch: false,
+    },
+    { href: '/web/contact', title: t('Footer.links.contact'), prefetch: false },
   ];
 };
 

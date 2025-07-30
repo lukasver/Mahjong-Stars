@@ -32,6 +32,7 @@
 		"db:seed:stage": "dotenv -e .env.stage.local -- npx prisma db seed -- --environment development",
 		"db:seed:prod": "dotenv -e .env.production.local -- npx prisma db seed -- --environment production",
 		"db:reset": "pnpm run db:push --force-reset && pnpm run db:seed && pnpm run db:generate",
+		"db:reset:stage": "dotenv -e .env.stage.local -- npx prisma db push && pnpm run db:seed:stage && pnpm run db:generate",
 		"type-check": "tsc -p tsconfig.json --noEmit"
 	},
 	"prisma": {

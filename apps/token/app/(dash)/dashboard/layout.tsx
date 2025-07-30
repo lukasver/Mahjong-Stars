@@ -13,6 +13,9 @@ import { DashboardSidebar } from '../../../components/sidebar';
 import AdminSidebar from './admin-sidebar';
 import { DashboardHeader } from './header';
 import { getCurrentUser } from '@/lib/actions';
+import usersController from '@/lib/repositories/users';
+import { getSessionCookie } from '@/lib/auth/cookies';
+import { verifyJwt } from '@/lib/auth/thirdweb';
 
 /**
  * Layout component for the dashboard section
@@ -30,6 +33,15 @@ export default async function DashboardLayout({
     queryKey: ['user', 'me'],
     queryFn: () => getCurrentUser(),
   });
+
+  const data = String((await getSessionCookie()) || '');
+  const verified = await verifyJwt(data);
+  if (!verified.valid) {
+    throw new Error('Invalid session');
+  }
+  const us = await usersController.getMe({ address: verified.parsedJWT.sub });
+
+  console.debug('🚀 ~ layout.tsx:44 ~ us:', us);
 
   return (
     <>

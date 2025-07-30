@@ -8,7 +8,7 @@ function loading() {
       <div className='grid min-h-[100dvh] grid-rows-[auto_1fr_auto]'>
         <header className='invisible'>a</header>
         <main className='container mx-auto grid place-items-center bg-cover bg-center relative z-20'>
-          <div className='w-full max-w-md mx-auto'>
+          <div className='w-full max-w-md mx-auto sm:min-w-[385px]'>
             <div
               className={getGlassyCardClassName(
                 'rounded-2xl border p-6 shadow'
