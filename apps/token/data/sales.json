@@ -37,6 +37,43 @@
       "Accredited investor status",
       "Minimum investment: $10,000",
       "KYC/AML compliance"
+    ],
+    "information": [
+      {
+        "type": "text",
+        "label": "Token Utility",
+        "value": "Governance Rights, Staking Rewards, Premium Features, NFT Marketplace, Revenue Sharing"
+      },
+      {
+        "type": "textarea",
+        "label": "Token Overview",
+        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+      },
+      {
+        "type": "text",
+        "label": "Total Supply",
+        "value": "888,888,888 $MJS"
+      },
+      {
+        "type": "text",
+        "label": "Allocation",
+        "value": "3.3% of total supply (29,166,667 tokens)"
+      },
+      {
+        "type": "textarea",
+        "label": "Security Features",
+        "value": "Multi-signature wallets for all treasury funds, time-locked contracts for vesting schedules, third-party audits before mainnet deployment, emergency pause mechanisms for security incidents, legal framework designed for global compliance, KYC/AML procedures for token sales, transparent reporting of token movements, community governance for major decisions."
+      },
+      {
+        "type": "text",
+        "label": "Vesting Schedule",
+        "value": "3-month cliff, 18-month vesting"
+      },
+      {
+        "type": "text",
+        "label": "TGE Unlock",
+        "value": "0% (no tokens unlocked at TGE)"
+      }
     ]
   },
   {
@@ -77,6 +114,48 @@
       "Accredited investor status",
       "Minimum investment: $25,000",
       "KYC/AML compliance"
+    ],
+    "information": [
+      {
+        "type": "text",
+        "label": "Token Utility",
+        "value": "Governance Rights, Staking Rewards, Premium Features, NFT Marketplace, Revenue Sharing"
+      },
+      {
+        "type": "textarea",
+        "label": "Token Overview",
+        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+      },
+      {
+        "type": "text",
+        "label": "Total Supply",
+        "value": "888,888,888 $MJS"
+      },
+      {
+        "type": "text",
+        "label": "Allocation",
+        "value": "6.1% of total supply (54,166,667 tokens)"
+      },
+      {
+        "type": "textarea",
+        "label": "Revenue Model",
+        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $MJS provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
+      },
+      {
+        "type": "text",
+        "label": "Vesting Schedule",
+        "value": "3-month cliff, 15-month vesting"
+      },
+      {
+        "type": "text",
+        "label": "TGE Unlock",
+        "value": "0% (no tokens unlocked at TGE)"
+      },
+      {
+        "type": "textarea",
+        "label": "Development Milestones",
+        "value": "Q3 2025: Foundation Phase with Beta Unity Build Released, Core Team Assembled, Fundraise Completion, Unity Development Ramp-Up. Q4 2025: Expansion & Launch Phase with Marketing & Influencer Rollout, NFT Marketplace Live, Version 2.0 Launch, $MJS Token Launch."
+      }
     ]
   },
   {
@@ -117,6 +196,48 @@
       "Strategic partnership potential",
       "Minimum investment: $50,000",
       "KYC/AML compliance"
+    ],
+    "information": [
+      {
+        "type": "text",
+        "label": "Token Utility",
+        "value": "Governance Rights, Staking Rewards, Premium Features, NFT Marketplace, Revenue Sharing"
+      },
+      {
+        "type": "textarea",
+        "label": "Token Overview",
+        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+      },
+      {
+        "type": "text",
+        "label": "Total Supply",
+        "value": "888,888,888 $MJS"
+      },
+      {
+        "type": "text",
+        "label": "Allocation",
+        "value": "9.4% of total supply (83,333,333 tokens)"
+      },
+      {
+        "type": "textarea",
+        "label": "Revenue Model",
+        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $MJS provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
+      },
+      {
+        "type": "text",
+        "label": "Vesting Schedule",
+        "value": "3-month cliff, 6-month vesting"
+      },
+      {
+        "type": "text",
+        "label": "TGE Unlock",
+        "value": "0% (no tokens unlocked at TGE)"
+      },
+      {
+        "type": "textarea",
+        "label": "Long-Term Vision",
+        "value": "Our tokenomics are designed to support sustainable growth with gradual token release preventing market flooding, community incentives with large allocation for player rewards and airdrops, team alignment with extended vesting ensuring long-term commitment, platform development with adequate reserves for future innovation, and market stability with balanced distribution across all stakeholder groups."
+      }
     ]
   },
   {
@@ -157,6 +278,48 @@
       "Influencer status or community leadership",
       "Minimum investment: $5,000",
       "KYC/AML compliance"
+    ],
+    "information": [
+      {
+        "type": "text",
+        "label": "Token Utility",
+        "value": "Governance Rights, Staking Rewards, Premium Features, NFT Marketplace, Revenue Sharing"
+      },
+      {
+        "type": "textarea",
+        "label": "Token Overview",
+        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+      },
+      {
+        "type": "text",
+        "label": "Total Supply",
+        "value": "888,888,888 $MJS"
+      },
+      {
+        "type": "text",
+        "label": "Allocation",
+        "value": "2.3% of total supply (20,000,000 tokens)"
+      },
+      {
+        "type": "textarea",
+        "label": "Revenue Model",
+        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $MJS provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
+      },
+      {
+        "type": "text",
+        "label": "Vesting Schedule",
+        "value": "1-month cliff, 6-month vesting"
+      },
+      {
+        "type": "text",
+        "label": "TGE Unlock",
+        "value": "20% (4,000,000 tokens unlocked at TGE)"
+      },
+      {
+        "type": "textarea",
+        "label": "Community Building",
+        "value": "This round focuses on community building support, content creation opportunities, and early platform access for key opinion leaders and influencers to help grow the Mahjong Stars ecosystem."
+      }
     ]
   },
   {
@@ -197,6 +360,53 @@
       "Age verification (18+)",
       "Minimum investment: $100",
       "KYC/AML compliance"
+    ],
+    "information": [
+      {
+        "type": "text",
+        "label": "Token Utility",
+        "value": "Governance Rights, Staking Rewards, Premium Features, NFT Marketplace, Revenue Sharing"
+      },
+      {
+        "type": "textarea",
+        "label": "Token Overview",
+        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+      },
+      {
+        "type": "text",
+        "label": "Total Supply",
+        "value": "888,888,888 $MJS"
+      },
+      {
+        "type": "text",
+        "label": "Allocation",
+        "value": "3.8% of total supply (33,333,333 tokens)"
+      },
+      {
+        "type": "textarea",
+        "label": "Revenue Model",
+        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $MJS provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
+      },
+      {
+        "type": "text",
+        "label": "Vesting Schedule",
+        "value": "20% TGE unlock, 12-month vesting"
+      },
+      {
+        "type": "text",
+        "label": "TGE Unlock",
+        "value": "20% (6,666,667 tokens unlocked at TGE)"
+      },
+      {
+        "type": "textarea",
+        "label": "Three-Year Vision",
+        "value": "2025: Establishment Year with successful platform launch and initial market penetration, $4.6M total revenue target. 2026: Growth Year achieving break-even and scale operations, $70.6M total revenue target. 2027: Leadership Year becoming #1 social mahjong platform worldwide, $204.6M total revenue target with 37.36% EBITDA margin."
+      },
+      {
+        "type": "textarea",
+        "label": "Platform Features",
+        "value": "Mahjong Stars combines proven technology with innovative features to create an unmatched player experience. The platform includes social gaming features, AI capabilities, NFT marketplace, governance rights, staking rewards, and revenue sharing opportunities for all token holders."
+      }
     ]
   }
 ]
