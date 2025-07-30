@@ -823,7 +823,7 @@ class TransactionsController {
           to: admins.map((admin) => ({
             email: admin.email,
           })),
-          subject: `Sale: ${tx.sale.name} Transaction Confirmed | ${tx.id}`,
+          subject: `${tx.sale.name} Transaction Confirmed | ${tx.id}`,
           props: {
             adminName: 'Admin',
             userName:
@@ -875,7 +875,7 @@ class TransactionsController {
           to: admins.map((admin) => ({
             email: admin.email,
           })),
-          subject: `Sale: ${tx.sale.name} Ended`,
+          subject: `${tx.sale.name} Ended`,
           props: {
             adminName: 'Admin',
             tokenSymbol: tx.sale.tokenSymbol,

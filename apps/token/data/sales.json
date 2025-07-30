@@ -16,7 +16,28 @@
     "saftCheckbox": true,
     "tokenContractAddress": null,
     "tokenContractChainId": null,
-    "tokenTotalSupply": "888888888"
+    "tokenTotalSupply": "888888888",
+    "raiseAmount": 350000,
+    "valuation": 10700000,
+    "vestingSchedule": {
+      "cliff": "3m",
+      "vesting": "18m",
+      "description": "3-month cliff, 18-month vesting"
+    },
+    "allocationPercentage": 3.3,
+    "tgeUnlock": 0,
+    "description": "Initial seed funding round for early investors and strategic partners",
+    "eligibility": "Accredited investors and strategic partners",
+    "benefits": [
+      "Early access to platform features",
+      "Priority support",
+      "Exclusive community access"
+    ],
+    "requirements": [
+      "Accredited investor status",
+      "Minimum investment: $10,000",
+      "KYC/AML compliance"
+    ]
   },
   {
     "name": "Seed Round",
@@ -35,7 +56,28 @@
     "saftCheckbox": true,
     "tokenContractAddress": null,
     "tokenContractChainId": null,
-    "tokenTotalSupply": "888888888"
+    "tokenTotalSupply": "888888888",
+    "raiseAmount": 650000,
+    "valuation": 14200000,
+    "vestingSchedule": {
+      "cliff": "3m",
+      "vesting": "15m",
+      "description": "3-month cliff, 15-month vesting"
+    },
+    "allocationPercentage": 6.1,
+    "tgeUnlock": 0,
+    "description": "Early investor round for strategic partners and institutional investors",
+    "eligibility": "Accredited investors and institutional partners",
+    "benefits": [
+      "Strategic partnership opportunities",
+      "Platform development input",
+      "Priority token allocation"
+    ],
+    "requirements": [
+      "Accredited investor status",
+      "Minimum investment: $25,000",
+      "KYC/AML compliance"
+    ]
   },
   {
     "name": "Private Round",
@@ -54,7 +96,28 @@
     "saftCheckbox": true,
     "tokenContractAddress": null,
     "tokenContractChainId": null,
-    "tokenTotalSupply": "888888888"
+    "tokenTotalSupply": "888888888",
+    "raiseAmount": 1500000,
+    "valuation": 16000000,
+    "vestingSchedule": {
+      "cliff": "3m",
+      "vesting": "6m",
+      "description": "3-month cliff, 6-month vesting"
+    },
+    "allocationPercentage": 9.4,
+    "tgeUnlock": 0,
+    "description": "Private sale round for strategic investors and partners",
+    "eligibility": "Strategic investors and partners",
+    "benefits": [
+      "Governance participation rights",
+      "Revenue sharing opportunities",
+      "Platform integration support"
+    ],
+    "requirements": [
+      "Strategic partnership potential",
+      "Minimum investment: $50,000",
+      "KYC/AML compliance"
+    ]
   },
   {
     "name": "KOL Round",
@@ -73,7 +136,28 @@
     "saftCheckbox": true,
     "tokenContractAddress": null,
     "tokenContractChainId": null,
-    "tokenTotalSupply": "888888888"
+    "tokenTotalSupply": "888888888",
+    "raiseAmount": 500000,
+    "valuation": 22200000,
+    "vestingSchedule": {
+      "cliff": "1m",
+      "vesting": "6m",
+      "description": "1-month cliff, 6-month vesting"
+    },
+    "allocationPercentage": 2.3,
+    "tgeUnlock": 20,
+    "description": "Key Opinion Leaders and influencer round for community building",
+    "eligibility": "KOLs, influencers, and community leaders",
+    "benefits": [
+      "Community building support",
+      "Content creation opportunities",
+      "Early platform access"
+    ],
+    "requirements": [
+      "Influencer status or community leadership",
+      "Minimum investment: $5,000",
+      "KYC/AML compliance"
+    ]
   },
   {
     "name": "Public Round",
@@ -92,6 +176,27 @@
     "saftCheckbox": false,
     "tokenContractAddress": null,
     "tokenContractChainId": null,
-    "tokenTotalSupply": "888888888"
+    "tokenTotalSupply": "888888888",
+    "raiseAmount": 1000000,
+    "valuation": 26700000,
+    "vestingSchedule": {
+      "cliff": "0m",
+      "vesting": "12m",
+      "description": "20% TGE unlock, 12-month vesting"
+    },
+    "allocationPercentage": 3.8,
+    "tgeUnlock": 20,
+    "description": "Public sale round for retail investors and community members",
+    "eligibility": "Public investors and community members",
+    "benefits": [
+      "Platform access",
+      "Community participation",
+      "Token utility access"
+    ],
+    "requirements": [
+      "Age verification (18+)",
+      "Minimum investment: $100",
+      "KYC/AML compliance"
+    ]
   }
 ]

@@ -47,7 +47,23 @@ export const AdminTransactionNotification = ({
   dashboardUrl = '#',
   transactionUrl = '#',
   supportEmail = 'support@company.com',
-}: AdminTransactionNotificationProps) => (
+}: {
+  adminName?: string;
+  userName: string;
+  userEmail: string;
+  tokenName: string;
+  tokenSymbol: string;
+  purchaseAmount: string;
+  tokenAmount: string;
+  transactionHash: string;
+  transactionTime: string;
+  paymentMethod: string;
+  walletAddress: string;
+  dashboardUrl?: string;
+  transactionId?: string;
+  transactionUrl?: string;
+  supportEmail?: string;
+}) => (
   <Html>
     <Head />
     <Preview>

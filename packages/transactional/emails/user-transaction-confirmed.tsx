@@ -47,7 +47,23 @@ export const UserTransactionNotification = ({
   dashboardUrl = '#',
   transactionUrl = '#',
   supportEmail = 'support@company.com',
-}: UserTransactionConfirmationProps) => (
+}: {
+  userName: string;
+  tokenName: string;
+  tokenSymbol: string;
+  purchaseAmount: string;
+  tokenAmount: string;
+  transactionHash: string;
+  transactionTime: string;
+  paymentMethod: string;
+  walletAddress: string;
+  vestingSchedule?: string;
+  distributionDate?: string;
+  dashboardUrl?: string;
+  transactionUrl?: string;
+  transactionId?: string;
+  supportEmail?: string;
+}) => (
   <Html>
     <Head />
     <Preview>

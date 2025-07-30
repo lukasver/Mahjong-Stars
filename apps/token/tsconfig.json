@@ -1,6 +1,7 @@
 {
   "extends": "@mjs/typescript-config/nextjs.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/.cache/token_tsbuildinfo",
     "plugins": [

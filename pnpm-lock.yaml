@@ -720,6 +720,9 @@ importers:
 
   packages/transactional:
     dependencies:
+      '@mjs/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@react-email/components':
         specifier: 0.0.41
         version: 0.0.41(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

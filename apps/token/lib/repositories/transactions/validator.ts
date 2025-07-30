@@ -56,7 +56,7 @@ export class TransactionValidator {
     comment?: string;
   }): Promise<{
     sale: Sale;
-    userData: User;
+    user: UserPayload;
     pendingTransaction?: SaleTransactions | null;
   }> {
     const { userId, saleId, quantity } = transactionData;
@@ -76,9 +76,6 @@ export class TransactionValidator {
     this.validateSaleAvailability(sale, quantity);
     this.validateSaleDateNotExpired(sale);
 
-    // Get and validate user
-    const userData = await this.validateUserExists(userId);
-
     // Validate pending transactions
     const pendingTransaction = await this.validateNoPendingTransactions(
       userId,
@@ -86,7 +83,7 @@ export class TransactionValidator {
     );
 
     // Validate user-specific rules
-    this.validateUserSpecificRules(user, quantity, sale);
+    // this.validateUserSpecificRules(user, quantity, sale);
 
     // Validate SAFT contract requirements
     await this.validateSaftContractRequirements(sale, user);
@@ -321,20 +318,20 @@ export class TransactionValidator {
     return pendingTransaction;
   }
 
-  private static validateUserSpecificRules(
-    user: UserPayload,
-    quantity: number,
-    sale: Sale
-  ): void {
-    // const isSiwe = currentUser?.isSiwe || userData?.isSiwe;
-    // if (isSiwe) {
-    // this.validateMaxAllowanceWithoutKYC(quantity);
-    // }
-    // Validate KYC requirements if sale requires KYC
-    // if (sale.requiresKYC) {
-    //   this.validateKYCRequirements(userData);
-    // }
-  }
+  // private static validateUserSpecificRules(
+  //   user: UserPayload,
+  //   quantity: number,
+  //   sale: Sale
+  // ): void {
+  // const isSiwe = currentUser?.isSiwe || userData?.isSiwe;
+  // if (isSiwe) {
+  // this.validateMaxAllowanceWithoutKYC(quantity);
+  // }
+  // Validate KYC requirements if sale requires KYC
+  // if (sale.requiresKYC) {
+  //   this.validateKYCRequirements(userData);
+  // }
+  // }
 
   // private static validateMaxAllowanceWithoutKYC(quantity: number): void {
   //   const maxAllowance = MAX_ALLOWANCE_WITHOUT_KYC;
@@ -347,16 +344,16 @@ export class TransactionValidator {
   //   }
   // }
 
-  private static validateKYCRequirements(user: UserPayload): void {
-    return; // NOT ENABLED FOR NOW
-    // Check if user has completed KYC verification
-    // if (!user.kycVerification || user?.kycVerification?.status !== 'VERIFIED') {
-    //   throw new HttpError(
-    //     HttpStatusCode.BAD_REQUEST,
-    //     'KYC verification is required for this sale'
-    //   );
-    // }
-  }
+  // private static validateKYCRequirements(user: UserPayload): void {
+  //   return; // NOT ENABLED FOR NOW
+  // Check if user has completed KYC verification
+  // if (!user.kycVerification || user?.kycVerification?.status !== 'VERIFIED') {
+  //   throw new HttpError(
+  //     HttpStatusCode.BAD_REQUEST,
+  //     'KYC verification is required for this sale'
+  //   );
+  // }
+  // }
 
   private static async validateSaftContractRequirements(
     sale: Sale,

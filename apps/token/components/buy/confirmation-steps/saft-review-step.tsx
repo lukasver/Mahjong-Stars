@@ -258,19 +258,3 @@ const SaftGenerationDialog = ({
     />
   );
 };
-
-/**
- * Used to check if user has an existing SAFT sent for signature for current transaction, if it does, render that to avoid multiple generation
- */
-export const SaftRecipientGuard = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const { tx: txId } = useParams();
-  const { data } = useRecipientForCurrentTransactionSaft(txId as string);
-  if (data?.recipient.status === 'CREATED') {
-    return <div>Please wait for the recipient to be created</div>;
-  }
-  return children;
-};
