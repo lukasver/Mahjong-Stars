@@ -132,7 +132,9 @@ const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
           }
           return (
             <AccordionItem value={key.label} key={key.label}>
-              <AccordionTrigger>{key.label}</AccordionTrigger>
+              <AccordionTrigger className={'text-secondary'}>
+                {key.label}
+              </AccordionTrigger>
               <AccordionContent>
                 <FieldDescription
                   title={undefined}

@@ -38,6 +38,8 @@ function ImagesSection({ images }: { images: ImageItem[] }) {
     <>
       <div className='columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4'>
         {images.map(({ id, src }, idx) => {
+          console.debug('🚀 ~ images-gallery.tsx:42 ~ src:', src);
+
           if (!isAbsoluteUrl(src)) return null;
           return (
             <Button

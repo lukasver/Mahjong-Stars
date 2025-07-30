@@ -83,7 +83,9 @@ export async function seedOpenSale(prisma: PrismaClient) {
           id: token.blockchain.id,
         },
       },
-      information: getSaleInformation() as unknown as InputJsonValue,
+      information:
+        sales[0]?.information ||
+        (getSaleInformation() as unknown as InputJsonValue),
       user: {
         connect: {
           id: user.id!,
@@ -91,10 +93,10 @@ export async function seedOpenSale(prisma: PrismaClient) {
       },
       documents: {
         create: {
-          name: 'Cover Picture',
-          fileName: 'coverPicture.png',
-          url: token.token.image || '/static/images/banner.png',
-          type: 'image/png',
+          name: 'X-Banner.webp',
+          fileName: '/mjs-public/branding/X-Banner.webp',
+          url: 'https://storage.googleapis.com/mjs-public/branding/X-Banner.webp',
+          type: 'image/webp',
           user: {
             connect: {
               id: user.id!,
@@ -194,10 +196,10 @@ export async function seedOpenSale(prisma: PrismaClient) {
             },
             documents: {
               create: {
-                name: 'Cover Picture',
-                fileName: 'coverPicture.png',
-                url: token.token.image || '',
-                type: 'image/png',
+                name: 'X-Banner.webp',
+                fileName: '/mjs-public/branding/X-Banner.webp',
+                url: 'https://storage.googleapis.com/mjs-public/branding/X-Banner.webp',
+                type: 'image/webp',
                 user: {
                   connect: {
                     id: user.id!,
