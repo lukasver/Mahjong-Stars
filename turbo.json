@@ -114,7 +114,11 @@
 				"DATABASE_URL",
 				"PDF_WEBHOOK_API_KEY",
 				"PDF_SERVICE_URL",
-				"PDF_SERVICE_API_KEY"
+				"PDF_SERVICE_API_KEY",
+				"PRIVATE_BUCKET",
+				"PUBLIC_BUCKET",
+				"GCP_PROJECT_ID",
+				"GCP_SERVICE_ACCOUNT"
 			]
 		},
 		"@mjs/i18n#build": {
