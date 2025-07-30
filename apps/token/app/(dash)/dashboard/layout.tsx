@@ -28,6 +28,9 @@ export default async function DashboardLayout({
 }) {
   const queryClient = new QueryClient();
   const t = await getTranslations();
+  const _user = await getCurrentUser();
+
+  console.debug('🚀 ~ layout.tsx:33 ~ _user:', _user);
 
   queryClient.prefetchQuery({
     queryKey: ['user', 'me'],
@@ -36,6 +39,9 @@ export default async function DashboardLayout({
 
   const data = String((await getSessionCookie()) || '');
   const verified = await verifyJwt(data);
+
+  console.debug('🚀 ~ layout.tsx:43 ~ verified:', verified);
+
   if (!verified.valid) {
     throw new Error('Invalid session');
   }

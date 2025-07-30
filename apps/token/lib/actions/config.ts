@@ -57,6 +57,7 @@ export const authActionClient = createSafeActionClient({
 
     let user: Pick<User, 'id' | 'walletAddress' | 'email'> | undefined =
       await authCache.get(address);
+
     if (!user) {
       user =
         (await prisma.user.findUnique({
@@ -72,6 +73,7 @@ export const authActionClient = createSafeActionClient({
       invariant(user, 'User not found');
       await authCache.set(address, user);
     }
+    console.debug('🚀 ~ config.ts:61 ~ user:', user);
 
     return next({
       ctx: {
