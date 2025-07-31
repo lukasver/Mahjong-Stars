@@ -1,15 +1,11 @@
 'use client';
 
-import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
-
 import { ConnectWallet } from '@/components/connect-wallet';
 import { client } from '@/lib/auth/thirdweb-client';
 import { Icons } from '@mjs/ui/components/icons';
-import { LoadingAnimation } from '@mjs/ui/components/motion';
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@mjs/ui/primitives/alert-dialog';
@@ -18,7 +14,6 @@ import React from 'react';
 import { AccountProvider as AccountProviderThirdweb } from 'thirdweb/react';
 import useActiveAccount from '../hooks/use-active-account';
 import { PointerEventsGuard } from './pointer-events-guard';
-import Image from 'next/image';
 
 const IS_DEV = process.env.NODE_ENV === 'development';
 // change to true for debug
@@ -34,10 +29,7 @@ function AccountProvider({ children }: { children: React.ReactNode }) {
   // In development we don't care if wallet is connected
   if (DEBUG) {
     return (
-      <AccountProviderThirdweb
-        address={'0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70'}
-        client={client}
-      >
+      <AccountProviderThirdweb address={''} client={client}>
         {children}
       </AccountProviderThirdweb>
     );
@@ -72,31 +64,33 @@ function AccountProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (status === 'unknown' || status === 'connecting') {
-    return (
-      <AlertDialog open={true}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Connecting wallet...</AlertDialogTitle>
-            <AlertDialogDescription className='text-secondary'>
-              Please wait
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className='flex items-center justify-center h-full w-full'>
-            <LoadingAnimation className='aspect-square'>
-              <Image
-                height={80}
-                width={80}
-                src={MahjongStarsIconXl}
-                alt='Mahjong Stars Logo'
-                className='aspect-square'
-              />
-            </LoadingAnimation>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  }
+  // if (status === 'unknown' || status === 'connecting') {
+  //   return (
+  //     <AlertDialog open={true}>
+  //       <AlertDialogContent>
+  //         <VisuallyHidden>
+  //           <AlertDialogHeader>
+  //             <AlertDialogTitle>Connecting wallet...</AlertDialogTitle>
+  //             <AlertDialogDescription className='text-secondary'>
+  //               Please wait
+  //             </AlertDialogDescription>
+  //           </AlertDialogHeader>
+  //         </VisuallyHidden>
+  //         <div className='flex items-center justify-center h-full w-full'>
+  //           <LoadingAnimation className='aspect-square'>
+  //             <Image
+  //               height={80}
+  //               width={80}
+  //               src={MahjongStarsIconXl}
+  //               alt='Mahjong Stars Logo'
+  //               className='aspect-square'
+  //             />
+  //           </LoadingAnimation>
+  //         </div>
+  //       </AlertDialogContent>
+  //     </AlertDialog>
+  //   );
+  // }
 
   if (activeAccount) {
     return (
@@ -119,7 +113,7 @@ function AccountProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return null;
+  return <>{children}</>;
 }
 
 export default AccountProvider;

@@ -1,7 +1,10 @@
-import { ALLOWED_CHAINS } from '@/services/crypto/config';
+import {
+  ALLOWED_CHAINS,
+  NETWORK_TO_TOKEN_MAPPING,
+} from '@/services/crypto/config';
 import { invariant } from '@epic-web/invariant';
 import { PrismaClient } from '@prisma/client';
-import { createThirdwebClient } from 'thirdweb';
+import { createThirdwebClient, defineChain } from 'thirdweb';
 
 const secretKey = process.env.THIRDWEB_API_SECRET;
 invariant(secretKey, 'THIRDWEB_API_SECRET is not set');
@@ -51,6 +54,52 @@ export async function seedBlockchains(prisma: PrismaClient) {
           },
         },
       })
+    ),
+
+    await Promise.all(
+      Object.entries(NETWORK_TO_TOKEN_MAPPING).map(
+        async ([chainId, tokens]) => {
+          return Promise.all(
+            Object.entries(tokens).map(async ([tokenSymbol, token]) => {
+              return prisma.token.create({
+                data: {
+                  symbol: tokenSymbol,
+                  totalSupply: '888888888',
+                  image:
+                    'https://d391b93f5f62d9c15f67142e43841acc.ipfscdn.io/ipfs/QmZegnyup388YaXGfRfCZotLguFZyEZXjhDsn2N5pvx7to/Star%20Point.png',
+                  TokensOnBlockchains: {
+                    create: {
+                      blockchain: {
+                        connectOrCreate: {
+                          where: {
+                            chainId: Number(chainId),
+                          },
+                          create: {
+                            chainId: Number(chainId),
+                            name: defineChain(Number(chainId)).name || '',
+                            rpcUrl: defineChain(Number(chainId)).rpc,
+                            explorerUrl: defineChain(Number(chainId))
+                              .blockExplorers?.[0]?.url,
+                            isTestnet:
+                              defineChain(Number(chainId)).testnet ||
+                              defineChain(Number(chainId))
+                                .name?.toLowerCase()
+                                ?.includes('testnet'),
+                            isEnabled: true,
+                          },
+                        },
+                      },
+                      name: tokenSymbol,
+                      decimals: token.decimals,
+                      contractAddress: token.contract,
+                    },
+                  },
+                },
+              });
+            })
+          );
+        }
+      )
     ),
     // Testnet tokens
     prisma.token.create({

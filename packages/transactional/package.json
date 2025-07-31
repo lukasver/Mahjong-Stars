@@ -5,7 +5,11 @@
 	"type": "module",
 	"private": true,
 	"keywords": [],
-	"author": "",
+	"author": {
+		"name": "Lucas Verdiell",
+		"email": "lucas@smat.io",
+		"url": "https://lucasverdiell.xyz"
+	},
 	"license": "ISC",
 	"exports": {
 		"./emails": "./src/emails/index.tsx"
