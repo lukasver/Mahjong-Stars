@@ -41,6 +41,7 @@ import notificatorService, { Notificator } from '../notifications';
 import { publicUrl } from '@/common/config/env';
 import { metadata } from '@/common/config/site';
 import { TransactionValidator } from './validator';
+import { TransactionByIdWithRelations } from '@/common/types/transactions';
 
 class TransactionsController {
   private documents;
@@ -188,7 +189,7 @@ class TransactionsController {
               requiresKYC: true,
               saftCheckbox: true,
               tokenSymbol: true,
-
+              toWalletsAddress: true,
               saftContract: {
                 select: {
                   id: true,
@@ -226,7 +227,9 @@ class TransactionsController {
       invariant(transaction, 'Transaction not found');
 
       return Success({
-        transaction: decimalsToString(transaction),
+        transaction: decimalsToString(
+          transaction
+        ) as TransactionByIdWithRelations,
         requiresKYC: transaction.sale.requiresKYC,
         requiresSAFT: transaction.sale.saftCheckbox,
       });

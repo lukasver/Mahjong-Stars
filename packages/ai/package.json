@@ -6,9 +6,15 @@
 	"exports": {
 		".": "./index.ts"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"keywords": [],
-	"author": "",
+	"author": {
+		"name": "Lucas Verdiell",
+		"email": "lucas@smat.io",
+		"url": "https://lucasverdiell.xyz"
+	},
 	"license": "ISC",
 	"dependencies": {
 		"@ai-sdk/google": "^1.2.19",

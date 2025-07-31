@@ -34,7 +34,7 @@ export default async function DashboardPage(_props: PageProps) {
 
         <ErrorBoundary
           fallback={
-            <div className='flex flex-col items-center justify-center min-h-[80dvh] h-full'>
+            <div className='py-6'>
               <ComingSoonContent to={undefined} />
             </div>
           }

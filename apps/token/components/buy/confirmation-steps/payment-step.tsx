@@ -32,10 +32,11 @@ import { Skeleton } from '@mjs/ui/primitives/skeleton';
 import { useLocale } from 'next-intl';
 import { FIAT_CURRENCIES, ONE_MINUTE } from '@/common/config/constants';
 import { isFileWithPreview } from './utils';
+import { getQueryClient } from '@/app/providers';
+import { TransactionByIdWithRelations } from '@/common/types/transactions';
+import { BanknoteIcon } from 'lucide-react';
 import { Placeholder } from '@/components/placeholder';
 import { metadata } from '@/common/config/site';
-import { BanknoteIcon } from 'lucide-react';
-import { getQueryClient } from '@/app/providers';
 
 interface PaymentStepProps {
   onSuccess: () => void;
@@ -48,14 +49,6 @@ interface PaymentStepProps {
 export function PaymentStep({ onSuccess }: PaymentStepProps) {
   const { tx: txId } = useParams();
   const { data: tx, isLoading } = useTransactionById(txId as string);
-  const { data: banks, isLoading: isBanksLoading } = useSaleBanks(
-    tx?.transaction?.sale?.id || ''
-  );
-  const [files, setFiles] = useState<unknown[]>([]); // Array of FileWithPreview
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const locale = useLocale();
 
   if (isLoading)
     return (
@@ -78,6 +71,63 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
   // TODO: Confirm the correct path for payment fields and type properly
   const paymentMethod = tx?.transaction?.formOfPayment;
 
+  return (
+    <>
+      <CardHeader>
+        <CardTitle>Payment</CardTitle>
+        <CardDescription>
+          Please follow the instructions below to complete your payment.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {paymentMethod === 'TRANSFER' ? (
+          <FiatPayment tx={tx.transaction} onSuccess={onSuccess} />
+        ) : (
+          <CryptoPayment tx={tx.transaction} onSuccess={onSuccess} />
+        )}
+      </CardContent>
+    </>
+  );
+}
+
+const CryptoPayment = ({
+  tx,
+  onSuccess,
+}: {
+  tx: TransactionByIdWithRelations;
+  onSuccess: () => void;
+}) => {
+  // Prepare the transaction
+  // Parse the amount to pay into a format used by the wallet
+
+  return (
+    <div className='py-8 text-center'>
+      <div className='mb-2'>
+        <span className='font-medium'>Crypto payment</span> (coming soon)
+      </div>
+      <div className='text-muted-foreground'>
+        Please follow the instructions for crypto payment in the next step.
+      </div>
+    </div>
+  );
+};
+
+const FiatPayment = ({
+  tx,
+  onSuccess,
+}: {
+  tx: TransactionByIdWithRelations;
+  onSuccess: () => void;
+}) => {
+  const { data: banks, isLoading: isBanksLoading } = useSaleBanks(
+    tx?.sale?.id || ''
+  );
+  const locale = useLocale();
+  const [files, setFiles] = useState<unknown[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
   /**
    * Handles the upload of the bank slip file.
    */
@@ -99,8 +149,8 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
       invariant(banks?.banks?.length, 'No banks found, try again later');
       invariant(tx, 'Transaction id could not be found');
 
-      const saleId = tx.transaction.sale.id;
-      const txId = tx.transaction.id;
+      const saleId = tx.sale.id;
+      const txId = tx.id;
 
       const validFiles = files
         .map((f) => (isFileWithPreview(f) ? f.file : null))
@@ -160,107 +210,81 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
   }
 
   return (
-    <>
-      <CardHeader>
-        <CardTitle>Payment</CardTitle>
-        <CardDescription>
-          Please follow the instructions below to complete your payment.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {paymentMethod === 'TRANSFER' ? (
-          <div className='space-y-4'>
-            <p className='text-sm text-foreground'>
-              Proceed to pay{' '}
-              <span className='font-medium '>
-                {safeFormatCurrency(
-                  {
-                    totalAmount: tx?.transaction?.amountPaid,
-                    currency: tx?.transaction?.paidCurrency,
-                  },
-                  {
-                    locale,
-                    precision: FIAT_CURRENCIES.includes(
-                      tx?.transaction?.paidCurrency
-                    )
-                      ? 'FIAT'
-                      : 'CRYPTO',
-                  }
-                )}
-              </span>{' '}
-              to one of the following bank accounts & upload a proof of payment:
-            </p>
-            <ul className='space-y-4 max-h-[600px] overflow-y-auto'>
-              {isBanksLoading ? (
-                <Skeleton className='h-10 w-full' />
-              ) : (
-                banks?.banks.map((bank, index) => (
-                  <li key={bank.id || index}>
-                    <BankDetailsCard
-                      noSelectable
-                      onCopy={() => {
-                        copyToClipboard(bank.iban);
-                        toast.success('IBAN copied to clipboard');
-                      }}
-                      data={{
-                        bankName: bank.bankName,
-                        iban: bank.iban,
-                        currency: bank.currency,
-                        accountName: bank.accountName || '',
-                        swift: bank.swift || '',
-                        address: bank.address || '',
-                        memo: bank.memo || '',
-                      }}
-                    />
-                  </li>
-                ))
-              )}
-            </ul>
-            <form className='space-y-4' onSubmit={handleSubmit}>
-              <div>
-                <label className='font-medium'>
-                  Upload Bank Transfer Receipt
-                </label>
-                <FileUpload
-                  type='all'
-                  maxSizeMB={5}
-                  className='w-full'
-                  multiple={false}
-                  onFilesChange={handleBankSlipChange}
-                />
-              </div>
-              {error && <div className='text-destructive mt-2'>{error}</div>}
-              {success && (
-                <div className='text-success mt-2'>
-                  Payment confirmation submitted!
-                </div>
-              )}
-              <Button
-                type='submit'
-                className='w-full'
-                disabled={!banks?.banks?.length}
-                variant='accent'
-                loading={isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Payment Confirmation'}
-              </Button>
-            </form>
-          </div>
+    <div className='space-y-4'>
+      <p className='text-sm text-foreground'>
+        Proceed to pay{' '}
+        <span className='font-medium '>
+          {safeFormatCurrency(
+            {
+              totalAmount: tx?.amountPaid,
+              currency: tx?.paidCurrency,
+            },
+            {
+              locale,
+              precision: FIAT_CURRENCIES.includes(tx?.paidCurrency)
+                ? 'FIAT'
+                : 'CRYPTO',
+            }
+          )}
+        </span>{' '}
+        to one of the following bank accounts & upload a proof of payment:
+      </p>
+      <ul className='space-y-4 max-h-[600px] overflow-y-auto'>
+        {isBanksLoading ? (
+          <Skeleton className='h-10 w-full' />
         ) : (
-          <div className='py-8 text-center'>
-            <div className='mb-2'>
-              <span className='font-medium'>Crypto payment</span> (coming soon)
-            </div>
-            <div className='text-muted-foreground'>
-              Please follow the instructions for crypto payment in the next
-              step.
-            </div>
+          banks?.banks.map((bank, index) => (
+            <li key={bank.id || index}>
+              <BankDetailsCard
+                noSelectable
+                onCopy={() => {
+                  copyToClipboard(bank.iban);
+                  toast.success('IBAN copied to clipboard');
+                }}
+                data={{
+                  bankName: bank.bankName,
+                  iban: bank.iban,
+                  currency: bank.currency,
+                  accountName: bank.accountName || '',
+                  swift: bank.swift || '',
+                  address: bank.address || '',
+                  memo: bank.memo || '',
+                }}
+              />
+            </li>
+          ))
+        )}
+      </ul>
+      <form className='space-y-4' onSubmit={handleSubmit}>
+        <div>
+          <label className='font-medium'>Upload Bank Transfer Receipt</label>
+          <FileUpload
+            type='all'
+            maxSizeMB={5}
+            className='w-full'
+            multiple={false}
+            onFilesChange={handleBankSlipChange}
+          />
+        </div>
+        {error && <div className='text-destructive mt-2'>{error}</div>}
+        {success && (
+          <div className='text-success mt-2'>
+            Payment confirmation submitted!
           </div>
         )}
-      </CardContent>
-    </>
+        <Button
+          type='submit'
+          className='w-full'
+          disabled={!banks?.banks?.length}
+          variant='accent'
+          loading={isSubmitting}
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Payment Confirmation'}
+        </Button>
+      </form>
+    </div>
   );
-}
+};
 
 /**
  * Used to check if the payment if the sale is still available for the transaction to render the payment page. If it is, render the children, otherwise renders an error component.

@@ -15,7 +15,11 @@
 		"translate": "pnpx tsx translate.ts"
 	},
 	"keywords": [],
-	"author": "",
+	"author": {
+		"name": "Lucas Verdiell",
+		"email": "lucas@smat.io",
+		"url": "https://lucasverdiell.xyz"
+	},
 	"license": "ISC",
 	"devDependencies": {
 		"@lingual/i18n-check": "^0.8.4",

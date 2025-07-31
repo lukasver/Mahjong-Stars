@@ -23,6 +23,7 @@ const transactionByIdWithRelations =
           requiresKYC: true,
           saftCheckbox: true,
           tokenSymbol: true,
+          toWalletsAddress: true,
           saftContract: {
             select: {
               id: true,

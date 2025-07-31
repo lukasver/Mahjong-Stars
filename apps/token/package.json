@@ -2,6 +2,11 @@
 	"name": "@mjs/token",
 	"version": "0.0.1",
 	"private": true,
+	"author": {
+		"name": "Lucas Verdiell",
+		"email": "lucas@smat.io",
+		"url": "https://lucasverdiell.xyz"
+	},
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
@@ -62,7 +67,6 @@
 		"cacheable": "^1.10.1",
 		"canvas-confetti": "^1.9.3",
 		"decimal.js": "^10.6.0",
-		"ethers": "^6.14.1",
 		"handlebars": "^4.7.8",
 		"image-size": "^2.0.2",
 		"lucide-react": "^0.511.0",
@@ -85,8 +89,6 @@
 		"sharp": "^0.34.2",
 		"thirdweb": "^5.102.0",
 		"usehooks-ts": "^3.1.1",
-		"viem": "2.x",
-		"wagmi": "^2.15.4",
 		"zod": "^3.25.67",
 		"zod-form-data": "^2.0.7",
 		"zod-prisma-types": "^3.2.4"

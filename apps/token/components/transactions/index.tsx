@@ -10,11 +10,13 @@ export function UserTransactions() {
 
   if (!data?.transactions) {
     return (
-      <Placeholder
-        icon={BanknoteArrowUp}
-        title='No transactions found'
-        description='You have not made any transactions yet'
-      />
+      <div className='flex flex-col items-center justify-center h-full min-h-[60dvh]'>
+        <Placeholder
+          icon={BanknoteArrowUp}
+          title='No transactions found'
+          description='You have not made any transactions yet'
+        />
+      </div>
     );
   }
 

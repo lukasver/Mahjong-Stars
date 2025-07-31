@@ -62,7 +62,7 @@ export function Stepper({
                 >
                   {step.name}
                 </div>
-                <div className='text-xs text-muted-foreground hidden sm:block whitespace-nowrap'>
+                <div className='text-xs text-secondary hidden sm:block whitespace-nowrap'>
                   {step.description}
                 </div>
               </div>
