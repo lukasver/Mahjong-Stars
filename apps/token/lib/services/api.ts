@@ -8,7 +8,6 @@ import {
   getInputOptions,
   getTransactionAvailabilityForSale,
   getTransactionById,
-  getUserTransactions,
   getWeb3Contract,
 } from '@/lib/actions';
 import { FOP } from '@prisma/client';
@@ -27,6 +26,7 @@ import {
   getSaleSaft,
   getSaleSaftForTransaction,
   getUserPendingTransactionsForSale,
+  getUserTransactions,
 } from './fetchers';
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -215,9 +215,9 @@ export const useUserTransactions = (
   } = {}
 ) => {
   const { data, status, error } = useSuspenseQuery({
-    queryKey: ['transactions', 'user', params],
+    queryKey: ['transactions', 'user', 'me', params],
     queryFn: ({ queryKey }) =>
-      getUserTransactions(queryKey[2] as typeof params),
+      getUserTransactions(queryKey[3] as typeof params),
     staleTime: DEFAULT_STALE_TIME,
   });
   const e = getError(data, error);

@@ -1,6 +1,8 @@
 import { TransactionModalTypes } from '@/common/types';
 import { SaleWithToken } from '@/common/types/sales';
 import { usePendingTransactionsForSale } from '@/lib/services/api';
+import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
+
 import {
   Dialog,
   DialogClose,
@@ -31,6 +33,7 @@ import { useAction } from 'next-safe-action/hooks';
 import { deleteOwnTransaction } from '@/lib/actions';
 import { useRef } from 'react';
 import { getQueryClient } from '@/app/providers';
+import Image from 'next/image';
 
 interface TokenModalProps {
   open: TransactionModalTypes | null;
@@ -146,7 +149,7 @@ const PendingTransactionModal = ({ sale }: { sale: SaleWithToken }) => {
     {
       onSuccess: () => {
         getQueryClient().invalidateQueries({
-          queryKey: ['transactions', sale.id, 'pending'],
+          queryKey: ['transactions'],
         });
         buttonRef.current?.click();
       },
@@ -154,7 +157,20 @@ const PendingTransactionModal = ({ sale }: { sale: SaleWithToken }) => {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='flex items-center gap-2'>
+        <span className='aspect-square animate-pulse'>
+          <Image
+            height={80}
+            width={80}
+            src={MahjongStarsIconXl}
+            alt='Mahjong Stars Logo'
+            className='animate-spin aspect-square'
+          />
+        </span>
+        <span className='text-xl font-bold font-head'>Loading...</span>
+      </div>
+    );
   }
   const tx = data?.transactions[0];
 

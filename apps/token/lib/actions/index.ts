@@ -2,10 +2,7 @@
 import 'server-only';
 import { CreateContractStatusDto } from '@/common/schemas/dtos/contracts';
 import { GetSaleDto, GetSalesDto } from '@/common/schemas/dtos/sales';
-import {
-  GetTransactionDto,
-  UpdateTransactionDto,
-} from '@/common/schemas/dtos/transactions';
+import { UpdateTransactionDto } from '@/common/schemas/dtos/transactions';
 import {
   ProfileSchema,
   TransactionStatusSchema,
@@ -299,18 +296,18 @@ export const getUserSaleTransactions = authActionClient
     return transactions.data;
   });
 
-export const getUserTransactions = authActionClient
-  .schema(GetTransactionDto)
-  .action(async ({ ctx, parsedInput }) => {
-    const transactions = await transactionsController.getUserTransactions(
-      parsedInput,
-      ctx
-    );
-    if (!transactions.success) {
-      throw new Error(transactions.message);
-    }
-    return transactions.data;
-  });
+// export const getUserTransactions = authActionClient
+//   .schema(GetTransactionDto)
+//   .action(async ({ ctx, parsedInput }) => {
+//     const transactions = await transactionsController.getUserTransactions(
+//       parsedInput,
+//       ctx
+//     );
+//     if (!transactions.success) {
+//       throw new Error(transactions.message);
+//     }
+//     return transactions.data;
+//   });
 
 export const getTransactionById = authActionClient
   .schema(z.object({ id: z.string() }))

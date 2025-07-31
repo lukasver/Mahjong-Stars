@@ -100,6 +100,12 @@ export const GET = withAuth(async (req, context, auth) => {
             );
             return NextResponse.json(data);
           }
+          if (subIdentifier === 'me') {
+            const data = await transactions.getUserTransactions(qParamsObject, {
+              address: auth.address,
+            });
+            return NextResponse.json(data);
+          }
           const data = await transactions.userTransactionsForSale(
             {
               saleId: identifier,

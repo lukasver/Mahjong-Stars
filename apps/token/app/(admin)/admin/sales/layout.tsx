@@ -26,13 +26,11 @@ export default async function AdminLayout({
 
   const [user, t] = await Promise.all([
     // Used for checking if the user is admin
-    getCurrentUser(),
-    getTranslations(),
-    // Used for
-    queryClient.prefetchQuery({
+    queryClient.fetchQuery({
       queryKey: ['user', 'me'],
       queryFn: () => getCurrentUser(),
     }),
+    getTranslations(),
   ]);
 
   if (!user?.data || !isAdmin(user.data.roles)) {

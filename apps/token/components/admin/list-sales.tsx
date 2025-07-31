@@ -91,12 +91,20 @@ export function ListSales({
 
   const filteredSales =
     salesData?.sales.filter((sale) => {
+      // Search term filtering - search across multiple fields
+      const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        sale.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sale.tokenName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sale.tokenSymbol.toLowerCase().includes(searchTerm.toLowerCase());
+        !searchTerm ||
+        sale.name.toLowerCase().includes(searchLower) ||
+        sale.tokenName.toLowerCase().includes(searchLower) ||
+        sale.tokenSymbol.toLowerCase().includes(searchLower) ||
+        sale.id.toLowerCase().includes(searchLower) ||
+        sale.currency.toLowerCase().includes(searchLower);
+
+      // Status filtering
       const matchesStatus =
         statusFilter === 'all' || sale.status === statusFilter;
+
       return matchesSearch && matchesStatus;
     }) || [];
 
@@ -130,6 +138,14 @@ export function ListSales({
           result.validationErrors?._errors?.join(',') ||
           'Unknown error ocurred'
       );
+    }
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    if (value === 'clear') {
+      setStatusFilter('all');
+    } else {
+      setStatusFilter(value);
     }
   };
 
@@ -223,7 +239,8 @@ export function ListSales({
                 />
               </div>
               <SearchSelect
-                placeholder='Search sales...'
+                showAll={false}
+                placeholder='Filter by status...'
                 options={[
                   { label: 'All Status', value: 'all' },
                   { label: 'Open', value: 'OPEN' },
@@ -231,12 +248,29 @@ export function ListSales({
                   { label: 'Closed', value: 'CLOSED' },
                   { label: 'Finished', value: 'FINISHED' },
                 ]}
-                onSearch={setSearchTerm}
+                onSearch={handleStatusFilterChange}
+                isFilter={true}
               />
             </div>
           </div>
         </CardHeader>
         <CardContent className=''>
+          {/* Filter Summary */}
+          {(searchTerm || statusFilter !== 'all') && (
+            <div className='mb-4 flex items-center gap-2 text-sm text-muted-foreground'>
+              <span>
+                Showing {filteredSales.length} of {salesData?.sales.length || 0}{' '}
+                sales
+              </span>
+              <span>•</span>
+              <span>
+                {searchTerm && `Search: "${searchTerm}"`}
+                {searchTerm && statusFilter !== 'all' && ' • '}
+                {statusFilter !== 'all' && `Status: ${statusFilter}`}
+              </span>
+            </div>
+          )}
+
           {/* Data Table */}
           <div className='rounded-md border bg-primary'>
             <Table>
@@ -399,6 +433,20 @@ export function ListSales({
               <p className='text-muted-foreground'>
                 No sales found matching your criteria.
               </p>
+              {(searchTerm || statusFilter !== 'all') && (
+                <div className='mt-2'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => {
+                      setSearchTerm('');
+                      setStatusFilter('all');
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

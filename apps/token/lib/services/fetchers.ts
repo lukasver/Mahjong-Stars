@@ -13,6 +13,7 @@ import {
   User,
 } from '@/common/schemas/generated';
 import { SaleWithToken } from '@/common/types/sales';
+import { TransactionWithRelations } from '@/common/types/transactions';
 import { BankDetails, DocumentSignatureStatus, FOP } from '@prisma/client';
 
 export type FetcherOptions = Omit<RequestInit, 'body'> & {
@@ -54,6 +55,7 @@ class Fetcher {
   fetcher = <T>(url: string, options: FetcherOptions = {}) => {
     const { token, ...fetchOptions } = options;
     const fullUrl = this.baseUrl ? `${this.baseUrl}${url}` : url;
+    console.log('fullUrl', fullUrl);
     const {
       body,
       rawBody = false,
@@ -348,6 +350,23 @@ export const getSaleBanks = async (saleId: string) => {
       })[];
     }>(`/sales/${saleId}/banks`);
 
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getUserTransactions = async (params: {
+  userId?: string;
+  formOfPayment?: FOP;
+  symbol?: string;
+  sale?: string;
+}) => {
+  const queryParams = new URLSearchParams(params);
+  try {
+    const data = await fetcher<{
+      transactions: TransactionWithRelations[];
+    }>(`/transactions/user/me?${queryParams.toString()}`);
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };

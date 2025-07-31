@@ -58,12 +58,13 @@ export const verifyAdminSignature = async ({
   address: string;
   chainId: number;
 }) => {
+  const stringifiedPayload = JSON.stringify(payload);
   // Verify the signature
   const isValid = await verifySignature({
     signature,
     address,
     chain: defineChain(chainId),
-    message: JSON.stringify(payload),
+    message: stringifiedPayload,
     client: serverClient,
   });
 
@@ -103,6 +104,14 @@ export const verifyAdminSignature = async ({
   if (!user) {
     throw new Error('User does not have admin privileges');
   }
+
+  void prisma.auditTrail.create({
+    data: {
+      actionType: payload.action,
+      performerAddress: address,
+      content: stringifiedPayload,
+    },
+  });
 
   return {
     valid: true,

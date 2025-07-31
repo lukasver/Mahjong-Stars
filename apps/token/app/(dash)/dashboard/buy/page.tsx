@@ -13,7 +13,7 @@ export default async function BuyPage() {
   const queryClient = new QueryClient();
 
   // Needs a suspense wrapper (loading.tsx here)
-  queryClient.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ['sales', 'active'],
     queryFn: () => getActiveSale(),
   });

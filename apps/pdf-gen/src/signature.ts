@@ -40,21 +40,23 @@ class DocumensoService {
     pageSize: number;
     reference: string;
   }) {
+    const signingOrder = DocumentSigningOrder.Sequential;
     try {
       const rec: Parameters<
         Documenso['documents']['createV0']
-      >[0]['recipients'] = recipients.map((r) => ({
+      >[0]['recipients'] = recipients.map((r, i) => ({
         name: r.name ?? '',
         email: r.email,
         role: DocumentRole.Signer,
-        signingOrder: 0,
+        signingOrder: signingOrder === 'SEQUENTIAL' ? i : 0,
       }));
       if (this.APPROVER) {
         rec.push({
           name: 'Reviewer',
           email: this.APPROVER,
           role: DocumentRole.Viewer,
-          signingOrder: 0,
+          signingOrder:
+            signingOrder === 'SEQUENTIAL' ? recipients.length + 1 : 1,
         });
       }
       const res = await this.sdk.documents.createV0({
@@ -70,7 +72,7 @@ class DocumensoService {
           emailSettings: {
             recipientRemoved: false,
           },
-          signingOrder: DocumentSigningOrder.Parallel,
+          signingOrder,
           distributionMethod:
             DocumentCreateDocumentTemporaryDistributionMethodRequest.Email,
         },

@@ -5,9 +5,7 @@ import { invariant } from '@epic-web/invariant';
 import { createSafeActionClient } from 'next-safe-action';
 import log from '../services/logger.server';
 
-import { User } from '@/common/schemas/generated';
-import { prisma } from '@/db';
-import { authCache } from '../auth/cache';
+import { getUserFromCache } from '../auth/cache';
 import { getSessionCookie } from '../auth/cookies';
 import { verifyJwt } from '../auth/thirdweb';
 
@@ -54,26 +52,7 @@ export const authActionClient = createSafeActionClient({
       invariant(verified.valid, 'Invalid jwt');
       address = verified.parsedJWT.sub;
     }
-
-    let user: Pick<User, 'id' | 'walletAddress' | 'email'> | undefined =
-      await authCache.get(address);
-
-    if (!user) {
-      user =
-        (await prisma.user.findUnique({
-          where: {
-            walletAddress: address,
-          },
-          select: {
-            id: true,
-            walletAddress: true,
-            email: true,
-          },
-        })) || undefined;
-      invariant(user, 'User not found');
-      await authCache.set(address, user);
-    }
-
+    const user = await getUserFromCache(address);
     return next({
       ctx: {
         address: user.walletAddress,

@@ -296,5 +296,6 @@ export const verifyAdminAction = adminClient
   )
   .action(async ({ parsedInput }) => {
     const result = await verifyAdminSignature(parsedInput);
+
     return result;
   });

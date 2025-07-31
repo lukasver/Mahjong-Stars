@@ -125,10 +125,22 @@ class TransactionsController {
   /**
    * Get all transactions for a user (optionally filtered by sale or symbol).
    */
-  async getUserTransactions(dto: GetTransactionDto, _ctx: ActionCtx) {
+  async getUserTransactions(
+    dto: Omit<GetTransactionDto, 'userId'>,
+    ctx: ActionCtx
+  ) {
     try {
-      const { userId, formOfPayment, tokenSymbol: symbol, saleId: sale } = dto;
-      invariant(userId, 'User id missing');
+      const { formOfPayment, tokenSymbol: symbol, saleId: sale } = dto;
+      let userId = ctx.userId;
+      const address = ctx.address;
+
+      if (!userId) {
+        const user = await prisma.user.findUniqueOrThrow({
+          where: { walletAddress: address },
+          select: { id: true },
+        });
+        userId = user.id;
+      }
       let saleId: string | undefined = sale;
       const andQuery: { saleId?: string; tokenSymbol?: string }[] = [];
       if (sale === 'current') {
@@ -149,6 +161,13 @@ class TransactionsController {
           ],
           ...(andQuery.length && { AND: andQuery }),
         },
+        include: {
+          sale: true,
+          approver: true,
+          blockchain: true,
+          tokenDistributions: true,
+        },
+        orderBy: { createdAt: 'desc' },
       });
       return Success({ transactions });
     } catch (e) {

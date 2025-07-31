@@ -25,7 +25,7 @@ const sleep = cache(
 export async function TokenStats({ address }: { address: string }) {
   const queryClient = new QueryClient();
 
-  queryClient.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ['contract', address],
     queryFn: () => getWeb3Contract(address),
   });

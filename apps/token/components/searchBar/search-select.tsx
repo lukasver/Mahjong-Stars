@@ -19,6 +19,8 @@ export interface SearchSelectProps {
   className?: string;
   options: { label: string; value: string }[];
   queryKey?: string;
+  isFilter?: boolean;
+  showAll?: boolean;
 }
 
 const SearchSelect = ({
@@ -27,6 +29,8 @@ const SearchSelect = ({
   className,
   options,
   queryKey = 'q',
+  isFilter = false,
+  showAll = true,
 }: SearchSelectProps) => {
   const [isPending, startTransition] = useTransition();
   const [searchValue, setSearchValue] = React.useState<string | null>(null);
@@ -48,11 +52,12 @@ const SearchSelect = ({
     }
   };
 
+  // Only use debouncing and query state for search, not for filters
   React.useEffect(() => {
-    if ((value && !loading) || !searchValue) {
+    if (!isFilter && ((value && !loading) || !searchValue)) {
       setDebouncedValue(!searchValue ? null : value);
     }
-  }, [value, searchValue]);
+  }, [value, searchValue, isFilter, setDebouncedValue, loading]);
 
   const CustomIcon = searchValue ? (
     isPending ? (
@@ -68,7 +73,7 @@ const SearchSelect = ({
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value='clear'>All</SelectItem>
+        {showAll && <SelectItem value='clear'>All</SelectItem>}
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
             {option.label}

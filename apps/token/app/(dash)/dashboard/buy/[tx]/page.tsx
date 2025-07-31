@@ -83,7 +83,7 @@ export default async function TransactionConfiramationPage({
   const tx = await getTransactionById({ id: p.tx });
 
   // Needs a suspense wrapper (loading.tsx here)
-  queryClient.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ['transactions', p.tx],
     queryFn: () => {
       return tx;
