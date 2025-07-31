@@ -9,14 +9,7 @@ import {
   CardTitle,
 } from '@mjs/ui/primitives/card';
 import { Input } from '@mjs/ui/primitives/input';
-import {
-  AlertCircle,
-  Edit,
-  Eye,
-  MoreHorizontal,
-  Search,
-  Trash2,
-} from 'lucide-react';
+import { AlertCircle, Edit, Eye, MoreHorizontal, Search } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import { SearchSelect } from '../searchBar/search-select';
 
@@ -72,6 +65,7 @@ import { toast } from '@mjs/ui/primitives/sonner';
 import { getQueryClient } from '@/app/providers';
 import { SaleStatusType } from '@/common/schemas/generated';
 import { getGlassyCardClassName } from '@mjs/ui/components/cards';
+import { useSensitiveAction } from '../hooks/use-sensitive-action';
 
 export function ListSales({
   children,
@@ -113,11 +107,9 @@ export function ListSales({
 
   const locale = useLocale();
 
-  const { executeAsync, isExecuting, result, hasErrored } =
-    useAction(updateSaleStatus);
+  const { executeAsync, isExecuting, result } = useAction(updateSaleStatus);
 
   const handleUpdateStatus = async (saleId: string, status: SaleStatusType) => {
-    console.log('handleUpdateStatus', saleId, status, isExecuting);
     if (!saleId || isExecuting || !status) return;
     const res = await executeAsync({
       id: saleId,
@@ -388,10 +380,10 @@ export function ListSales({
                               </DropdownMenuPortal>
                             </DropdownMenuSub>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className='text-destructive'>
+                            {/* <DropdownMenuItem className='text-destructive'>
                               <Trash2 className='mr-2 h-4 w-4' />
                               Delete Sale
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -452,6 +444,17 @@ const SaleStatusDialog = ({
   saleId: string;
   onConfirm: (saleId: string, status: SaleStatusType) => Promise<void>;
 }) => {
+  const sensitiveAction = useSensitiveAction({
+    action: 'open_sale',
+    saleId,
+    data: { saleId, status: 'OPEN' },
+    onSuccess: () => {
+      toast.success('Admin action authenticated successfully');
+    },
+    onError: (error) => {
+      toast.error(`Authentication failed: ${error}`);
+    },
+  });
   return (
     <AlertDialogContent>
       <AlertDialogHeader>
@@ -472,7 +475,9 @@ const SaleStatusDialog = ({
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
         <AlertDialogAction
-          onClick={() => onConfirm(saleId, 'OPEN')}
+          onClick={() =>
+            sensitiveAction.executeAction(async () => onConfirm(saleId, 'OPEN'))
+          }
           className='bg-accent'
         >
           Yes, Open Sale

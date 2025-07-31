@@ -45,11 +45,11 @@ model User {
   // registrationStep  RegistrationStep        @default(REGISTRATION_NEW_ACCOUNT)
   // isSiwe           Boolean            @default(false)
 
-  profile          Profile?
-  sales            Sale[]
+  profile    Profile?
+  sales      Sale[]
   // isEmailVerify     EmailVerificationStatus @default(NOTVERIFIED)
-  userRole         UserRole[]
-  transactionAudit TransactionAudit[]
+  userRole   UserRole[]
+  auditTrail AuditTrail[]
 
   kycVerification KycVerification?
   sessions        Session[]
@@ -415,7 +415,7 @@ model SaleTransactions {
   paymentEvidence String?
   paymentDate     DateTime?
 
-  auditTrail         TransactionAudit[]
+  auditTrail         AuditTrail[]
   tokenDistributions TokenDistribution[]
 
   @@map("sales_transactions")
@@ -458,22 +458,22 @@ model ContractStatus {
   @@map("contract_status")
 }
 
-model TransactionAudit {
+model AuditTrail {
   id        String    @id @default(cuid()) @db.Text
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt DateTime  @updatedAt @db.Timestamptz(6)
   deletedAt DateTime? @db.Timestamptz(6)
 
-  transactionId String
-  transaction   SaleTransactions  @relation(fields: [transactionId], references: [id])
-  actionType    String
-  fromStatus    TransactionStatus
-  toStatus      TransactionStatus
-  performedBy   String
-  admin         User              @relation(fields: [performedBy], references: [id])
-  comment       String?
+  /// Used if the action is linked to a transaction
+  transactionId    String?
+  transaction      SaleTransactions? @relation(fields: [transactionId], references: [id])
+  actionType       String
+  performer        User              @relation(fields: [performerAddress], references: [walletAddress])
+  performerAddress String
+  content          Json?
+  comment          String?
 
-  @@map("transaction_audits")
+  @@map("audit_trails")
 }
 
 model KycVerification {

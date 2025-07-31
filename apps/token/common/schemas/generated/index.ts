@@ -108,7 +108,7 @@ export const BlockchainScalarFieldEnumSchema = z.enum(['id','createdAt','updated
 
 export const ContractStatusScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','saleId','contractId','status']);
 
-export const TransactionAuditScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','actionType','fromStatus','toStatus','performedBy','comment']);
+export const AuditTrailScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','actionType','performerAddress','content','comment']);
 
 export const KycVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','status','verifiedAt','rejectionReason']);
 
@@ -520,23 +520,25 @@ export const ContractStatusSchema = z.object({
 export type ContractStatus = z.infer<typeof ContractStatusSchema>
 
 /////////////////////////////////////////
-// TRANSACTION AUDIT SCHEMA
+// AUDIT TRAIL SCHEMA
 /////////////////////////////////////////
 
-export const TransactionAuditSchema = z.object({
-  fromStatus: TransactionStatusSchema,
-  toStatus: TransactionStatusSchema,
+export const AuditTrailSchema = z.object({
   id: z.string().cuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   deletedAt: z.coerce.date().nullable(),
-  transactionId: z.string(),
+  /**
+   * Used if the action is linked to a transaction
+   */
+  transactionId: z.string().nullable(),
   actionType: z.string(),
-  performedBy: z.string(),
+  performerAddress: z.string(),
+  content: JsonValueSchema.nullable(),
   comment: z.string().nullable(),
 })
 
-export type TransactionAudit = z.infer<typeof TransactionAuditSchema>
+export type AuditTrail = z.infer<typeof AuditTrailSchema>
 
 /////////////////////////////////////////
 // KYC VERIFICATION SCHEMA
