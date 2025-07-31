@@ -47,6 +47,7 @@ export const CreateSaleForm = () => {
   );
   const t = useTranslations('admin.sales.create');
   const { data } = useSale(saleId);
+  const steps = getSteps(t);
 
   const sale = data?.sale;
 
@@ -59,7 +60,7 @@ export const CreateSaleForm = () => {
   const sensitiveAction = useSensitiveAction({
     action: 'edit_sale',
     saleId,
-    data: { step },
+    data: { step: steps.find((s) => s.id === step)?.name },
     onSuccess: () => {
       toast.success('Admin action authenticated successfully');
     },
@@ -264,7 +265,6 @@ export const CreateSaleForm = () => {
     },
     [form]
   );
-  const steps = getSteps(t);
 
   return (
     <form.AppForm>

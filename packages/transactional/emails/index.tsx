@@ -6,6 +6,7 @@ import { WelcomeEmail } from './welcome';
 import { ICOSaleEndedEmail } from './sale-ended';
 import { UserTransactionNotification } from './user-transaction-confirmed';
 import { AdminTransactionNotification } from './admin-transaction-confirmed';
+import { ICOSaleOpenedEmail } from './sale-opened';
 
 const templates = {
   contact: ContactFormEmail,
@@ -14,6 +15,7 @@ const templates = {
   emailVerification: EmailVerification,
   welcome: WelcomeEmail,
   saleEnded: ICOSaleEndedEmail,
+  saleOpened: ICOSaleOpenedEmail,
   userTransactionConfirmed: UserTransactionNotification,
   adminTransactionConfirmed: AdminTransactionNotification,
 };

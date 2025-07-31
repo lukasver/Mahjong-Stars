@@ -2,14 +2,11 @@ import { cn } from '@mjs/ui/lib/utils';
 import { Button } from '@mjs/ui/primitives/button';
 import { UseAppForm, useFormContext } from '@mjs/ui/primitives/form';
 import { parseAsInteger, useQueryState } from 'nuqs';
-import { SensitiveActionWrapper } from '../sensitive-action-wrapper';
 
 export const FormFooter = ({
   steps,
-  saleId,
 }: {
   steps: { id: number; name: string }[];
-  saleId?: string;
 }) => {
   const [step, setStep] = useQueryState(
     'step',
@@ -28,15 +25,10 @@ export const FormFooter = ({
       >
         Back
       </Button>
-      <SensitiveActionWrapper
-        action='edit_sale'
-        data={{ step, saleId }}
-        enabled={!!saleId}
-      >
-        <form.SubmitButton className='min-w-32'>
-          {step === steps.length ? 'Finish' : 'Next'}
-        </form.SubmitButton>
-      </SensitiveActionWrapper>
+
+      <form.SubmitButton className='min-w-32'>
+        {step === steps.length ? 'Finish' : 'Next'}
+      </form.SubmitButton>
     </div>
   );
 };
