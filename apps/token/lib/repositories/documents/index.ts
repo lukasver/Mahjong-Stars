@@ -206,6 +206,7 @@ class DocumentsController {
         key: string;
       }[];
       type: 'KYC' | 'PAYMENT';
+      transactionId?: string;
     },
     _ctx: ActionCtx
   ) {
@@ -278,6 +279,13 @@ class DocumentsController {
         );
       }
       if (type === 'PAYMENT') {
+        const doc = documents[0];
+        if (dto.transactionId && doc) {
+          void prisma.saleTransactions.update({
+            where: { id: dto.transactionId },
+            data: { paymentEvidenceId: doc.id },
+          });
+        }
         //TODO check fi we want to associate something or if it is enought with linking to user
       }
       const [docs] = await Promise.all(promises);

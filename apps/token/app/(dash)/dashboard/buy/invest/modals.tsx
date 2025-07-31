@@ -136,7 +136,20 @@ export const TokenInvestModals = (props: TokenModalProps) => {
 };
 
 const LoadingModal = () => {
-  return <div>Loading</div>;
+  return (
+    <div className='flex items-center gap-2'>
+      <span className='aspect-square animate-pulse'>
+        <Image
+          height={80}
+          width={80}
+          src={MahjongStarsIconXl}
+          alt='Mahjong Stars Logo'
+          className='animate-spin aspect-square'
+        />
+      </span>
+      <span className='text-xl font-bold font-head'>Loading...</span>
+    </div>
+  );
 };
 
 const PendingTransactionModal = ({ sale }: { sale: SaleWithToken }) => {

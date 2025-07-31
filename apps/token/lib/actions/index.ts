@@ -493,7 +493,7 @@ export const getFileUploadPublicPresignedUrl = authActionClient
       key: z.string().min(1),
     })
   )
-  .action(async ({ ctx, parsedInput }) => {
+  .action(async ({ parsedInput }) => {
     const result = await documentsController.getPresignedUrl(
       parsedInput.key,
       'public',
@@ -514,7 +514,7 @@ export const getFileUploadPrivatePresignedUrl = authActionClient
       key: z.string().min(1),
     })
   )
-  .action(async ({ ctx, parsedInput }) => {
+  .action(async ({ parsedInput }) => {
     const result = await documentsController.getPresignedUrl(
       parsedInput.key,
       'private',
@@ -528,7 +528,7 @@ export const getFileUploadPrivatePresignedUrl = authActionClient
 
 export const validateMagicWord = authActionClient
   .schema(z.object({ invitationCode: z.string() }))
-  .action(async ({ ctx, parsedInput }) => {
+  .action(async ({ parsedInput }) => {
     if (!env.MAGIC_WORD) {
       // IF not set, then allow access
       return true;
@@ -590,6 +590,7 @@ export const associateDocumentsToUser = authActionClient
         })
       ),
       type: z.enum(['KYC', 'PAYMENT']).optional().default('KYC'),
+      transactionId: z.string().optional(),
     })
   )
   .action(async ({ ctx, parsedInput }) => {

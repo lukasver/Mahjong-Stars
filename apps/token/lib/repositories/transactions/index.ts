@@ -180,18 +180,7 @@ class TransactionsController {
     try {
       const transaction = await prisma.saleTransactions.findUnique({
         where: { id: String(dto.id) },
-        select: {
-          id: true,
-          amountPaid: true,
-          amountPaidCurrency: true,
-          totalAmount: true,
-          paidCurrency: true,
-          formOfPayment: true,
-          receivingWallet: true,
-          comment: true,
-          status: true,
-          rawPrice: true,
-          price: true,
+        include: {
           sale: {
             select: {
               id: true,
@@ -199,6 +188,7 @@ class TransactionsController {
               requiresKYC: true,
               saftCheckbox: true,
               tokenSymbol: true,
+
               saftContract: {
                 select: {
                   id: true,
@@ -644,7 +634,7 @@ class TransactionsController {
 
   async getContractForTransaction(
     dto: { txId: string; recipientId: string },
-    ctx: ActionCtx
+    _ctx: ActionCtx
   ) {
     try {
       //TODO! add own user check?

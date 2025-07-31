@@ -3,6 +3,7 @@
 import { type ColumnDef } from '@mjs/ui/primitives/data-table';
 import { Decimal } from 'decimal.js';
 import { FOP, TransactionStatus } from '@prisma/client';
+import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
 
 import { formatDate, safeFormatCurrency } from '@mjs/utils/client';
 import { Badge } from '@mjs/ui/primitives/badge';
@@ -26,9 +27,13 @@ import { TransactionWithRelations } from '@/common/types/transactions';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
-import { useState } from 'react';
-import { TokenInvestModals } from '@/app/(dash)/dashboard/buy/invest/modals';
-import { TransactionModalTypes } from '@/common/types';
+import { Suspense, useState } from 'react';
+import { TransactionDetailsModal } from './transaction-details-modal';
+import {
+  AlertDialog,
+  AlertDialogContent,
+} from '@mjs/ui/primitives/alert-dialog';
+import Image from 'next/image';
 
 const statusColors: Record<TransactionStatus, string> = {
   PENDING:
@@ -236,26 +241,9 @@ export const getColumns = (): ColumnDef<TransactionWithRelations>[] => [
 ];
 
 const ActionButtons = ({ row }: { row: TransactionWithRelations }) => {
-  // Only show actions for pending or awaiting payment transactions
-  // if (
-  //   row.status !== TransactionStatus.PENDING &&
-  //   row.status !== TransactionStatus.AWAITING_PAYMENT
-  // ) {
-  //   return (
-  //     <div className='flex items-center gap-2'>
-  //       <Button variant='ghost' size='sm'>
-  //         <Eye className='h-4 w-4' />
-  //       </Button>
-  //       <Button variant='ghost' size='sm'>
-  //         <MoreHorizontal className='h-4 w-4' />
-  //       </Button>
-  //     </div>
-  //   );
-  // }
-
   const status = row.status;
   const hasTxHash = cryptoTxTypeGuard(row);
-  const [open, setOpen] = useState<TransactionModalTypes | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <div className='flex items-center gap-2'>
@@ -267,7 +255,7 @@ const ActionButtons = ({ row }: { row: TransactionWithRelations }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowDetails(true)}>
             <Eye className='h-4 w-4 mr-2' />
             View Details
           </DropdownMenuItem>
@@ -281,9 +269,7 @@ const ActionButtons = ({ row }: { row: TransactionWithRelations }) => {
           )}
           {(status === TransactionStatus.AWAITING_PAYMENT ||
             status === TransactionStatus.PENDING) && (
-            <DropdownMenuItem
-              onClick={() => setOpen(TransactionModalTypes.PendingTx)}
-            >
+            <DropdownMenuItem>
               <XCircle className='h-4 w-4 mr-2 text-destructive' />
               Cancel
             </DropdownMenuItem>
@@ -308,7 +294,33 @@ const ActionButtons = ({ row }: { row: TransactionWithRelations }) => {
               </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
-      <TokenInvestModals open={open} handleModal={setOpen} sale={row.sale} />
+      <Suspense
+        key={row.id}
+        fallback={
+          <AlertDialog open={true}>
+            <AlertDialogContent>
+              <div className='flex items-center gap-2'>
+                <span className='aspect-square animate-pulse'>
+                  <Image
+                    height={80}
+                    width={80}
+                    src={MahjongStarsIconXl}
+                    alt='Mahjong Stars Logo'
+                    className='animate-spin aspect-square'
+                  />
+                </span>
+                <span className='text-xl font-bold font-head'>Loading...</span>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
+        }
+      >
+        <TransactionDetailsModal
+          open={showDetails}
+          onOpenChange={setShowDetails}
+          id={row.id}
+        />
+      </Suspense>
     </div>
   );
 };

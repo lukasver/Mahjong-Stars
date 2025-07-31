@@ -121,6 +121,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
         associateDocumentsToUser({
           documents: keys,
           type: 'PAYMENT',
+          transactionId: txId,
         }),
         confirmTransaction({
           id: txId,

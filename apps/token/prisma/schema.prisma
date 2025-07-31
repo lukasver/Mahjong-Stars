@@ -281,7 +281,7 @@ model DocumentRecipient {
   SaftContract   SaftContract? @relation(fields: [saftContractId], references: [id])
   saftContractId String?       @db.Text
 
-  // TODO! maybe link to a transaction??
+  SaleTransactions SaleTransactions?
 
   @@index([email])
   @@index([address, saftContractId])
@@ -332,6 +332,8 @@ model Document {
 
   kycVerification   KycVerification? @relation("KycDocuments", fields: [kycVerificationId], references: [id])
   kycVerificationId String?
+
+  SaleTransactions SaleTransactions?
 
   @@unique([id, url])
   @@map("documents")
@@ -406,14 +408,20 @@ model SaleTransactions {
   blockchain Blockchain? @relation(fields: [blockchainId], references: [id])
 
   blockchainId String?
-  agreementId  String?
+
+  // Not being used
+  agreement   DocumentRecipient? @relation(fields: [agreementId], references: [id])
+  agreementId String?            @unique
 
   approvedBy String?
   approver   User?   @relation("TransactionApprovals", fields: [approvedBy], references: [id])
 
   rejectionReason String?
-  paymentEvidence String?
-  paymentDate     DateTime?
+
+  paymentEvidence   Document? @relation(fields: [paymentEvidenceId], references: [id])
+  paymentEvidenceId String?   @unique
+
+  paymentDate DateTime?
 
   auditTrail         AuditTrail[]
   tokenDistributions TokenDistribution[]

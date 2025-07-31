@@ -1,4 +1,7 @@
 'use client';
+
+import Decimal from 'decimal.js';
+
 export * from './dates';
 export * from './currencies';
 
@@ -20,4 +23,15 @@ export const safeJsonParse = (value: string) => {
   } catch {
     return {};
   }
+};
+
+export const formatNumber = (
+  num?: number | string | null | Decimal,
+  locale: string = 'en-US'
+) => {
+  if (!num) return 'N/A';
+  const decimal = new Decimal(num);
+  const asNum = decimal.toNumber();
+  if (isNaN(asNum)) return 'N/A';
+  return new Intl.NumberFormat(locale).format(asNum);
 };

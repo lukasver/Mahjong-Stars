@@ -13,7 +13,10 @@ import {
   User,
 } from '@/common/schemas/generated';
 import { SaleWithToken } from '@/common/types/sales';
-import { TransactionWithRelations } from '@/common/types/transactions';
+import {
+  TransactionByIdWithRelations,
+  TransactionWithRelations,
+} from '@/common/types/transactions';
 import { BankDetails, DocumentSignatureStatus, FOP } from '@prisma/client';
 
 export type FetcherOptions = Omit<RequestInit, 'body'> & {
@@ -277,7 +280,9 @@ export const getUserPendingTransactionsForSale = async (saleId: string) => {
 export const getTransactionById = async (id: string) => {
   try {
     const data = await fetcher<{
-      transaction: SaleTransactions;
+      transaction: TransactionByIdWithRelations;
+      requiresKYC: boolean;
+      requiresSAFT: boolean;
     }>(`/transactions/${id}`);
     return { data, error: null };
   } catch (e) {
