@@ -1,5 +1,4 @@
 import { ROLES } from '@/common/config/constants';
-import { publicUrl } from '@/common/config/env';
 import { GetExchangeRate } from '@/common/schemas/dtos/rates';
 import { Failure, Success } from '@/common/schemas/dtos/utils';
 import {
@@ -44,14 +43,14 @@ class Fetcher {
   private defaultToken?: string;
   private defaultOptions: Omit<FetcherOptions, 'baseUrl' | 'token'>;
 
-  constructor(options: FetcherOptions = {}) {
+  constructor(options: FetcherOptions & { basePath?: string } = {}) {
     const { baseUrl = '', token, ...defaultOptions } = options;
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl + options.basePath;
     this.defaultToken = token;
     this.defaultOptions = defaultOptions;
   }
 
-  static create(options: FetcherOptions = {}): Fetcher {
+  static create(options: FetcherOptions & { basePath?: string } = {}): Fetcher {
     return new Fetcher(options);
   }
 
@@ -105,11 +104,9 @@ class Fetcher {
   };
 }
 
-const basePath = '/api/proxy';
-
 const { fetcher } = Fetcher.create({
   credentials: 'same-origin',
-  baseUrl: publicUrl + basePath,
+  basePath: '/api/proxy',
 });
 
 /**
