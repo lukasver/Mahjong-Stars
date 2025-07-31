@@ -12,10 +12,7 @@ import { Suspense } from 'react';
 import { DashboardSidebar } from '../../../components/sidebar';
 import AdminSidebar from './admin-sidebar';
 import { DashboardHeader } from './header';
-import { getCurrentUser } from '@/lib/actions';
-import usersController from '@/lib/repositories/users';
-import { getSessionCookie } from '@/lib/auth/cookies';
-import { verifyJwt } from '@/lib/auth/thirdweb';
+import { getCurrentUser } from '@/lib/services/fetchers-server';
 
 /**
  * Layout component for the dashboard section
@@ -28,26 +25,11 @@ export default async function DashboardLayout({
 }) {
   const queryClient = new QueryClient();
   const t = await getTranslations();
-  const _user = await getCurrentUser();
 
-  console.debug('🚀 ~ layout.tsx:33 ~ _user:', _user);
-
-  queryClient.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ['user', 'me'],
     queryFn: () => getCurrentUser(),
   });
-
-  const data = String((await getSessionCookie()) || '');
-  const verified = await verifyJwt(data);
-
-  console.debug('🚀 ~ layout.tsx:43 ~ verified:', verified);
-
-  if (!verified.valid) {
-    throw new Error('Invalid session');
-  }
-  const us = await usersController.getMe({ address: verified.parsedJWT.sub });
-
-  console.debug('🚀 ~ layout.tsx:44 ~ us:', us);
 
   return (
     <>

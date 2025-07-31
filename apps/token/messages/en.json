@@ -16,6 +16,18 @@
 		"goTransactions": "Go to transactions"
 	},
 	"admin": {
+		"wallet": {
+			"authenticationRequired": "Admin Authentication Required",
+			"authenticationDescription": "This action requires admin privileges. Please sign with your wallet to continue.",
+			"adminAction": "Admin Action",
+			"saleId": "Sale ID",
+			"action": "Action",
+			"timestamp": "Timestamp",
+			"connectWalletFirst": "Please connect your wallet first",
+			"signWithWallet": "Sign with Wallet",
+			"signing": "Signing...",
+			"tryAgain": "Try Again"
+		},
 		"sales": {
 			"create": {
 				"basic": {

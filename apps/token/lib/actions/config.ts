@@ -73,7 +73,6 @@ export const authActionClient = createSafeActionClient({
       invariant(user, 'User not found');
       await authCache.set(address, user);
     }
-    console.debug('🚀 ~ config.ts:61 ~ user:', user);
 
     return next({
       ctx: {

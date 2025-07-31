@@ -2,9 +2,10 @@
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { VerifyEmail } from '../../components/verify-email';
-import { getCurrentUser } from '@/lib/actions';
+
 import BackgroundWrapper from '@/components/bg-wrapper';
 import { PointerEventsGuard } from '@/components/thirdweb/pointer-events-guard';
+import { getCurrentUser } from '@/lib/services/fetchers-server';
 
 export default async function Onboarding({ searchParams }: PageProps) {
   const [res, params] = await Promise.all([getCurrentUser(), searchParams]);

@@ -5,7 +5,7 @@ import { getFooterLinks, metadata } from '@/common/config/site';
 import { BuyTokenButton } from '@/components/buy-token-button';
 import { InputOptionsProvider } from '@/components/hooks/use-input-options';
 import { DashboardSidebar } from '@/components/sidebar';
-import { getCurrentUser } from '@/lib/actions';
+import { getCurrentUser } from '@/lib/services/fetchers-server';
 import { isAdmin } from '@/lib/utils';
 import { Footer } from '@mjs/ui/components/footer';
 import {

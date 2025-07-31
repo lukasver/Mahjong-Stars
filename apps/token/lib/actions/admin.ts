@@ -23,6 +23,10 @@ import { TransactionStatus } from '@prisma/client';
 import { z } from 'zod';
 import { type JSONContent } from '@mjs/utils/server/tiptap';
 import { BankDetailsSchema } from '@/components/admin/create-sales/utils';
+import {
+  verifyAdminSignature,
+  AdminActionPayloadSchema,
+} from '@/lib/auth/admin-wallet-auth';
 
 const isAdmin = adminCache.wrap(async (walletAddress: string) => {
   return await prisma.user.findUniqueOrThrow({
@@ -260,7 +264,7 @@ export const cancelAllTransactions = adminClient
 /**
  * @warning ADMIN REQUIRED
  */
-export const createSaftContract = authActionClient
+export const createSaftContract = adminClient
   .schema(
     z.object({
       content: z.union([z.string(), z.custom<JSONContent>()]),
@@ -270,9 +274,27 @@ export const createSaftContract = authActionClient
     })
   )
   .action(async ({ ctx, parsedInput }) => {
+    console.log('ENTRE?', parsedInput);
     const result = await documentsController.createSaft(parsedInput, ctx);
     if (!result.success) {
       throw new Error(result.message);
     }
+    return result;
+  });
+
+/**
+ * Verify admin action signature and permissions
+ */
+export const verifyAdminAction = adminClient
+  .schema(
+    z.object({
+      payload: AdminActionPayloadSchema,
+      signature: z.string(),
+      address: z.string(),
+      chainId: z.number(),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    const result = await verifyAdminSignature(parsedInput);
     return result;
   });

@@ -163,21 +163,21 @@ export const logout = loginActionClient.action(async () => {
   redirect('/');
 });
 
-export const getCurrentUser = authActionClient.action(
-  async ({ ctx: { address } }) => {
-    // const user = await getUser({
-    //   client,
-    //   email: address,
-    //   // walletAddress: address,
-    // });
+// export const getCurrentUser = authActionClient.action(
+//   async ({ ctx: { address } }) => {
+//     // const user = await getUser({
+//     //   client,
+//     //   email: address,
+//     //   // walletAddress: address,
+//     // });
 
-    const user = await usersController.getMe({ address });
-    if (!user.success) {
-      throw new Error(user.message);
-    }
-    return user.data;
-  }
-);
+//     const user = await usersController.getMe({ address });
+//     if (!user.success) {
+//       throw new Error(user.message);
+//     }
+//     return user.data;
+//   }
+// );
 
 export const getCurrentUserEmail = authActionClient.action(
   async ({ ctx: { address } }) => {

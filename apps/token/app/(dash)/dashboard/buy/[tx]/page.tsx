@@ -1,4 +1,4 @@
-import { getCurrentUser, getTransactionById } from '@/lib/actions';
+import { getTransactionById } from '@/lib/actions';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import { cn } from '@mjs/ui/lib/utils';
 import {
@@ -15,6 +15,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { VerifyMandatoryEmail } from '@/components/buy/verify-mandatory-email';
 import { TransactionStatus } from '@prisma/client';
+import { getCurrentUser } from '@/lib/services/fetchers-server';
 
 const idGen = () => {
   let id = 1;
