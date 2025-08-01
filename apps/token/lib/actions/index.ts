@@ -19,7 +19,6 @@ import { invariant } from '@epic-web/invariant';
 import { redirect } from 'next/navigation';
 import { defineChain, getContract as getContractThirdweb } from 'thirdweb';
 import { bscTestnet } from 'thirdweb/chains';
-import { erc20Abi } from 'viem';
 import { z } from 'zod';
 import { authCache } from '../auth/cache';
 import {
@@ -42,6 +41,7 @@ import {
 import { env } from '@/common/config/env';
 import { InvestFormSchema } from '@/components/invest/schemas';
 import { FOP, Prisma } from '@prisma/client';
+import { erc20Abi } from '../services/crypto/ABI';
 
 export const hasActiveSession = async (address: string, token: string) => {
   const sessions = await prisma.session.findMany({

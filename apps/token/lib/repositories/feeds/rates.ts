@@ -7,7 +7,7 @@ import { env } from '@/common/config/env';
 import { getContract, readContract } from 'thirdweb';
 import { serverClient } from '@/lib/auth/thirdweb';
 import { bsc } from 'thirdweb/chains';
-import { formatUnits } from 'ethers';
+
 import { AggregatorV3InterfaceABI } from '@/lib/services/crypto/ABI';
 import { Failure, Success } from '@/common/schemas/dtos/utils';
 import { GetExchangeRate } from '@/common/schemas/dtos/rates';
@@ -16,6 +16,7 @@ import { prisma } from '@/lib/db/prisma';
 import { Cacheable } from 'cacheable';
 import 'server-only';
 import { ONE_MINUTE } from '@/common/config/constants';
+import { formatUnits } from 'ethers';
 
 const cacheTTL =
   ONE_MINUTE * (process.env.NODE_ENV === 'production' ? 1 : 10 * 60);
