@@ -16,14 +16,18 @@ body {
   color: var(--foreground);
 }
 
-@layer utilities {
-  .border-gradient {
-    border: 1px solid;
-    border-image-source: linear-gradient(
-      144.54deg,
-      #ffffff 2.22%,
-      rgba(255, 255, 255, 0) 54.79%,
-      #ffffff 95.31%
-    );
+@utility border-gradient {
+  border: 1px solid;
+  border-image-source: linear-gradient(
+    144.54deg,
+    #ffffff 2.22%,
+    rgba(255, 255, 255, 0) 54.79%,
+    #ffffff 95.31%
+  );
+}
+
+@utility scrollbar-hidden {
+  &::-webkit-scrollbar {
+    display: none;
   }
 }

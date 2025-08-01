@@ -10,13 +10,20 @@ import { DataTable } from '@mjs/ui/primitives/data-table';
 import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 import { getColumns } from './columns';
 import { NetworkStatus } from '../network-status';
-import { TransactionWithRelations } from '@/common/types/transactions';
+import {
+  AdminTransactionsWithRelations,
+  TransactionWithRelations,
+} from '@/common/types/transactions';
 
 interface TransactionsProps {
-  transactions?: TransactionWithRelations[];
+  transactions?: TransactionWithRelations[] | AdminTransactionsWithRelations[];
+  isAdmin?: boolean;
 }
 
-export const Transactions = ({ transactions }: TransactionsProps) => {
+export const Transactions = ({
+  transactions,
+  isAdmin = false,
+}: TransactionsProps) => {
   const [loadingAction, setLoadingAction] = useState(false);
 
   // Set initial column visibility to hide the ID column
@@ -51,7 +58,7 @@ export const Transactions = ({ transactions }: TransactionsProps) => {
 
       <div className='min-h-[30rem] h-[75vh] mb-8'>
         <DataTable
-          columns={getColumns()}
+          columns={getColumns(isAdmin)}
           data={transactions || []}
           loading={loadingAction}
           pageSize={10}

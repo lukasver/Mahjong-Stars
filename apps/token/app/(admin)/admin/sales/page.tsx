@@ -1,5 +1,4 @@
 import { ListSales } from '@/components/admin/list-sales';
-import BackgroundWrapper from '@/components/bg-wrapper';
 import { getSales } from '@/lib/actions';
 import {
   dehydrate,
@@ -15,12 +14,10 @@ export default async function AdminPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <BackgroundWrapper>
-        <ListSales
-          title='Sales List'
-          description='View and manage all token sales'
-        />
-      </BackgroundWrapper>
+      <ListSales
+        title='Sales List'
+        description='View and manage all token sales'
+      />
     </HydrationBoundary>
   );
 }

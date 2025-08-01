@@ -5,15 +5,20 @@ import { OverviewProject } from '../../../../components/buy/overview';
 import { Coins } from 'lucide-react';
 import { ProjectInformation } from './information';
 import { SaleCoverImage } from './cover-image';
-import { Invest } from './invest';
+import { Invest } from '../../../../components/invest';
 import { SaleWithToken } from '@/common/types/sales';
-import { invariant } from '@epic-web/invariant';
+import { ComingSoon } from '../../../../components/coming-soon';
 
 export const TokenSale = () => {
-  const { data: sale } = useActiveSale();
+  const { data: sale, status } = useActiveSale();
 
-  // invariant(!error, 'Sale not found');
-  invariant(sale, 'Sale not found');
+  if (!sale && status === 'error') {
+    throw new Error('Sale not found');
+  }
+
+  if (!sale) {
+    return <ComingSoon />;
+  }
 
   return (
     <div className='h-full w-full px-4 py-8'>

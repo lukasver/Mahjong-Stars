@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useTransition } from 'react';
+import { useCallback, useRef, useState, useTransition } from 'react';
 import {
   UseAppForm,
   useAppForm,
@@ -26,7 +26,7 @@ import { invariant } from '@epic-web/invariant';
 import { SaleWithToken } from '@/common/types/sales';
 import { Account } from 'thirdweb/wallets';
 import { formatCurrency } from '@mjs/utils/client';
-import { AlertTriangle, FileText, Shield } from 'lucide-react';
+import { FileText, Shield } from 'lucide-react';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
 import { useAction } from 'next-safe-action/hooks';
@@ -49,6 +49,7 @@ import { getQueryClient } from '@/app/providers';
 import { Card, CardContent } from '@mjs/ui/primitives/card';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
 import { Input } from '@mjs/ui/primitives/input';
+import { FormError, FormErrorProps } from '@/components/form-error';
 const Decimal = Prisma.Decimal;
 
 export const InvestForm = ({
@@ -62,6 +63,11 @@ export const InvestForm = ({
 }) => {
   const { activeAccount } = useActiveAccount();
   const { data: user } = useUser();
+  const errorCountRef = useRef(0);
+  const [blockForm, setBlockForm] = useState<null | Omit<
+    FormErrorProps,
+    'icon'
+  >>(null);
   const router = useRouter();
   const { data: options, isLoading: loadingOptions } = useInputOptions();
 
@@ -166,22 +172,30 @@ export const InvestForm = ({
     [form]
   );
 
+  const resetCurrencyAndPPU = (q: number = 1) => {
+    if (sale) {
+      form.setFieldValue('paid.ppu', sale.tokenPricePerUnit.toString());
+      form.setFieldValue('paid.currency', sale.currency);
+      form.setFieldValue(
+        'paid.amount',
+        new Decimal(q)
+          .mul(sale.tokenPricePerUnit)
+          .toFixed(calculator.FIAT_PRECISION)
+      );
+    } else {
+      setBlockForm({ type: 'maintenance' });
+    }
+  };
+
   const handleChangeCurrency = async (v: string) => {
     startTransition(async () => {
+      const q = form.getFieldValue('paid.quantity') || 1;
       try {
-        const q = form.getFieldValue('paid.quantity') || 1;
         invariant(q, 'Quantity is required');
 
         // Change to original currency
         if (v === sale?.currency) {
-          form.setFieldValue('paid.ppu', sale.tokenPricePerUnit.toString());
-          form.setFieldValue('paid.currency', sale.currency);
-          form.setFieldValue(
-            'paid.amount',
-            new Decimal(q)
-              .mul(sale.tokenPricePerUnit)
-              .toFixed(calculator.FIAT_PRECISION)
-          );
+          resetCurrencyAndPPU(q);
           return;
         }
 
@@ -197,15 +211,20 @@ export const InvestForm = ({
           currency,
           // tokenDecimals: decimals,
         });
-
-        console.debug('PPU', pricePerUnit, 'AMOUNT', amount);
         // form.reset({})
         form.setFieldValue('paid.amount', amount);
         form.setFieldValue('paid.ppu', pricePerUnit);
         form.setFieldValue('paid.currency', currency);
         form.setFieldValue('paid.quantity', q);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : 'Unknown error');
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        toast.error(message);
+        if (errorCountRef.current >= 3) {
+          setBlockForm({ type: 'custom', title: message });
+        } else {
+          errorCountRef.current++;
+          resetCurrencyAndPPU(q);
+        }
       }
     });
   };
@@ -214,21 +233,18 @@ export const InvestForm = ({
     return <InvestSkeleton />;
   }
 
+  if (blockForm) {
+    return <FormError {...blockForm} />;
+  }
+
   if (!sale) {
-    return (
-      <Alert className='border-primary-200 bg-primary-100 dark:border-red-800 dark:bg-red-950/50'>
-        <AlertTriangle className='h-4 w-4 text-red-500' />
-        <AlertDescription className='text-white/90 space-y-1'>
-          <h4 className='text-sm font-medium text-red-800 dark:text-red-200'>
-            Investment Period Ended
-          </h4>
-          <p className='text-xs text-red-700 dark:text-red-300'>
-            This token sale has concluded and is no longer accepting new
-            investments. Thank you for your interest.
-          </p>
-        </AlertDescription>
-      </Alert>
-    );
+    return <FormError type='sale-ended' />;
+  }
+
+  // Check if wallet is required but not connected
+  const isWalletConnected = !!activeAccount?.address;
+  if (!isWalletConnected) {
+    return <FormError type='wallet-required' />;
   }
 
   const amountDescription = getAmountDescription(sale, locale);
@@ -247,6 +263,8 @@ export const InvestForm = ({
           inputProps={{
             placeholder: '0x1234567890',
           }}
+          description='The address where tokens will be sent after release'
+          descriptionClassName='text-secondary scroll scrollbar-hidden '
         />
 
         {/* Quantity */}
@@ -285,6 +303,7 @@ export const InvestForm = ({
               spellCheck: false,
               placeholder: '0.00',
             }}
+            descriptionClassName='text-secondary scrollbar-hidden'
             description={amountDescription}
           />
           <div className='flex items-end w-full'>
@@ -297,11 +316,15 @@ export const InvestForm = ({
                 loading: isPending,
                 decimalScale: getDecimalScale(paidCurrency),
                 decimalsLimit: 18,
-                className: 'rounded-r-none pointer-events-none',
-                disabled: true,
+                className:
+                  'rounded-r-none pointer-events-none cursor-not-allowed',
+                // disabled: true,
                 intlConfig: {
                   locale,
-                  currency: sale.currency,
+                  currency:
+                    paidCurrency && FIAT_CURRENCIES.includes(paidCurrency)
+                      ? paidCurrency
+                      : undefined,
                   maximumFractionDigits: calculator.CRYPTO_PRECISION,
                   minimumFractionDigits: 3,
                 },

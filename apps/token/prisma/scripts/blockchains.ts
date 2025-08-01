@@ -4,7 +4,11 @@ import {
 } from '@/services/crypto/config';
 import { invariant } from '@epic-web/invariant';
 import { PrismaClient } from '@prisma/client';
-import { createThirdwebClient, defineChain } from 'thirdweb';
+import {
+  createThirdwebClient,
+  defineChain,
+  NATIVE_TOKEN_ADDRESS,
+} from 'thirdweb';
 
 const secretKey = process.env.THIRDWEB_API_SECRET;
 invariant(secretKey, 'THIRDWEB_API_SECRET is not set');
@@ -33,6 +37,7 @@ export async function seedBlockchains(prisma: PrismaClient) {
     decimals: nativeCurrency?.decimals,
     chainId: id,
     name: nativeCurrency?.name,
+    contractAddress: NATIVE_TOKEN_ADDRESS,
   })).filter(Boolean);
 
   await Promise.all([
@@ -47,6 +52,7 @@ export async function seedBlockchains(prisma: PrismaClient) {
                   chainId: t.chainId,
                 },
               },
+              contractAddress: t.contractAddress,
               name: t.name!,
               decimals: t.decimals!,
               isNative: true,
@@ -55,68 +61,55 @@ export async function seedBlockchains(prisma: PrismaClient) {
         },
       })
     ),
-
-    await Promise.all(
-      Object.entries(NETWORK_TO_TOKEN_MAPPING).map(
-        async ([chainId, tokens]) => {
-          return Promise.all(
-            Object.entries(tokens).map(async ([tokenSymbol, token]) => {
-              return prisma.token.create({
-                data: {
-                  symbol: tokenSymbol,
-                  totalSupply: '888888888',
-                  image:
-                    'https://d391b93f5f62d9c15f67142e43841acc.ipfscdn.io/ipfs/QmZegnyup388YaXGfRfCZotLguFZyEZXjhDsn2N5pvx7to/Star%20Point.png',
-                  TokensOnBlockchains: {
-                    create: {
-                      blockchain: {
-                        connectOrCreate: {
-                          where: {
-                            chainId: Number(chainId),
-                          },
-                          create: {
-                            chainId: Number(chainId),
-                            name: defineChain(Number(chainId)).name || '',
-                            rpcUrl: defineChain(Number(chainId)).rpc,
-                            explorerUrl: defineChain(Number(chainId))
-                              .blockExplorers?.[0]?.url,
-                            isTestnet:
-                              defineChain(Number(chainId)).testnet ||
-                              defineChain(Number(chainId))
-                                .name?.toLowerCase()
-                                ?.includes('testnet'),
-                            isEnabled: true,
-                          },
-                        },
+  ]);
+  await Promise.all(
+    Object.entries(NETWORK_TO_TOKEN_MAPPING).map(async ([chainId, tokens]) => {
+      return Promise.all(
+        Object.entries(tokens).map(async ([tokenSymbol, token]) => {
+          if (token.isNative) {
+            // Native token creation is handled in the previous step
+            return Promise.resolve();
+          }
+          return prisma.token.create({
+            data: {
+              symbol: tokenSymbol,
+              totalSupply: tokenSymbol === 'tMJS' ? '888888888' : null,
+              image:
+                tokenSymbol === 'tMJS'
+                  ? 'https://d391b93f5f62d9c15f67142e43841acc.ipfscdn.io/ipfs/QmZegnyup388YaXGfRfCZotLguFZyEZXjhDsn2N5pvx7to/Star%20Point.png'
+                  : null,
+              TokensOnBlockchains: {
+                create: {
+                  blockchain: {
+                    connectOrCreate: {
+                      where: {
+                        chainId: Number(chainId),
                       },
-                      name: tokenSymbol,
-                      decimals: token.decimals,
-                      contractAddress: token.contract,
+                      create: {
+                        chainId: Number(chainId),
+                        name: defineChain(Number(chainId)).name || '',
+                        rpcUrl: defineChain(Number(chainId)).rpc,
+                        explorerUrl: defineChain(Number(chainId))
+                          .blockExplorers?.[0]?.url,
+                        isTestnet:
+                          defineChain(Number(chainId)).testnet ||
+                          defineChain(Number(chainId))
+                            .name?.toLowerCase()
+                            ?.includes('testnet'),
+                        isEnabled: true,
+                      },
                     },
                   },
+                  name: tokenSymbol,
+                  decimals: token.decimals,
+                  contractAddress: token.contract,
+                  isNative: token.isNative,
                 },
-              });
-            })
-          );
-        }
-      )
-    ),
-    // Testnet tokens
-    prisma.token.create({
-      data: {
-        symbol: 'tMJS',
-        totalSupply: '888888888',
-        image:
-          'https://d391b93f5f62d9c15f67142e43841acc.ipfscdn.io/ipfs/QmZegnyup388YaXGfRfCZotLguFZyEZXjhDsn2N5pvx7to/Star%20Point.png',
-        TokensOnBlockchains: {
-          create: {
-            chainId: 97,
-            name: 'MJS BNB Testnet',
-            decimals: 18,
-            contractAddress: '0x8699210141B710c46eC211cDD39D2C2edDA7A63c',
-          },
-        },
-      },
-    }),
-  ]);
+              },
+            },
+          });
+        })
+      );
+    })
+  );
 }

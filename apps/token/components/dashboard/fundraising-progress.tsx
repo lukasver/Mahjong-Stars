@@ -1,4 +1,5 @@
 'use client';
+import { ComingSoonContent } from '@/components/coming-soon';
 import { useActiveSale } from '@/lib/services/api';
 import {
   Card,
@@ -25,8 +26,20 @@ export function FundraisingProgress({
   const sold = total - available;
   const percentage = Math.round((sold / total) * 100);
 
+  // if (isLoading) {
+  //   return (
+  //     <div className='py-6'>
+  //       <PulseLoader />
+  //     </div>
+  //   );
+  // }
+
   if (!activeSale) {
-    throw new Error(t('noActiveSale'));
+    return (
+      <div className='py-6'>
+        <ComingSoonContent to={undefined} />
+      </div>
+    );
   }
 
   const daysRemaining = Math.floor(

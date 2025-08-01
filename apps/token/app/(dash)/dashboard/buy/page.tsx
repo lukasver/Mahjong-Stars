@@ -5,7 +5,7 @@ import {
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-import { ComingSoon } from './coming-soon';
+import { ComingSoon } from '../../../../components/coming-soon';
 import { TokenSale } from './sale';
 import BackgroundWrapper from '@/components/bg-wrapper';
 

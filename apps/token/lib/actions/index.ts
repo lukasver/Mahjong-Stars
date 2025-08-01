@@ -40,7 +40,7 @@ import {
   setSessionCookie,
 } from '../auth/cookies';
 import { env } from '@/common/config/env';
-import { InvestFormSchema } from '@/app/(dash)/dashboard/buy/invest/schemas';
+import { InvestFormSchema } from '@/components/invest/schemas';
 import { FOP, Prisma } from '@prisma/client';
 
 export const hasActiveSession = async (address: string, token: string) => {

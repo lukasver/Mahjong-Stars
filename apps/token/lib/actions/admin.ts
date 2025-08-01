@@ -28,7 +28,7 @@ import {
   AdminActionPayloadSchema,
 } from '@/lib/auth/admin-wallet-auth';
 
-const isAdmin = adminCache.wrap(async (walletAddress: string) => {
+export const isAdmin = adminCache.wrap(async (walletAddress: string) => {
   return await prisma.user.findUniqueOrThrow({
     where: {
       walletAddress,

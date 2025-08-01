@@ -7,7 +7,7 @@ import { FundraisingProgress } from '../../../components/dashboard/fundraising-p
 import { getActiveSale } from '@/lib/actions';
 import { cn } from '@mjs/ui/lib/utils';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
-import { ComingSoonContent } from './buy/coming-soon';
+import { ComingSoonContent } from '../../../components/coming-soon';
 import { FeatureCards } from '@/components/feature-cards';
 import BackgroundWrapper from '@/components/bg-wrapper';
 

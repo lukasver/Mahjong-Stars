@@ -1,88 +1,88 @@
-@import "@mjs/tailwind-config";
+@import '@mjs/tailwind-config';
 
 @custom-variant dark (&:is(.dark *));
 @config "../tailwind.config.js";
 
 @theme inline {
-	--color-background: var(--primary);
-	--color-foreground: var(--white);
+  --color-background: var(--primary);
+  --color-foreground: var(--white);
 
-	--color-primary-100: var(--primary-lighter);
-	--color-primary-200: var(--primary-lighter);
-	--color-primary-300: var(--primary-light);
-	--color-primary-400: var(--primary-light);
-	--color-primary-500: var(--primary-main);
-	--color-primary-600: var(--primary-main);
-	--color-primary-700: var(--primary-dark);
-	--color-primary-800: var(--primary-dark);
-	--color-primary-900: var(--primary-darker);
-	--color-primary-950: var(--primary-darkest);
+  --color-primary-100: var(--primary-lighter);
+  --color-primary-200: var(--primary-lighter);
+  --color-primary-300: var(--primary-light);
+  --color-primary-400: var(--primary-light);
+  --color-primary-500: var(--primary-main);
+  --color-primary-600: var(--primary-main);
+  --color-primary-700: var(--primary-dark);
+  --color-primary-800: var(--primary-dark);
+  --color-primary-900: var(--primary-darker);
+  --color-primary-950: var(--primary-darkest);
 
-	--color-secondary-100: var(--secondary-lighter);
-	--color-secondary-200: var(--secondary-lighter);
-	--color-secondary-300: var(--secondary-light);
-	--color-secondary-400: var(--secondary-light);
-	--color-secondary-500: var(--secondary-main);
-	--color-secondary-600: var(--secondary-main);
-	--color-secondary-700: var(--secondary-dark);
-	--color-secondary-800: var(--secondary-dark);
-	--color-secondary-900: var(--secondary-darker);
+  --color-secondary-100: var(--secondary-lighter);
+  --color-secondary-200: var(--secondary-lighter);
+  --color-secondary-300: var(--secondary-light);
+  --color-secondary-400: var(--secondary-light);
+  --color-secondary-500: var(--secondary-main);
+  --color-secondary-600: var(--secondary-main);
+  --color-secondary-700: var(--secondary-dark);
+  --color-secondary-800: var(--secondary-dark);
+  --color-secondary-900: var(--secondary-darker);
 
-	--color-sidebar-ring: var(--sidebar-ring);
-	--color-sidebar-border: var(--sidebar-border);
-	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-	--color-sidebar-accent: var(--sidebar-accent);
-	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-	--color-sidebar-primary: var(--sidebar-primary);
-	--color-sidebar-foreground: var(--sidebar-foreground);
-	--color-sidebar: var(--sidebar);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
 
-	--animate-rainbow: rainbow var(--speed, 2s) infinite linear;
-	--animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite
-		alternate;
-	--animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+  --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite
+    alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
 
-	--color-popover: var(--popover);
-	--color-popover-foreground: var(--popover-foreground);
-	--color-border: var(--border);
-	--color-input: var(--input);
-	--color-ring: var(--ring);
-	--color-radius: var(--radius);
-	--color-card: var(--card);
-	--color-card-foreground: var(--card-foreground);
-	--color-background: var(--background);
-	--animate-aurora: aurora 8s ease-in-out infinite alternate;
-	@keyframes aurora {
-		0% {
-			background-position: 0% 50%;
-			transform: rotate(-5deg) scale(0.9);
-		}
-		25% {
-			background-position: 50% 100%;
-			transform: rotate(5deg) scale(1.1);
-		}
-		50% {
-			background-position: 100% 50%;
-			transform: rotate(-3deg) scale(0.95);
-		}
-		75% {
-			background-position: 50% 0%;
-			transform: rotate(3deg) scale(1.05);
-		}
-		100% {
-			background-position: 0% 50%;
-			transform: rotate(-5deg) scale(0.9);
-		}
-	}
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-radius: var(--radius);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-background: var(--background);
+  --animate-aurora: aurora 8s ease-in-out infinite alternate;
+  @keyframes aurora {
+    0% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
+    }
+    25% {
+      background-position: 50% 100%;
+      transform: rotate(5deg) scale(1.1);
+    }
+    50% {
+      background-position: 100% 50%;
+      transform: rotate(-3deg) scale(0.95);
+    }
+    75% {
+      background-position: 50% 0%;
+      transform: rotate(3deg) scale(1.05);
+    }
+    100% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
+    }
+  }
 }
 
 @keyframes rainbow {
-	0% {
-		background-position: 0%;
-	}
-	100% {
-		background-position: 200%;
-	}
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 200%;
+  }
 }
 
 /*
@@ -94,442 +94,456 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-	*,
-	::after,
-	::before,
-	::backdrop,
-	::file-selector-button {
-		border-color: var(--color-gray-200, currentcolor);
-	}
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
 }
 
 /**
  * Fancy overlay gradients & animation.
  */
 @property --fancy-x {
-	syntax: "<percentage>";
-	inherits: true;
-	initial-value: 0%;
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
 }
 @property --fancy-y {
-	syntax: "<percentage>";
-	inherits: true;
-	initial-value: 0%;
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
 }
 
 @utility perspective-left {
-	box-shadow: var(--hard-shadow);
-	transform: perspective(400em) rotateY(-15deg) rotateX(6deg) skew(-8deg, 4deg)
-		translate3d(-4%, -2%, 0) scale(0.8);
+  box-shadow: var(--hard-shadow);
+  transform: perspective(400em) rotateY(-15deg) rotateX(6deg) skew(-8deg, 4deg)
+    translate3d(-4%, -2%, 0) scale(0.8);
 }
 
 @utility perspective-right {
-	box-shadow: var(--hard-shadow-left);
-	transform: perspective(400em) rotateY(15deg) rotateX(6deg) skew(8deg, -4deg)
-		translate3d(4%, -2%, 0) scale(0.8);
+  box-shadow: var(--hard-shadow-left);
+  transform: perspective(400em) rotateY(15deg) rotateX(6deg) skew(8deg, -4deg)
+    translate3d(4%, -2%, 0) scale(0.8);
 }
 
 @utility perspective-bottom {
-	box-shadow: var(--hard-shadow);
-	transform: translateY(-4%) perspective(400em) rotateX(18deg) scale(0.9);
+  box-shadow: var(--hard-shadow);
+  transform: translateY(-4%) perspective(400em) rotateX(18deg) scale(0.9);
 }
 
 @utility perspective-bottom-lg {
-	box-shadow: var(--hard-shadow);
-	transform: perspective(400em) translate3d(0, -6%, 0) rotateX(34deg) scale(0.8);
+  box-shadow: var(--hard-shadow);
+  transform: perspective(400em) translate3d(0, -6%, 0) rotateX(34deg) scale(0.8);
 }
 
 @utility perspective-paper {
-	box-shadow: var(--hard-shadow);
-	transform: rotateX(40deg) rotate(40deg) scale(0.8);
+  box-shadow: var(--hard-shadow);
+  transform: rotateX(40deg) rotate(40deg) scale(0.8);
 }
 
 @utility perspective-paper-left {
-	box-shadow: var(--hard-shadow-left);
-	transform: rotateX(40deg) rotate(-40deg) scale(0.8);
+  box-shadow: var(--hard-shadow-left);
+  transform: rotateX(40deg) rotate(-40deg) scale(0.8);
 }
 
 @utility hard-shadow {
-	box-shadow: var(--hard-shadow);
+  box-shadow: var(--hard-shadow);
 }
 
 @utility hard-shadow-left {
-	box-shadow: var(--hard-shadow-left);
+  box-shadow: var(--hard-shadow-left);
 }
 
 @utility faq {
-	& li h3 {
-		@apply font-semibold text-lg;
-	}
+  & li h3 {
+    @apply font-semibold text-lg;
+  }
 }
 
 @utility nav-link-active {
-	@apply opacity-80 py-2 rounded-sm text-secondary-500 dark:text-slate-400;
+  @apply opacity-80 py-2 rounded-sm text-secondary-500 dark:text-slate-400;
 }
 
 @utility nav-link {
-	@apply opacity-100 text-slate-900 dark:text-slate-200 hover:text-secondary-700 dark:hover:text-secondary-100 transition-all;
+  @apply opacity-100 text-slate-900 dark:text-slate-200 hover:text-secondary-700 dark:hover:text-secondary-100 transition-all;
 }
 
 @utility fancy-heading {
-	@supports (background-clip: text) {
-		background-image: linear-gradient(
-			rgb(10, 10, 10) 10%,
-			rgba(10, 10, 10, 0.68)
-		);
-		background-clip: text;
-		color: transparent;
+  @supports (background-clip: text) {
+    background-image: linear-gradient(
+      rgb(10, 10, 10) 10%,
+      rgba(10, 10, 10, 0.68)
+    );
+    background-clip: text;
+    color: transparent;
 
-		.dark & {
-			background-image: linear-gradient(
-				rgb(245, 245, 245) 10%,
-				rgba(245, 245, 245, 0.68)
-			);
-			background-clip: text;
-			color: transparent;
-		}
-	}
+    .dark & {
+      background-image: linear-gradient(
+        rgb(245, 245, 245) 10%,
+        rgba(245, 245, 245, 0.68)
+      );
+      background-clip: text;
+      color: transparent;
+    }
+  }
 }
 
 @utility dark {
-	@supports (background-clip: text) {
-		& .fancy-heading {
-			background-image: linear-gradient(
-				rgb(245, 245, 245) 10%,
-				rgba(245, 245, 245, 0.68)
-			);
-			background-clip: text;
-			color: transparent;
-		}
-	}
+  @supports (background-clip: text) {
+    & .fancy-heading {
+      background-image: linear-gradient(
+        rgb(245, 245, 245) 10%,
+        rgba(245, 245, 245, 0.68)
+      );
+      background-clip: text;
+      color: transparent;
+    }
+  }
 
-	& .fancy-overlay::after {
-		background-image: linear-gradient(
-			54deg,
-			var(--primary-dark) var(--fancy-y) var(--fancy-y),
-			var(--secondary-dark) var(--fancy-x) var(--fancy-x)
-		);
-	}
+  & .fancy-overlay::after {
+    background-image: linear-gradient(
+      54deg,
+      var(--primary-dark) var(--fancy-y) var(--fancy-y),
+      var(--secondary-dark) var(--fancy-x) var(--fancy-x)
+    );
+  }
 
-	& .fancy-link {
-		color: rgba(255, 255, 255, 0.5);
-	}
+  & .fancy-link {
+    color: rgba(255, 255, 255, 0.5);
+  }
 }
 
 @utility fancy-overlay {
-	&::after {
-		--maximum-opacity: 0.1;
+  &::after {
+    --maximum-opacity: 0.1;
 
-		content: "";
-		position: fixed;
-		top: 0;
-		left: 0;
-		z-index: -1;
-		width: 100%;
-		height: 100%;
-		background-image: linear-gradient(
-			54deg,
-			var(--primary-light) var(--fancy-y) var(--fancy-y),
-			var(--secondary-light) var(--fancy-x) var(--fancy-x)
-		);
-		animation: roundabout 5s ease-in-out both;
-	}
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(
+      54deg,
+      var(--primary-light) var(--fancy-y) var(--fancy-y),
+      var(--secondary-light) var(--fancy-x) var(--fancy-x)
+    );
+    animation: roundabout 5s ease-in-out both;
+  }
 
-	.dark &::after {
-		background-image: linear-gradient(
-			54deg,
-			var(--primary-dark) var(--fancy-y) var(--fancy-y),
-			var(--secondary-dark) var(--fancy-x) var(--fancy-x)
-		);
-	}
+  .dark &::after {
+    background-image: linear-gradient(
+      54deg,
+      var(--primary-dark) var(--fancy-y) var(--fancy-y),
+      var(--secondary-dark) var(--fancy-x) var(--fancy-x)
+    );
+  }
 }
 
 @utility fancy-overlay--muted {
-	&::after {
-		--maximum-opacity: 0.05;
-		animation: roundabout 5s ease-in-out both;
-	}
+  &::after {
+    --maximum-opacity: 0.05;
+    animation: roundabout 5s ease-in-out both;
+  }
 }
 
 @utility fancy-link {
-	/**
+  /**
 	 * Fancy links
 	 * with a gradient background and underline
 	 * and fancy hover underline via tailwind
 	 */
-	background-image: linear-gradient(
-		120deg,
-		var(--primary-light) 0%,
-		var(--primary-darker) 100%
-	);
-	background-repeat: no-repeat;
-	background-size: 100% 0;
-	background-position: 0 100%;
-	transition: background-size 0.25s ease-in;
-	text-decoration: none;
-	color: rgba(0, 0, 0, 0.5);
-	background-clip: text;
-	text-decoration-line: underline;
-	text-underline-offset: 3px;
+  background-image: linear-gradient(
+    120deg,
+    var(--primary-light) 0%,
+    var(--primary-darker) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 0;
+  background-position: 0 100%;
+  transition: background-size 0.25s ease-in;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.5);
+  background-clip: text;
+  text-decoration-line: underline;
+  text-underline-offset: 3px;
 
-	&:hover {
-		background-size: 100% 100%;
-	}
+  &:hover {
+    background-size: 100% 100%;
+  }
 
-	.dark & {
-		color: rgba(255, 255, 255, 0.5);
-	}
+  .dark & {
+    color: rgba(255, 255, 255, 0.5);
+  }
 }
 
 @utility fancy-text-black {
-	/**
+  /**
 	 * Fancy Text
 	 */
-	@apply bg-clip-text bg-linear-to-r text-transparent from-black to-neutral-500;
+  @apply bg-clip-text bg-linear-to-r text-transparent from-black to-neutral-500;
 }
 
 @utility fancy-text-blue {
-	@apply bg-clip-text bg-linear-to-r text-transparent from-sky-400 to-blue-700;
+  @apply bg-clip-text bg-linear-to-r text-transparent from-sky-400 to-blue-700;
 }
 
 @utility fancy-text-pink {
-	@apply bg-clip-text bg-linear-to-r text-transparent from-pink-500 to-yellow-500;
+  @apply bg-clip-text bg-linear-to-r text-transparent from-pink-500 to-yellow-500;
 }
 
 @utility fancy-text-white {
-	@apply bg-clip-text bg-linear-to-r text-transparent from-gray-100 to-neutral-400;
+  @apply bg-clip-text bg-linear-to-r text-transparent from-gray-100 to-neutral-400;
 }
 
 @utility fancy-text-purple {
-	@apply bg-clip-text bg-linear-to-r text-transparent from-purple-500 to-fuchsia-800 dark:from-purple-400 dark:to-fuchsia-600;
+  @apply bg-clip-text bg-linear-to-r text-transparent from-purple-500 to-fuchsia-800 dark:from-purple-400 dark:to-fuchsia-600;
 }
 
 @utility fancy-glass {
-	/**
+  /**
 	 * Fancy glass
 	 * with a gradient background and blur
 	 */
-	--glass-color: 0, 0, 200;
+  --glass-color: 0, 0, 200;
 
-	background: radial-gradient(
-			63.94% 63.94% at 50% 0%,
-			rgba(var(--glass-color), 0.12) 0%,
-			rgba(var(--glass-color), 0) 100%
-		), rgba(var(--glass-color), 0.01);
-	backdrop-filter: blur(6px);
-	position: relative;
-	overflow: hidden;
+  background:
+    radial-gradient(
+      63.94% 63.94% at 50% 0%,
+      rgba(var(--glass-color), 0.12) 0%,
+      rgba(var(--glass-color), 0) 100%
+    ),
+    rgba(var(--glass-color), 0.01);
+  backdrop-filter: blur(6px);
+  position: relative;
+  overflow: hidden;
 
-	&:before {
-		content: "";
-		width: calc(100% + 2px);
-		height: calc(100% + 2px);
-		background: linear-gradient(
-				rgba(var(--glass-color), 0.12) 0%,
-				rgba(var(--glass-color), 0) 74.04%
-			),
-			linear-gradient(
-				0deg,
-				rgba(var(--glass-color), 0.04),
-				rgba(var(--glass-color), 0.04)
-			);
-		position: absolute;
-		top: -1px;
-		left: -1px;
-		mask: url("data:image/svg+xml,%3Csvg width='402' height='202' viewBox='0 0 402 202' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='401' height='201' rx='9.5' /%3E%3C/svg%3E%0A");
-		pointer-events: none;
-	}
+  &:before {
+    content: '';
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+    background:
+      linear-gradient(
+        rgba(var(--glass-color), 0.12) 0%,
+        rgba(var(--glass-color), 0) 74.04%
+      ),
+      linear-gradient(
+        0deg,
+        rgba(var(--glass-color), 0.04),
+        rgba(var(--glass-color), 0.04)
+      );
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    mask: url("data:image/svg+xml,%3Csvg width='402' height='202' viewBox='0 0 402 202' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='401' height='201' rx='9.5' /%3E%3C/svg%3E%0A");
+    pointer-events: none;
+  }
 }
 
 @utility fancy-glass-contrast {
-	--glass-color: 0, 0, 200;
+  --glass-color: 0, 0, 200;
 
-	background: radial-gradient(
-			63.94% 63.94% at 50% 0%,
-			rgba(var(--glass-color), 0.12) 0%,
-			rgba(var(--glass-color), 0) 100%
-		), rgba(var(--glass-color), 0.01);
-	backdrop-filter: blur(6px);
-	position: relative;
-	overflow: hidden;
+  background:
+    radial-gradient(
+      63.94% 63.94% at 50% 0%,
+      rgba(var(--glass-color), 0.12) 0%,
+      rgba(var(--glass-color), 0) 100%
+    ),
+    rgba(var(--glass-color), 0.01);
+  backdrop-filter: blur(6px);
+  position: relative;
+  overflow: hidden;
 
-	&:after {
-		content: "";
-		width: calc(100% + 2px);
-		height: calc(100% + 2px);
-		background: var(--primary-darker);
-		opacity: 0.1;
-		position: absolute;
-		top: -1px;
-		left: -1px;
-		z-index: -1;
-	}
+  &:after {
+    content: '';
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+    background: var(--primary-darker);
+    opacity: 0.1;
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    z-index: -1;
+  }
 
-	&:before {
-		content: "";
-		width: calc(100% + 2px);
-		height: calc(100% + 2px);
-		background: linear-gradient(
-				rgba(var(--glass-color), 0.12) 0%,
-				rgba(var(--glass-color), 0) 74.04%
-			),
-			linear-gradient(
-				0deg,
-				rgba(var(--glass-color), 0.04),
-				rgba(var(--glass-color), 0.04)
-			);
-		position: absolute;
-		top: -1px;
-		left: -1px;
-		mask: url("data:image/svg+xml,%3Csvg width='402' height='202' viewBox='0 0 402 202' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='401' height='201' rx='9.5' /%3E%3C/svg%3E%0A");
-		pointer-events: none;
-	}
+  &:before {
+    content: '';
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+    background:
+      linear-gradient(
+        rgba(var(--glass-color), 0.12) 0%,
+        rgba(var(--glass-color), 0) 74.04%
+      ),
+      linear-gradient(
+        0deg,
+        rgba(var(--glass-color), 0.04),
+        rgba(var(--glass-color), 0.04)
+      );
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    mask: url("data:image/svg+xml,%3Csvg width='402' height='202' viewBox='0 0 402 202' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='401' height='201' rx='9.5' /%3E%3C/svg%3E%0A");
+    pointer-events: none;
+  }
+}
+
+@utility scrollbar-hidden {
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer base {
-	*,
-	::before,
-	::after {
-		@apply border-gray-100 dark:border-neutral-800;
-	}
+  *,
+  ::before,
+  ::after {
+    @apply border-gray-100 dark:border-neutral-800;
+  }
 
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		@apply font-semibold font-head;
-	}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold font-head;
+  }
 }
 
 @layer utilities {
-	@keyframes roundabout {
-		0% {
-			--fancy-x: 60%;
-			--fancy-y: 20%;
+  @keyframes roundabout {
+    0% {
+      --fancy-x: 60%;
+      --fancy-y: 20%;
 
-			opacity: 0;
-		}
+      opacity: 0;
+    }
 
-		5% {
-			--fancy-x: 80%;
-			--fancy-y: 10%;
-		}
+    5% {
+      --fancy-x: 80%;
+      --fancy-y: 10%;
+    }
 
-		20% {
-			--fancy-x: 95%;
-			--fancy-y: 5%;
+    20% {
+      --fancy-x: 95%;
+      --fancy-y: 5%;
 
-			opacity: var(--maximum-opacity);
-		}
+      opacity: var(--maximum-opacity);
+    }
 
-		100% {
-			--fancy-x: 100%;
-			--fancy-y: 0%;
+    100% {
+      --fancy-x: 100%;
+      --fancy-y: 0%;
 
-			opacity: var(--maximum-opacity);
-		}
-	}
+      opacity: var(--maximum-opacity);
+    }
+  }
 }
 
 /**
  * Container utilities
  */
 .container-narrow {
-	@apply max-w-4xl;
+  @apply max-w-4xl;
 }
 
 .container-wide {
-	@apply xl:max-w-6xl;
+  @apply xl:max-w-6xl;
 }
 
 .container-ultrawide {
-	@apply xl:max-w-7xl;
+  @apply xl:max-w-7xl;
 }
 
 .container-gigawide {
-	@apply xl:max-w-[1400px];
+  @apply xl:max-w-[1400px];
 }
 
 /**
  * MDX requirements
  */
 .task-list-item::before {
-	@apply hidden;
+  @apply hidden;
 }
 
 .task-list-item {
-	@apply list-none;
+  @apply list-none;
 }
 
 .footnotes {
-	@apply mt-12 border-t border-gray-200 pt-8 dark:border-gray-700;
+  @apply mt-12 border-t border-gray-200 pt-8 dark:border-gray-700;
 }
 
 .data-footnote-backref {
-	@apply no-underline;
+  @apply no-underline;
 }
 
 .csl-entry {
-	@apply my-5;
+  @apply my-5;
 }
 
 /**
  * Hacks and fixes
  */
 .safari-border-radius-fix {
-	-webkit-mask-image: -webkit-radial-gradient(white, black);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 [data-nextjs-scroll-focus-boundary] {
-	display: contents;
+  display: contents;
 }
 
 /* https://stackoverflow.com/questions/61083813/how-to-avoid-internal-autofill-selected-style-to-be-applied */
 input:-webkit-autofill,
 input:-webkit-autofill:focus {
-	transition: background-color 600000s 0s, color 600000s 0s;
+  transition:
+    background-color 600000s 0s,
+    color 600000s 0s;
 }
 
 /**
  * Scrollbar
  */
 ::-webkit-scrollbar {
-	width: 12px;
-	height: 12px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-	background-color: rgba(240, 240, 240, 0.1);
+  background-color: rgba(240, 240, 240, 0.1);
 }
 
 ::-webkit-scrollbar-thumb {
-	background-color: #d6dee1;
-	border-radius: 16px;
-	border: 4px solid transparent;
-	background-clip: content-box;
+  background-color: #d6dee1;
+  border-radius: 16px;
+  border: 4px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background-color: #a8bbbf;
+  background-color: #a8bbbf;
 }
 
 ::-webkit-scrollbar-corner {
-	background: rgba(240, 240, 240, 0.1);
+  background: rgba(240, 240, 240, 0.1);
 }
 
 /**
  * Set select colors to primary and respect dark mode
  */
 ::selection {
-	background-color: var(--primary-lighter);
-	color: black;
+  background-color: var(--primary-lighter);
+  color: black;
 }
 
 .dark ::selection {
-	background-color: var(--primary-darker);
-	color: white;
+  background-color: var(--primary-darker);
+  color: white;
 }
 
 /*
@@ -537,20 +551,20 @@ input:-webkit-autofill:focus {
 */
 
 :root {
-	--sidebar: var(--primary-darkest);
-	--sidebar-foreground: var(--primary-foreground);
-	--sidebar-primary: var(--primary-main);
-	--sidebar-primary-foreground: var(--primary-foreground);
-	--sidebar-accent: var(--secondary-dark);
-	--sidebar-accent-foreground: var(--secondary-foreground);
-	--sidebar-border: hsl(220 13% 91%);
-	--sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: var(--primary-darkest);
+  --sidebar-foreground: var(--primary-foreground);
+  --sidebar-primary: var(--primary-main);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--secondary-dark);
+  --sidebar-accent-foreground: var(--secondary-foreground);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
 
-	--color-1: hsl(0 100% 63%);
-	--color-2: hsl(270 100% 63%);
-	--color-3: hsl(210 100% 63%);
-	--color-4: hsl(195 100% 63%);
-	--color-5: hsl(90 100% 63%);
+  --color-1: hsl(0 100% 63%);
+  --color-2: hsl(270 100% 63%);
+  --color-3: hsl(210 100% 63%);
+  --color-4: hsl(195 100% 63%);
+  --color-5: hsl(90 100% 63%);
 }
 
 /*
@@ -558,20 +572,20 @@ input:-webkit-autofill:focus {
 */
 
 .dark {
-	--sidebar: hsl(240 5.9% 10%);
-	--sidebar-foreground: hsl(240 4.8% 95.9%);
-	--sidebar-primary: hsl(224.3 76.3% 48%);
-	--sidebar-primary-foreground: hsl(0 0% 100%);
-	--sidebar-accent: hsl(240 3.7% 15.9%);
-	--sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-	--sidebar-border: hsl(240 3.7% 15.9%);
-	--sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
 
-	--color-1: hsl(0 100% 63%);
-	--color-2: hsl(270 100% 63%);
-	--color-3: hsl(210 100% 63%);
-	--color-4: hsl(195 100% 63%);
-	--color-5: hsl(90 100% 63%);
+  --color-1: hsl(0 100% 63%);
+  --color-2: hsl(270 100% 63%);
+  --color-3: hsl(210 100% 63%);
+  --color-4: hsl(195 100% 63%);
+  --color-5: hsl(90 100% 63%);
 }
 
 /*
@@ -579,42 +593,42 @@ input:-webkit-autofill:focus {
 */
 
 @layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-	body {
-		@apply bg-background text-foreground;
-	}
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 @layer utilities {
-	.glassy {
-		background: rgba(255, 255, 255, 0.09);
-		border-radius: 16px;
-		box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-		backdrop-filter: blur(20px);
-		-webkit-backdrop-filter: blur(20px);
-		border: 1px solid rgba(255, 255, 255, 0.5);
-	}
+  .glassy {
+    background: rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
 }
 @keyframes shimmer-slide {
-	to {
-		transform: translate(calc(100cqw - 100%), 0);
-	}
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
 }
 @keyframes spin-around {
-	0% {
-		transform: translateZ(0) rotate(0);
-	}
-	15%,
-	35% {
-		transform: translateZ(0) rotate(90deg);
-	}
-	65%,
-	85% {
-		transform: translateZ(0) rotate(270deg);
-	}
-	100% {
-		transform: translateZ(0) rotate(360deg);
-	}
+  0% {
+    transform: translateZ(0) rotate(0);
+  }
+  15%,
+  35% {
+    transform: translateZ(0) rotate(90deg);
+  }
+  65%,
+  85% {
+    transform: translateZ(0) rotate(270deg);
+  }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+  }
 }

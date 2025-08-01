@@ -106,6 +106,15 @@ export const GET = withAuth(async (req, context, auth) => {
             });
             return NextResponse.json(data);
           }
+          if (subIdentifier === 'crypto') {
+            const data = await transactions.getCryptoTransaction(
+              {
+                id: identifier,
+              },
+              { address: auth.address }
+            );
+            return NextResponse.json(data);
+          }
           const data = await transactions.userTransactionsForSale(
             {
               saleId: identifier,
@@ -143,6 +152,25 @@ export const GET = withAuth(async (req, context, auth) => {
           return NextResponse.json(data);
         }
 
+        return NextResponse.json({ error: 'Bad request' }, { status: 404 });
+      }
+
+      case 'admin': {
+        if (!auth.isAdmin) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        if (identifier === 'transactions') {
+          const data = await transactions.getAllTransactions(
+            qParamsObject || {},
+            {
+              address: auth.address,
+              userId: auth.userId,
+              isAdmin: auth.isAdmin,
+            }
+          );
+          return NextResponse.json(data);
+        }
         return NextResponse.json({ error: 'Bad request' }, { status: 404 });
       }
     }

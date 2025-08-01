@@ -36,6 +36,7 @@ export type FormInputProps = {
   description?: string;
   message?: true | null;
   className?: string;
+  descriptionClassName?: string;
   type: InputTypes | 'hidden';
   inputProps?: Partial<InputUnionProps> & {
     required?: boolean;
@@ -101,6 +102,7 @@ export function FormInput({
   className,
   listeners,
   validators,
+  descriptionClassName,
   ...props
 }: FormInputProps) {
   const form = useFormContext() as unknown as UseAppForm;
@@ -158,7 +160,12 @@ export function FormInput({
             </field.FormControl>
           </div>
           {description && (
-            <field.FormDescription className={'overflow-x-auto truncate'}>
+            <field.FormDescription
+              className={cn(
+                'overflow-x-auto scrollbar-hidden whitespace-nowrap',
+                descriptionClassName
+              )}
+            >
               {description}
             </field.FormDescription>
           )}

@@ -14,6 +14,8 @@ import { FOP } from '@prisma/client';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import {
   getActiveSale,
+  getAllTransactions,
+  getCryptoTransaction,
   getCurrencies,
   getCurrentUser,
   getRecipientForCurrentTransactionSaft,
@@ -72,7 +74,7 @@ export const useActiveSale = () => {
   });
 
   const e = getError(data, error);
-  return { data: data?.data?.sales[0], error: e, status };
+  return { data: data?.data?.sales?.[0], error: e, status };
 };
 
 export const useSale = (id: string | undefined) => {
@@ -224,6 +226,19 @@ export const useUserTransactions = (
   return { data: data?.data, error: e, status };
 };
 
+/**
+ * Get all transactions (admin only)
+ */
+export const useAllTransactions = () => {
+  const { data, status, error } = useSuspenseQuery({
+    queryKey: ['transactions', 'admin'],
+    queryFn: () => getAllTransactions(),
+    staleTime: DEFAULT_STALE_TIME,
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, status };
+};
+
 export const useExchangeRate = ({
   from,
   to,
@@ -312,6 +327,17 @@ export const useSaftForTransactionDetails = (
     staleTime: 7 * 1000, // 7 seconds
     refetchInterval: 7 * 1000,
     enabled: Boolean(recipientId && enabled),
+  });
+  const e = getError(data, error);
+  return { data: data?.data, error: e, isLoading, refetch };
+};
+
+export const useCryptoTransaction = (txId: string) => {
+  const { data, isLoading, refetch, error } = useQuery({
+    queryKey: ['transactions', txId, 'crypto'],
+    queryFn: () => getCryptoTransaction(txId),
+    staleTime: DEFAULT_STALE_TIME,
+    enabled: !!txId,
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, isLoading, refetch };

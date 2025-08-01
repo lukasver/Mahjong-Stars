@@ -116,7 +116,7 @@ export default () => {
     },
     logging: {
       fetches: {
-        fullUrl: true,
+        fullUrl: process.env.VERCEL_URL ? false : true,
       },
     },
     async redirects() {

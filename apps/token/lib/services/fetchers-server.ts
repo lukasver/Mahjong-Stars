@@ -5,6 +5,7 @@ import users from '../repositories/users';
 import transactions from '../repositories/transactions';
 
 import { getUserFromCache } from '../auth/cache';
+import { isAdmin } from '../actions/admin';
 
 const getUserFromSession = async () => {
   const verified = await getSessionCookie().then((d) => verifyJwt(d || ''));
@@ -33,6 +34,24 @@ export const getUserTransactions = async () => {
     {
       userId: user.id,
       address: user.walletAddress,
+    }
+  );
+  if (result.success) {
+    return { data: result.data, error: null };
+  } else {
+    return { data: null, error: result };
+  }
+};
+
+export const getAllTransactions = async () => {
+  const user = await getUserFromSession();
+  const isAdminUser = await isAdmin(user.walletAddress);
+  const result = await transactions.getAllTransactions(
+    {},
+    {
+      address: user.walletAddress,
+      userId: user.id,
+      isAdmin: !!isAdminUser,
     }
   );
   if (result.success) {

@@ -89,7 +89,9 @@ const formatChipMessage = (status: TransactionStatus) => {
   }
 };
 
-export const getColumns = (): ColumnDef<TransactionWithRelations>[] => [
+export const getColumns = (
+  isAdmin = false
+): ColumnDef<TransactionWithRelations>[] => [
   {
     accessorKey: 'id',
     header: 'ID',
@@ -236,11 +238,17 @@ export const getColumns = (): ColumnDef<TransactionWithRelations>[] => [
   {
     id: 'actions',
     header: 'Actions',
-    cell: ({ row }) => <ActionButtons row={row.original} />,
+    cell: ({ row }) => <ActionButtons row={row.original} isAdmin={isAdmin} />,
   },
 ];
 
-const ActionButtons = ({ row }: { row: TransactionWithRelations }) => {
+const ActionButtons = ({
+  row,
+  isAdmin,
+}: {
+  row: TransactionWithRelations;
+  isAdmin?: boolean;
+}) => {
   const status = row.status;
   const hasTxHash = cryptoTxTypeGuard(row);
   const [showDetails, setShowDetails] = useState(false);
@@ -278,6 +286,20 @@ const ActionButtons = ({ row }: { row: TransactionWithRelations }) => {
             <DropdownMenuItem>
               <Eye className='h-4 w-4 mr-2' />
               Confirm payment
+            </DropdownMenuItem>
+          )}
+
+          {isAdmin && status === TransactionStatus.AWAITING_PAYMENT && (
+            <DropdownMenuItem>
+              <CheckIcon className='h-4 w-4 mr-2 text-green-600' />
+              Verify Payment
+            </DropdownMenuItem>
+          )}
+
+          {isAdmin && status === TransactionStatus.PAYMENT_VERIFIED && (
+            <DropdownMenuItem>
+              <CheckIcon className='h-4 w-4 mr-2 text-blue-600' />
+              Allocate Tokens
             </DropdownMenuItem>
           )}
 
