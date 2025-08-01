@@ -31,7 +31,6 @@ export const setSessionCookie = async (
   const c = await cookies();
   // Extract hostname from publicUrl
   const domain = new URL(publicUrl).hostname;
-  console.debug('🚀 ~ cookies.ts:35 ~ domain:', publicUrl, domain);
   c.set(cookieName, jwt, {
     domain,
     httpOnly: true,
@@ -48,7 +47,19 @@ export const deleteSessionCookie = async (
   }
 ) => {
   const cookieName = opts.cookiePrefix + COOKIE_NAME;
-  console.debug('SHOULD DELETE COOKIE', cookieName);
   const c = await cookies();
-  c.delete(cookieName);
+  // Extract hostname from publicUrl to match the domain used when setting the cookie
+  const domain = new URL(publicUrl).hostname;
+
+  console.debug('🚀 ~ cookies.ts:54 ~ domain:', domain, cookieName);
+
+  // Set the cookie with an expired date to effectively delete it
+  c.set(cookieName, '', {
+    domain,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 0, // This expires the cookie immediately
+    path: '/',
+    sameSite: 'strict',
+  });
 };

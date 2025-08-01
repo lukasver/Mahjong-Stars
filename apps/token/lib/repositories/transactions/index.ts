@@ -293,14 +293,17 @@ class TransactionsController {
         });
 
       const { sale } = validationResult;
-
-      const transaction = await prisma.$transaction(async (tx) => {
-        tx.sale.update({
+      const price = new Prisma.Decimal(amountPaid);
+      const [_updtSale, transaction] = await prisma.$transaction([
+        prisma.sale.update({
           where: { id: saleId },
           data: { availableTokenQuantity: { decrement: Number(quantity) } },
-        });
-        const price = new Prisma.Decimal(amountPaid);
-        return tx.saleTransactions.create({
+          select: {
+            availableTokenQuantity: true,
+            id: true,
+          },
+        }),
+        prisma.saleTransactions.create({
           data: {
             tokenSymbol,
             quantity: new Prisma.Decimal(quantity),
@@ -346,8 +349,8 @@ class TransactionsController {
               },
             },
           },
-        });
-      });
+        }),
+      ]);
 
       return Success({
         transaction: decimalsToString(transaction),

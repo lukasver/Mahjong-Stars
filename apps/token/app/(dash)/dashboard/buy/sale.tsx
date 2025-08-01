@@ -51,7 +51,6 @@ const OverviewFormInvest = ({ sale }: { sale: SaleWithToken }) => {
   return (
     <div className='flex flex-col gap-4'>
       <OverviewProject sale={sale} />
-      {/* TODO ADD invest-form.tsx component */}
       <Invest sale={sale} />
     </div>
   );

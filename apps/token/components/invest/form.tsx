@@ -164,7 +164,6 @@ export const InvestForm = ({
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
-      console.log('submit');
       e.preventDefault();
       e.stopPropagation();
       form.handleSubmit();
@@ -238,6 +237,10 @@ export const InvestForm = ({
   }
 
   if (!sale) {
+    return <FormError type='sale-ended' />;
+  }
+
+  if (sale.availableTokenQuantity === 0) {
     return <FormError type='sale-ended' />;
   }
 
@@ -547,15 +550,18 @@ const getDefaultValues = (
 const getAmountDescription = (
   sale: Pick<
     SaleWithToken,
-    'minimumTokenBuyPerUser' | 'maximumTokenBuyPerUser'
+    | 'minimumTokenBuyPerUser'
+    | 'maximumTokenBuyPerUser'
+    | 'availableTokenQuantity'
   >,
   locale: string
 ) => {
   let base = `Min: ${formatCurrency(sale.minimumTokenBuyPerUser, {
     locale,
   })}`;
-  if (sale.maximumTokenBuyPerUser) {
-    base += ` / Max: ${formatCurrency(sale.maximumTokenBuyPerUser, {
+  const val = sale.maximumTokenBuyPerUser || sale.availableTokenQuantity;
+  if (val) {
+    base += ` / Max: ${formatCurrency(val, {
       locale,
     })}`;
   }
