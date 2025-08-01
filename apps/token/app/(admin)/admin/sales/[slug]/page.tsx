@@ -18,7 +18,7 @@ export default async function AdminPage({ params, searchParams }: PageProps) {
     if (saleId) {
       // If we have info about the sale in the params, prefetch it
       const queryClient = new QueryClient();
-      queryClient.prefetchQuery({
+      await queryClient.prefetchQuery({
         queryKey: ['sales', saleId],
         queryFn: ({ queryKey }) => getSale({ id: queryKey[1] as string }),
       });

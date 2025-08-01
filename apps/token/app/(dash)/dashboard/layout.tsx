@@ -13,6 +13,7 @@ import { DashboardSidebar } from '../../../components/sidebar';
 import AdminSidebar from './admin-sidebar';
 import { DashboardHeader } from './header';
 import { getCurrentUser } from '@/lib/services/fetchers-server';
+import BackgroundWrapper from '@/components/bg-wrapper';
 
 /**
  * Layout component for the dashboard section
@@ -41,13 +42,19 @@ export default async function DashboardLayout({
                 <AdminSidebar />
               </Suspense>
             </DashboardSidebar>
-            <section className='flex-1 grid grid-rows-[auto_1fr_auto]'>
+            <div className='flex-1 grid grid-rows-[auto_1fr_auto]'>
               <DashboardHeader>
                 <Suspense fallback={null}>
                   <BuyTokenButton />
                 </Suspense>
               </DashboardHeader>
-              {children}
+              <BackgroundWrapper>
+                <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
+                  <main className='container mx-auto z-10 py-4 sm:py-20'>
+                    {children}
+                  </main>
+                </div>
+              </BackgroundWrapper>
               <Footer
                 siteConfig={metadata}
                 links={getFooterLinks(t)}
@@ -56,7 +63,7 @@ export default async function DashboardLayout({
                 })}
                 className='bg-black'
               />
-            </section>
+            </div>
           </>
         </PagesProviders>
       </HydrationBoundary>

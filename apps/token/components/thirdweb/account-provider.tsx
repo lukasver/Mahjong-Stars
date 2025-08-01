@@ -113,7 +113,6 @@ function AccountProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return null;
   return <>{children}</>;
 }
 

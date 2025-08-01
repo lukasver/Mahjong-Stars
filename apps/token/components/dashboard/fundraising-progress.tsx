@@ -1,5 +1,4 @@
 'use client';
-import { ComingSoonContent } from '@/components/coming-soon';
 import { useActiveSale } from '@/lib/services/api';
 import {
   Card,
@@ -12,13 +11,14 @@ import { Progress } from '@mjs/ui/primitives/progress';
 import { motion } from '@mjs/ui/components/motion';
 import { DateTime } from 'luxon';
 import { useTranslations } from 'next-intl';
+import { PulseLoader } from '../pulse-loader';
 
 export function FundraisingProgress({
   children,
 }: {
   children?: React.ReactNode;
 }) {
-  const { data: activeSale } = useActiveSale();
+  const { data: activeSale, isLoading } = useActiveSale();
   const t = useTranslations('dashboard.fundraisingProgress');
 
   // In a real app, these would come from your API or blockchain data
@@ -27,20 +27,19 @@ export function FundraisingProgress({
   const sold = total - available;
   const percentage = Math.round((sold / total) * 100);
 
-  // if (isLoading) {
-  //   return (
-  //     <div className='py-6'>
-  //       <PulseLoader />
-  //     </div>
-  //   );
-  // }
-
-  if (!activeSale) {
+  if (isLoading) {
     return (
       <div className='py-6'>
-        <ComingSoonContent to={undefined} />
+        <PulseLoader />
       </div>
     );
+  }
+
+  if (!activeSale) {
+    return null;
+    // <div className='py-6'>
+    //   <ComingSoonContent to={undefined} />
+    // </div>
   }
 
   const daysRemaining = Math.floor(

@@ -216,14 +216,14 @@ export const useUserTransactions = (
     sale?: string;
   } = {}
 ) => {
-  const { data, status, error } = useSuspenseQuery({
+  const { data, status, error, isLoading } = useSuspenseQuery({
     queryKey: ['transactions', 'user', 'me', params],
     queryFn: ({ queryKey }) =>
       getUserTransactions(queryKey[3] as typeof params),
     staleTime: DEFAULT_STALE_TIME,
   });
   const e = getError(data, error);
-  return { data: data?.data, error: e, status };
+  return { data: data?.data, error: e, status, isLoading: isLoading };
 };
 
 /**

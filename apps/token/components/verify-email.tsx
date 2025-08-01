@@ -314,12 +314,14 @@ export const VerifyTokenForm = ({
   noMessage?: boolean;
 }) => {
   const router = useRouter();
+  const [disabled, setDisabled] = useState(false);
   const { execute, isExecuting } = useActionListener(useAction(verifyEmail), {
     successMessage: noMessage
       ? undefined
       : 'Email verified, redirecting to dashboard...',
     onSuccess: () => {
       if (onSuccess) {
+        setDisabled(true);
         onSuccess();
       } else {
         router.push('/dashboard');
@@ -367,7 +369,7 @@ export const VerifyTokenForm = ({
             <Button
               variant='outline'
               className='flex-1'
-              disabled={isExecuting}
+              disabled={isExecuting || disabled}
               type='button'
               onClick={onCancel}
             >
@@ -378,6 +380,7 @@ export const VerifyTokenForm = ({
               className='flex-1'
               type='submit'
               loading={isExecuting}
+              disabled={disabled}
             >
               Verify
             </Button>

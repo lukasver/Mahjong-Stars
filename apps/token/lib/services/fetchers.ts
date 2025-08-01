@@ -63,6 +63,7 @@ class Fetcher {
   fetcher = <T>(url: string, options: FetcherOptions = {}) => {
     const { token, ...fetchOptions } = options;
     const fullUrl = this.baseUrl ? `${this.baseUrl}${url}` : url;
+
     const {
       body,
       rawBody = false,

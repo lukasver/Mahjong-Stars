@@ -24,7 +24,6 @@ export function withAuth(
     try {
       const jwt = await getSessionCookie();
 
-      console.log('req.url', req.url, 'Hay jwt?', !!jwt);
       if (!jwt) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
@@ -49,7 +48,7 @@ export function withAuth(
       let userId: string | undefined = undefined;
       if (_isAdmin.status === 'fulfilled') {
         isAdminUser = !!_isAdmin.value;
-        userId = _isAdmin.value.id;
+        userId = _isAdmin?.value?.id;
       }
 
       if (!authed) {
@@ -68,6 +67,7 @@ export function withAuth(
       if (e instanceof Error && env.IS_DEV) {
         error += ': ' + e.message;
       }
+      console.error('API MIDDLEWARE', error);
       return new NextResponse(JSON.stringify({ error }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

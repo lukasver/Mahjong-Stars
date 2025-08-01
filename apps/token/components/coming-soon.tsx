@@ -12,10 +12,8 @@ import { useRouter } from 'next/navigation';
  */
 export const ComingSoon = ({ to = '/dashboard' }: { to?: string }) => {
   return (
-    <div className='bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center min-h-[100dvh] w-full h-full'>
-      <div className='grid place-content-center bg-gradient-to-b from-primary to-5% to-transparent h-full'>
-        <ComingSoonContent to={to} />
-      </div>
+    <div className='grid place-content-center min-h-[100dvh] sm:min-h-[800px] w-full h-full'>
+      <ComingSoonContent to={to} />
     </div>
   );
 };

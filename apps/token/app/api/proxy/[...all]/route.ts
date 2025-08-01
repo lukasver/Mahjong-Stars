@@ -12,6 +12,7 @@ import { TransactionStatusSchema } from '@/common/schemas/generated';
  */
 export const GET = withAuth(async (req, context, auth) => {
   const { all } = await context.params;
+
   const qParams = req.nextUrl.searchParams;
   const qParamsObject = Object.fromEntries(qParams.entries());
 

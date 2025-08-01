@@ -24,6 +24,7 @@ import { AccountAddress, AccountAvatar } from 'thirdweb/react';
 import { shortenAddress } from 'thirdweb/utils';
 import useActiveAccount from '../hooks/use-active-account';
 import { useUser } from '@/lib/services/api';
+import ErrorBoundary from '@mjs/ui/components/error-boundary';
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -125,7 +126,11 @@ const EmailIndicator = (props: EmailIndicatorProps) => {
   const { isSiwe = false, email } = props;
 
   if (isSiwe) {
-    return <AccountAddress formatFn={shortenAddress} />;
+    return (
+      <ErrorBoundary fallback={null}>
+        <AccountAddress formatFn={shortenAddress} />
+      </ErrorBoundary>
+    );
   }
 
   if (!email) {

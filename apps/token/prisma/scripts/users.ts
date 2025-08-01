@@ -11,6 +11,7 @@ export async function seedUsers(
       data: _users.map((user) => ({
         ...user,
         walletAddress: user.walletAddress,
+        isSiwe: true,
       })),
     })
     .then(async (users) => {

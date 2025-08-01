@@ -1,6 +1,5 @@
 import { getTransactionById } from '@/lib/actions';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
-import { cn } from '@mjs/ui/lib/utils';
 import {
   dehydrate,
   HydrationBoundary,
@@ -114,25 +113,13 @@ export default async function TransactionConfiramationPage({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ErrorBoundary fallback={<div>Error</div>}>
-        <main
-          className={cn(
-            'bg-[url(/static/images/bg2-ov.png)] bg-cover bg-center -z-50!'
-          )}
-        >
-          <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
-            <div className='container mx-auto z-10'>
-              <Suspense fallback={null} key={steps.length}>
-                <TransactionConfirmation
-                  steps={steps}
-                  initialStep={getInitialStep(
-                    tx.data.transaction.status,
-                    steps
-                  )}
-                />
-              </Suspense>
-            </div>
-          </div>
-        </main>
+        <Suspense fallback={null} key={steps.length}>
+          <TransactionConfirmation
+            steps={steps}
+            initialStep={getInitialStep(tx.data.transaction.status, steps)}
+          />
+        </Suspense>
+
         {(!user?.data?.emailVerified || !user?.data?.email) && (
           <VerifyMandatoryEmail email={user?.data?.email || ''} />
         )}

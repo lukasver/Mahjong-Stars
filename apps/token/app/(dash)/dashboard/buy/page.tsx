@@ -6,7 +6,6 @@ import {
 } from '@tanstack/react-query';
 import { ComingSoon } from '../../../../components/coming-soon';
 import { TokenSale } from './sale';
-import BackgroundWrapper from '@/components/bg-wrapper';
 import { getActiveSale } from '@/lib/services/fetchers-server';
 
 export default async function BuyPage() {
@@ -21,13 +20,7 @@ export default async function BuyPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ErrorBoundary fallback={<ComingSoon />}>
-        <BackgroundWrapper>
-          <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
-            <main className='container mx-auto z-10'>
-              <TokenSale />
-            </main>
-          </div>
-        </BackgroundWrapper>
+        <TokenSale />
       </ErrorBoundary>
     </HydrationBoundary>
   );
