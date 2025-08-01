@@ -19,16 +19,9 @@ export const isLoggedIn = async (address: string) => {
 };
 
 export const doLogin = async (params: LoginParams) => {
-  try {
-    const res = await login(params);
-    if (!res?.serverError || res.validationErrors) {
-      throw new Error('Login failed');
-    }
-  } catch (e) {
-    if (e instanceof Error && e?.name !== 'NEXT_REDIRECT') {
-      console.error('doLogin ~ e:', e);
-      throw e;
-    }
+  const res = await login(params);
+  if (!res?.serverError || res.validationErrors) {
+    throw new Error('Login failed');
   }
 };
 
