@@ -496,9 +496,7 @@ const SaleStatusDialog = ({
     action: 'open_sale',
     saleId,
     data: { saleId, status: 'OPEN' },
-    onSuccess: () => {
-      toast.success('Admin action authenticated successfully');
-    },
+
     onError: (error) => {
       toast.error(`Authentication failed: ${error}`);
     },

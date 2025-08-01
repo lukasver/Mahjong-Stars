@@ -156,7 +156,7 @@ export const getSale = async (id: string) => {
 export const getActiveSale = async () => {
   try {
     const queryParams = new URLSearchParams({ active: 'true' });
-    const data = await fetcher<{ sales: SaleWithToken[] }>(
+    const data = await fetcher<{ sales: SaleWithToken[]; quantity: number }>(
       `/sales?${queryParams}`
     );
     return { data: data, error: null };

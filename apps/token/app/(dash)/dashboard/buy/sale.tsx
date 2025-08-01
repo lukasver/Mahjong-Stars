@@ -8,12 +8,17 @@ import { SaleCoverImage } from './cover-image';
 import { Invest } from '../../../../components/invest';
 import { SaleWithToken } from '@/common/types/sales';
 import { ComingSoon } from '../../../../components/coming-soon';
+import { PulseLoader } from '@/components/pulse-loader';
 
 export const TokenSale = () => {
-  const { data: sale, status } = useActiveSale();
+  const { data: sale, isLoading, status } = useActiveSale();
 
   if (!sale && status === 'error') {
     throw new Error('Sale not found');
+  }
+
+  if (isLoading) {
+    return <PulseLoader />;
   }
 
   if (!sale) {

@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@mjs/ui/primitives/card';
 import { Progress } from '@mjs/ui/primitives/progress';
+import { motion } from '@mjs/ui/components/motion';
 import { DateTime } from 'luxon';
 import { useTranslations } from 'next-intl';
 
@@ -49,40 +50,68 @@ export function FundraisingProgress({
   );
 
   return (
-    <Card className='border-zinc-800 bg-zinc-900/50'>
-      <CardHeader>
-        <CardTitle>{activeSale.name}</CardTitle>
-        {daysRemaining > 0 ? (
-          <CardDescription>
-            {t('description', { days: daysRemaining })}
-          </CardDescription>
-        ) : null}
-      </CardHeader>
-      <CardContent className='space-y-6'>
-        <div className='space-y-2'>
-          <div className='flex items-center justify-between text-sm'>
-            <div>
-              <span className='text-xl font-bold text-secondary-500'>
-                {t('tokensSold', {
-                  sold: sold.toLocaleString(),
-                  total: total.toLocaleString(),
-                  tokenSymbol: activeSale.tokenSymbol,
-                })}
-              </span>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{
+        duration: 0.6,
+        scale: { type: 'spring', visualDuration: 0.6, bounce: 0.2 },
+      }}
+    >
+      <Card className='border-zinc-800 bg-zinc-900/50'>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
+          <CardHeader>
+            <CardTitle>{activeSale.name}</CardTitle>
+            {daysRemaining > 0 ? (
+              <CardDescription>
+                {t('description', { days: daysRemaining })}
+              </CardDescription>
+            ) : null}
+          </CardHeader>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.4 }}
+        >
+          <CardContent className='space-y-6'>
+            <div className='space-y-2'>
+              <div className='flex items-center justify-between text-sm'>
+                <div>
+                  <span className='text-xl font-bold text-secondary-500'>
+                    {t('tokensSold', {
+                      sold: sold.toLocaleString(),
+                      total: total.toLocaleString(),
+                      tokenSymbol: activeSale.tokenSymbol,
+                    })}
+                  </span>
+                </div>
+                <div className='text-right font-medium'>
+                  {t('percentage', { percentage })}
+                </div>
+              </div>
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 0.6, duration: 0.8, ease: 'easeOut' }}
+                style={{ transformOrigin: 'left' }}
+              >
+                <Progress
+                  value={percentage}
+                  className='h-2 bg-zinc-800'
+                  indicatorClassName='bg-secondary-500'
+                />
+              </motion.div>
             </div>
-            <div className='text-right font-medium'>
-              {t('percentage', { percentage })}
-            </div>
-          </div>
-          <Progress
-            value={percentage}
-            className='h-2 bg-zinc-800'
-            indicatorClassName='bg-secondary-500'
-          />
-        </div>
 
-        {children}
-      </CardContent>
-    </Card>
+            {children}
+          </CardContent>
+        </motion.div>
+      </Card>
+    </motion.div>
   );
 }

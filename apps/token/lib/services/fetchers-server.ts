@@ -3,6 +3,7 @@ import { getSessionCookie } from '../auth/cookies';
 import { verifyJwt } from '../auth/thirdweb';
 import users from '../repositories/users';
 import transactions from '../repositories/transactions';
+import sales from '../repositories/sales';
 
 import { getUserFromCache } from '../auth/cache';
 import { isAdmin } from '../actions/admin';
@@ -52,6 +53,22 @@ export const getAllTransactions = async () => {
       address: user.walletAddress,
       userId: user.id,
       isAdmin: !!isAdminUser,
+    }
+  );
+  if (result.success) {
+    return { data: result.data, error: null };
+  } else {
+    return { data: null, error: result };
+  }
+};
+
+export const getActiveSale = async () => {
+  const user = await getUserFromSession();
+  const result = await sales.getSales(
+    { active: true },
+    {
+      address: user.walletAddress,
+      userId: user.id,
     }
   );
   if (result.success) {

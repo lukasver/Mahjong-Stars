@@ -15,6 +15,7 @@ import { Logo } from './logo';
 import { NavMain } from './nav/nav-main';
 import { NavUser } from './nav/nav-user';
 import { TeamSwitcher } from './nav/team-switcher';
+import ErrorBoundary from '@mjs/ui/components/error-boundary';
 
 // This is sample data.
 const data = {
@@ -85,7 +86,9 @@ export function DashboardSidebar({
   return (
     <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <ErrorBoundary fallback={null}>
+          <TeamSwitcher teams={data.teams} />
+        </ErrorBoundary>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

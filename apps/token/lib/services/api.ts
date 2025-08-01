@@ -67,14 +67,14 @@ export function useSales() {
 }
 
 export const useActiveSale = () => {
-  const { data, status, error } = useSuspenseQuery({
+  const { data, status, error, isLoading } = useSuspenseQuery({
     queryKey: ['sales', 'active'],
     queryFn: () => getActiveSale(),
     staleTime: DEFAULT_STALE_TIME,
   });
 
   const e = getError(data, error);
-  return { data: data?.data?.sales?.[0], error: e, status };
+  return { data: data?.data?.sales?.[0], error: e, status, isLoading };
 };
 
 export const useSale = (id: string | undefined) => {

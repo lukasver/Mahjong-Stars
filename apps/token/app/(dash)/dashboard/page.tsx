@@ -4,12 +4,13 @@ import { VisuallyHidden } from '@mjs/ui/primitives/visually-hidden';
 import { QueryClient } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import { FundraisingProgress } from '../../../components/dashboard/fundraising-progress';
-import { getActiveSale } from '@/lib/actions';
+
 import { cn } from '@mjs/ui/lib/utils';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import { ComingSoonContent } from '../../../components/coming-soon';
 import { FeatureCards } from '@/components/feature-cards';
 import BackgroundWrapper from '@/components/bg-wrapper';
+import { getActiveSale } from '@/lib/services/fetchers-server';
 
 export default async function DashboardPage(_props: PageProps) {
   const queryClient = new QueryClient();
@@ -19,7 +20,7 @@ export default async function DashboardPage(_props: PageProps) {
   });
 
   return (
-    <BackgroundWrapper className='min-h-[80dvh]'>
+    <BackgroundWrapper className='min-h-[80dvh] flex flex-col items-center justify-center'>
       <main
         className={cn('p-4 relative mx-auto max-w-7xl space-y-8 z-10 py-10')}
       >

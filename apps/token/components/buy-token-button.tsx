@@ -1,14 +1,15 @@
-import { getActiveSale } from '@/lib/actions';
+import { getActiveSale } from '@/lib/services/fetchers-server';
 import { RainbowButton } from '@mjs/ui/components/rainbow-button';
 import { cn } from '@mjs/ui/lib/utils';
 import Link from 'next/link';
 
 export async function BuyTokenButton({ className }: { className?: string }) {
   const data = await getActiveSale();
+
   if (!data?.data) {
     return null;
   }
-  const sale = data.data;
+  const sale = data.data?.sales?.[0];
   if (!sale) {
     return null;
   }

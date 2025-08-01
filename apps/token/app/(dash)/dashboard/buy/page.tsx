@@ -1,4 +1,3 @@
-import { getActiveSale } from '@/lib/actions';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import {
   dehydrate,
@@ -8,6 +7,7 @@ import {
 import { ComingSoon } from '../../../../components/coming-soon';
 import { TokenSale } from './sale';
 import BackgroundWrapper from '@/components/bg-wrapper';
+import { getActiveSale } from '@/lib/services/fetchers-server';
 
 export default async function BuyPage() {
   const queryClient = new QueryClient();

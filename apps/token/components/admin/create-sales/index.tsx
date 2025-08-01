@@ -61,9 +61,7 @@ export const CreateSaleForm = () => {
     action: 'edit_sale',
     saleId,
     data: { step: steps.find((s) => s.id === step)?.name },
-    onSuccess: () => {
-      toast.success('Admin action authenticated successfully');
-    },
+
     onError: (error) => {
       toast.error(`Authentication failed: ${error}`);
     },
