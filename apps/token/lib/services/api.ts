@@ -89,13 +89,13 @@ export const useSale = (id: string | undefined) => {
 };
 
 export const useUser = () => {
-  const { data, status, error } = useSuspenseQuery({
+  const { data, status, error, isLoading } = useSuspenseQuery({
     queryKey: ['users', 'me'],
     queryFn: () => getCurrentUser(),
     staleTime: DEFAULT_STALE_TIME,
   });
   const e = getError(data, error);
-  return { data: data?.data, error: e, status };
+  return { data: data?.data, error: e, status, isLoading };
 };
 
 export function useWeb3Contract(address: string) {

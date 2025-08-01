@@ -48,6 +48,7 @@ export const deleteSessionCookie = async (
   }
 ) => {
   const cookieName = opts.cookiePrefix + COOKIE_NAME;
+  console.debug('SHOULD DELETE COOKIE', cookieName);
   const c = await cookies();
   c.delete(cookieName);
 };
