@@ -6,7 +6,8 @@
       "http://localhost:3001",
       "http://localhost:6006",
       "https://*.mahjongstars.com",
-      "https://*.vercel.app"
+      "https://*.vercel.app",
+      "https://mahjong-stars-token.vercel.app"
     ],
     "method": [
       "GET",

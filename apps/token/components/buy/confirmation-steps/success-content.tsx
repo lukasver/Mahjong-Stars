@@ -21,7 +21,7 @@ export const SuccessContent = ({ className }: { className?: string }) => {
   const tokenSymbol = data?.transaction.sale.tokenSymbol;
 
   const handleClick = () => {
-    router.push('/dashboard');
+    router.push(`/dashboard/transactions?id=${tx}`);
   };
 
   const supportEmail =
