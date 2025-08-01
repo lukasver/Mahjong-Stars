@@ -16,7 +16,13 @@ import {
   TransactionByIdWithRelations,
   TransactionWithRelations,
 } from '@/common/types/transactions';
-import { BankDetails, DocumentSignatureStatus, FOP } from '@prisma/client';
+import {
+  BankDetails,
+  DocumentSignatureStatus,
+  FOP,
+  Token,
+  TokensOnBlockchains,
+} from '@prisma/client';
 
 export type FetcherOptions = Omit<RequestInit, 'body'> & {
   baseUrl?: string;
@@ -57,7 +63,6 @@ class Fetcher {
   fetcher = <T>(url: string, options: FetcherOptions = {}) => {
     const { token, ...fetchOptions } = options;
     const fullUrl = this.baseUrl ? `${this.baseUrl}${url}` : url;
-    console.log('fullUrl', fullUrl);
     const {
       body,
       rawBody = false,
@@ -369,6 +374,32 @@ export const getUserTransactions = async (params: {
     const data = await fetcher<{
       transactions: TransactionWithRelations[];
     }>(`/transactions/user/me?${queryParams.toString()}`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getAllTransactions = async () => {
+  try {
+    const data = await fetcher<{
+      transactions: TransactionWithRelations[];
+      quantity: number;
+    }>('/admin/transactions');
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getCryptoTransaction = async (txId: string) => {
+  try {
+    const data = await fetcher<{
+      // amend
+      transaction: TransactionByIdWithRelations;
+      token: Token;
+      blockchain: TokensOnBlockchains;
+    }>(`/transactions/${txId}/crypto`);
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };

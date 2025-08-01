@@ -61,8 +61,28 @@ class TransactionsController {
       const transactions = await prisma.saleTransactions.findMany({
         include: {
           sale: true,
-          user: { include: { profile: true } },
+          user: {
+            select: {
+              profile: true,
+              kycVerification: {
+                select: {
+                  id: true,
+                  status: true,
+                  documents: {
+                    select: {
+                      id: true,
+                      url: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          approver: true,
+          blockchain: true,
+          tokenDistributions: true,
         },
+        orderBy: { createdAt: 'desc' },
       });
       return Success({ transactions, quantity: transactions.length });
     } catch (e) {
@@ -916,6 +936,41 @@ class TransactionsController {
       invariant(transaction, 'Transaction not found');
       return Success({
         transaction: true,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  async getCryptoTransaction(dto: { id: string }, ctx: ActionCtx) {
+    try {
+      const transaction = await prisma.saleTransactions.findUnique({
+        where: {
+          id: dto.id,
+          user: {
+            walletAddress: ctx.address,
+          },
+        },
+        include: {
+          sale: {
+            include: {
+              token: {
+                include: {
+                  TokensOnBlockchains: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      invariant(transaction, 'Transaction not found');
+      const blockchain = transaction.sale.token.TokensOnBlockchains?.[0];
+      invariant(blockchain, 'Blockchain not found');
+      return Success({
+        transaction: decimalsToString(transaction),
+        token: transaction.sale.token,
+        blockchain,
       });
     } catch (e) {
       logger(e);

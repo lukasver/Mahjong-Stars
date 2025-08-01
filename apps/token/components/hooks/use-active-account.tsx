@@ -1,4 +1,5 @@
 'use client';
+import { getQueryClient } from '@/app/providers';
 import { logout } from '@/lib/actions';
 import { useCallback, useTransition } from 'react';
 import {
@@ -24,6 +25,7 @@ function useActiveAccount() {
     startTransition(async () => {
       if (wallet) {
         disconnect(wallet);
+        getQueryClient().clear();
       }
       await logout();
     });

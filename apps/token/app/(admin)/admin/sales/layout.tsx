@@ -2,6 +2,7 @@ import AdminSidebar from '@/app/(dash)/dashboard/admin-sidebar';
 import { DashboardHeader } from '@/app/(dash)/dashboard/header';
 import { PagesProviders } from '@/app/providers';
 import { getFooterLinks, metadata } from '@/common/config/site';
+import BackgroundWrapper from '@/components/bg-wrapper';
 import { BuyTokenButton } from '@/components/buy-token-button';
 import { InputOptionsProvider } from '@/components/hooks/use-input-options';
 import { DashboardSidebar } from '@/components/sidebar';
@@ -54,7 +55,9 @@ export default async function AdminLayout({
                 </Suspense>
               </DashboardHeader>
               <InputOptionsProvider>
-                <main className='p-6 container mx-auto'>{children}</main>
+                <BackgroundWrapper>
+                  <main className='p-6 container mx-auto'>{children}</main>
+                </BackgroundWrapper>
               </InputOptionsProvider>
               <Footer
                 siteConfig={metadata}

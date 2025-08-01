@@ -16,6 +16,7 @@ import {
 } from '@/lib/actions';
 import { uploadFile } from '@/lib/utils/files';
 import {
+  useCryptoTransaction,
   useSaleBanks,
   useTransactionAvailabilityForSale,
   useTransactionById,
@@ -38,6 +39,8 @@ import { BanknoteIcon } from 'lucide-react';
 import { Placeholder } from '@/components/placeholder';
 import { metadata } from '@/common/config/site';
 
+import useActiveAccount from '@/components/hooks/use-active-account';
+import { PurchaseSummaryCard } from '@/components/invest/summary';
 interface PaymentStepProps {
   onSuccess: () => void;
 }
@@ -97,17 +100,95 @@ const CryptoPayment = ({
   tx: TransactionByIdWithRelations;
   onSuccess: () => void;
 }) => {
-  // Prepare the transaction
-  // Parse the amount to pay into a format used by the wallet
+  const { activeAccount: ac } = useActiveAccount();
+  const locale = useLocale();
+  const { data: cryptoTransaction, isLoading } = useCryptoTransaction(tx.id);
 
   return (
-    <div className='py-8 text-center'>
+    <div className='py-2 text-center space-y-4'>
+      <PurchaseSummaryCard
+        purchased={{
+          quantity: tx.quantity.toString(),
+          tokenSymbol: tx.tokenSymbol,
+        }}
+        base={tx.quantity.toString()}
+        total={tx.quantity.toString()}
+        paid={{
+          totalAmount: tx.totalAmount.toString(),
+          currency: tx.paidCurrency,
+        }}
+        locale={locale}
+      />
       <div className='mb-2'>
         <span className='font-medium'>Crypto payment</span> (coming soon)
       </div>
-      <div className='text-muted-foreground'>
+      {/* <div className='text-muted-foreground'>
         Please follow the instructions for crypto payment in the next step.
-      </div>
+      </div> */}
+      {/* {!isLoading && (
+        <TransactionButton
+          transaction={() => {
+            const chain = cryptoTransaction?.blockchain;
+            if (!chain) throw new Error('Contract not found');
+            const contract = chain.contractAddress;
+            if (!contract) throw new Error('Contract not found');
+            const toWallet =
+              cryptoTransaction.transaction.sale.toWalletsAddress;
+            if (!toWallet) throw new Error('To wallet not found');
+            const tx = cryptoTransaction.transaction;
+
+            const twContract = getContract({
+              client: client,
+              chain: defineChain(chain.chainId),
+              address: contract,
+            });
+
+            console.log('CHAIN', chain);
+            // ERC-20
+            if (chain.decimals === 18) {
+              const txs = transferFrom({
+                contract: twContract,
+                amount: tx.totalAmount.toString(),
+                from: ac?.address!,
+                to: toWallet,
+              });
+              console.debug('🚀 ~ payment-step.tsx:172 ~ tx:', txs);
+
+              return txs;
+            } else {
+              const txs = prepareContractCall({
+                contract: twContract,
+                method: resolveMethod('transferFrom'),
+                params: [
+                  '0x123...',
+                  toUnits(tx.totalAmount.toString(), chain.decimals),
+                ],
+              });
+              return txs;
+            }
+          }}
+          // transaction={() => {
+          //   // Create a transaction object and return it
+          //   const tx = prepareContractCall({
+          //     contract,
+          //     method: "mint",
+          //     params: [address, amount],
+          //   });
+          //   return tx;
+          // }}
+          onTransactionSent={(result) => {
+            console.log('Transaction submitted', result.transactionHash);
+          }}
+          onTransactionConfirmed={(receipt) => {
+            console.log('Transaction confirmed', receipt.transactionHash);
+          }}
+          onError={(error) => {
+            console.error('Transaction error', error);
+          }}
+        >
+          Confirm Transaction
+        </TransactionButton>
+      )} */}
     </div>
   );
 };

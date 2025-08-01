@@ -90,7 +90,7 @@ export const PurchaseSummaryCard = ({
           </span>
         </div>
         <div className='flex justify-between'>
-          <span className='text-gray-400'>Total amount to pay</span>
+          <span className='text-secondary font-bold'>Total amount to pay</span>
           <span className='text-white font-bold'>
             {safeFormatCurrency(paid, {
               locale,

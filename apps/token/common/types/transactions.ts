@@ -63,3 +63,33 @@ const transactionByIdWithRelations =
 export type TransactionByIdWithRelations = Prisma.SaleTransactionsGetPayload<
   typeof transactionByIdWithRelations
 >;
+
+const AdminTransactionsWithRelations =
+  Prisma.validator<Prisma.SaleTransactionsDefaultArgs>()({
+    include: {
+      sale: true,
+      user: {
+        select: {
+          profile: true,
+          kycVerification: {
+            select: {
+              id: true,
+              status: true,
+              documents: {
+                select: {
+                  id: true,
+                  url: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      approver: true,
+      blockchain: true,
+      tokenDistributions: true,
+    },
+  });
+export type AdminTransactionsWithRelations = Prisma.SaleTransactionsGetPayload<
+  typeof AdminTransactionsWithRelations
+>;

@@ -347,9 +347,7 @@ export function TransactionDetailsModal({
                       </div>
                     }
                   />
-                  {/* @ts-expect-error */}
                   {tx.blockchain && (
-                    // @ts-expect-error
                     <DetailRow label='Network' value={tx?.blockchain?.name} />
                   )}
                 </div>
@@ -358,7 +356,6 @@ export function TransactionDetailsModal({
           )}
 
           {/* Token Distribution Information */}
-          {/* @ts-expect-error */}
           {tx?.tokenDistributions && tx?.tokenDistributions.length > 0 && (
             <>
               <Separator />
@@ -367,7 +364,6 @@ export function TransactionDetailsModal({
                   Token Distribution
                 </h3>
                 <div className='space-y-1'>
-                  {/* @ts-expect-error */}
                   {tx?.tokenDistributions.map((distribution, index) => (
                     <div
                       key={distribution.id}
@@ -387,7 +383,7 @@ export function TransactionDetailsModal({
                           {distribution.status}
                         </Badge>
                       </div>
-                      <DetailRow
+                      {/* <DetailRow
                         label='Quantity'
                         value={formatNumber(distribution.quantity)}
                       />
@@ -401,7 +397,7 @@ export function TransactionDetailsModal({
                               })
                             : 'Pending'
                         }
-                      />
+                      /> */}
                     </div>
                   ))}
                 </div>
@@ -418,7 +414,6 @@ export function TransactionDetailsModal({
                   Approval Information
                 </h3>
                 <div className='space-y-1'>
-                  {/* @ts-expect-error */}
                   <DetailRow label='Approved By' value={tx?.approver?.email} />
                   <DetailRow
                     label='Approved At'
