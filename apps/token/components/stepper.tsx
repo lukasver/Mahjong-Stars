@@ -42,7 +42,9 @@ export function Stepper({
                     : currentStep === step.id
                       ? 'border-secondary-500 bg-background text-secondary-500'
                       : 'border-muted-foreground/25 bg-background text-muted-foreground',
-                  onStepClick && 'hover:border-primary/50 cursor-pointer'
+                  onStepClick &&
+                    !disableClick &&
+                    'hover:border-primary/50 cursor-pointer'
                 )}
               >
                 {currentStep > step.id ? (
