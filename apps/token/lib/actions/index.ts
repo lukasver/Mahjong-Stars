@@ -16,7 +16,7 @@ import salesController from '@/lib/repositories/sales';
 import transactionsController from '@/lib/repositories/transactions';
 import usersController from '@/lib/repositories/users';
 import { invariant } from '@epic-web/invariant';
-import { redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 import { defineChain, getContract as getContractThirdweb } from 'thirdweb';
 import { bscTestnet } from 'thirdweb/chains';
 import { z } from 'zod';
@@ -121,7 +121,10 @@ export const login = loginActionClient
     });
     invariant(user?.success, 'User could not be found/created');
 
-    redirect(user.data.user.emailVerified ? '/dashboard' : '/onboarding');
+    redirect(
+      user.data.user.emailVerified ? '/dashboard' : '/onboarding',
+      RedirectType.replace
+    );
   });
 
 export const generatePayload = loginActionClient
