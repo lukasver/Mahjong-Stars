@@ -122,7 +122,7 @@ export const login = loginActionClient
     invariant(user?.success, 'User could not be found/created');
 
     redirect(
-      user.data.user.emailVerified ? '/dashboard' : '/onboarding',
+      user.data.user.emailVerified ? '/in?to=dashboard' : '/in?to=onboarding',
       RedirectType.replace
     );
   });

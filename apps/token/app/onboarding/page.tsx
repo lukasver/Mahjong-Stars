@@ -8,7 +8,10 @@ import { PointerEventsGuard } from '@/components/thirdweb/pointer-events-guard';
 import { getCurrentUser } from '@/lib/services/fetchers-server';
 
 export default async function Onboarding({ searchParams }: PageProps) {
-  const [res, params] = await Promise.all([getCurrentUser(), searchParams]);
+  const [res, params] = await Promise.all([
+    getCurrentUser().catch(() => null),
+    searchParams,
+  ]);
 
   if (!res?.data) {
     redirect('/?error=unauthorized');
