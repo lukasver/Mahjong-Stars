@@ -1,7 +1,7 @@
 To update cors:
 
 ```sh
-gsutil cors set {fileLocation} gs://mjs-private-dev
+gsutil cors set $FILE_LOCATION gs://mjs-private-dev
 
 # Check result
 gsutil cors get gs://mjs-private-dev

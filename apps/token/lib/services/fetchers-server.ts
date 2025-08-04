@@ -7,16 +7,17 @@ import sales from '../repositories/sales';
 
 import { getUserFromCache } from '../auth/cache';
 import { isAdmin } from '../actions/admin';
+import { cache } from 'react';
 
-const getUserFromSession = async () => {
+const getUserFromSession = cache(async () => {
   const verified = await getSessionCookie().then((d) => verifyJwt(d || ''));
   if (!verified || !verified.valid) {
     throw new Error('Invalid session');
   }
   return getUserFromCache(verified.parsedJWT.sub);
-};
+});
 
-export const getCurrentUser = async () => {
+export const getCurrentUser = cache(async () => {
   const user = await getUserFromSession();
   const result = await users.getMe({
     address: user.walletAddress,
@@ -26,9 +27,9 @@ export const getCurrentUser = async () => {
   } else {
     return { data: null, error: result };
   }
-};
+});
 
-export const getUserTransactions = async () => {
+export const getUserTransactions = cache(async () => {
   const user = await getUserFromSession();
   const result = await transactions.getUserTransactions(
     {},
@@ -42,9 +43,9 @@ export const getUserTransactions = async () => {
   } else {
     return { data: null, error: result };
   }
-};
+});
 
-export const getAllTransactions = async () => {
+export const getAllTransactions = cache(async () => {
   const user = await getUserFromSession();
   const isAdminUser = await isAdmin(user.walletAddress);
   const result = await transactions.getAllTransactions(
@@ -60,9 +61,9 @@ export const getAllTransactions = async () => {
   } else {
     return { data: null, error: result };
   }
-};
+});
 
-export const getActiveSale = async () => {
+export const getActiveSale = cache(async () => {
   const user = await getUserFromSession();
   const result = await sales.getSales(
     { active: true },
@@ -76,4 +77,4 @@ export const getActiveSale = async () => {
   } else {
     return { data: null, error: result };
   }
-};
+});

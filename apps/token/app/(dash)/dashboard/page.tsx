@@ -9,6 +9,17 @@ import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import { ComingSoonContent } from '../../../components/coming-soon';
 import { FeatureCards } from '@/components/feature-cards';
 import { getActiveSale } from '@/lib/services/fetchers-server';
+import {
+  UserTokensCard,
+  TokenHoldersCard,
+  TokenPriceCard,
+  RemainingTokensCard,
+  DashboardCardLoading,
+} from '@/components/dashboard/cards';
+import { TokenStats } from '@/components/dashboard/token-stats';
+import { TokenMetrics } from '@/components/dashboard/token-metrics';
+import { IcoPhases } from '@/components/dashboard/ico-phases';
+import { RecentTransactions } from '@/components/dashboard/recent-transactions';
 
 export default async function DashboardPage(_props: PageProps) {
   const queryClient = new QueryClient();
@@ -38,30 +49,18 @@ export default async function DashboardPage(_props: PageProps) {
         <Suspense fallback={<FundraisingProgressLoading />}>
           <FundraisingProgress>
             <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
-              <div className='rounded-lg border border-zinc-800 bg-zinc-900 p-3'>
-                <div className='text-sm font-medium text-zinc-400'>
-                  Your tokens
-                </div>
-                <div className='text-xl font-bold'>0</div>
-              </div>
-              <div className='rounded-lg border border-zinc-800 bg-zinc-900 p-3'>
-                <div className='text-sm font-medium text-zinc-400'>
-                  Token Holders
-                </div>
-                <div className='text-xl font-bold'>6.5M</div>
-              </div>
-              <div className='rounded-lg border border-zinc-800 bg-zinc-900 p-3'>
-                <div className='text-sm font-medium text-zinc-400'>
-                  Token Price
-                </div>
-                <div className='text-xl font-bold'>$0.012</div>
-              </div>
-              <div className='rounded-lg border border-zinc-800 bg-zinc-900 p-3'>
-                <div className='text-sm font-medium text-zinc-400'>
-                  Remaining Tokens
-                </div>
-                <div className='text-xl font-bold'>3.5M</div>
-              </div>
+              <Suspense fallback={<DashboardCardLoading />}>
+                <UserTokensCard />
+              </Suspense>
+              <Suspense fallback={<DashboardCardLoading />}>
+                <TokenHoldersCard />
+              </Suspense>
+              <Suspense fallback={<DashboardCardLoading />}>
+                <TokenPriceCard />
+              </Suspense>
+              <Suspense fallback={<DashboardCardLoading />}>
+                <RemainingTokensCard />
+              </Suspense>
             </div>
           </FundraisingProgress>
         </Suspense>
@@ -69,16 +68,18 @@ export default async function DashboardPage(_props: PageProps) {
 
       <FeatureCards />
 
-      {/* <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+      <ErrorBoundary fallback={null}>
+        <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
           <TokenStats address={'0x8699210141B710c46eC211cDD39D2C2edDA7A63c'} />
         </div>
+      </ErrorBoundary>
 
-        <div className='grid gap-6 lg:grid-cols-2'>
-          <TokenMetrics />
-          <IcoPhases />
-        </div>
+      <div className='grid gap-6 lg:grid-cols-2'>
+        <TokenMetrics />
+        <IcoPhases />
+      </div>
 
-        <RecentTransactions /> */}
+      <RecentTransactions />
     </div>
   );
 }
