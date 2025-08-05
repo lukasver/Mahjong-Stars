@@ -356,6 +356,7 @@ export const confirmTransaction = authActionClient
   .schema(
     UpdateTransactionDto.extend({
       id: z.string(),
+      type: z.enum(['CRYPTO', 'FIAT']),
     })
   )
   .action(async ({ ctx, parsedInput }) => {

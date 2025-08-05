@@ -14,6 +14,7 @@ import { useLocale } from 'next-intl';
 import { copyToClipboard, safeFormatCurrency } from '@mjs/utils/client';
 import { Decimal } from 'decimal.js';
 import { toast } from '@mjs/ui/primitives/sonner';
+import { FIAT_CURRENCIES } from '@/common/config/constants';
 
 interface BalanceCheckerProps {
   /**
@@ -175,7 +176,9 @@ export function BalanceChecker({
                   },
                   {
                     locale,
-                    precision: 'CRYPTO',
+                    precision: FIAT_CURRENCIES.includes(tokenSymbol)
+                      ? 'FIAT'
+                      : 'CRYPTO',
                   }
                 )}
               </span>

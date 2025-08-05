@@ -45,8 +45,6 @@ export function CryptoPaymentButton({
   txId: string;
   onSuccess: () => void;
 }) {
-  console.debug('🚀 ~ crypto-payment-btn.tsx:36 ~ chain:', chain);
-
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
   const { mutate: simulateTx } = useSimulateTransaction();

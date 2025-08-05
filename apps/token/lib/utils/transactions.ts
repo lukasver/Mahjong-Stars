@@ -50,8 +50,6 @@ export const getTransactionModalTypeToOpen = (
 
       case TransactionStatusSchema.enum.CANCELLED:
         return null; //TODO! IMPLEMENT
-      case TransactionStatusSchema.enum.TOKENS_ALLOCATED:
-        return null; //TODO! IMPLEMENT
       case TransactionStatusSchema.enum.PAYMENT_SUBMITTED:
         return null; //TODO! IMPLEMENT
       case TransactionStatusSchema.enum.PAYMENT_VERIFIED:

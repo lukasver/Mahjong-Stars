@@ -11,3 +11,5 @@ export default async function AdminTransactionsPage() {
 
   return <AdminTransactions />;
 }
+
+export const dynamic = 'force-dynamic';

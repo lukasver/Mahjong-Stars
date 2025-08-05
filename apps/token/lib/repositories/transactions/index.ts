@@ -796,7 +796,7 @@ class TransactionsController {
     }: {
       id: string;
       type: 'CRYPTO' | 'FIAT';
-      payload: {
+      payload?: {
         formOfPayment?: FOP;
         confirmationId?: string;
         receivingWallet?: string;
@@ -871,7 +871,7 @@ class TransactionsController {
         tx.sale.availableTokenQuantity
       ).equals(tx.quantity);
 
-      const { chainId, ...rest } = payload;
+      const { chainId, ...rest } = payload || {};
       const [updatedTx] = await prisma.$transaction([
         prisma.saleTransactions.update({
           where: { id },

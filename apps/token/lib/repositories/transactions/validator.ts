@@ -424,12 +424,6 @@ export class TransactionValidator {
         TransactionStatus.CANCELLED,
       ],
       [TransactionStatus.PAYMENT_VERIFIED]: [
-        TransactionStatus.TOKENS_ALLOCATED,
-        TransactionStatus.REJECTED,
-        TransactionStatus.CANCELLED,
-      ],
-      [TransactionStatus.TOKENS_ALLOCATED]: [
-        TransactionStatus.TOKENS_DISTRIBUTED,
         TransactionStatus.REJECTED,
         TransactionStatus.CANCELLED,
       ],
@@ -485,15 +479,6 @@ export class TransactionValidator {
         throw new HttpError(
           HttpStatusCode.BAD_REQUEST,
           'Rejection reason is required for REJECTED status'
-        );
-      }
-    }
-
-    if (newStatus === TransactionStatus.TOKENS_ALLOCATED) {
-      if (!updateData?.approvedBy) {
-        throw new HttpError(
-          HttpStatusCode.BAD_REQUEST,
-          'Approver ID is required for TOKENS_ALLOCATED status'
         );
       }
     }

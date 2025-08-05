@@ -137,6 +137,10 @@ const getInitialStep = (
   switch (status) {
     case TransactionStatusSchema.enum.AWAITING_PAYMENT:
       return steps.find((s) => s.name === STEP_NAMES.Payment) || defaultStep;
+    case TransactionStatusSchema.enum.PAYMENT_SUBMITTED:
+      return (
+        steps.find((s) => s.name === STEP_NAMES.Confirmation) || defaultStep
+      );
     case TransactionStatusSchema.enum.PAYMENT_VERIFIED:
       return (
         steps.find((s) => s.name === STEP_NAMES.Confirmation) || defaultStep

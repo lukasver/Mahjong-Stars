@@ -82,3 +82,5 @@ export default async function AdminLayout({
     </>
   );
 }
+
+export const dynamic = 'force-dynamic';

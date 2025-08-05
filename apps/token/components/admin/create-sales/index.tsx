@@ -39,7 +39,7 @@ export const CreateSaleForm = () => {
   const router = useRouter();
   const [step, setStep] = useQueryState(
     'step',
-    parseAsInteger.withDefault(1).withOptions({ shallow: true })
+    parseAsInteger.withDefault(1).withOptions({ shallow: false })
   );
   const [saleId, setSaleId] = useQueryState(
     'saleId',

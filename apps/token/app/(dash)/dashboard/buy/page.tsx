@@ -25,3 +25,5 @@ export default async function BuyPage() {
     </HydrationBoundary>
   );
 }
+
+export const dynamic = 'force-dynamic';

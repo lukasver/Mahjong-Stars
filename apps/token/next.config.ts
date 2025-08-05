@@ -43,7 +43,7 @@ const cspHeader = `
     upgrade-insecure-requests;
 `;
 
-export default () => {
+const config: NextConfig = () => {
   const plugins = [
     bundleAnalyzer({
       enabled: BUNDLE_ANALIZER_ON,
@@ -159,3 +159,5 @@ export default () => {
     },
   } as NextConfig);
 };
+
+export default config;

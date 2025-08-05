@@ -1,13 +1,14 @@
 import { publicUrl } from '@/common/config/env';
 import { deleteSessionCookie } from '@/lib/auth/cookies';
-import { NextApiRequest } from 'next';
 import { revalidatePath } from 'next/cache';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Your frontend's address: http://localhost:3000 or https://my.production.domain.com
 
-export async function GET(req: NextApiRequest) {
-  const redirectTo = req.query.redirectTo as string | undefined;
+export async function GET(req: NextRequest) {
+  const redirectTo = req.nextUrl.searchParams.get('redirectTo') as
+    | string
+    | undefined;
   // Tell Next.js to purge the entire cache, no stale data should stay after the redirect back to the index page.
   revalidatePath('/', 'layout');
   revalidatePath('/dashboard', 'layout');

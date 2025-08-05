@@ -11,3 +11,5 @@ export default async function TransactionsPage(_props: PageProps) {
 
   return <UserTransactions />;
 }
+
+export const dynamic = 'force-dynamic';

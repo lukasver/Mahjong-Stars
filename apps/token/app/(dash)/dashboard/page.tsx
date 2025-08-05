@@ -89,3 +89,5 @@ export default async function DashboardPage(_props: PageProps) {
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic';

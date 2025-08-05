@@ -47,3 +47,5 @@ const Container = ({ children }: { children: React.ReactNode }) => {
     </PointerEventsGuard>
   );
 };
+
+export const dynamic = 'force-dynamic';

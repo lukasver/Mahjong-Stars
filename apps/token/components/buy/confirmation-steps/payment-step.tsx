@@ -38,12 +38,10 @@ import { TransactionByIdWithRelations } from '@/common/types/transactions';
 import { BanknoteIcon } from 'lucide-react';
 import { Placeholder } from '@/components/placeholder';
 import { metadata } from '@/common/config/site';
-import { client } from '@/lib/auth/thirdweb-client';
 
 import useActiveAccount from '@/components/hooks/use-active-account';
 import { PurchaseSummaryCard } from '@/components/invest/summary';
 import { BalanceChecker } from '@/components/buy/balance-checker';
-import { useSocialProfiles } from 'thirdweb/react';
 
 import { CryptoPaymentButton } from './crypto-payment-btn';
 import { TransactionStatus } from '@prisma/client';
@@ -126,10 +124,10 @@ const CryptoPayment = ({
 
   const [isBalanceSufficient, setIsBalanceSufficient] = useState(false);
 
-  const { data: profiles } = useSocialProfiles({
-    client,
-    address: ac?.address,
-  });
+  // const { data: profiles } = useSocialProfiles({
+  //   client,
+  //   address: ac?.address,
+  // });
 
   return (
     <div className='py-2 text-center space-y-4'>
@@ -252,6 +250,7 @@ const FiatPayment = ({
         }),
         confirmTransaction({
           id: txId,
+          type: 'FIAT',
         }).then(() => {
           const client = getQueryClient();
           const keys = [['transactions'], ['sales']];
@@ -288,6 +287,18 @@ const FiatPayment = ({
 
   return (
     <div className='space-y-4'>
+      <PurchaseSummaryCard
+        locale={locale}
+        purchased={{
+          quantity: tx.quantity.toString(),
+          tokenSymbol: tx.sale.tokenSymbol,
+        }}
+        total={tx.quantity.toString()}
+        paid={{
+          totalAmount: tx.totalAmount.toString(),
+          currency: tx.paidCurrency,
+        }}
+      />
       <p className='text-sm text-foreground'>
         Proceed to pay{' '}
         <span className='font-medium '>
@@ -306,6 +317,7 @@ const FiatPayment = ({
         </span>{' '}
         to one of the following bank accounts & upload a proof of payment:
       </p>
+      <h3>Bank Details:</h3>
       <ul className='space-y-4 max-h-[600px] overflow-y-auto'>
         {isBanksLoading ? (
           <Skeleton className='h-10 w-full' />
