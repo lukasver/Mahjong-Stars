@@ -257,6 +257,7 @@ const FiatPayment = ({
     try {
       invariant(banks?.banks?.length, 'No banks found, try again later');
       invariant(tx, 'Transaction id could not be found');
+      invariant(files.length, 'No files uploaded');
 
       const saleId = tx.sale.id;
       const txId = tx.id;
@@ -285,6 +286,9 @@ const FiatPayment = ({
         confirmTransaction({
           id: txId,
           type: 'FIAT',
+          payload: {
+            paymentDate: new Date(),
+          },
         }).then(() => {
           const client = getQueryClient();
           const keys = [['transactions'], ['sales']];
@@ -439,7 +443,7 @@ const FiatPayment = ({
         <Button
           type='submit'
           className='w-full'
-          disabled={!banks?.banks?.length}
+          disabled={!banks?.banks?.length || !files.length}
           variant='accent'
           loading={isSubmitting}
         >

@@ -810,6 +810,7 @@ class TransactionsController {
         chainId?: number;
         amountPaid?: string;
         paymentDate?: Date;
+        paymentEvidenceId?: string;
       };
     },
     ctx: ActionCtx
@@ -876,7 +877,7 @@ class TransactionsController {
         tx.sale.availableTokenQuantity
       ).equals(tx.quantity);
 
-      const { chainId, ...rest } = payload || {};
+      const { chainId, paymentEvidenceId, ...rest } = payload || {};
       const [updatedTx] = await prisma.$transaction([
         prisma.saleTransactions.update({
           where: { id },
@@ -886,6 +887,15 @@ class TransactionsController {
               blockchain: {
                 connect: {
                   chainId,
+                },
+              },
+            }),
+            amountPaid: tx.totalAmount.toString(),
+            paymentDate: new Date(),
+            ...(paymentEvidenceId && {
+              paymentEvidence: {
+                connect: {
+                  id: paymentEvidenceId,
                 },
               },
             }),

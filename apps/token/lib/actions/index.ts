@@ -357,6 +357,11 @@ export const confirmTransaction = authActionClient
     UpdateTransactionDto.extend({
       id: z.string(),
       type: z.enum(['CRYPTO', 'FIAT']),
+      payload: z
+        .object({
+          paymentDate: z.coerce.date().optional(),
+        })
+        .optional(),
     })
   )
   .action(async ({ ctx, parsedInput }) => {

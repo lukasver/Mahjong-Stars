@@ -243,20 +243,33 @@ class DocumentsController {
       // Else we should create
       const promises = [];
       promises.push(
-        prisma.document.createManyAndReturn({
-          data: documents.map((d) => {
-            const url = this.s3.getFileUrl('private', d.key);
-            console.log('URL', url, d.key);
-            return {
-              userId,
-              fileName: d.key,
-              type: mime.lookup(d.key) || 'application/octet-stream',
-              name: d.key.split('/').pop() || '',
-              url: this.s3.getFileUrl('private', d.key),
-            } satisfies Prisma.DocumentCreateManyInput;
-          }),
-          skipDuplicates: true,
-        })
+        prisma.document
+          .createManyAndReturn({
+            data: documents.map((d) => {
+              const url = this.s3.getFileUrl('private', d.key);
+              console.log('URL', url, d.key);
+              return {
+                userId,
+                fileName: d.key,
+                type: mime.lookup(d.key) || 'application/octet-stream',
+                name: d.key.split('/').pop() || '',
+                url: this.s3.getFileUrl('private', d.key),
+              } satisfies Prisma.DocumentCreateManyInput;
+            }),
+            skipDuplicates: true,
+            select: {
+              id: true,
+            },
+          })
+          .then(async (docs) => {
+            if (type === 'PAYMENT' && docs[0]) {
+              await prisma.saleTransactions.update({
+                where: { id: dto.transactionId },
+                data: { paymentEvidenceId: docs[0].id },
+              });
+            }
+            return docs;
+          })
       );
       if (type === 'KYC') {
         promises.push(
@@ -278,16 +291,7 @@ class DocumentsController {
           })
         );
       }
-      if (type === 'PAYMENT') {
-        const doc = documents[0];
-        if (dto.transactionId && doc) {
-          void prisma.saleTransactions.update({
-            where: { id: dto.transactionId },
-            data: { paymentEvidenceId: doc.id },
-          });
-        }
-        //TODO check fi we want to associate something or if it is enought with linking to user
-      }
+
       const [docs] = await Promise.all(promises);
       return Success({ documents: docs });
     }
