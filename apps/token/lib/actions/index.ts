@@ -30,8 +30,11 @@ import {
 } from '../auth/thirdweb';
 import { authActionClient, loginActionClient } from './config';
 import {
+  COOKIE_PREFIX,
   FIAT_CURRENCIES,
   JWT_EXPIRATION_TIME,
+  MW_KEY,
+  ONE_YEAR,
 } from '@/common/config/constants';
 import {
   deleteSessionCookie,
@@ -43,6 +46,7 @@ import { InvestFormSchema } from '@/components/invest/schemas';
 import { FOP, Prisma } from '@prisma/client';
 import { erc20Abi } from '../services/crypto/ABI';
 import Decimal from 'decimal.js';
+import { cookies } from 'next/headers';
 
 export const hasActiveSession = async (address: string, token: string) => {
   const sessions = await prisma.session.findMany({
@@ -537,6 +541,14 @@ export const getFileUploadPrivatePresignedUrl = authActionClient
 export const validateMagicWord = authActionClient
   .schema(z.object({ invitationCode: z.string() }))
   .action(async ({ parsedInput }) => {
+    const c = await cookies();
+    c.set(`${COOKIE_PREFIX}-${MW_KEY}`, MW_KEY, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: ONE_YEAR * 100, // Set to effectively never expire (100 years)
+      path: '/',
+      sameSite: 'strict',
+    });
     if (!env.MAGIC_WORD) {
       // IF not set, then allow access
       return true;

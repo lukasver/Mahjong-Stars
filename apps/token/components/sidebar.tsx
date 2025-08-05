@@ -70,7 +70,7 @@ const data = {
         },
         {
           title: 'Whitepaper',
-          url: `/docs/${process.env.NEXT_PUBLIC_WHITEPAPER_SLUG}`,
+          url: process.env.NEXT_PUBLIC_WHITEPAPER_SLUG || '',
         },
       ],
     },

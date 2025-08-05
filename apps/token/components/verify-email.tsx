@@ -26,6 +26,7 @@ import useActiveAccount from './hooks/use-active-account';
 import { useLocalStorage } from 'usehooks-ts';
 import { cn } from '@mjs/ui/lib/utils';
 import { getGlassyCardClassName } from '@mjs/ui/components/cards';
+import { MW_KEY } from '@/common/config/constants';
 
 const titleMapping = {
   1: {
@@ -41,8 +42,6 @@ const titleMapping = {
     description: 'Please enter the code sent to your email.',
   },
 };
-
-const MW_KEY = 'mjs-mw';
 
 export function VerifyEmail({ token }: { token: string }) {
   const [magicWord] = useLocalStorage(MW_KEY, '');

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { COOKIE_PREFIX } from './common/config/constants';
+import { COOKIE_PREFIX, MW_KEY } from './common/config/constants';
 import log from './lib/services/logger.server';
 import { getSessionCookie } from './lib/auth/cookies';
 
@@ -20,12 +20,12 @@ export default async (req: NextRequest) => {
   // }
 
   // This doesn't not check if the session cookie is valid, it only checks if it exists for faster perf
-  const cookies = await getSessionCookie(req, {
+  const sessionCookie = await getSessionCookie(req, {
     cookiePrefix: COOKIE_PREFIX,
   });
 
   // If no cookie is present, we should redirect to the login page
-  if (!cookies) {
+  if (!sessionCookie) {
     if (PUBLIC_ROUTES.includes(req.nextUrl.pathname)) {
       return NextResponse.next();
     }
@@ -34,10 +34,18 @@ export default async (req: NextRequest) => {
 
   //TODO! see if we can check if user is admin from here
 
+  const magicWord = req.cookies.get(`${COOKIE_PREFIX}-${MW_KEY}`);
+
   switch (req.nextUrl.pathname) {
     case '/':
+      if (!magicWord) {
+        return NextResponse.redirect(new URL('/onboarding', req.url));
+      }
       return NextResponse.redirect(new URL('/dashboard', req.url));
     case '/dashboard':
+      if (!magicWord) {
+        return NextResponse.redirect(new URL('/onboarding', req.url));
+      }
       return NextResponse.next();
     default:
       return NextResponse.next();
