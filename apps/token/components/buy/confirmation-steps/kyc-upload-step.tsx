@@ -9,6 +9,7 @@ import {
 } from '@mjs/ui/primitives/card';
 import { FileUpload } from '@mjs/ui/components/file-upload';
 import { Button } from '@mjs/ui/primitives/button';
+import { motion } from '@mjs/ui/components/motion';
 import {
   associateDocumentsToUser,
   getFileUploadPrivatePresignedUrl,
@@ -85,33 +86,53 @@ export function KycUploadStep({ onSuccess }: KycUploadStepProps) {
 
   return (
     <CardContent>
-      <CardHeader>
-        <CardTitle>KYC Document Upload</CardTitle>
-        <CardDescription>
-          Please upload your documents for your KYC verification (id / passport
-          / proof of tax residence).
-        </CardDescription>
-      </CardHeader>
-      <FileUpload
-        type='all'
-        maxSizeMB={5}
-        className='w-full'
-        multiple
-        onFilesChange={handleFilesChange}
-      />
-
-      {error && <div className='text-destructive mt-2'>{error}</div>}
-      {success && (
-        <div className='text-success mt-2'>Files uploaded successfully!</div>
-      )}
-      <Button
-        className='mt-4 w-full'
-        onClick={handleSubmit}
-        variant='accent'
-        disabled={isSubmitting || files.length === 0}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
       >
-        {isSubmitting ? 'Uploading...' : 'Submit KYC Documents'}
-      </Button>
+        <CardHeader>
+          <CardTitle>KYC Document Upload</CardTitle>
+          <CardDescription>
+            Please upload your documents for your KYC verification (id /
+            passport / proof of tax residence).
+          </CardDescription>
+        </CardHeader>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+      >
+        <FileUpload
+          type='all'
+          maxSizeMB={5}
+          className='w-full'
+          multiple
+          onFilesChange={handleFilesChange}
+        />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+        className='space-y-2'
+      >
+        {error && <div className='text-destructive mt-2'>{error}</div>}
+        {success && (
+          <div className='text-success mt-2'>Files uploaded successfully!</div>
+        )}
+        <Button
+          className='mt-4 w-full'
+          onClick={handleSubmit}
+          variant='accent'
+          disabled={isSubmitting || files.length === 0}
+        >
+          {isSubmitting ? 'Uploading...' : 'Submit KYC Documents'}
+        </Button>
+      </motion.div>
     </CardContent>
   );
 }

@@ -641,6 +641,11 @@ class TransactionsController {
           role: SignableDocumentRoleSchema.enum.SIGNER,
           address: ctx.address,
           saftContractId: dto.contractId,
+          SaleTransactions: {
+            connect: {
+              id: dto.transactionId,
+            },
+          },
         },
         select: {
           id: true,
@@ -1059,8 +1064,6 @@ class TransactionsController {
         },
       });
 
-      console.debug('🚀 ~ index.ts:1053 ~ paymentToken:', paymentToken);
-
       return Success({
         transaction: decimalsToString(transaction),
         paymentToken,
@@ -1077,20 +1080,27 @@ class TransactionsController {
    * Retrieves the Recipient information for the user and current transaction in case it exists
    */
   async getRecipientForCurrentTransactionSaft(
-    dto: { saftContractId: string },
+    dto: { transactionId: string },
     ctx: ActionCtx
   ) {
     try {
       const recipient = await prisma.documentRecipient.findMany({
         where: {
-          saftContractId: dto.saftContractId,
+          SaleTransactions: {
+            id: dto.transactionId,
+          },
           address: {
             equals: ctx.address,
           },
           status: {
-            in: [DocumentSignatureStatus.SENT_FOR_SIGNATURE],
+            in: [
+              DocumentSignatureStatus.SENT_FOR_SIGNATURE,
+              DocumentSignatureStatus.SIGNED,
+              DocumentSignatureStatus.CREATED,
+            ],
           },
         },
+        orderBy: [{ createdAt: 'desc' }],
         select: {
           id: true,
           status: true,
@@ -1102,7 +1112,7 @@ class TransactionsController {
         return Success({ recipient: null });
       }
       if (recipient.length > 1) {
-        return Success({ recipient: null });
+        return Success({ recipient: recipient[0] });
       }
 
       return Success({ recipient: recipient[0] });

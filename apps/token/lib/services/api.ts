@@ -176,13 +176,13 @@ export const useSaleSaftForTransaction = (txId: string) => {
 };
 
 export const useRecipientForCurrentTransactionSaft = (
-  saftContractId: string | undefined
+  transactionId: string | undefined
 ) => {
   const { data, status, error, isLoading } = useQuery({
-    queryKey: ['saft', 'recipient', saftContractId],
-    queryFn: () => getRecipientForCurrentTransactionSaft(saftContractId!),
+    queryKey: ['transactions', transactionId, 'recipient'],
+    queryFn: () => getRecipientForCurrentTransactionSaft(transactionId!),
     staleTime: DEFAULT_STALE_TIME,
-    enabled: !!saftContractId,
+    enabled: !!transactionId,
   });
   const e = getError(data, error);
   return { data: data?.data, error: e, status, isLoading };

@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@mjs/ui/primitives/card';
 import { Button } from '@mjs/ui/primitives/button';
+import { motion } from '@mjs/ui/components/motion';
 import { generateContractForTransaction } from '@/lib/actions';
 import {
   useSaleSaftForTransaction,
@@ -28,6 +29,7 @@ import { ContractDialogFailed } from '@/components/buy/contract/dialog-failed';
 import { ContractDialogConfirmSignature } from '@/components/buy/contract/dialog-confirm-signature';
 import { ContractDialogLoading } from '@/components/buy/contract/dialog-loading';
 import { getLabel, getVariablesAsNestedObjects, saftFormSchema } from './utils';
+import { getQueryClient } from '@/app/providers';
 
 interface SaftReviewStepProps {
   onSuccess: () => void;
@@ -41,7 +43,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
   const { tx: txId } = useParams();
   const { data, error, isLoading } = useSaleSaftForTransaction(txId as string);
   const { data: recipient, isLoading: isRecipientLoading } =
-    useRecipientForCurrentTransactionSaft(data?.id ? data.id : undefined);
+    useRecipientForCurrentTransactionSaft(txId ? (txId as string) : undefined);
 
   const [cid, setCid] = useQueryState('cid', parseAsString);
   const [openDialog, setOpenDialog] = useState(!!cid);
@@ -102,6 +104,10 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
       setCid(recipient.recipient.id);
       setOpenDialog(!!recipient.recipient.id);
     }
+    if (recipient && recipient?.recipient?.status === 'SIGNED') {
+      setOpenDialog(false);
+      onSuccess();
+    }
   }, [isRecipientLoading, recipient]);
 
   if (isLoading) return <CardContent>Loading SAFT...</CardContent>;
@@ -115,69 +121,124 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
   if (!template)
     return (
       <CardContent>
-        <CardHeader>
-          <CardTitle>No SAFT template found for this sale.</CardTitle>
-          <CardDescription>You can proceed to next step</CardDescription>
-          <Button variant='accent' onClick={() => onSuccess()} className='mt-4'>
-            Next
-          </Button>
-        </CardHeader>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+        >
+          <CardHeader>
+            <CardTitle>No SAFT template found for this sale.</CardTitle>
+            <CardDescription>You can proceed to next step</CardDescription>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+            >
+              <Button
+                variant='accent'
+                onClick={() => onSuccess()}
+                className='mt-4'
+              >
+                Next
+              </Button>
+            </motion.div>
+          </CardHeader>
+        </motion.div>
       </CardContent>
     );
 
   return (
     <>
-      <CardHeader>
-        <CardTitle>SAFT Review</CardTitle>
-        <CardDescription>
-          Please review the contract and fill in the required information below.
-          This is a preview; signature will be handled separately.
-        </CardDescription>
-      </CardHeader>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
+        <CardHeader>
+          <CardTitle>SAFT Review</CardTitle>
+          <CardDescription>
+            Please review the contract and fill in the required information
+            below. This is a preview; signature will be handled separately.
+          </CardDescription>
+        </CardHeader>
+      </motion.div>
       <CardContent>
         <form.AppForm>
           <form className='space-y-4' onSubmit={handleSubmit}>
-            <div className='grid grid-cols-2 gap-4'>
-              {variables.map((v) => (
-                <FormInput
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className='grid grid-cols-2 gap-4'
+            >
+              {variables.map((v, index) => (
+                <motion.div
                   key={v}
-                  name={`variables.${v}`}
-                  type='text'
-                  label={getLabel(v)}
-                />
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
+                >
+                  <FormInput
+                    name={`variables.${v}`}
+                    type='text'
+                    label={getLabel(v)}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
-            <div className='mt-6'>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className='mt-6'
+            >
               <CardTitle className='text-base mb-2'>Contract Preview</CardTitle>
-              <div className='max-h-3xl overflow-y-auto'>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.9, duration: 0.6 }}
+                className='max-h-3xl overflow-y-auto'
+              >
                 <div
                   className='border rounded p-3 prose prose-invert w-full max-w-none! max-h-96 sm:max-h-svh overflow-y-auto'
                   dangerouslySetInnerHTML={{
                     __html: template,
                   }}
                 />
-              </div>
-            </div>
-            <Button
-              type='submit'
-              variant='accent'
-              className='w-full'
-              loading={action.isExecuting}
+              </motion.div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.1, duration: 0.4 }}
             >
-              Sign Contract
-            </Button>
-            {process.env.NODE_ENV === 'development' && (
               <Button
-                type='button'
-                variant='outline'
-                onClick={() => {
-                  console.log('ERRORS', form.getAllErrors());
-                  console.log('VALS', form.state.values);
-                }}
+                type='submit'
+                variant='accent'
+                className='w-full'
+                loading={action.isExecuting}
               >
-                Reset
+                Sign Contract
               </Button>
+            </motion.div>
+            {process.env.NODE_ENV === 'development' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.3, duration: 0.4 }}
+              >
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => {
+                    console.log('ERRORS', form.getAllErrors());
+                    console.log('VALS', form.state.values);
+                  }}
+                >
+                  Reset
+                </Button>
+              </motion.div>
             )}
           </form>
         </form.AppForm>
@@ -190,6 +251,15 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
           onConfirmSignature={() => {
             setOpenDialog(false);
             toast.success('Document signed');
+            const keys = [
+              ['saft', 'details'],
+              ['transactions', txId, 'recipient'],
+            ];
+            keys.forEach((key) => {
+              getQueryClient().invalidateQueries({
+                queryKey: key,
+              });
+            });
             // Remove the cid from the parameters once signature is done
             setCid(null);
             onSuccess();

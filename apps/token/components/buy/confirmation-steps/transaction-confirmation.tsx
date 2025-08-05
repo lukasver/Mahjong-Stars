@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
-import { AnimatePresence } from '@mjs/ui/components/motion';
+import { AnimatePresence, motion } from '@mjs/ui/components/motion';
 import { Card } from '@mjs/ui/primitives/card';
 import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 import { KycUploadStep } from './kyc-upload-step';
@@ -38,40 +38,97 @@ export function TransactionConfirmation({
 
   return (
     <ErrorBoundary fallback={<div>Error with transaction confirmation</div>}>
-      <div className='container mx-auto p-4 space-y-4 max-w-3xl min-h-[80dvh]'>
-        <FormStepper steps={steps} step={step.id} setStep={handleStepChange} />
-        <Card
-          className={getGlassyCardClassName('flex flex-col justify-center')}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className='container mx-auto p-4 space-y-4 max-w-3xl min-h-[80dvh]'
+      >
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
         >
-          <AnimatePresence>
-            {step.name === 'KYC' && (
-              <KycUploadStep
-                onSuccess={() => setStep(steps.find((s) => s.name === 'SAFT')!)}
-              />
-            )}
-            {step.name === 'SAFT' && (
-              <SaftReviewStep
-                onSuccess={() =>
-                  setStep(steps.find((s) => s.name === 'Payment')!)
-                }
-              />
-            )}
-            {step.name === 'Payment' && (
-              <PaymentAvailabilityGuard>
-                <PaymentStep
-                  onSuccess={() => {
-                    getQueryClient().invalidateQueries({
-                      queryKey: ['transactions'],
-                    });
-                    setStep(steps.find((s) => s.name === 'Confirmation')!);
-                  }}
-                />
-              </PaymentAvailabilityGuard>
-            )}
-            {step.name === 'Confirmation' && <ConfirmationStep />}
-          </AnimatePresence>
-        </Card>
-      </div>
+          <FormStepper
+            steps={steps}
+            step={step.id}
+            setStep={handleStepChange}
+          />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4, duration: 0.5, ease: 'easeOut' }}
+        >
+          <Card
+            className={getGlassyCardClassName('flex flex-col justify-center')}
+          >
+            <AnimatePresence mode='wait'>
+              {step.name === 'KYC' && (
+                <motion.div
+                  key='kyc'
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4, ease: 'easeInOut' }}
+                >
+                  <KycUploadStep
+                    onSuccess={() =>
+                      setStep(steps.find((s) => s.name === 'SAFT')!)
+                    }
+                  />
+                </motion.div>
+              )}
+              {step.name === 'SAFT' && (
+                <motion.div
+                  key='saft'
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4, ease: 'easeInOut' }}
+                >
+                  <SaftReviewStep
+                    onSuccess={() =>
+                      setStep(steps.find((s) => s.name === 'Payment')!)
+                    }
+                  />
+                </motion.div>
+              )}
+              {step.name === 'Payment' && (
+                <motion.div
+                  key='payment'
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4, ease: 'easeInOut' }}
+                >
+                  <PaymentAvailabilityGuard>
+                    <PaymentStep
+                      onSuccess={() => {
+                        getQueryClient().invalidateQueries({
+                          queryKey: ['transactions'],
+                        });
+                        setStep(steps.find((s) => s.name === 'Confirmation')!);
+                      }}
+                    />
+                  </PaymentAvailabilityGuard>
+                </motion.div>
+              )}
+              {step.name === 'Confirmation' && (
+                <motion.div
+                  key='confirmation'
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4, ease: 'easeInOut' }}
+                >
+                  <ConfirmationStep />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Card>
+        </motion.div>
+      </motion.div>
     </ErrorBoundary>
   );
 }

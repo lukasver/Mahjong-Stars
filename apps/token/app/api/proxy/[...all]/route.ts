@@ -101,6 +101,14 @@ export const GET = withAuth(async (req, context, auth) => {
             );
             return NextResponse.json(data);
           }
+          if (subIdentifier === 'recipient') {
+            const data =
+              await transactions.getRecipientForCurrentTransactionSaft(
+                { transactionId: identifier },
+                { address: auth.address }
+              );
+            return NextResponse.json(data);
+          }
           if (subIdentifier === 'me') {
             const data = await transactions.getUserTransactions(qParamsObject, {
               address: auth.address,
@@ -140,17 +148,6 @@ export const GET = withAuth(async (req, context, auth) => {
             return NextResponse.json(data);
           }
           return NextResponse.json({ error: 'Bad request' }, { status: 404 });
-        }
-
-        if (identifier === 'recipient') {
-          if (!subIdentifier) {
-            return NextResponse.json({ error: 'Bad request' }, { status: 404 });
-          }
-          const data = await transactions.getRecipientForCurrentTransactionSaft(
-            { saftContractId: subIdentifier },
-            { address: auth.address }
-          );
-          return NextResponse.json(data);
         }
 
         return NextResponse.json({ error: 'Bad request' }, { status: 404 });

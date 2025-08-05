@@ -9,6 +9,7 @@ import {
 } from '@mjs/ui/primitives/card';
 import { FileUpload } from '@mjs/ui/components/file-upload';
 import { Button } from '@mjs/ui/primitives/button';
+import { motion } from '@mjs/ui/components/motion';
 import {
   associateDocumentsToUser,
   confirmTransaction,
@@ -39,12 +40,12 @@ import { BanknoteIcon } from 'lucide-react';
 import { Placeholder } from '@/components/placeholder';
 import { metadata } from '@/common/config/site';
 
-import useActiveAccount from '@/components/hooks/use-active-account';
 import { PurchaseSummaryCard } from '@/components/invest/summary';
 import { BalanceChecker } from '@/components/buy/balance-checker';
 
 import { CryptoPaymentButton } from './crypto-payment-btn';
 import { TransactionStatus } from '@prisma/client';
+import { PulseLoader } from '@/components/pulse-loader';
 interface PaymentStepProps {
   onSuccess: () => void;
 }
@@ -72,17 +73,28 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
   if (isLoading) {
     return (
       <CardContent>
-        <CardHeader>
-          <CardTitle>Payment</CardTitle>
-          <CardDescription>
-            Please follow the instructions below to complete your payment.
-          </CardDescription>
-        </CardHeader>
-        <div className='space-y-4'>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+        >
+          <CardHeader>
+            <CardTitle>Payment</CardTitle>
+            <CardDescription>
+              Please follow the instructions below to complete your payment.
+            </CardDescription>
+          </CardHeader>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className='space-y-4'
+        >
           {[1, 2, 3].map((i) => (
             <BankDetailsSkeleton key={i} />
           ))}
-        </div>
+        </motion.div>
       </CardContent>
     );
   }
@@ -94,12 +106,18 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
 
   return (
     <>
-      <CardHeader>
-        <CardTitle>Payment</CardTitle>
-        <CardDescription>
-          Please follow the instructions below to complete your payment.
-        </CardDescription>
-      </CardHeader>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
+        <CardHeader>
+          <CardTitle>Payment</CardTitle>
+          <CardDescription>
+            Please follow the instructions below to complete your payment.
+          </CardDescription>
+        </CardHeader>
+      </motion.div>
       <CardContent>
         {paymentMethod === 'TRANSFER' ? (
           <FiatPayment tx={tx.transaction} onSuccess={onSuccess} />
@@ -118,7 +136,6 @@ const CryptoPayment = ({
   tx: TransactionByIdWithRelations;
   onSuccess: () => void;
 }) => {
-  const { activeAccount: ac } = useActiveAccount();
   const locale = useLocale();
   const { data: cryptoTransaction, isLoading } = useCryptoTransaction(tx.id);
 
@@ -131,38 +148,50 @@ const CryptoPayment = ({
 
   return (
     <div className='py-2 text-center space-y-4'>
-      <PurchaseSummaryCard
-        purchased={{
-          quantity: tx.quantity.toString(),
-          tokenSymbol: tx.tokenSymbol,
-        }}
-        base={tx.quantity.toString()}
-        total={tx.quantity.toString()}
-        paid={{
-          totalAmount: tx.totalAmount.toString(),
-          currency: tx.paidCurrency,
-        }}
-        locale={locale}
-      />
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+      >
+        <PurchaseSummaryCard
+          purchased={{
+            quantity: tx.quantity.toString(),
+            tokenSymbol: tx.tokenSymbol,
+          }}
+          base={tx.quantity.toString()}
+          total={tx.quantity.toString()}
+          paid={{
+            totalAmount: tx.totalAmount.toString(),
+            currency: tx.paidCurrency,
+          }}
+          locale={locale}
+        />
+      </motion.div>
 
       {/* Balance Checker */}
       {!isLoading && cryptoTransaction?.paymentToken && (
-        <BalanceChecker
-          onBalanceCheck={(result) => {
-            setIsBalanceSufficient(result);
-          }}
-          requiredAmount={tx.totalAmount.toString()}
-          tokenAddress={
-            cryptoTransaction.paymentToken.contractAddress || undefined
-          }
-          tokenSymbol={cryptoTransaction.paymentToken.tokenSymbol}
-          isNativeToken={cryptoTransaction.paymentToken.isNative}
-          chainId={cryptoTransaction.blockchain.chainId}
-          onAddFunds={() => {
-            // Open external link to add funds
-            window.open('https://binance.com', '_blank');
-          }}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+        >
+          <BalanceChecker
+            onBalanceCheck={(result) => {
+              setIsBalanceSufficient(result);
+            }}
+            requiredAmount={tx.totalAmount.toString()}
+            tokenAddress={
+              cryptoTransaction.paymentToken.contractAddress || undefined
+            }
+            tokenSymbol={cryptoTransaction.paymentToken.tokenSymbol}
+            isNativeToken={cryptoTransaction.paymentToken.isNative}
+            chainId={cryptoTransaction.blockchain.chainId}
+            onAddFunds={() => {
+              // Open external link to add funds
+              window.open('https://binance.com', '_blank');
+            }}
+          />
+        </motion.div>
       )}
 
       {/* <div className='mb-2'>
@@ -172,7 +201,12 @@ const CryptoPayment = ({
         Please follow the instructions for crypto payment in the next step.
       </div> */}
       {!isLoading && (
-        <div className='flex flex-col gap-2'>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.4 }}
+          className='flex flex-col gap-2'
+        >
           <CryptoPaymentButton
             chain={cryptoTransaction?.paymentToken}
             toWallet={cryptoTransaction?.transaction?.sale?.toWalletsAddress}
@@ -181,7 +215,7 @@ const CryptoPayment = ({
             txId={tx.id}
             onSuccess={onSuccess}
           />
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -275,31 +309,50 @@ const FiatPayment = ({
 
   if (!isBanksLoading && banks?.banks?.length === 0) {
     return (
-      <Placeholder
-        icon={BanknoteIcon}
-        title='No config for transfer payment'
-        description='Contact support'
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <a href={`mailto:${metadata.supportEmail}`}>{metadata.supportEmail}</a>
-      </Placeholder>
+        <Placeholder
+          icon={BanknoteIcon}
+          title='No config for transfer payment'
+          description='Contact support'
+        >
+          <a href={`mailto:${metadata.supportEmail}`}>
+            {metadata.supportEmail}
+          </a>
+        </Placeholder>
+      </motion.div>
     );
   }
 
   return (
     <div className='space-y-4'>
-      <PurchaseSummaryCard
-        locale={locale}
-        purchased={{
-          quantity: tx.quantity.toString(),
-          tokenSymbol: tx.sale.tokenSymbol,
-        }}
-        total={tx.quantity.toString()}
-        paid={{
-          totalAmount: tx.totalAmount.toString(),
-          currency: tx.paidCurrency,
-        }}
-      />
-      <p className='text-sm text-foreground'>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+      >
+        <PurchaseSummaryCard
+          locale={locale}
+          purchased={{
+            quantity: tx.quantity.toString(),
+            tokenSymbol: tx.sale.tokenSymbol,
+          }}
+          total={tx.quantity.toString()}
+          paid={{
+            totalAmount: tx.totalAmount.toString(),
+            currency: tx.paidCurrency,
+          }}
+        />
+      </motion.div>
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+        className='text-sm text-foreground'
+      >
         Proceed to pay{' '}
         <span className='font-medium '>
           {safeFormatCurrency(
@@ -316,14 +369,30 @@ const FiatPayment = ({
           )}
         </span>{' '}
         to one of the following bank accounts & upload a proof of payment:
-      </p>
-      <h3>Bank Details:</h3>
-      <ul className='space-y-4 max-h-[600px] overflow-y-auto'>
+      </motion.p>
+      <motion.h3
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7, duration: 0.4 }}
+      >
+        Bank Details:
+      </motion.h3>
+      <motion.ul
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.9, duration: 0.4 }}
+        className='space-y-4 max-h-[600px] overflow-y-auto'
+      >
         {isBanksLoading ? (
           <Skeleton className='h-10 w-full' />
         ) : (
           banks?.banks.map((bank, index) => (
-            <li key={bank.id || index}>
+            <motion.li
+              key={bank.id || index}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.1 + index * 0.1, duration: 0.4 }}
+            >
               <BankDetailsCard
                 noSelectable
                 onCopy={() => {
@@ -340,11 +409,17 @@ const FiatPayment = ({
                   memo: bank.memo || '',
                 }}
               />
-            </li>
+            </motion.li>
           ))
         )}
-      </ul>
-      <form className='space-y-4' onSubmit={handleSubmit}>
+      </motion.ul>
+      <motion.form
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.3, duration: 0.4 }}
+        className='space-y-4'
+        onSubmit={handleSubmit}
+      >
         <div>
           <label className='font-medium'>Upload Bank Transfer Receipt</label>
           <FileUpload
@@ -370,7 +445,7 @@ const FiatPayment = ({
         >
           {isSubmitting ? 'Submitting...' : 'Submit Payment Confirmation'}
         </Button>
-      </form>
+      </motion.form>
     </div>
   );
 };
@@ -384,13 +459,20 @@ export function PaymentAvailabilityGuard({
   children: React.ReactNode;
 }) {
   const { tx: txId } = useParams();
-  const { data } = useTransactionAvailabilityForSale(txId as string, {
-    refetchInterval: ONE_MINUTE,
-    enabled: !!txId,
-    staleTime: ONE_MINUTE,
-  });
+  const { data, isLoading } = useTransactionAvailabilityForSale(
+    txId as string,
+    {
+      refetchInterval: ONE_MINUTE,
+      enabled: !!txId,
+      staleTime: ONE_MINUTE,
+    }
+  );
 
   const isAvailable = data?.transaction === true;
+
+  if (isLoading) {
+    return <PulseLoader />;
+  }
 
   if (!isAvailable) {
     return <div>Transaction not available</div>;

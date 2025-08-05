@@ -413,7 +413,6 @@ model SaleTransactions {
 
   blockchainId String?
 
-  // Not being used
   agreement   DocumentRecipient? @relation(fields: [agreementId], references: [id])
   agreementId String?            @unique
 

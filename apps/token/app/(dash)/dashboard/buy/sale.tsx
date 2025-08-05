@@ -9,6 +9,7 @@ import { Invest } from '../../../../components/invest';
 import { SaleWithToken } from '@/common/types/sales';
 import { ComingSoon } from '../../../../components/coming-soon';
 import { PulseLoader } from '@/components/pulse-loader';
+import { EnterAnimation, FadeAnimation } from '@mjs/ui/components/motion';
 
 export const TokenSale = () => {
   const { data: sale, isLoading, status } = useActiveSale();
@@ -27,21 +28,27 @@ export const TokenSale = () => {
 
   return (
     <div className='h-full w-full px-4 py-8'>
-      <Header sale={sale} />
+      <FadeAnimation delay={0.1}>
+        <Header sale={sale} />
+      </FadeAnimation>
       <div className='grid grid-cols-1 lg:grid-cols-[1fr_375px] gap-4 '>
-        <section id='information'>
-          <ProjectInformation sale={sale}>
-            <div id='hero'>
-              <SaleCoverImage
-                src={sale?.banner?.url}
-                className='overflow-hidden rounded-t-lg shadow'
-              />
-            </div>
-          </ProjectInformation>
-        </section>
-        <section id='overview'>
-          <OverviewFormInvest sale={sale} />
-        </section>
+        <EnterAnimation delay={0.2}>
+          <section id='information'>
+            <ProjectInformation sale={sale}>
+              <div id='hero'>
+                <SaleCoverImage
+                  src={sale?.banner?.url}
+                  className='overflow-hidden rounded-t-lg shadow'
+                />
+              </div>
+            </ProjectInformation>
+          </section>
+        </EnterAnimation>
+        <EnterAnimation delay={0.4}>
+          <section id='overview'>
+            <OverviewFormInvest sale={sale} />
+          </section>
+        </EnterAnimation>
       </div>
     </div>
   );
@@ -50,8 +57,12 @@ export const TokenSale = () => {
 const OverviewFormInvest = ({ sale }: { sale: SaleWithToken }) => {
   return (
     <div className='flex flex-col gap-4'>
-      <OverviewProject sale={sale} />
-      <Invest sale={sale} />
+      <FadeAnimation delay={0.1}>
+        <OverviewProject sale={sale} />
+      </FadeAnimation>
+      <FadeAnimation delay={0.2}>
+        <Invest sale={sale} />
+      </FadeAnimation>
     </div>
   );
 };
