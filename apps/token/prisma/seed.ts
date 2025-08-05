@@ -41,7 +41,7 @@ async function main() {
         await prisma.$executeRawUnsafe(
           `TRUNCATE TABLE ${tables.join(', ')} CASCADE;`
         );
-        await seedCurrencies(prisma);
+        await seedCurrencies(prisma, environment);
         await seedRoles(prisma);
         await seedUsers(
           [

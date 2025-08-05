@@ -381,9 +381,13 @@ model SaleTransactions {
 
   tokenSymbol String
 
+  /// Number of tokens purchased in the transaction
   quantity    Decimal @db.Decimal(36, 18)
-  rawPrice    String // Store exact value as string
-  price       Decimal @db.Decimal(36, 18) // Optimized for crypto
+  /// Store exact price per unit as string
+  rawPrice    String
+  /// Price per unit of the token as Decimal (Optimized for crypto)
+  price       Decimal @db.Decimal(36, 18)
+  /// Total amount to be paid by the user
   totalAmount Decimal @db.Decimal(36, 18)
 
   formOfPayment   FOP
@@ -399,8 +403,8 @@ model SaleTransactions {
 
   comment String?
 
-  amountPaid String
-
+  /// actual amount transfered by the user after confirmation
+  amountPaid         String?
   amountPaidCurrency Currency @relation(fields: [paidCurrency], references: [symbol])
   paidCurrency       String
 

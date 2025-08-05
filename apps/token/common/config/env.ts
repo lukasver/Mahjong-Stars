@@ -42,7 +42,6 @@ export const env = createEnv({
       (val) => val === 'true' || val === '1',
       z.boolean().optional().default(false)
     ),
-
     EMAIL_API_KEY: z.string().min(1),
     EMAIL_FROM: z.string().min(1),
     THIRDWEB_ADMIN_PRIVATE_KEY: z.string().min(1),
@@ -60,6 +59,8 @@ export const env = createEnv({
     PRIVATE_BUCKET: z.string().min(1),
     GCP_SERVICE_ACCOUNT: z.string().min(1),
     GCP_PROJECT_ID: z.string().min(1),
+    EMAIL_OCTOPUS_LIST_ID: z.string().min(1),
+    EMAIL_OCTOPUS_API_KEY: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_THIRDWEB_CLIENT_ID: z.string().min(1),
@@ -106,6 +107,8 @@ export const env = createEnv({
     PRIVATE_BUCKET: process.env.PRIVATE_BUCKET,
     GCP_PROJECT_ID: process.env.GCP_PROJECT_ID,
     GCP_SERVICE_ACCOUNT: process.env.GCP_SERVICE_ACCOUNT,
+    EMAIL_OCTOPUS_LIST_ID: process.env.EMAIL_OCTOPUS_LIST_ID,
+    EMAIL_OCTOPUS_API_KEY: process.env.EMAIL_OCTOPUS_API_KEY,
   },
   skipValidation: process.env.NODE_ENV === 'test',
 });

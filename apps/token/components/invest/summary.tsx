@@ -68,7 +68,7 @@ export const PurchaseSummaryCard = ({
     <div className='space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600'>
       <h4 className='text-white font-medium'>Summary</h4>
       <div className='space-y-2 text-sm'>
-        {base && (
+        {base && bonus && (
           <div className='flex justify-between'>
             <span className='text-gray-400'>
               {purchased.tokenSymbol} Tokens
@@ -77,12 +77,14 @@ export const PurchaseSummaryCard = ({
           </div>
         )}
         {bonus && (
-          <div className='flex justify-between'>
-            <span className='text-gray-400'>Bonus Tokens</span>
-            <span className='text-green-400'>+{bonus?.toLocaleString()}</span>
-          </div>
+          <>
+            <div className='flex justify-between'>
+              <span className='text-gray-400'>Bonus Tokens</span>
+              <span className='text-green-400'>+{bonus?.toLocaleString()}</span>
+            </div>
+            <Separator className='bg-slate-600' />
+          </>
         )}
-        <Separator className='bg-slate-600' />
         <div className='flex justify-between font-medium'>
           <span className='text-white'>Total Tokens</span>
           <span className='text-white'>

@@ -41,5 +41,5 @@ export const getLoginPayload = async ({
 };
 
 export const doLogout = async () => {
-  await logout();
+  await logout({ redirect: false });
 };

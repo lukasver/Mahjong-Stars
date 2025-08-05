@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CardContent,
   CardDescription,
@@ -38,9 +38,15 @@ import { TransactionByIdWithRelations } from '@/common/types/transactions';
 import { BanknoteIcon } from 'lucide-react';
 import { Placeholder } from '@/components/placeholder';
 import { metadata } from '@/common/config/site';
+import { client } from '@/lib/auth/thirdweb-client';
 
 import useActiveAccount from '@/components/hooks/use-active-account';
 import { PurchaseSummaryCard } from '@/components/invest/summary';
+import { BalanceChecker } from '@/components/buy/balance-checker';
+import { useSocialProfiles } from 'thirdweb/react';
+
+import { CryptoPaymentButton } from './crypto-payment-btn';
+import { TransactionStatus } from '@prisma/client';
 interface PaymentStepProps {
   onSuccess: () => void;
 }
@@ -53,7 +59,19 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
   const { tx: txId } = useParams();
   const { data: tx, isLoading } = useTransactionById(txId as string);
 
-  if (isLoading)
+  useEffect(() => {
+    const status = tx?.transaction?.status;
+    if (
+      status &&
+      ![TransactionStatus.AWAITING_PAYMENT, TransactionStatus.PENDING].includes(
+        status
+      )
+    ) {
+      onSuccess();
+    }
+  }, [tx?.transaction?.status]);
+
+  if (isLoading) {
     return (
       <CardContent>
         <CardHeader>
@@ -69,6 +87,8 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
         </div>
       </CardContent>
     );
+  }
+
   if (!tx) return <CardContent>Transaction not found.</CardContent>;
 
   // TODO: Confirm the correct path for payment fields and type properly
@@ -104,6 +124,13 @@ const CryptoPayment = ({
   const locale = useLocale();
   const { data: cryptoTransaction, isLoading } = useCryptoTransaction(tx.id);
 
+  const [isBalanceSufficient, setIsBalanceSufficient] = useState(false);
+
+  const { data: profiles } = useSocialProfiles({
+    client,
+    address: ac?.address,
+  });
+
   return (
     <div className='py-2 text-center space-y-4'>
       <PurchaseSummaryCard
@@ -119,76 +146,45 @@ const CryptoPayment = ({
         }}
         locale={locale}
       />
-      <div className='mb-2'>
+
+      {/* Balance Checker */}
+      {!isLoading && cryptoTransaction?.paymentToken && (
+        <BalanceChecker
+          onBalanceCheck={(result) => {
+            setIsBalanceSufficient(result);
+          }}
+          requiredAmount={tx.totalAmount.toString()}
+          tokenAddress={
+            cryptoTransaction.paymentToken.contractAddress || undefined
+          }
+          tokenSymbol={cryptoTransaction.paymentToken.tokenSymbol}
+          isNativeToken={cryptoTransaction.paymentToken.isNative}
+          chainId={cryptoTransaction.blockchain.chainId}
+          onAddFunds={() => {
+            // Open external link to add funds
+            window.open('https://binance.com', '_blank');
+          }}
+        />
+      )}
+
+      {/* <div className='mb-2'>
         <span className='font-medium'>Crypto payment</span> (coming soon)
-      </div>
+      </div> */}
       {/* <div className='text-muted-foreground'>
         Please follow the instructions for crypto payment in the next step.
       </div> */}
-      {/* {!isLoading && (
-        <TransactionButton
-          transaction={() => {
-            const chain = cryptoTransaction?.blockchain;
-            if (!chain) throw new Error('Contract not found');
-            const contract = chain.contractAddress;
-            if (!contract) throw new Error('Contract not found');
-            const toWallet =
-              cryptoTransaction.transaction.sale.toWalletsAddress;
-            if (!toWallet) throw new Error('To wallet not found');
-            const tx = cryptoTransaction.transaction;
-
-            const twContract = getContract({
-              client: client,
-              chain: defineChain(chain.chainId),
-              address: contract,
-            });
-
-            console.log('CHAIN', chain);
-            // ERC-20
-            if (chain.decimals === 18) {
-              const txs = transferFrom({
-                contract: twContract,
-                amount: tx.totalAmount.toString(),
-                from: ac?.address!,
-                to: toWallet,
-              });
-              console.debug('🚀 ~ payment-step.tsx:172 ~ tx:', txs);
-
-              return txs;
-            } else {
-              const txs = prepareContractCall({
-                contract: twContract,
-                method: resolveMethod('transferFrom'),
-                params: [
-                  '0x123...',
-                  toUnits(tx.totalAmount.toString(), chain.decimals),
-                ],
-              });
-              return txs;
-            }
-          }}
-          // transaction={() => {
-          //   // Create a transaction object and return it
-          //   const tx = prepareContractCall({
-          //     contract,
-          //     method: "mint",
-          //     params: [address, amount],
-          //   });
-          //   return tx;
-          // }}
-          onTransactionSent={(result) => {
-            console.log('Transaction submitted', result.transactionHash);
-          }}
-          onTransactionConfirmed={(receipt) => {
-            console.log('Transaction confirmed', receipt.transactionHash);
-          }}
-          onError={(error) => {
-            console.error('Transaction error', error);
-          }}
-        >
-          Confirm Transaction
-        </TransactionButton>
-      )} */}
+      {!isLoading && (
+        <div className='flex flex-col gap-2'>
+          <CryptoPaymentButton
+            chain={cryptoTransaction?.paymentToken}
+            toWallet={cryptoTransaction?.transaction?.sale?.toWalletsAddress}
+            amount={tx.totalAmount.toString()}
+            disabled={!isBalanceSufficient}
+            txId={tx.id}
+            onSuccess={onSuccess}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -297,7 +293,7 @@ const FiatPayment = ({
         <span className='font-medium '>
           {safeFormatCurrency(
             {
-              totalAmount: tx?.amountPaid,
+              totalAmount: tx?.totalAmount.toString(),
               currency: tx?.paidCurrency,
             },
             {

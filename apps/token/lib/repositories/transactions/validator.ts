@@ -13,6 +13,7 @@ import {
   Blockchain,
   Prisma,
 } from '@prisma/client';
+import Decimal from 'decimal.js';
 
 const USER_SELECT_QUERY = {
   id: true,
@@ -50,7 +51,7 @@ export class TransactionValidator {
     tokenSymbol: string;
     quantity: number;
     formOfPayment: FOP;
-    amountPaid: string;
+    totalAmount: Decimal | string;
     paidCurrency: string;
     receivingWallet?: string;
     comment?: string;
@@ -210,7 +211,7 @@ export class TransactionValidator {
       );
     }
 
-    if (!transactionData.amountPaid || !transactionData.paidCurrency) {
+    if (!transactionData.totalAmount || !transactionData.paidCurrency) {
       throw new HttpError(
         HttpStatusCode.BAD_REQUEST,
         'Payment amount and currency are required'

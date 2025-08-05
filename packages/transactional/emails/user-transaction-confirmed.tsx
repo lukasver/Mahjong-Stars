@@ -45,8 +45,9 @@ export const UserTransactionNotification = ({
   transactionId,
   distributionDate,
   dashboardUrl = '#',
-  transactionUrl = '#',
+  transactionUrl,
   supportEmail = 'support@company.com',
+  paidCurrency,
 }: {
   userName: string;
   tokenName: string;
@@ -63,6 +64,7 @@ export const UserTransactionNotification = ({
   transactionUrl?: string;
   transactionId?: string;
   supportEmail?: string;
+  paidCurrency?: string;
 }) => (
   <Html>
     <Head />
@@ -98,7 +100,7 @@ export const UserTransactionNotification = ({
             <Heading style={styles.h2}>Your Purchase Summary</Heading>
 
             <Text style={styles.detailItem}>
-              <strong>Amount Paid:</strong> {purchaseAmount}
+              <strong>Amount Paid:</strong> {purchaseAmount} {paidCurrency}
             </Text>
 
             <Text style={styles.detailItem}>
@@ -135,9 +137,11 @@ export const UserTransactionNotification = ({
               <>
                 <Text style={styles.h3}>Transaction Hash:</Text>
                 <Text style={styles.transactionHash}>{transactionHash}</Text>
-                <Link href={transactionUrl} style={styles.link}>
-                  View on Blockchain Explorer →
-                </Link>
+                {transactionUrl && (
+                  <Link href={transactionUrl} style={styles.link}>
+                    View on Blockchain Explorer →
+                  </Link>
+                )}
               </>
             ) : (
               <>

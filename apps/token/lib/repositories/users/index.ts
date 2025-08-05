@@ -1,5 +1,5 @@
 import { JWT_EXPIRATION_TIME, ONE_DAY, ROLES } from '@/common/config/constants';
-import { publicUrl } from '@/common/config/env';
+import { env, publicUrl } from '@/common/config/env';
 import { ActionCtx } from '@/common/schemas/dtos/sales';
 import { CreateUserDto, GetUserDto } from '@/common/schemas/dtos/users';
 import { Failure, isObject, Success } from '@/common/schemas/dtos/utils';
@@ -295,6 +295,42 @@ class UsersController {
 
   async verifyEmail(token: string, ctx: ActionCtx) {
     return this.emailVerification.verify(token, ctx);
+  }
+
+  async subscribeToNewsletter(ctx: ActionCtx) {
+    const user = await prisma.user.findUniqueOrThrow({
+      where: {
+        walletAddress: ctx.address,
+      },
+      select: {
+        email: true,
+      },
+    });
+    if (user.email) {
+      if (process.env.NODE_ENV === 'production') {
+        await fetch(
+          `https://api.emailoctopus.com/lists/${env.EMAIL_OCTOPUS_LIST_ID}/contacts`,
+          {
+            body: JSON.stringify({
+              email_address: user.email,
+              tags: {
+                'token-dashboard': true,
+              },
+              status: 'subscribed',
+            }),
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${env.EMAIL_OCTOPUS_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        ).catch((e) => {
+          logger(e);
+          return null;
+        });
+      }
+    }
+    return;
   }
 }
 

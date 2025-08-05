@@ -163,7 +163,7 @@ const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
     );
 
   return (
-    <div className='space-y-3'>
+    <div className='space-y-3 min-h-[185px]'>
       {docs.documents.map((document, index) => (
         <a
           href={document.url}
@@ -229,7 +229,7 @@ const GalleryTab = ({ sale }: { sale: SaleWithToken }) => {
     );
 
   return (
-    <div className='max-w-lg mx-auto'>
+    <div className='max-w-lg mx-auto min-h-[185px]'>
       <ImagesSection
         images={docs.images.map((image) => ({
           src: getBucketUrl(image.url),

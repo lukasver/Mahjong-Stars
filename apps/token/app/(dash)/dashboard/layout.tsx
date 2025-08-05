@@ -12,8 +12,12 @@ import { Suspense } from 'react';
 import { DashboardSidebar } from '../../../components/sidebar';
 import AdminSidebar from './admin-sidebar';
 import { DashboardHeader } from './header';
-import { getCurrentUser } from '@/lib/services/fetchers-server';
+import {
+  getCurrentUser,
+  getUserFromSession,
+} from '@/lib/services/fetchers-server';
 import BackgroundWrapper from '@/components/bg-wrapper';
+import { redirect } from 'next/navigation';
 
 /**
  * Layout component for the dashboard section
@@ -25,7 +29,14 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const queryClient = new QueryClient();
-  const t = await getTranslations();
+  const [t, user] = await Promise.all([
+    getTranslations(),
+    getUserFromSession(),
+  ]);
+
+  if (!user) {
+    redirect('/in?error=invalid_session');
+  }
 
   await queryClient.prefetchQuery({
     queryKey: ['user', 'me'],

@@ -11,7 +11,9 @@ const transactionWithRelations =
   });
 export type TransactionWithRelations = Prisma.SaleTransactionsGetPayload<
   typeof transactionWithRelations
->;
+> & {
+  explorerUrl?: string | null;
+};
 
 const transactionByIdWithRelations =
   Prisma.validator<Prisma.SaleTransactionsDefaultArgs>()({
@@ -27,6 +29,11 @@ const transactionByIdWithRelations =
           saftContract: {
             select: {
               id: true,
+            },
+          },
+          blockchain: {
+            select: {
+              explorerUrl: true,
             },
           },
         },

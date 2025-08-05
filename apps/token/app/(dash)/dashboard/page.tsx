@@ -1,4 +1,3 @@
-import { FundraisingProgressLoading } from '@/components/skeletons/fundraising-progress-loading';
 import { TokenDetails } from '@/components/token-details';
 import { VisuallyHidden } from '@mjs/ui/primitives/visually-hidden';
 import { QueryClient } from '@tanstack/react-query';
@@ -11,18 +10,21 @@ import { FeatureCards } from '@/components/feature-cards';
 import { getActiveSale } from '@/lib/services/fetchers-server';
 import {
   UserTokensCard,
-  TokenHoldersCard,
+  UnconfirmedTokensCard,
   TokenPriceCard,
   RemainingTokensCard,
   DashboardCardLoading,
 } from '@/components/dashboard/cards';
-import { TokenStats } from '@/components/dashboard/token-stats';
-import { TokenMetrics } from '@/components/dashboard/token-metrics';
-import { IcoPhases } from '@/components/dashboard/ico-phases';
-import { RecentTransactions } from '@/components/dashboard/recent-transactions';
+import {
+  IcoPhasesLoading,
+  RecentTransactionsLoading,
+} from '@/components/dashboard/loading-components';
+import { IcoPhasesSSR } from '@/components/dashboard/ico-phases';
+import { RecentTransactionsSSR } from '@/components/dashboard/recent-transactions';
 
 export default async function DashboardPage(_props: PageProps) {
   const queryClient = new QueryClient();
+
   await queryClient.prefetchQuery({
     queryKey: ['sales', 'active'],
     queryFn: () => getActiveSale(),
@@ -46,40 +48,44 @@ export default async function DashboardPage(_props: PageProps) {
           </div>
         }
       >
-        <Suspense fallback={<FundraisingProgressLoading />}>
-          <FundraisingProgress>
-            <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
-              <Suspense fallback={<DashboardCardLoading />}>
-                <UserTokensCard />
-              </Suspense>
-              <Suspense fallback={<DashboardCardLoading />}>
-                <TokenHoldersCard />
-              </Suspense>
-              <Suspense fallback={<DashboardCardLoading />}>
-                <TokenPriceCard />
-              </Suspense>
-              <Suspense fallback={<DashboardCardLoading />}>
-                <RemainingTokensCard />
-              </Suspense>
-            </div>
-          </FundraisingProgress>
-        </Suspense>
+        {/* <Suspense fallback={<FundraisingProgressLoading />}> */}
+        <FundraisingProgress>
+          <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+            <Suspense fallback={<DashboardCardLoading />}>
+              <UserTokensCard />
+            </Suspense>
+            <Suspense fallback={<DashboardCardLoading />}>
+              <UnconfirmedTokensCard />
+            </Suspense>
+            <Suspense fallback={<DashboardCardLoading />}>
+              <TokenPriceCard />
+            </Suspense>
+            <Suspense fallback={<DashboardCardLoading />}>
+              <RemainingTokensCard />
+            </Suspense>
+          </div>
+        </FundraisingProgress>
+        {/* </Suspense> */}
       </ErrorBoundary>
 
-      <FeatureCards />
-
-      <ErrorBoundary fallback={null}>
+      {/* <ErrorBoundary fallback={null}>
         <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-          <TokenStats address={'0x8699210141B710c46eC211cDD39D2C2edDA7A63c'} />
+          <Suspense fallback={null}>
+            <TokenStats />
+          </Suspense>
         </div>
-      </ErrorBoundary>
+      </ErrorBoundary> */}
 
       <div className='grid gap-6 lg:grid-cols-2'>
-        <TokenMetrics />
-        <IcoPhases />
+        {/* <TokenMetrics /> */}
+        <Suspense fallback={<RecentTransactionsLoading />}>
+          <RecentTransactionsSSR />
+        </Suspense>
+        <Suspense fallback={<IcoPhasesLoading />}>
+          <IcoPhasesSSR />
+        </Suspense>
       </div>
-
-      <RecentTransactions />
+      <FeatureCards />
     </div>
   );
 }

@@ -194,6 +194,15 @@ export class RatesController {
     url.searchParams.set('fsyms', parsedFrom);
     url.searchParams.set('tsyms', parsedTo);
 
+    if (process.env.NODE_ENV === 'development' && parsedTo === 'tMJS') {
+      // For testing ERC-20 purposes
+      return GetExchangeRate.parse({
+        [parsedFrom]: {
+          [parsedTo]: 0.012,
+        },
+      });
+    }
+
     try {
       const response = await fetch(url.href, {
         method: 'GET',
@@ -205,6 +214,7 @@ export class RatesController {
         throw new Error('Failed to fetch exchange rate');
       }
       const data = await response.json();
+
       return GetExchangeRate.parse(data);
     } catch (e) {
       // if fetcher or parsing fails, then response is unexpected. We need to try calling the backup service.

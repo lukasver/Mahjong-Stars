@@ -9,6 +9,7 @@ import { metadata } from '@/common/config/site';
 import { useTransactionById } from '@/lib/services/api';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
 import { cn } from '@mjs/ui/lib/utils';
+import AppLink from '@/components/link';
 
 export const SuccessContent = ({ className }: { className?: string }) => {
   const router = useRouter();
@@ -16,13 +17,8 @@ export const SuccessContent = ({ className }: { className?: string }) => {
   const { data, isLoading } = useTransactionById(tx as string);
   const t = useTranslations();
   const confettiRef = useRef<ConfettiRef>(null);
-  const _url = `/dashboard/transactions?id=${tx}`;
-  const _saleName = data?.transaction.sale.name;
+  const explorerUrl = data?.explorerUrl;
   const tokenSymbol = data?.transaction.sale.tokenSymbol;
-
-  const handleClick = () => {
-    router.push(`/dashboard/transactions?id=${tx}`);
-  };
 
   const supportEmail =
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL || metadata.supportEmail;
@@ -63,14 +59,24 @@ export const SuccessContent = ({ className }: { className?: string }) => {
           </a>
         </div>
       )} */}
-        <Button
-          type='button'
-          variant='primary'
-          onClick={handleClick}
-          className='w-full max-w-xs'
-        >
-          {t('transactions.success.button')}
-        </Button>
+        <div className='flex flex-row gap-4'>
+          <AppLink href={`/dashboard/transactions?id=${tx}`}>
+            <Button type='button' variant='primary' className='w-full max-w-xs'>
+              {t('transactions.success.button')}
+            </Button>
+          </AppLink>
+          {explorerUrl && (
+            <a href={explorerUrl} target='_blank' rel='noopener noreferrer'>
+              <Button
+                type='button'
+                variant='primary'
+                className='w-full max-w-xs'
+              >
+                View on explorer
+              </Button>
+            </a>
+          )}
+        </div>
         <div className='text-secondary mt-2'>
           {t('transactions.success.supportText')}{' '}
           <a href={`mailto:${supportEmail}`} className='underline'>

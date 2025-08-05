@@ -21,7 +21,9 @@ export const JWT_EXPIRATION_TIME = Duration.fromObject({ days: 1 }).as(
 );
 
 export const FIAT_CURRENCIES = ['CHF', 'EUR', 'USD', 'GBP'] as const;
-export const CRYPTO_CURRENCIES = ['ETH', 'BTC', 'USDC', 'BNB'] as const;
+export const CRYPTO_CURRENCIES = ['ETH', 'BTC', 'USDC', 'BNB'].concat(
+  process.env.NODE_ENV === 'development' ? ['tMJS'] : []
+) as Array<'ETH' | 'BTC' | 'USDC' | 'BNB' | 'tMJS'>;
 
 export const ROLES = {
   SUPER_ADMIN: 'SUPER_ADMIN',

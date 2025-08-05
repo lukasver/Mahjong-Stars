@@ -1,4 +1,3 @@
-import BackgroundWrapper from '@/components/bg-wrapper';
 import { SuccessContent } from '@/components/buy/confirmation-steps/success-content';
 
 /**
@@ -6,11 +5,7 @@ import { SuccessContent } from '@/components/buy/confirmation-steps/success-cont
  * Shows success message, project name, support email, and transaction link if available.
  */
 const Success = () => {
-  return (
-    <BackgroundWrapper>
-      <SuccessContent className='min-h-screen grid place-content-center bg-gradient-to-b from-primary to-5% to-transparent h-full' />
-    </BackgroundWrapper>
-  );
+  return <SuccessContent className='min-h-[60dvh] grid place-content-center' />;
 };
 
 export default Success;

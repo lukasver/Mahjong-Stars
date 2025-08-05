@@ -190,7 +190,17 @@ class TransactionsController {
         },
         orderBy: { createdAt: 'desc' },
       });
-      return Success({ transactions });
+
+      return Success({
+        transactions: transactions.map((t) =>
+          decimalsToString({
+            ...t,
+            explorerUrl: !t.txHash
+              ? null
+              : `${t?.blockchain?.explorerUrl}/tx/${t.txHash}`,
+          })
+        ),
+      });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -210,6 +220,11 @@ class TransactionsController {
               saftCheckbox: true,
               tokenSymbol: true,
               toWalletsAddress: true,
+              blockchain: {
+                select: {
+                  explorerUrl: true,
+                },
+              },
               saftContract: {
                 select: {
                   id: true,
@@ -252,6 +267,9 @@ class TransactionsController {
         ) as TransactionByIdWithRelations,
         requiresKYC: transaction.sale.requiresKYC,
         requiresSAFT: transaction.sale.saftCheckbox,
+        explorerUrl: transaction.txHash
+          ? `${transaction.sale.blockchain?.explorerUrl}/tx/${transaction.txHash}`
+          : null,
       });
     } catch (e) {
       logger(e);
@@ -271,7 +289,7 @@ class TransactionsController {
         receivingWallet,
         saleId,
         comment,
-        amountPaid,
+        totalAmount,
         paidCurrency,
       } = dto;
       const userId = ctx.userId;
@@ -286,14 +304,14 @@ class TransactionsController {
           tokenSymbol,
           quantity: quantity.toNumber(),
           formOfPayment,
-          amountPaid,
+          totalAmount,
           paidCurrency,
           receivingWallet: receivingWallet || undefined,
           comment: comment || undefined,
         });
 
       const { sale } = validationResult;
-      const price = new Prisma.Decimal(amountPaid);
+      const price = new Prisma.Decimal(totalAmount);
       const [_updtSale, transaction] = await prisma.$transaction([
         prisma.sale.update({
           where: { id: saleId },
@@ -311,11 +329,10 @@ class TransactionsController {
             receivingWallet,
             comment,
             status: TransactionStatus.PENDING,
-            amountPaid,
             paidCurrency,
             saleId,
             userId,
-            rawPrice: amountPaid,
+            rawPrice: totalAmount.toString(),
             price: price.div(new Prisma.Decimal(quantity)),
             totalAmount: price,
           },
@@ -774,8 +791,21 @@ class TransactionsController {
   async confirmTransaction(
     {
       id,
+      type,
+      payload,
     }: {
       id: string;
+      type: 'CRYPTO' | 'FIAT';
+      payload: {
+        formOfPayment?: FOP;
+        confirmationId?: string;
+        receivingWallet?: string;
+        comment?: string;
+        txHash?: string;
+        chainId?: number;
+        amountPaid?: string;
+        paymentDate?: Date;
+      };
     },
     ctx: ActionCtx
   ) {
@@ -792,6 +822,11 @@ class TransactionsController {
                 tokenSymbol: true,
                 currency: true,
                 tokenPricePerUnit: true,
+              },
+            },
+            blockchain: {
+              select: {
+                explorerUrl: true,
               },
             },
             user: {
@@ -825,20 +860,32 @@ class TransactionsController {
       ]);
 
       // Check if the sale has enough tokens available
-      if (
-        new Prisma.Decimal(tx.sale.availableTokenQuantity).lessThan(tx.quantity)
-      ) {
-        invariant(false, 'Not enough tokens available to confirm transaction');
-      }
+      // TODO! This should be done before actually confriming payment of the tx
+      // if (
+      //   new Prisma.Decimal(tx.sale.availableTokenQuantity).lessThan(tx.quantity)
+      // ) {
+      //   invariant(false, 'Not enough tokens available to confirm transaction');
+      // }
 
       const shouldFinishSale = new Prisma.Decimal(
         tx.sale.availableTokenQuantity
       ).equals(tx.quantity);
 
-      await prisma.$transaction([
+      const { chainId, ...rest } = payload;
+      const [updatedTx] = await prisma.$transaction([
         prisma.saleTransactions.update({
           where: { id },
-          data: { status: TransactionStatus.PAYMENT_SUBMITTED },
+          data: {
+            status: TransactionStatus.PAYMENT_SUBMITTED,
+            ...(chainId && {
+              blockchain: {
+                connect: {
+                  chainId,
+                },
+              },
+            }),
+            ...rest,
+          },
         }),
         prisma.sale.update({
           where: { id: tx.saleId },
@@ -866,10 +913,21 @@ class TransactionsController {
             userEmail: tx.user.email,
             tokenName: tx.sale.name,
             tokenSymbol: tx.sale.tokenSymbol,
-            purchaseAmount: tx.totalAmount.toString(),
-            tokenAmount: tx.quantity.toString(),
-            transactionId: tx.id,
-            transactionHash: tx.id,
+            purchaseAmount: updatedTx.totalAmount.toString(),
+            tokenAmount: updatedTx.quantity.toString(),
+            transactionId: updatedTx.id,
+            paidCurrency: updatedTx.paidCurrency,
+            ...(type === 'CRYPTO' && {
+              transactionHash: updatedTx.txHash,
+              // Update to point to the chain explorer
+              transactionUrl: tx?.blockchain?.explorerUrl
+                ? `${tx.blockchain.explorerUrl}/tx/${updatedTx.txHash}`
+                : `${publicUrl}/admin/transactions?txId=${tx.id}`,
+            }),
+            ...(type === 'FIAT' && {
+              transactionHash: tx.id,
+              transactionUrl: `${publicUrl}/admin/transactions?txId=${tx.id}`,
+            }),
             transactionTime: new Date().toISOString(),
           },
         }),
@@ -887,17 +945,26 @@ class TransactionsController {
               tx.user.profile?.firstName || tx.user.profile?.lastName || 'user',
             tokenName: tx.sale.name,
             tokenSymbol: tx.sale.tokenSymbol,
-            purchaseAmount: tx.totalAmount.toFixed(
-              tx.formOfPayment === 'CRYPTO' ? 8 : 2
+            purchaseAmount: updatedTx.totalAmount.toFixed(
+              updatedTx.formOfPayment === 'CRYPTO' ? 8 : 2
             ),
-            tokenAmount: tx.quantity.toString(),
-            transactionHash: tx.id,
+            tokenAmount: updatedTx.quantity.toString(),
             transactionTime: new Date().toISOString(),
-            paymentMethod: tx.formOfPayment,
-            walletAddress: tx.receivingWallet || '',
-            transactionId: tx.id,
+            paymentMethod: updatedTx.formOfPayment,
+            walletAddress: updatedTx.receivingWallet || '',
+            transactionId: updatedTx.id,
             dashboardUrl: `${publicUrl}/dashboard/transactions`,
-            transactionUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
+            ...(type === 'CRYPTO' && {
+              transactionHash: updatedTx.txHash,
+              // Update to point to the chain explorer
+              transactionUrl: tx?.blockchain?.explorerUrl
+                ? `${tx.blockchain.explorerUrl}/tx/${updatedTx.txHash}`
+                : `${publicUrl}/dashboard/transactions?txId=${updatedTx.id}`,
+            }),
+            ...(type === 'FIAT' && {
+              transactionHash: updatedTx.id,
+              transactionUrl: `${publicUrl}/dashboard/transactions?txId=${updatedTx.id}`,
+            }),
             supportEmail: metadata.supportEmail,
           },
         }),
@@ -924,7 +991,7 @@ class TransactionsController {
         });
       }
 
-      return Success({ transaction: tx });
+      return Success({ transaction: decimalsToString(tx) });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -970,8 +1037,33 @@ class TransactionsController {
       invariant(transaction, 'Transaction not found');
       const blockchain = transaction.sale.token.TokensOnBlockchains?.[0];
       invariant(blockchain, 'Blockchain not found');
+
+      const paymentToken = await prisma.tokensOnBlockchains.findUnique({
+        where: {
+          tokenSymbol_chainId: {
+            tokenSymbol:
+              blockchain.chainId === 97 && transaction.paidCurrency === 'BNB'
+                ? 'tBNB'
+                : transaction.paidCurrency,
+            chainId: blockchain.chainId,
+          },
+        },
+        select: {
+          contractAddress: true,
+          id: true,
+          isNative: true,
+          name: true,
+          tokenSymbol: true,
+          decimals: true,
+          chainId: true,
+        },
+      });
+
+      console.debug('🚀 ~ index.ts:1053 ~ paymentToken:', paymentToken);
+
       return Success({
         transaction: decimalsToString(transaction),
+        paymentToken,
         token: transaction.sale.token,
         blockchain,
       });
@@ -982,7 +1074,7 @@ class TransactionsController {
   }
 
   /**
-   * Retrieves teh Recipient information for the user and current transaction in case it exists
+   * Retrieves the Recipient information for the user and current transaction in case it exists
    */
   async getRecipientForCurrentTransactionSaft(
     dto: { saftContractId: string },

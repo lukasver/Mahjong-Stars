@@ -1,12 +1,12 @@
-import { getUserTransactions } from '@/lib/services/fetchers-server';
+import { TransactionStatus } from '@prisma/client';
 import { DashboardCard } from './dashboard-card';
 import { DashboardCardError } from './dashboard-card-error';
-import { TransactionStatus } from '@prisma/client';
+import { getUserTransactions } from '@/lib/services/fetchers-server';
 
 /**
- * Server component that fetches and displays the user's token balance
+ * Server component that fetches and displays the total number of token holders
  */
-export async function UserTokensCard() {
+export async function UnconfirmedTokensCard() {
   try {
     const { data: transactions, error: transactionsError } =
       await getUserTransactions();
@@ -20,9 +20,9 @@ export async function UserTokensCard() {
       (total, transaction) => {
         if (
           [
-            TransactionStatus.COMPLETED,
-            TransactionStatus.PAYMENT_VERIFIED,
-            TransactionStatus.TOKENS_DISTRIBUTED,
+            TransactionStatus.AWAITING_PAYMENT,
+            TransactionStatus.PAYMENT_SUBMITTED,
+            TransactionStatus.PENDING,
           ].includes(transaction.status)
         ) {
           return total + parseFloat(transaction.quantity.toString() || '0');
@@ -33,7 +33,10 @@ export async function UserTokensCard() {
     );
 
     return (
-      <DashboardCard title='Your tokens' value={userTokens.toLocaleString()} />
+      <DashboardCard
+        title='Your unconfirmed tokens'
+        value={userTokens.toLocaleString()}
+      />
     );
   } catch (error) {
     console.error('Error fetching user tokens:', error);

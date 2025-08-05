@@ -8,7 +8,7 @@ export const CreateTransactionDto = SaleTransactionsSchema.pick({
   receivingWallet: true,
   saleId: true,
   comment: true,
-  amountPaid: true,
+  totalAmount: true,
   paidCurrency: true,
 });
 

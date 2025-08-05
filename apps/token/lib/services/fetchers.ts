@@ -400,6 +400,16 @@ export const getCryptoTransaction = async (txId: string) => {
       transaction: TransactionByIdWithRelations;
       token: Token;
       blockchain: TokensOnBlockchains;
+      paymentToken: Pick<
+        TokensOnBlockchains,
+        | 'contractAddress'
+        | 'decimals'
+        | 'isNative'
+        | 'name'
+        | 'tokenSymbol'
+        | 'id'
+        | 'chainId'
+      >;
     }>(`/transactions/${txId}/crypto`);
     return { data, error: null };
   } catch (e) {

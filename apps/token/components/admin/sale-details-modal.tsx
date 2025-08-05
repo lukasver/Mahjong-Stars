@@ -80,7 +80,7 @@ function DetailRow({
 }) {
   return (
     <div className='flex justify-between items-start py-2'>
-      <span className='text-sm font-medium text-muted-foreground min-w-[140px]'>
+      <span className='text-sm font-medium text-secondary min-w-[140px]'>
         {label}:
       </span>
       <div className='flex items-center gap-2 flex-1 justify-end'>

@@ -134,8 +134,8 @@ export const NETWORK_TO_TOKEN_MAPPING = {
     // },
   },
   [c.bscTestnet.id]: {
-    ['BNB']: {
-      symbol: 'BNB',
+    ['tBNB']: {
+      symbol: 'tBNB',
       contract: NATIVE_TOKEN_ADDRESS,
       enabled: true,
       decimals: ERC20_DECIMALS,

@@ -6,7 +6,10 @@ import BackgroundWrapper from '@/components/bg-wrapper';
 import { BuyTokenButton } from '@/components/buy-token-button';
 import { InputOptionsProvider } from '@/components/hooks/use-input-options';
 import { DashboardSidebar } from '@/components/sidebar';
-import { getCurrentUser } from '@/lib/services/fetchers-server';
+import {
+  getCurrentUser,
+  getUserFromSession,
+} from '@/lib/services/fetchers-server';
 import { isAdmin } from '@/lib/utils';
 import { Footer } from '@mjs/ui/components/footer';
 import {
@@ -26,17 +29,18 @@ export default async function AdminLayout({
   const queryClient = new QueryClient();
 
   const [user, t] = await Promise.all([
-    // Used for checking if the user is admin
-    queryClient.fetchQuery({
-      queryKey: ['user', 'me'],
-      queryFn: () => getCurrentUser(),
-    }),
+    getUserFromSession(),
     getTranslations(),
   ]);
 
-  if (!user?.data || !isAdmin(user.data.roles)) {
+  if (!user || !isAdmin(user.roles)) {
     redirect('/?error=unauthorized');
   }
+
+  await queryClient.prefetchQuery({
+    queryKey: ['user', 'me'],
+    queryFn: () => getCurrentUser(),
+  });
 
   return (
     <>
@@ -57,7 +61,7 @@ export default async function AdminLayout({
               <InputOptionsProvider>
                 <BackgroundWrapper>
                   <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
-                    <main className='container mx-auto z-10 py-4 sm:py-10 px-4 sm:px-10 xl:px-20 xl:py-20'>
+                    <main className='container mx-auto z-10 py-4 sm:py-10 px-4 sm:px-10 xl:px-20 xl:py-2'>
                       {children}
                     </main>
                   </div>

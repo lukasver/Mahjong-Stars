@@ -5,7 +5,11 @@ import { Decimal } from 'decimal.js';
 import { FOP, TransactionStatus } from '@prisma/client';
 import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
 
-import { formatDate, safeFormatCurrency } from '@mjs/utils/client';
+import {
+  copyToClipboard,
+  formatDate,
+  safeFormatCurrency,
+} from '@mjs/utils/client';
 import { Badge } from '@mjs/ui/primitives/badge';
 import {
   Eye,
@@ -34,6 +38,7 @@ import {
   AlertDialogContent,
 } from '@mjs/ui/primitives/alert-dialog';
 import Image from 'next/image';
+import { cn } from '@mjs/ui/lib/utils';
 
 const statusColors: Record<TransactionStatus, string> = {
   PENDING:
@@ -46,8 +51,7 @@ const statusColors: Record<TransactionStatus, string> = {
     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
   REJECTED: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
   CANCELLED: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
-  TOKENS_ALLOCATED:
-    'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
+
   TOKENS_DISTRIBUTED:
     'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
   COMPLETED:
@@ -78,8 +82,6 @@ const formatChipMessage = (status: TransactionStatus) => {
       return 'Awaiting Payment';
     case TransactionStatus.PAYMENT_SUBMITTED:
       return 'Payment Submitted';
-    case TransactionStatus.TOKENS_ALLOCATED:
-      return 'Tokens Allocated';
     case TransactionStatus.REJECTED:
       return 'Rejected';
     case TransactionStatus.REFUNDED:
@@ -98,7 +100,9 @@ export const getColumns = (
     enableHiding: true,
     cell: ({ row }) => {
       const id = row.getValue('id') as string;
-      return <span className='font-mono text-xs'>{id.slice(-8)}</span>;
+      return (
+        <span className='font-mono text-xs text-secondary'>{id.slice(-8)}</span>
+      );
     },
   },
   {
@@ -110,7 +114,7 @@ export const getColumns = (
       return (
         <div>
           <div className='text-sm'>{formatDate(date)}</div>
-          <div className='text-xs text-muted-foreground'>
+          <div className='text-xs text-secondary'>
             {date.toLocaleString({
               hour: '2-digit',
               minute: '2-digit',
@@ -131,28 +135,19 @@ export const getColumns = (
     },
   },
   {
-    accessorKey: 'tokenSymbol',
-    header: 'Token',
-    cell: ({ row }) => {
-      const symbol = row.original.tokenSymbol;
-      return (
-        <div>
-          <b className='font-medium'>{symbol}</b>
-          {/* <div className='text-xs text-muted-foreground'>
-            {row.getValue('')}
-          </div> */}
-        </div>
-      );
-    },
-  },
-  {
     accessorKey: 'quantity',
     header: 'Purchased',
     cell: ({ row }) => {
       const value = row.getValue('quantity') as string | number;
-      return value
-        ? new Intl.NumberFormat().format(new Decimal(value).toNumber())
-        : null;
+      if (!value) return null;
+      return (
+        <div>
+          <span>
+            {new Intl.NumberFormat().format(new Decimal(value).toNumber())}{' '}
+            {row.original.tokenSymbol}
+          </span>
+        </div>
+      );
     },
   },
   // {
@@ -177,20 +172,20 @@ export const getColumns = (
   //   },
   // },
   {
-    accessorKey: 'amountPaid',
+    accessorKey: 'totalAmount',
     header: 'Paid / To pay',
     cell: ({ row }) => {
-      const amountPaid = row.original.amountPaid;
+      const totalAmount = row.original.totalAmount?.toString();
       const paidCurrency = row.original.paidCurrency;
       const locale = useLocale();
 
-      if (Number.isNaN(Number(amountPaid))) return 'TBD';
+      if (Number.isNaN(Number(totalAmount))) return 'TBD';
 
       return (
         <span>
           {safeFormatCurrency(
             {
-              totalAmount: amountPaid,
+              totalAmount: totalAmount,
               currency: paidCurrency,
             },
             {
@@ -224,10 +219,14 @@ export const getColumns = (
       const txHash = row.original.txHash;
 
       return (
-        <div>
+        <div
+          role={txHash ? 'button' : undefined}
+          onClick={() => txHash && copyToClipboard(txHash)}
+          className={cn(txHash && 'cursor-pointer')}
+        >
           <div className='text-sm'>{fopLabels[fop]}</div>
           {txHash && (
-            <div className='text-xs text-muted-foreground font-mono'>
+            <div className='text-xs text-secondary font-mono'>
               {txHash.slice(0, 10)}...
             </div>
           )}
@@ -303,10 +302,16 @@ const ActionButtons = ({
             </DropdownMenuItem>
           )}
 
-          {hasTxHash && (
-            <DropdownMenuItem>
-              <ExternalLink className='h-4 w-4 mr-2' />
-              View on Explorer
+          {row.explorerUrl && (
+            <DropdownMenuItem asChild>
+              <a
+                href={row.explorerUrl}
+                target='_blank'
+                rel='noopener noreferrer nofollow'
+              >
+                <ExternalLink className='h-4 w-4 mr-2' />
+                View on Explorer
+              </a>
             </DropdownMenuItem>
           )}
           {/* <DropdownMenuSeparator />

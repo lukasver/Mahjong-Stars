@@ -33,11 +33,11 @@ const titleMapping = {
     description: 'Please enter your invitation code if you have one',
   },
   2: {
-    title: 'Enter your email',
+    title: 'Verify your email',
     description: 'Please enter your email to continue.',
   },
   3: {
-    title: 'Verify email',
+    title: 'Verify code',
     description: 'Please enter the code sent to your email.',
   },
 };
@@ -275,6 +275,7 @@ export const VerifyEmailForm = ({
               autoComplete: 'off',
             }}
           />
+
           <CardFooter className='flex gap-2 justify-between p-0'>
             {canSkip && (
               <Button
@@ -330,16 +331,15 @@ export const VerifyTokenForm = ({
   });
   const form = useAppForm({
     validators: {
+      // @ts-expect-error - zod types are not compatible with useAppForm
       onSubmit: z.object({
         token: z.string().min(1, { message: 'Token is required' }).trim(),
-        firstName: z.string().trim(),
-        lastName: z.string().trim(),
+        subscribe: z.boolean().optional().default(false),
       }),
     },
     defaultValues: {
       token: token ?? '',
-      firstName: '',
-      lastName: '',
+      subscribe: false,
     },
     onSubmit: ({ value }) => execute(value),
   });
@@ -363,6 +363,14 @@ export const VerifyTokenForm = ({
             label='Enter code'
             inputProps={{
               autoComplete: 'off',
+            }}
+          />
+          <FormInput
+            type='checkbox'
+            name='subscribe'
+            label='Want to receive news & updates?'
+            inputProps={{
+              required: false,
             }}
           />
           <CardFooter className='flex gap-2 justify-between p-0'>

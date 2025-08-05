@@ -42,6 +42,7 @@ import { env } from '@/common/config/env';
 import { InvestFormSchema } from '@/components/invest/schemas';
 import { FOP, Prisma } from '@prisma/client';
 import { erc20Abi } from '../services/crypto/ABI';
+import Decimal from 'decimal.js';
 
 export const hasActiveSession = async (address: string, token: string) => {
   const sessions = await prisma.session.findMany({
@@ -138,30 +139,39 @@ export const generatePayload = loginActionClient
     return await generateAuthPayload({ chainId, address });
   });
 
-export const logout = loginActionClient.action(async () => {
-  const data = String((await getSessionCookie()) || '');
+export const logout = loginActionClient
+  .schema(
+    z.object({
+      redirectTo: z.string().optional(),
+      redirect: z.boolean().optional().default(true),
+    })
+  )
+  .action(async ({ parsedInput: { redirectTo, redirect: _redirect } }) => {
+    const data = String((await getSessionCookie()) || '');
 
-  await deleteSessionCookie();
-  if (data) {
-    const verified = await verifyJwt(data);
-    void Promise.allSettled([
-      verified.valid && authCache.delete(verified.parsedJWT.sub),
-      prisma.session
-        .delete({
-          where: {
-            token: data,
-          },
-        })
-        .catch((e) => {
-          console.error(
-            'index.ts:122 ~ e:',
-            e instanceof Error ? e.message : e
-          );
-        }),
-    ]);
-  }
-  redirect('/');
-});
+    await deleteSessionCookie();
+    if (data) {
+      const verified = await verifyJwt(data);
+      void Promise.allSettled([
+        verified.valid && authCache.delete(verified.parsedJWT.sub),
+        prisma.session
+          .delete({
+            where: {
+              token: data,
+            },
+          })
+          .catch((e) => {
+            console.error(
+              'index.ts:122 ~ e:',
+              e instanceof Error ? e.message : e
+            );
+          }),
+      ]);
+    }
+    if (_redirect) {
+      redirect(redirectTo || '/');
+    }
+  });
 
 // export const getCurrentUser = authActionClient.action(
 //   async ({ ctx: { address } }) => {
@@ -291,19 +301,6 @@ export const getUserSaleTransactions = authActionClient
     return transactions.data;
   });
 
-// export const getUserTransactions = authActionClient
-//   .schema(GetTransactionDto)
-//   .action(async ({ ctx, parsedInput }) => {
-//     const transactions = await transactionsController.getUserTransactions(
-//       parsedInput,
-//       ctx
-//     );
-//     if (!transactions.success) {
-//       throw new Error(transactions.message);
-//     }
-//     return transactions.data;
-//   });
-
 export const getTransactionById = authActionClient
   .schema(z.object({ id: z.string() }))
   .action(async ({ ctx, parsedInput }) => {
@@ -343,7 +340,7 @@ export const createTransaction = authActionClient
           : FOP.CRYPTO,
         receivingWallet: parsedInput.receivingWallet,
         saleId: parsedInput.saleId,
-        amountPaid: parsedInput.paid.amount,
+        totalAmount: parsedInput.paid.amount as unknown as Decimal,
         paidCurrency: parsedInput.paid.currency,
         comment: null,
       },
@@ -405,6 +402,7 @@ export const createEmailVerification = authActionClient
   )
   .action(async ({ ctx, parsedInput }) => {
     const { email, ...profile } = parsedInput;
+
     const result = await usersController.updateUser(
       { user: { email }, profile },
       ctx
@@ -417,11 +415,20 @@ export const createEmailVerification = authActionClient
   });
 
 export const verifyEmail = authActionClient
-  .schema(z.object({ token: z.string() }))
+  .schema(
+    z.object({
+      token: z.string(),
+      subscribe: z.boolean().optional().default(false),
+    })
+  )
   .action(async ({ ctx, parsedInput }) => {
     const result = await usersController.verifyEmail(parsedInput.token, ctx);
+
     if (!result.success) {
-      throw new Error(result.message);
+      throw new Error('Failed to verify code');
+    }
+    if (parsedInput.subscribe) {
+      await usersController.subscribeToNewsletter(ctx);
     }
     return result;
   });
@@ -591,6 +598,36 @@ export const associateDocumentsToUser = authActionClient
   .action(async ({ ctx, parsedInput }) => {
     const result = await documentsController.associateDocumentsToUser(
       parsedInput,
+      ctx
+    );
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    return result.data;
+  });
+
+export const confirmCryptoTransaction = authActionClient
+  .schema(
+    z.object({
+      txId: z.string(),
+      receipt: z.string(),
+      chainId: z.number(),
+      amountPaid: z.string(),
+      paymentDate: z.coerce.date(),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const result = await transactionsController.confirmTransaction(
+      {
+        id: parsedInput.txId,
+        type: 'CRYPTO',
+        payload: {
+          txHash: parsedInput.receipt,
+          chainId: parsedInput.chainId,
+          amountPaid: parsedInput.amountPaid,
+          paymentDate: parsedInput.paymentDate,
+        },
+      },
       ctx
     );
     if (!result.success) {

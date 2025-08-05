@@ -116,10 +116,12 @@
 			"button": "Back to your Dashboard"
 		},
 		"pending": {
-			"title": "Pending transaction!",
-			"text": "Your transaction is in review status.",
-			"transactionLink": "If you want to see the transaction click here",
-			"button": "Back to your Dashboard"
+			"title": "Transaction Confirmed! ⏳",
+			"text": "Your transaction has been confirmed and is now under review by the {projectName} team. You will receive an email with further information once approved. Thank you for your patience!",
+			"transactionLink": "View transaction details",
+			"contactButton": "Get in Touch",
+			"button": "Back to your Dashboard",
+			"supportText": "If you have any questions, please contact us at"
 		}
 	},
 	"dashboard": {

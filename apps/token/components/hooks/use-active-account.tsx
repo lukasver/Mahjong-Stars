@@ -27,7 +27,7 @@ function useActiveAccount() {
         disconnect(wallet);
         getQueryClient().clear();
       }
-      await logout();
+      await logout({ redirectTo: '/', redirect: true });
     });
   }, [wallet, disconnect]);
 
@@ -41,6 +41,7 @@ function useActiveAccount() {
     [!!ac, !!wallet]
   );
 
+  const chain = wallet?.getChain();
   return {
     activeAccount: ac,
     status,
@@ -48,7 +49,8 @@ function useActiveAccount() {
     isConnected: status === 'connected',
     signout,
     signMessage,
-    chainId: wallet?.getChain()?.id,
+    chainId: chain?.id,
+    chain,
   };
 }
 

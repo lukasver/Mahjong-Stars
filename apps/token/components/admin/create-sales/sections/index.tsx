@@ -341,11 +341,7 @@ export const PaymentInformation = ({
   };
 
   const handleRemoveBankFromSale = (fieldId: string) => {
-    console.log('REMOVE', fieldId, form.getFieldValue('banks'));
     const saleId = form.getFieldValue('saleId') || query.get('saleId');
-
-    console.debug('🚀 ~ index.tsx:312 ~ saleId:', saleId);
-
     if (fieldId && saleId) {
       action
         .executeAsync({

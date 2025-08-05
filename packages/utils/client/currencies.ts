@@ -13,19 +13,24 @@ export const formatCurrency = (
 
   const locale = options.locale;
   const currency = options.currency;
-  if (Intl) {
-    return new Intl.NumberFormat(locale || 'en-US', {
-      ...(currency && { style: 'currency', currency }),
-      ...(options.precision === 'CRYPTO'
-        ? {
-            minimumFractionDigits: 4,
-            maximumFractionDigits: 8,
-          }
-        : {}),
-      ...options,
-    }).format(formated);
+  try {
+    if (Intl) {
+      return new Intl.NumberFormat(locale || 'en-US', {
+        ...(currency && { style: 'currency', currency }),
+        ...(options.precision === 'CRYPTO'
+          ? {
+              minimumFractionDigits: 4,
+              maximumFractionDigits: 8,
+            }
+          : {}),
+        ...options,
+      }).format(formated);
+    }
+  } catch {
+    return currency
+      ? `${currency} ${formated.toFixed(2)}`
+      : formated.toFixed(2);
   }
-  return currency ? `${currency} ${formated.toFixed(2)}` : formated.toFixed(2);
 };
 
 export const safeFormatCurrency = (

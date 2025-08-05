@@ -56,7 +56,7 @@ const data = {
       ],
     },
     {
-      title: 'ICO',
+      title: 'More info',
       url: '#',
       icon: Globe,
       items: [

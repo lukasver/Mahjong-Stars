@@ -102,12 +102,13 @@ export default async function TransactionConfiramationPage({
   const status = tx.data.transaction.status;
   if (
     status === TransactionStatusSchema.enum.CANCELLED ||
-    status === 'REJECTED'
+    status === TransactionStatusSchema.enum.REJECTED
   ) {
     redirect(`/dashboard/buy/${tx.data.transaction.id}/failure`);
   }
+
   if (status === TransactionStatusSchema.enum.PAYMENT_SUBMITTED) {
-    redirect(`/dashboard/buy/${tx.data.transaction.id}/pending`);
+    redirect(`/dashboard/buy/${tx.data.transaction.id}/success`);
   }
 
   return (

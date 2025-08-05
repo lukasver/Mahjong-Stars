@@ -8,9 +8,14 @@ import sales from '../repositories/sales';
 import { getUserFromCache } from '../auth/cache';
 import { isAdmin } from '../actions/admin';
 import { cache } from 'react';
+import { SaleStatus, TransactionStatus } from '@prisma/client';
+import { prisma } from '../db/prisma';
+import { decimalsToString } from '@/common/schemas/dtos/utils';
 
-const getUserFromSession = cache(async () => {
-  const verified = await getSessionCookie().then((d) => verifyJwt(d || ''));
+export const getUserFromSession = cache(async () => {
+  const verified = await getSessionCookie()
+    .then((d) => verifyJwt(d || ''))
+    .catch(() => null);
   if (!verified || !verified.valid) {
     throw new Error('Invalid session');
   }
@@ -76,5 +81,77 @@ export const getActiveSale = cache(async () => {
     return { data: result.data, error: null };
   } else {
     return { data: null, error: result };
+  }
+});
+
+export const getRecentTransactions = cache(async () => {
+  try {
+    const transactions = await prisma.saleTransactions.findMany({
+      where: {
+        status: {
+          notIn: [
+            TransactionStatus.REJECTED,
+            TransactionStatus.CANCELLED,
+            TransactionStatus.REFUNDED,
+          ],
+        },
+      },
+      select: {
+        id: true,
+        quantity: true,
+        totalAmount: true,
+        amountPaidCurrency: true,
+        user: {
+          select: {
+            walletAddress: true,
+          },
+        },
+        createdAt: true,
+        sale: {
+          select: {
+            tokenSymbol: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 10, // Limit to 10 most recent transactions
+    });
+    return {
+      data: { transactions: decimalsToString(transactions) },
+      error: null,
+    };
+  } catch (error) {
+    return { data: null, error: error };
+  }
+});
+
+export const getIcoPhases = cache(async () => {
+  try {
+    const sales = await prisma.sale.findMany({
+      where: {
+        status: {
+          in: [SaleStatus.OPEN, SaleStatus.CREATED, SaleStatus.FINISHED],
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        saleStartDate: true,
+        saleClosingDate: true,
+        tokenPricePerUnit: true,
+        initialTokenQuantity: true,
+        availableTokenQuantity: true,
+        tokenSymbol: true,
+      },
+      orderBy: {
+        saleStartDate: 'asc',
+      },
+    });
+    return { data: { sales: decimalsToString(sales) }, error: null };
+  } catch (error) {
+    return { data: null, error: error };
   }
 });

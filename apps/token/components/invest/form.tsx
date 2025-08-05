@@ -536,14 +536,6 @@ const getDefaultValues = (
     receivingWallet: activeAccount?.address || '',
     requiresSaft: !!sale?.saftCheckbox,
     requiresKYC: !!sale?.requiresKYC,
-    // confirmationId: '',
-    // formOfPayment: FOPSchema.enum.CRYPTO,
-    // currency: sale.currency,
-    // comment: '',
-    // amountPaid: '',
-    // amountPaidCurrency: sale.currency,
-    // txHash: '',
-    // agreementId: '',
   };
 };
 

@@ -2,7 +2,13 @@ import Image from 'next/image';
 
 import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
 
-export function PulseLoader({ children }: { children?: React.ReactNode }) {
+export function PulseLoader({
+  children,
+  text = 'Loading...',
+}: {
+  children?: React.ReactNode;
+  text?: string;
+}) {
   return (
     <div className='flex items-center gap-2'>
       <span className='aspect-square animate-pulse'>
@@ -14,9 +20,7 @@ export function PulseLoader({ children }: { children?: React.ReactNode }) {
           className='animate-spin aspect-square'
         />
       </span>
-      {children || (
-        <span className='text-xl font-bold font-head'>Loading...</span>
-      )}
+      {children || <span className='text-xl font-bold font-head'>{text}</span>}
     </div>
   );
 }

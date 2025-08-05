@@ -43,8 +43,6 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
   const { data: recipient, isLoading: isRecipientLoading } =
     useRecipientForCurrentTransactionSaft(data?.id ? data.id : undefined);
 
-  console.debug('🚀 ~ saft-review-step.tsx:46 ~ recipient:', recipient);
-
   const [cid, setCid] = useQueryState('cid', parseAsString);
   const [openDialog, setOpenDialog] = useState(!!cid);
 

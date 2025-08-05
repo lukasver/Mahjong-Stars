@@ -13,7 +13,7 @@ import {
 } from '@mjs/ui/primitives/dialog';
 import { Separator } from '@mjs/ui/primitives/separator';
 import { Copy, ExternalLink } from 'lucide-react';
-import { copyToClipboard, formatCurrency, formatDate } from '@mjs/utils/client';
+import { copyToClipboard, formatDate } from '@mjs/utils/client';
 import { useTransactionById } from '@/lib/services/api';
 import { Prisma } from '@prisma/client';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
@@ -240,17 +240,27 @@ export function TransactionDetailsModal({
               />
               <DetailRow
                 label='Price per Token'
-                value={formatCurrency(tx.price, {
-                  locale,
-                  currency: tx.paidCurrency,
-                })}
+                value={safeFormatCurrency(
+                  {
+                    currency: tx.paidCurrency,
+                    totalAmount: tx.price.toString(),
+                  },
+                  {
+                    locale,
+                  }
+                )}
               />
               <DetailRow
                 label='Total Amount'
-                value={formatCurrency(tx.totalAmount, {
-                  locale,
-                  currency: tx.paidCurrency,
-                })}
+                value={safeFormatCurrency(
+                  {
+                    currency: tx.paidCurrency,
+                    totalAmount: tx.totalAmount.toString(),
+                  },
+                  {
+                    locale,
+                  }
+                )}
               />
             </div>
           </div>
@@ -261,19 +271,23 @@ export function TransactionDetailsModal({
           <div>
             <h3 className='text-lg font-semibold mb-3'>Payment Information</h3>
             <div className='space-y-1'>
-              <DetailRow
-                label='Amount Paid'
-                value={safeFormatCurrency(
-                  {
-                    totalAmount: tx.amountPaid,
-                    currency: tx.paidCurrency,
-                  },
-                  {
-                    locale,
-                    precision: isFiatCurrency ? 'FIAT' : 'CRYPTO',
-                  }
-                )}
-              />
+              {tx.amountPaid ? (
+                <DetailRow
+                  label='Amount Paid'
+                  value={safeFormatCurrency(
+                    {
+                      totalAmount: tx.amountPaid,
+                      currency: tx.paidCurrency,
+                    },
+                    {
+                      locale,
+                      precision: isFiatCurrency ? 'FIAT' : 'CRYPTO',
+                    }
+                  )}
+                />
+              ) : (
+                <DetailRow label='Amount Paid' value='Awaiting payment' />
+              )}
               <DetailRow label='Currency' value={tx.paidCurrency} />
               <DetailRow label='Raw Price' value={formatNumber(tx.rawPrice)} />
               {tx.comment && <DetailRow label='Comment' value={tx.comment} />}
@@ -433,19 +447,22 @@ export function TransactionDetailsModal({
           <div>
             <h3 className='text-lg font-semibold mb-3'>Financial Summary</h3>
             <div className='grid grid-cols-2 gap-4'>
-              <div className='bg-muted/50 p-4 rounded-lg'>
-                <div className='text-sm text-muted-foreground'>Total Value</div>
+              <div className='glassy text-foreground p-4 rounded-lg'>
+                <div className='text-sm text-secondary'>Total Value</div>
                 <div className='text-2xl font-bold'>
-                  {formatCurrency(tx.totalAmount, {
-                    locale,
-                    currency: tx.paidCurrency,
-                  })}
+                  {safeFormatCurrency(
+                    {
+                      totalAmount: tx.totalAmount,
+                      currency: tx.paidCurrency,
+                    },
+                    {
+                      locale,
+                    }
+                  )}
                 </div>
               </div>
-              <div className='bg-muted/50 p-4 rounded-lg'>
-                <div className='text-sm text-muted-foreground'>
-                  Tokens Purchased
-                </div>
+              <div className='glassy text-foreground p-4 rounded-lg'>
+                <div className='text-sm text-secondary'>Tokens Purchased</div>
                 <div className='text-2xl font-bold'>
                   {formatNumber(new Decimal(tx.quantity).toNumber())}{' '}
                   {tx.tokenSymbol}

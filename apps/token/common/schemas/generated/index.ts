@@ -158,7 +158,7 @@ export const CurrencyTypeSchema = z.enum(['CRYPTO','FIAT']);
 
 export type CurrencyTypeType = `${z.infer<typeof CurrencyTypeSchema>}`
 
-export const TransactionStatusSchema = z.enum(['PENDING','AWAITING_PAYMENT','PAYMENT_SUBMITTED','PAYMENT_VERIFIED','REJECTED','CANCELLED','TOKENS_ALLOCATED','TOKENS_DISTRIBUTED','COMPLETED','REFUNDED']);
+export const TransactionStatusSchema = z.enum(['PENDING','AWAITING_PAYMENT','PAYMENT_SUBMITTED','PAYMENT_VERIFIED','REJECTED','CANCELLED','TOKENS_DISTRIBUTED','COMPLETED','REFUNDED']);
 
 export type TransactionStatusType = `${z.infer<typeof TransactionStatusSchema>}`
 
@@ -461,16 +461,31 @@ export const SaleTransactionsSchema = z.object({
   updatedAt: z.coerce.date(),
   deletedAt: z.coerce.date().nullable(),
   tokenSymbol: z.string(),
+  /**
+   * Number of tokens purchased in the transaction
+   */
   quantity: z.instanceof(Prisma.Decimal, { message: "Field 'quantity' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
+  /**
+   * Store exact price per unit as string
+   */
   rawPrice: z.string(),
+  /**
+   * Price per unit of the token as Decimal (Optimized for crypto)
+   */
   price: z.instanceof(Prisma.Decimal, { message: "Field 'price' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
+  /**
+   * Total amount to be paid by the user
+   */
   totalAmount: z.instanceof(Prisma.Decimal, { message: "Field 'totalAmount' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
   confirmationId: z.string().nullable(),
   receivingWallet: z.string().nullable(),
   userId: z.string(),
   saleId: z.string(),
   comment: z.string().nullable(),
-  amountPaid: z.string(),
+  /**
+   * actual amount transfered by the user after confirmation
+   */
+  amountPaid: z.string().nullable(),
   paidCurrency: z.string(),
   txHash: z.string().nullable(),
   blockchainId: z.string().nullable(),

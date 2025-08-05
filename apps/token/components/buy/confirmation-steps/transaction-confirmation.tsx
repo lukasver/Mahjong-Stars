@@ -10,6 +10,7 @@ import { SaftReviewStep } from './saft-review-step';
 import { PaymentAvailabilityGuard, PaymentStep } from './payment-step';
 import { ConfirmationStep } from './confirmation-step';
 import { FormStepper } from './form-stepper';
+import { getQueryClient } from '@/app/providers';
 
 interface TransactionConfirmationProps {
   steps: { id: number; name: string; description: string }[];
@@ -58,9 +59,12 @@ export function TransactionConfirmation({
             {step.name === 'Payment' && (
               <PaymentAvailabilityGuard>
                 <PaymentStep
-                  onSuccess={() =>
-                    setStep(steps.find((s) => s.name === 'Confirmation')!)
-                  }
+                  onSuccess={() => {
+                    getQueryClient().invalidateQueries({
+                      queryKey: ['transactions'],
+                    });
+                    setStep(steps.find((s) => s.name === 'Confirmation')!);
+                  }}
                 />
               </PaymentAvailabilityGuard>
             )}

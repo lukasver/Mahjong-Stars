@@ -122,8 +122,6 @@ class ContractController {
         let mapped = DocumensoStatusToContractStatusMapping[document.status];
         const signer = document.recipients.find((r) => r.role === 'SIGNER');
 
-        console.debug('🚀 ~ index.ts:127 ~ signer:', signer);
-
         if (signer?.signingStatus === 'SIGNED') {
           mapped = 'SIGNED';
         }

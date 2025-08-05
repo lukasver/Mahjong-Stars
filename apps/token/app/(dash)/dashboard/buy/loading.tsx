@@ -15,10 +15,10 @@ export default function Loading() {
         </div>
 
         {/* Main Content Grid */}
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
           {/* Left Content - Main Image and Information */}
           <div className='lg:col-span-2'>
-            <Card className='bg-secondary-800/50 border-secondary-700'>
+            <Card className=''>
               <CardContent className='p-0'>
                 {/* Main Image Loading */}
                 <div className='relative'>
