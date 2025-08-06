@@ -3,13 +3,17 @@ import { COOKIE_PREFIX, MW_KEY } from './common/config/constants';
 import log from './lib/services/logger.server';
 import { getSessionCookie } from './lib/auth/cookies';
 
-const PUBLIC_ROUTES: string[] = ['/', '/onboarding', '/test'];
+const PUBLIC_ROUTES: string[] = ['/', '/onboarding', '/test', '/in'];
 const _PRIVATE_ROUTES: string[] = ['/dashboard'];
 
 const isE2ETest = process.env.E2E_TEST_MODE === 'true';
 
 export default async (req: NextRequest) => {
-  log('[MIDDLEWARE]', req.nextUrl.pathname);
+  log(
+    '[MIDDLEWARE]',
+    req.nextUrl.pathname,
+    req.cookies.get(`${COOKIE_PREFIX}-${MW_KEY}`)
+  );
 
   if (isE2ETest) {
     return NextResponse.next();
@@ -31,8 +35,6 @@ export default async (req: NextRequest) => {
     }
     return NextResponse.redirect(new URL('/', req.url));
   }
-
-  //TODO! see if we can check if user is admin from here
 
   const magicWord = req.cookies.get(`${COOKIE_PREFIX}-${MW_KEY}`);
 

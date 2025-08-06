@@ -7,6 +7,23 @@ import { mockTransactions, mockUsers } from '../mocks/helpers';
 const Decimal = Prisma.Decimal;
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/repositories/documents/storage', () => ({
+  StorageService: vi.fn().mockImplementation(() => ({
+    getFileUrl: vi.fn(),
+  })),
+}));
+
+vi.mock('@/lib/repositories/documents', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    generatePDF: vi.fn(),
+  })),
+}));
+
+vi.mock('@/lib/repositories/notifications', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    send: vi.fn(),
+  })),
+}));
 
 // Block all external HTTP requests except localhost
 nock.disableNetConnect();

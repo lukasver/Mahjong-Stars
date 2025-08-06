@@ -9,7 +9,16 @@ export const formatCurrency = (
   } = { locale: 'en-US', precision: 'FIAT' }
 ) => {
   if (value === undefined || value === null) return value;
-  const formated = new Decimal(value).toNumber();
+  let toFormat: number = NaN;
+  try {
+    toFormat = new Decimal(value).toNumber();
+  } catch {
+    toFormat = formatStringCurrencyToNumber(
+      String(value),
+      options.currency,
+      options.locale
+    );
+  }
 
   const locale = options.locale;
   const currency = options.currency;
@@ -27,17 +36,18 @@ export const formatCurrency = (
               maximumFractionDigits: 4,
             }),
         ...options,
-      }).format(formated);
+      }).format(toFormat);
 
-      // Remove trailing zeros after decimal point
-      return formatted.replace(/\.?0+$/, '');
+      return formatted;
     }
   } catch {
-    const fixedValue = formated.toFixed(options.precision === 'CRYPTO' ? 8 : 4);
+    if (Number.isNaN(toFormat)) {
+      return 'NaN';
+    }
+    const fixedValue = toFormat.toFixed(options.precision === 'CRYPTO' ? 8 : 4);
     const formatted = currency ? `${currency} ${fixedValue}` : fixedValue;
 
-    // Remove trailing zeros after decimal point
-    return formatted.replace(/\.?0+$/, '');
+    return formatted;
   }
 };
 
@@ -66,13 +76,12 @@ export const safeFormatCurrency = (
  */
 export const formatStringCurrencyToNumber = (
   value: string,
-  currency: string,
+  currency: string | undefined,
   locale: string
 ) => {
   // Get the format parts to understand the locale's number formatting
   const parts = new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: currency,
+    ...(currency && { style: 'currency', currency }),
   }).formatToParts(12345.67);
 
   // Extract the decimal and group separators used in this locale

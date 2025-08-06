@@ -548,6 +548,23 @@ const getAmountDescription = (
   >,
   locale: string
 ) => {
+  console.log(
+    'ACA MIN ',
+    `${formatCurrency(sale.minimumTokenBuyPerUser, {
+      locale,
+    })}`
+  );
+
+  console.log(
+    'ACA MAX ',
+    `${formatCurrency(
+      sale.maximumTokenBuyPerUser || sale.availableTokenQuantity,
+      {
+        locale,
+      }
+    )}`
+  );
+
   let base = `Min: ${formatCurrency(sale.minimumTokenBuyPerUser, {
     locale,
   })}`;
