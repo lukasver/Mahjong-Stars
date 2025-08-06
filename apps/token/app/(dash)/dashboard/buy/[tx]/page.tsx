@@ -14,7 +14,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { VerifyMandatoryEmail } from '@/components/buy/verify-mandatory-email';
 import { TransactionStatus } from '@prisma/client';
-import { getCurrentUser } from '@/lib/services/fetchers-server';
+import { getCurrentUser } from '@/lib/services/fetchers.server';
 
 const idGen = () => {
   let id = 1;

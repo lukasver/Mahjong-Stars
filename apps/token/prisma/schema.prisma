@@ -391,7 +391,7 @@ model SaleTransactions {
   totalAmount Decimal @db.Decimal(36, 18)
 
   formOfPayment   FOP
-  confirmationId  String?
+  // confirmationId  String?
   receivingWallet String?
 
   status TransactionStatus @default(PENDING)

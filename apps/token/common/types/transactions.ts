@@ -77,7 +77,13 @@ const AdminTransactionsWithRelations =
       sale: true,
       user: {
         select: {
-          profile: true,
+          email: true,
+          profile: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
           kycVerification: {
             select: {
               id: true,
@@ -86,6 +92,8 @@ const AdminTransactionsWithRelations =
                 select: {
                   id: true,
                   url: true,
+                  fileName: true,
+                  name: true,
                 },
               },
             },

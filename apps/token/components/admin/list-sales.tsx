@@ -9,7 +9,14 @@ import {
   CardTitle,
 } from '@mjs/ui/primitives/card';
 import { Input } from '@mjs/ui/primitives/input';
-import { AlertCircle, Edit, Eye, MoreHorizontal, Search } from 'lucide-react';
+import {
+  AlertCircle,
+  Edit,
+  Eye,
+  MoreHorizontal,
+  Search,
+  Download,
+} from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import { SearchSelect } from '../searchBar/search-select';
 
@@ -37,7 +44,6 @@ import { Button } from '@mjs/ui/primitives/button';
 import { cn } from '@mjs/ui/lib/utils';
 import { Badge } from '@mjs/ui/primitives/badge';
 import { SaleDetailsModal } from './sale-details-modal';
-import Link from 'next/link';
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import {
   Dialog,
@@ -60,12 +66,13 @@ import {
   AlertDialogCancel,
 } from '@mjs/ui/primitives/alert-dialog';
 import { useAction } from 'next-safe-action/hooks';
-import { updateSaleStatus } from '@/lib/actions/admin';
+import { updateSaleStatus, exportTransactions } from '@/lib/actions/admin';
 import { toast } from '@mjs/ui/primitives/sonner';
 import { getQueryClient } from '@/app/providers';
 import { SaleStatusType } from '@/common/schemas/generated';
 import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 import { useSensitiveAction } from '../hooks/use-sensitive-action';
+import AppLink from '../link';
 
 export function ListSales({
   children,
@@ -115,7 +122,9 @@ export function ListSales({
 
   const locale = useLocale();
 
-  const { executeAsync, isExecuting, result } = useAction(updateSaleStatus);
+  const { executeAsync, isExecuting } = useAction(updateSaleStatus);
+  const { executeAsync: executeExportAsync, isExecuting: isExporting } =
+    useAction(exportTransactions);
 
   const handleUpdateStatus = async (saleId: string, status: SaleStatusType) => {
     if (!saleId || isExecuting || !status) return;
@@ -134,9 +143,46 @@ export function ListSales({
       toast.success(`Sale status changed to ${status}`);
     } else {
       toast.error(
-        result.serverError ||
-          result.validationErrors?._errors?.join(',') ||
+        res?.serverError ||
+          res?.validationErrors?._errors?.join(',') ||
           'Unknown error ocurred'
+      );
+    }
+  };
+
+  const handleExportTransactions = async (
+    format: 'csv' | 'xlsx',
+    saleId?: string
+  ) => {
+    if (isExporting) return;
+
+    const res = await executeExportAsync({
+      format,
+      saleId,
+    });
+
+    if (res?.data) {
+      const { data, filename, contentType } = res.data;
+
+      // Create blob and download
+      const blob = new Blob([data], { type: contentType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success(
+        `Transactions exported successfully as ${format.toUpperCase()}`
+      );
+    } else {
+      toast.error(
+        res?.serverError ||
+          res?.validationErrors?._errors?.join(',') ||
+          'Failed to export transactions'
       );
     }
   };
@@ -275,7 +321,7 @@ export function ListSales({
           <div className='rounded-md border bg-primary'>
             <Table>
               <TableHeader>
-                <TableRow className='text-secondary'>
+                <TableRow className='text-secondary [&>th]:text-secondary'>
                   <TableHead>Sale Name</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Token</TableHead>
@@ -375,13 +421,22 @@ export function ListSales({
                               <Eye className='mr-2 h-4 w-4' />
                               View Details
                             </DropdownMenuItem>
+
                             <DropdownMenuItem asChild>
-                              <Link
+                              <AppLink
+                                href={`/admin/transactions?saleId=${sale.id}`}
+                              >
+                                <Eye className='mr-2 h-4 w-4' />
+                                View Transactions
+                              </AppLink>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <AppLink
                                 href={`/admin/sales/create?saleId=${sale.id}&step=1`}
                               >
                                 <Edit className='mr-2 h-4 w-4' />
                                 Edit Sale
-                              </Link>
+                              </AppLink>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuSub>
@@ -409,6 +464,33 @@ export function ListSales({
                                     )}
                                   >
                                     Close
+                                  </DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                              </DropdownMenuPortal>
+                            </DropdownMenuSub>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger>
+                                <Download className='mr-2 h-4 w-4' />
+                                Export Transactions
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuPortal>
+                                <DropdownMenuSubContent>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleExportTransactions('csv', sale.id)
+                                    }
+                                    disabled={isExporting}
+                                  >
+                                    Export as CSV
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleExportTransactions('xlsx', sale.id)
+                                    }
+                                    disabled={isExporting}
+                                  >
+                                    Export as Excel
                                   </DropdownMenuItem>
                                 </DropdownMenuSubContent>
                               </DropdownMenuPortal>

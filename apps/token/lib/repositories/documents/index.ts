@@ -128,15 +128,6 @@ class DocumentsController {
       return Failure(e);
     }
   }
-  // this.service.getTemplateData(user, uids)
-  // this.service.getTemplatePreview(user, uid)
-
-  // this.service.uploadDocument(payload, file)
-  // this.service.addDocumentRecipients(uid, payload, user)
-  // this.service.getDocumentRecipients(uid, user)
-  // this.service.sendForDocumentSigning(user, uid, payload)
-  // this.service.downloadDocument(uid)
-  // this.service.sendRecipientReminder(user, uid)
 
   /**
    *
@@ -176,6 +167,37 @@ class DocumentsController {
     }
   }
 
+  async getDocumentById(
+    id: string | string[],
+    { presignedUrl }: { presignedUrl?: boolean } = {},
+    _ctx: ActionCtx
+  ) {
+    let documents = await prisma.document.findMany({
+      where: {
+        id: {
+          in: Array.isArray(id) ? id : [id],
+        },
+      },
+      select: {
+        id: true,
+        fileName: true,
+        name: true,
+      },
+    });
+
+    if (presignedUrl) {
+      documents = await Promise.all(
+        documents.map(async (d) => {
+          return {
+            ...d,
+            url: await this.s3.generateReadSignedUrl('private', d.fileName),
+          };
+        })
+      );
+    }
+    return Success({ documents });
+  }
+
   async generatePDF(args: {
     content: string;
     title: string;
@@ -212,6 +234,27 @@ class DocumentsController {
   ) {
     const { documents, type = 'KYC' } = dto;
     const { userId } = _ctx;
+    let kycVerificationId: string | undefined;
+    if (type === 'KYC') {
+      kycVerificationId = (
+        await prisma.kycVerification.upsert({
+          where: {
+            userId,
+          },
+          create: {
+            user: {
+              connect: {
+                id: userId,
+              },
+            },
+          },
+          update: {},
+          select: {
+            id: true,
+          },
+        })
+      )?.id;
+    }
 
     const shouldUpsert = z
       .object({
@@ -254,6 +297,7 @@ class DocumentsController {
                 type: mime.lookup(d.key) || 'application/octet-stream',
                 name: d.key.split('/').pop() || '',
                 url: this.s3.getFileUrl('private', d.key),
+                ...(kycVerificationId ? { kycVerificationId } : {}),
               } satisfies Prisma.DocumentCreateManyInput;
             }),
             skipDuplicates: true,
@@ -268,6 +312,7 @@ class DocumentsController {
                 data: { paymentEvidenceId: docs[0].id },
               });
             }
+
             return docs;
           })
       );

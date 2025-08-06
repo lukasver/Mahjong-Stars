@@ -18,6 +18,7 @@ import { uploadFile } from '@/lib/utils/files';
 import { useUser } from '@/lib/services/api';
 import { invariant } from '@epic-web/invariant';
 import { isFileWithPreview } from './utils';
+import { useParams } from 'next/navigation';
 
 interface KycUploadStepProps {
   onSuccess: () => void;
@@ -31,6 +32,8 @@ interface KycUploadStepProps {
  */
 export function KycUploadStep({ onSuccess }: KycUploadStepProps) {
   const { data: user } = useUser();
+  const { tx: txId } = useParams();
+
   const [files, setFiles] = useState<unknown[]>([]); // Array of FileWithPreview
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,9 +73,13 @@ export function KycUploadStep({ onSuccess }: KycUploadStepProps) {
       );
 
       const keys = response.flatMap((key) => ({ key }));
-      await associateDocumentsToUser({
+      const res = await associateDocumentsToUser({
         documents: keys,
+        type: 'KYC',
+        transactionId: (txId as string) || undefined,
       });
+
+      console.debug('🚀 ~ kyc-upload-step.tsx:82 ~ res:', res);
 
       setSuccess(true);
       setFiles([]);

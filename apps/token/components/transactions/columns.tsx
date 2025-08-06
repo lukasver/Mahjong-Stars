@@ -27,18 +27,24 @@ import {
   DropdownMenuItem,
   DropdownMenuContent,
 } from '@mjs/ui/primitives/dropdown-menu';
-import { TransactionWithRelations } from '@/common/types/transactions';
+import {
+  AdminTransactionsWithRelations,
+  TransactionWithRelations,
+} from '@/common/types/transactions';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Suspense, useState } from 'react';
 import { TransactionDetailsModal } from './transaction-details-modal';
+import { ApproveTransactionDialog } from './approve-transaction-dialog';
+import { RejectTransactionDialog } from './reject-transaction-dialog';
 import {
   AlertDialog,
   AlertDialogContent,
 } from '@mjs/ui/primitives/alert-dialog';
 import Image from 'next/image';
 import { cn } from '@mjs/ui/lib/utils';
+import { shortenAddress } from 'thirdweb/utils';
 
 const statusColors: Record<TransactionStatus, string> = {
   PENDING:
@@ -93,7 +99,7 @@ const formatChipMessage = (status: TransactionStatus) => {
 
 export const getColumns = (
   isAdmin = false
-): ColumnDef<TransactionWithRelations>[] => [
+): ColumnDef<TransactionWithRelations | AdminTransactionsWithRelations>[] => [
   {
     accessorKey: 'id',
     header: 'ID',
@@ -109,7 +115,10 @@ export const getColumns = (
     accessorKey: 'createdAt',
     header: 'Date',
     cell: ({ row }) => {
-      const date = DateTime.fromISO(row.getValue('createdAt'));
+      let date = DateTime.fromISO(row.getValue('createdAt'));
+      if (!date.isValid) {
+        date = DateTime.fromJSDate(new Date(row.getValue('createdAt')));
+      }
 
       return (
         <div>
@@ -121,6 +130,28 @@ export const getColumns = (
               hour12: false,
             })}
           </div>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: 'user',
+    header: 'User',
+    cell: ({ row }) => {
+      const user =
+        'user' in row.original
+          ? row.original.user.profile?.firstName
+          : undefined;
+      const wallet = row.original.receivingWallet;
+
+      return (
+        <div className='flex items-start gap-1 flex-col'>
+          <span className='text-sm font-medium'>{user || 'N/A'}</span>
+          {wallet && (
+            <span className='text-xs text-secondary'>
+              {shortenAddress(wallet)}
+            </span>
+          )}
         </div>
       );
     },
@@ -245,64 +276,42 @@ const ActionButtons = ({
   row,
   isAdmin,
 }: {
-  row: TransactionWithRelations;
+  row: TransactionWithRelations | AdminTransactionsWithRelations;
   isAdmin?: boolean;
 }) => {
   const status = row.status;
-  const hasTxHash = cryptoTxTypeGuard(row);
   const [showDetails, setShowDetails] = useState(false);
+  const [openDialog, setOpenDialog] = useState<
+    'approve' | 'reject' | undefined
+  >(undefined);
 
-  return (
-    <div className='flex items-center gap-2'>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant='ghost' size='sm'>
-            <MoreHorizontal className='h-4 w-4' />
-          </Button>
-        </DropdownMenuTrigger>
+  const Content = ({ isAdmin }: { isAdmin: boolean }) => {
+    if (isAdmin) {
+      return (
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => setShowDetails(true)}>
             <Eye className='h-4 w-4 mr-2' />
             View Details
           </DropdownMenuItem>
-          {status === TransactionStatus.PENDING && (
-            <Link href={`/dashboard/buy/${row.id}`}>
-              <DropdownMenuItem>
-                <CheckIcon className='h-4 w-4 mr-2 text-secondary' />
-                Continue
-              </DropdownMenuItem>
-            </Link>
+          {status === TransactionStatus.PAYMENT_SUBMITTED && (
+            <DropdownMenuItem onClick={() => setOpenDialog('approve')}>
+              <CheckIcon className='h-4 w-4 mr-2 text-secondary' />
+              Approve
+            </DropdownMenuItem>
           )}
-          {(status === TransactionStatus.AWAITING_PAYMENT ||
-            status === TransactionStatus.PENDING) && (
-            <DropdownMenuItem>
+          {[
+            TransactionStatus.PAYMENT_SUBMITTED,
+            TransactionStatus.PENDING,
+            TransactionStatus.AWAITING_PAYMENT,
+          ].includes(status) && (
+            <DropdownMenuItem onClick={() => setOpenDialog('reject')}>
               <XCircle className='h-4 w-4 mr-2 text-destructive' />
-              Cancel
-            </DropdownMenuItem>
-          )}
-          {status === TransactionStatus.AWAITING_PAYMENT && (
-            <DropdownMenuItem>
-              <Eye className='h-4 w-4 mr-2' />
-              Confirm payment
+              Reject
             </DropdownMenuItem>
           )}
 
-          {isAdmin && status === TransactionStatus.AWAITING_PAYMENT && (
-            <DropdownMenuItem>
-              <CheckIcon className='h-4 w-4 mr-2 text-green-600' />
-              Verify Payment
-            </DropdownMenuItem>
-          )}
-
-          {isAdmin && status === TransactionStatus.PAYMENT_VERIFIED && (
-            <DropdownMenuItem>
-              <CheckIcon className='h-4 w-4 mr-2 text-blue-600' />
-              Allocate Tokens
-            </DropdownMenuItem>
-          )}
-
-          {row.explorerUrl && (
+          {'explorerUrl' in row && row.explorerUrl && (
             <DropdownMenuItem asChild>
               <a
                 href={row.explorerUrl}
@@ -314,12 +323,68 @@ const ActionButtons = ({
               </a>
             </DropdownMenuItem>
           )}
-          {/* <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Download className='h-4 w-4 mr-2' />
-                Export Transaction
-              </DropdownMenuItem> */}
         </DropdownMenuContent>
+      );
+    }
+    return (
+      <DropdownMenuContent align='end'>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => setShowDetails(true)}>
+          <Eye className='h-4 w-4 mr-2' />
+          View Details
+        </DropdownMenuItem>
+        {status === TransactionStatus.PENDING && (
+          <Link href={`/dashboard/buy/${row.id}`}>
+            <DropdownMenuItem>
+              <CheckIcon className='h-4 w-4 mr-2 text-secondary' />
+              Continue
+            </DropdownMenuItem>
+          </Link>
+        )}
+        {(status === TransactionStatus.AWAITING_PAYMENT ||
+          status === TransactionStatus.PENDING) && (
+          <DropdownMenuItem>
+            <XCircle className='h-4 w-4 mr-2 text-destructive' />
+            Cancel
+          </DropdownMenuItem>
+        )}
+        {status === TransactionStatus.AWAITING_PAYMENT && (
+          <DropdownMenuItem>
+            <Eye className='h-4 w-4 mr-2' />
+            Confirm payment
+          </DropdownMenuItem>
+        )}
+
+        {'explorerUrl' in row && row.explorerUrl && (
+          <DropdownMenuItem asChild>
+            <a
+              href={row.explorerUrl}
+              target='_blank'
+              rel='noopener noreferrer nofollow'
+            >
+              <ExternalLink className='h-4 w-4 mr-2' />
+              View on Explorer
+            </a>
+          </DropdownMenuItem>
+        )}
+        {/* <DropdownMenuSeparator />
+      <DropdownMenuItem>
+        <Download className='h-4 w-4 mr-2' />
+        Export Transaction
+      </DropdownMenuItem> */}
+      </DropdownMenuContent>
+    );
+  };
+
+  return (
+    <div className='flex items-center gap-2'>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant='ghost' size='sm'>
+            <MoreHorizontal className='h-4 w-4' />
+          </Button>
+        </DropdownMenuTrigger>
+        <Content isAdmin={!!isAdmin} />
       </DropdownMenu>
       <Suspense
         key={row.id}
@@ -348,16 +413,22 @@ const ActionButtons = ({
           id={row.id}
         />
       </Suspense>
-    </div>
-  );
-};
 
-const cryptoTxTypeGuard = (data: object): data is TransactionWithRelations => {
-  return (
-    Boolean(data) &&
-    'formOfPayment' in data &&
-    data.formOfPayment === FOP.CRYPTO &&
-    'txHash' in data &&
-    data.txHash !== null
+      {/* Admin Dialogs */}
+      {isAdmin && 'user' in row && (
+        <>
+          <ApproveTransactionDialog
+            open={openDialog === 'approve'}
+            onOpenChange={() => setOpenDialog(undefined)}
+            transaction={row as AdminTransactionsWithRelations}
+          />
+          <RejectTransactionDialog
+            open={openDialog === 'reject'}
+            onOpenChange={() => setOpenDialog(undefined)}
+            transaction={row as AdminTransactionsWithRelations}
+          />
+        </>
+      )}
+    </div>
   );
 };

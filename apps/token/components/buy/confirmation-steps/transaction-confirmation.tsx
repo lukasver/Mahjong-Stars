@@ -73,9 +73,12 @@ export function TransactionConfirmation({
                   transition={{ duration: 0.4, ease: 'easeInOut' }}
                 >
                   <KycUploadStep
-                    onSuccess={() =>
-                      setStep(steps.find((s) => s.name === 'SAFT')!)
-                    }
+                    onSuccess={() => {
+                      const nextStep = steps.find(
+                        (s) => s.name === 'SAFT' || s.name === 'Payment'
+                      );
+                      setStep(nextStep || steps[1]!);
+                    }}
                   />
                 </motion.div>
               )}

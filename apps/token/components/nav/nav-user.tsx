@@ -55,11 +55,13 @@ export function NavUser() {
           >
             <DropdownMenuLabel className='p-0 font-normal'>
               <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
-                <AvatarIndicator
-                  image={user?.image || undefined}
-                  name={user?.name || undefined}
-                  isSiwe={!!user?.isSiwe}
-                />
+                <ErrorBoundary fallback={null}>
+                  <AvatarIndicator
+                    image={user?.image || undefined}
+                    name={user?.name || undefined}
+                    isSiwe={!!user?.isSiwe}
+                  />
+                </ErrorBoundary>
                 <div className='grid flex-1 text-left text-sm leading-tight gap-1'>
                   {isLoading ? (
                     <Skeleton className='w-24 h-4' />

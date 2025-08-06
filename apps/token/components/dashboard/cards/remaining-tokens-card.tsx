@@ -1,4 +1,4 @@
-import { getActiveSale } from '@/lib/services/fetchers-server';
+import { getActiveSale } from '@/lib/services/fetchers.server';
 import { DashboardCard } from './dashboard-card';
 import { DashboardCardError } from './dashboard-card-error';
 

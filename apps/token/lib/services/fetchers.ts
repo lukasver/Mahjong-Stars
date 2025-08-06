@@ -1,4 +1,4 @@
-import { ROLES } from '@/common/config/constants';
+import { ONE_DAY, ROLES } from '@/common/config/constants';
 import { GetExchangeRate } from '@/common/schemas/dtos/rates';
 import { Failure, Success } from '@/common/schemas/dtos/utils';
 import {
@@ -381,12 +381,21 @@ export const getUserTransactions = async (params: {
   }
 };
 
-export const getAllTransactions = async () => {
+export const getAllTransactions = async (params: { saleId?: string }) => {
+  const search = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value) {
+      search.set(key, value);
+    }
+  });
+  const queryParams = search.size > 0 ? `?${search.toString()}` : '';
+
   try {
     const data = await fetcher<{
       transactions: TransactionWithRelations[];
       quantity: number;
-    }>('/admin/transactions');
+    }>(`/admin/transactions${queryParams}`);
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };
@@ -411,6 +420,33 @@ export const getCryptoTransaction = async (txId: string) => {
         | 'chainId'
       >;
     }>(`/transactions/${txId}/crypto`);
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getDocumentById = async (id: string | string[]) => {
+  const search = new URLSearchParams();
+  const ids = Array.isArray(id) ? id : [id];
+  ids.forEach((id) => {
+    search.set('ids', id);
+  });
+  const queryParams = search.size > 0 ? `?${search.toString()}` : '';
+  try {
+    const data = await fetcher<{
+      documents: {
+        id: string;
+        fileName: string;
+        name: string;
+        url: string;
+      }[];
+    }>(`/admin/documents${queryParams}`, {
+      next: {
+        // Default expire time for GCP presigned url is 1 day
+        revalidate: ONE_DAY,
+      },
+    });
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };

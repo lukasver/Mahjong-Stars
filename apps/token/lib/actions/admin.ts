@@ -13,10 +13,6 @@ import {
   UpdateSaleStatusDto,
 } from '@/common/schemas/dtos/sales';
 
-import {
-  CancelAllTransactionsDto,
-  UpdateTransactionDto,
-} from '@/common/schemas/dtos/transactions';
 import salesController from '@/lib/repositories/sales';
 import transactionsController from '@/lib/repositories/transactions';
 import { TransactionStatus } from '@prisma/client';
@@ -27,6 +23,7 @@ import {
   verifyAdminSignature,
   AdminActionPayloadSchema,
 } from '@/lib/auth/admin-wallet-auth';
+import { TransactionsExporter } from '../repositories/transactions/exporter';
 
 export const isAdmin = adminCache.wrap(async (walletAddress: string) => {
   return await prisma.user.findUniqueOrThrow({
@@ -233,10 +230,15 @@ export const deleteSale = adminClient
  * @warning ADMIN REQUIRED
  */
 export const confirmAdminTransaction = adminClient
-  .schema(UpdateTransactionDto)
+  .schema(
+    z.object({
+      id: z.string(),
+      requiresKYC: z.boolean(),
+    })
+  )
   .action(async ({ ctx, parsedInput }) => {
     const transaction = await transactionsController.adminUpdateTransaction(
-      parsedInput,
+      { ...parsedInput, status: TransactionStatus.PAYMENT_VERIFIED },
       ctx
     );
     if (!transaction.success) {
@@ -248,11 +250,21 @@ export const confirmAdminTransaction = adminClient
 /**
  * @warning ADMIN REQUIRED
  */
-export const cancelAllTransactions = adminClient
-  .schema(CancelAllTransactionsDto)
+export const rejectAdminTransaction = adminClient
+  .schema(
+    z.object({
+      id: z.string(),
+      comment: z.string().optional(),
+    })
+  )
   .action(async ({ ctx, parsedInput }) => {
     const transaction = await transactionsController.adminUpdateTransaction(
-      { ...parsedInput, status: TransactionStatus.CANCELLED },
+      {
+        ...parsedInput,
+        status: TransactionStatus.REJECTED,
+        comment: parsedInput.comment,
+        requiresKYC: false,
+      },
       ctx
     );
     if (!transaction.success) {
@@ -298,4 +310,25 @@ export const verifyAdminAction = adminClient
     const result = await verifyAdminSignature(parsedInput);
 
     return result;
+  });
+
+/**
+ * Export transactions to CSV/XLSX format
+ */
+export const exportTransactions = adminClient
+  .schema(
+    z.object({
+      format: z.enum(['csv', 'xlsx']),
+      saleId: z.string().optional(),
+    })
+  )
+  .action(async ({ ctx, parsedInput }) => {
+    const transactions = await new TransactionsExporter().export(
+      parsedInput,
+      ctx
+    );
+    if (!transactions.success) {
+      throw new Error(transactions.message);
+    }
+    return transactions.data;
   });

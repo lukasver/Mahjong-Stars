@@ -9,7 +9,7 @@ import { DashboardSidebar } from '@/components/sidebar';
 import {
   getCurrentUser,
   getUserFromSession,
-} from '@/lib/services/fetchers-server';
+} from '@/lib/services/fetchers.server';
 import { isAdmin } from '@/lib/utils';
 import { Footer } from '@mjs/ui/components/footer';
 import {
@@ -61,7 +61,7 @@ export default async function AdminLayout({
               <InputOptionsProvider>
                 <BackgroundWrapper>
                   <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
-                    <main className='container mx-auto z-10 py-4 sm:py-10 px-4 sm:px-10 xl:px-20 xl:py-2'>
+                    <main className='container mx-auto z-10 py-4 sm:py-10 px-4 sm:px-10 xl:px-20 xl:py-20'>
                       {children}
                     </main>
                   </div>

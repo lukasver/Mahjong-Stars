@@ -229,14 +229,14 @@ export const useUserTransactions = (
 /**
  * Get all transactions (admin only)
  */
-export const useAllTransactions = () => {
-  const { data, status, error } = useSuspenseQuery({
-    queryKey: ['transactions', 'admin'],
-    queryFn: () => getAllTransactions(),
+export const useAllTransactions = (saleId?: string) => {
+  const { data, status, error, isLoading } = useSuspenseQuery({
+    queryKey: ['transactions', 'admin', saleId],
+    queryFn: () => getAllTransactions({ saleId }),
     staleTime: DEFAULT_STALE_TIME,
   });
   const e = getError(data, error);
-  return { data: data?.data, error: e, status };
+  return { data: data?.data, error: e, status, isLoading: isLoading };
 };
 
 export const useExchangeRate = ({
@@ -359,13 +359,3 @@ export const useSaleBanks = (saleId: string) => {
   const e = getError(data, error);
   return { data: data?.data, error: e, isLoading, refetch };
 };
-
-// export const useAdminTransactions = () => {
-//   const { data, status, error } = useSuspenseQuery({
-//     queryKey: ['admin', 'transactions'],
-//     queryFn: () => getAdminTransactions(),
-//     staleTime: DEFAULT_STALE_TIME,
-//   });
-//   const e = getError(data, error);
-//   return { data: data?.data, error: e, status };
-// };

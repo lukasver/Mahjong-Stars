@@ -193,6 +193,36 @@ export const alertReason = {
   lineHeight: '20px',
 };
 
+// Error box styles for rejected transactions
+export const errorBox = {
+  backgroundColor: '#fef2f2',
+  border: '1px solid #fecaca',
+  borderRadius: '8px',
+  padding: '16px',
+  margin: '24px 0',
+};
+
+export const errorTitle = {
+  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  fontSize: '14px',
+  fontWeight: 'bold',
+  margin: '0 0 8px 0',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.5px',
+};
+
+export const errorMessage = {
+  color: '#dc2626',
+  fontSize: '16px',
+  fontWeight: '600',
+  margin: '0',
+  lineHeight: '20px',
+};
+
+export const reasonSection = {
+  margin: '24px 0',
+};
+
 // Verification email styles
 export const text = {
   color: '#374151',

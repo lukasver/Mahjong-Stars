@@ -1,4 +1,4 @@
-import { getActiveSale } from '@/lib/services/fetchers-server';
+import { getActiveSale } from '@/lib/services/fetchers.server';
 import { RainbowButton } from '@mjs/ui/components/rainbow-button';
 import { cn } from '@mjs/ui/lib/utils';
 import Link from 'next/link';

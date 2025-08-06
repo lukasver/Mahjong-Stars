@@ -1,6 +1,6 @@
 import { RecentTransactionsError } from './recent-transactions-error';
 import { RecentTransactions } from './recent-transactions-client';
-import { getRecentTransactions } from '@/lib/services/fetchers-server';
+import { getRecentTransactions } from '@/lib/services/fetchers.server';
 
 /**
  * Server component that fetches and displays recent transactions

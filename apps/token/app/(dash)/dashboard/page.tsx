@@ -7,7 +7,7 @@ import { FundraisingProgress } from '../../../components/dashboard/fundraising-p
 import ErrorBoundary from '@mjs/ui/components/error-boundary';
 import { ComingSoonContent } from '../../../components/coming-soon';
 import { FeatureCards } from '@/components/feature-cards';
-import { getActiveSale } from '@/lib/services/fetchers-server';
+import { getActiveSale } from '@/lib/services/fetchers.server';
 import {
   UserTokensCard,
   UnconfirmedTokensCard,

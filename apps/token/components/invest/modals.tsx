@@ -215,24 +215,7 @@ const PendingTransactionModal = ({ sale }: { sale: SaleWithToken }) => {
           currency: tx.paidCurrency,
         }}
       />
-      {/* {sale.requiresKYC && (
-        <Alert className='bg-secondary-800/50 border-secondary'>
-          <Shield className='h-4 w-4 text-secondary' />
-          <AlertDescription className='text-white/90'>
-            <span className='font-bold'>KYC Required:</span> You will be
-            prompted to verify your account in the next step.
-          </AlertDescription>
-        </Alert>
-      )}
-      {sale.saftCheckbox && (
-        <Alert className='bg-secondary-800/50 border-secondary'>
-          <FileText className='h-4 w-4 text-secondary' />
-          <AlertDescription className='text-white/90'>
-            <span className='font-bold'>SAFT Agreement:</span> You will be
-            prompted to sign a contract in the next steps.
-          </AlertDescription>
-        </Alert>
-      )} */}
+
       <Alert className='bg-secondary-800/50 border-secondary'>
         <AlertCircle className='h-4 w-4 text-secondary' />
         <AlertDescription className='text-white/90'>

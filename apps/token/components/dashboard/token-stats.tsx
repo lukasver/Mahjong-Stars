@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { cache } from 'react';
 import { TokenStatsLoading } from '../skeletons/large-cards-loading';
 import { TokenStatCard } from './token-stats-card';
-import { getActiveSale } from '@/lib/services/fetchers-server';
+import { getActiveSale } from '@/lib/services/fetchers.server';
 
 const sleep = cache(
   (ms: number) =>

@@ -41,7 +41,11 @@ import notificatorService, { Notificator } from '../notifications';
 import { publicUrl } from '@/common/config/env';
 import { metadata } from '@/common/config/site';
 import { TransactionValidator } from './validator';
-import { TransactionByIdWithRelations } from '@/common/types/transactions';
+import {
+  AdminTransactionsWithRelations,
+  TransactionByIdWithRelations,
+  TransactionWithRelations,
+} from '@/common/types/transactions';
 
 class TransactionsController {
   private documents;
@@ -55,36 +59,49 @@ class TransactionsController {
   /**
    * Get all transactions (admin only).
    */
-  async getAllTransactions(_dto: unknown, ctx: ActionCtx) {
+  async getAllTransactions(dto: { saleId?: string }, ctx: ActionCtx) {
     try {
       invariant(ctx.isAdmin, 'Forbidden');
-      const transactions = await prisma.saleTransactions.findMany({
-        include: {
-          sale: true,
-          user: {
-            select: {
-              profile: true,
-              kycVerification: {
-                select: {
-                  id: true,
-                  status: true,
-                  documents: {
-                    select: {
-                      id: true,
-                      url: true,
+      const transactions: AdminTransactionsWithRelations[] =
+        await prisma.saleTransactions.findMany({
+          ...(dto.saleId && { where: { saleId: dto.saleId } }),
+          include: {
+            sale: true,
+            user: {
+              select: {
+                email: true,
+                profile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+                kycVerification: {
+                  select: {
+                    id: true,
+                    status: true,
+                    documents: {
+                      select: {
+                        id: true,
+                        url: true,
+                        fileName: true,
+                        name: true,
+                      },
                     },
                   },
                 },
               },
             },
+            approver: true,
+            blockchain: true,
+            tokenDistributions: true,
           },
-          approver: true,
-          blockchain: true,
-          tokenDistributions: true,
-        },
-        orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: 'desc' },
+        });
+      return Success({
+        transactions: transactions.map((t) => decimalsToString(t)),
+        quantity: transactions.length,
       });
-      return Success({ transactions, quantity: transactions.length });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -96,24 +113,118 @@ class TransactionsController {
    * @param dto - Transaction update data
    * @param ctx - Action context
    */
-  async adminUpdateTransaction(dto: UpdateTransactionDto, ctx: ActionCtx) {
+  async adminUpdateTransaction(
+    dto: {
+      id: string;
+      requiresKYC: boolean;
+      status: TransactionStatus;
+      comment?: string;
+    },
+    ctx: ActionCtx
+  ) {
     try {
       invariant(ctx.isAdmin, 'Forbidden');
       invariant(dto.id, 'Id missing');
-      invariant(dto.status, 'Status missing');
-      const transaction = await prisma.saleTransactions.update({
-        where: { id: String(dto.id) },
-        data: { status: dto.status },
-        include: {
-          sale: true,
+      const { id, requiresKYC } = dto;
+      const tx = await prisma.saleTransactions.update({
+        where: { id },
+        data: {
+          status: dto.status,
+          ...(dto.status === TransactionStatus.PAYMENT_VERIFIED && {
+            approver: {
+              connect: {
+                id: ctx.userId,
+              },
+            },
+          }),
+        },
+        select: {
+          id: true,
+          quantity: true,
+          amountPaid: true,
+          paidCurrency: true,
+          formOfPayment: true,
+          receivingWallet: true,
+          txHash: true,
+          paymentDate: true,
+          rejectionReason: true,
           user: {
-            include: {
-              profile: true,
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              walletAddress: true,
+            },
+          },
+          sale: {
+            select: {
+              name: true,
+              tokenSymbol: true,
             },
           },
         },
       });
-      return Success({ transaction });
+
+      if (requiresKYC) {
+        await prisma.user.update({
+          where: { id: tx.user.id },
+          data: {
+            kycVerification: {
+              upsert: {
+                create: { status: 'VERIFIED' },
+                update: { status: 'VERIFIED' },
+              },
+            },
+          },
+        });
+      }
+
+      if (dto.status === TransactionStatus.PAYMENT_VERIFIED) {
+        await this.notificator.send({
+          template: 'paymentVerified',
+          to: [{ email: tx.user.email }],
+          subject: `Payment verified for ${tx.sale.name} | ${tx.id}`,
+          props: {
+            userName: tx.user.name,
+            tokenName: tx.sale.name,
+            tokenSymbol: tx.sale.tokenSymbol,
+            purchaseAmount: tx.amountPaid || '0',
+            tokenAmount: tx.quantity.toString(),
+            transactionHash: tx.txHash,
+            transactionTime:
+              tx.paymentDate?.toISOString() || new Date().toISOString(),
+            paymentMethod: tx.formOfPayment,
+            walletAddress: tx.receivingWallet || tx.user.walletAddress,
+            transactionId: tx.id,
+            supportEmail: metadata.supportEmail,
+            paidCurrency: tx.paidCurrency,
+          },
+        });
+      }
+      if (dto.status === TransactionStatus.REJECTED) {
+        await this.notificator.send({
+          template: 'transactionRejected',
+          to: [{ email: tx.user.email }],
+          subject: `${tx.sale.name} Transaction Rejected | ${tx.id}`,
+          props: {
+            userName: tx.user.name,
+            tokenName: tx.sale.name,
+            tokenSymbol: tx.sale.tokenSymbol,
+            purchaseAmount: tx.amountPaid || '0',
+            transactionHash: tx.txHash,
+            transactionTime:
+              tx.paymentDate?.toISOString() || new Date().toISOString(),
+            paymentMethod: tx.formOfPayment,
+            walletAddress: tx.receivingWallet || tx.user.walletAddress,
+            transactionId: tx.id,
+            rejectionReason: tx.rejectionReason || dto.comment,
+            supportEmail: metadata.supportEmail,
+            paidCurrency: tx.paidCurrency,
+          },
+        });
+      }
+
+      return Success({ transaction: decimalsToString(tx) });
     } catch (error) {
       logger(error);
       return Failure(error);
@@ -171,25 +282,26 @@ class TransactionsController {
         andQuery.push({ saleId });
       }
       if (symbol) andQuery.push({ tokenSymbol: symbol });
-      const transactions = await prisma.saleTransactions.findMany({
-        where: {
-          OR: [
-            { userId, ...(formOfPayment && { formOfPayment }) },
-            {
-              receivingWallet: userId,
-              ...(formOfPayment && { formOfPayment }),
-            },
-          ],
-          ...(andQuery.length && { AND: andQuery }),
-        },
-        include: {
-          sale: true,
-          approver: true,
-          blockchain: true,
-          tokenDistributions: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
+      const transactions: TransactionWithRelations[] =
+        await prisma.saleTransactions.findMany({
+          where: {
+            OR: [
+              { userId, ...(formOfPayment && { formOfPayment }) },
+              {
+                receivingWallet: userId,
+                ...(formOfPayment && { formOfPayment }),
+              },
+            ],
+            ...(andQuery.length && { AND: andQuery }),
+          },
+          include: {
+            sale: true,
+            approver: true,
+            blockchain: true,
+            tokenDistributions: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        });
 
       return Success({
         transactions: transactions.map((t) =>
@@ -1013,7 +1125,10 @@ class TransactionsController {
     }
   }
 
-  async getTransactionAvailabilityForSale(dto: { id: string }, ctx: ActionCtx) {
+  async getTransactionAvailabilityForSale(
+    dto: { id: string },
+    _ctx: ActionCtx
+  ) {
     try {
       const transaction = await prisma.saleTransactions.findUnique({
         where: { id: dto.id },

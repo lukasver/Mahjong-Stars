@@ -31,8 +31,8 @@ const items = [
     icon: 'transaction',
     items: [
       {
-        title: 'Transaction list',
-        url: '/admin/sales/transactions',
+        title: 'List',
+        url: '/admin/transactions',
       },
     ],
   },

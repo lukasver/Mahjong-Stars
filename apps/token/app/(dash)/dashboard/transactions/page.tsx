@@ -1,5 +1,5 @@
 import { UserTransactions } from '@/components/transactions';
-import { getUserTransactions } from '@/lib/services/fetchers-server';
+import { getUserTransactions } from '@/lib/services/fetchers.server';
 import { QueryClient } from '@tanstack/react-query';
 
 export default async function TransactionsPage(_props: PageProps) {

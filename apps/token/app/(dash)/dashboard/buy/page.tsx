@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { ComingSoon } from '../../../../components/coming-soon';
 import { TokenSale } from './sale';
-import { getActiveSale } from '@/lib/services/fetchers-server';
+import { getActiveSale } from '@/lib/services/fetchers.server';
 
 export default async function BuyPage() {
   const queryClient = new QueryClient();

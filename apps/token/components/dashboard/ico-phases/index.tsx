@@ -1,4 +1,4 @@
-import { getIcoPhases } from '@/lib/services/fetchers-server';
+import { getIcoPhases } from '@/lib/services/fetchers.server';
 import { IcoPhasesError } from './ico-phases-error';
 import { IcoPhases } from './ico-phases-client';
 

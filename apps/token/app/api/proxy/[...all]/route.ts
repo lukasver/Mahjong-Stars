@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import rates from '@/lib/repositories/feeds/rates';
 import { env } from '@/common/config/env';
 import transactions from '@/lib/repositories/transactions';
+import documents from '@/lib/repositories/documents';
 import { TransactionStatusSchema } from '@/common/schemas/generated';
 
 /**
@@ -161,6 +162,19 @@ export const GET = withAuth(async (req, context, auth) => {
         if (identifier === 'transactions') {
           const data = await transactions.getAllTransactions(
             qParamsObject || {},
+            {
+              address: auth.address,
+              userId: auth.userId,
+              isAdmin: auth.isAdmin,
+            }
+          );
+          return NextResponse.json(data);
+        }
+
+        if (identifier === 'documents') {
+          const data = await documents.getDocumentById(
+            qParamsObject.ids as string | string[],
+            { presignedUrl: true },
             {
               address: auth.address,
               userId: auth.userId,

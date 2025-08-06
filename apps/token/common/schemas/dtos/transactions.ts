@@ -24,9 +24,3 @@ export const GetTransactionDto = SaleTransactionsSchema.pick({
   saleId: true,
 }).partial();
 export type GetTransactionDto = z.infer<typeof GetTransactionDto>;
-
-export const CancelAllTransactionsDto = z.object({
-  saleId: z.string(),
-  uuid: z.string(),
-});
-export type CancelAllTransactionsDto = z.infer<typeof CancelAllTransactionsDto>;

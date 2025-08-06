@@ -51,7 +51,7 @@ export async function seedOpenSale(prisma: PrismaClient) {
     data: {
       name: 'Test PreSale',
       saleStartDate: DateTime.now().toISO(),
-      saleClosingDate: DateTime.now().plus({ year: 1 }).toISO(),
+      saleClosingDate: DateTime.now().plus({ days: 15 }).toISO(),
       tokenName: token.name,
       // tokenSymbol: token.token.symbol,
       initialTokenQuantity: 29_166_667,

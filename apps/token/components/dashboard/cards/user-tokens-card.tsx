@@ -1,4 +1,4 @@
-import { getUserTransactions } from '@/lib/services/fetchers-server';
+import { getUserTransactions } from '@/lib/services/fetchers.server';
 import { DashboardCard } from './dashboard-card';
 import { DashboardCardError } from './dashboard-card-error';
 import { TransactionStatus } from '@prisma/client';

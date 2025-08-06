@@ -33,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from './table';
+import { cn } from '../lib/utils';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -44,6 +45,9 @@ interface DataTableProps<TData, TValue> {
   pageSize?: number;
   loading?: boolean;
   initialColumnVisibility?: VisibilityState;
+  children?: React.ReactNode;
+  className?: string;
+  headerClassName?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -56,6 +60,9 @@ export function DataTable<TData, TValue>({
   pageSize = 10,
   loading = false,
   initialColumnVisibility = {},
+  children,
+  className,
+  headerClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -90,8 +97,10 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className='w-full'>
-      <div className='flex items-center py-4'>
+    <div className={cn('w-full', className)}>
+      <div className={cn(headerClassName, 'flex items-center py-4')}>
+        {children}
+
         {searchKey && (
           <Input
             placeholder={searchPlaceholder}

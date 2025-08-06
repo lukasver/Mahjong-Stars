@@ -27,6 +27,3 @@ export function UserTransactions() {
 
   return <Transactions transactions={data?.transactions} />;
 }
-export const AdminTransactions = () => {
-  return <Transactions />;
-};

@@ -340,6 +340,19 @@ export function SaleDetailsModal({
                   </div>
                 }
               />
+              <DetailRow
+                label='KYC Required'
+                value={
+                  <div className='flex items-center gap-2'>
+                    {sale.requiresKYC ? (
+                      <CheckCircle className='h-4 w-4 text-green-500' />
+                    ) : (
+                      <XCircle className='h-4 w-4 text-red-500' />
+                    )}
+                    <span>{sale.requiresKYC ? 'Enabled' : 'Disabled'}</span>
+                  </div>
+                }
+              />
               {/* //TODO! add information for the saft here */}
               {/* {sale.saftContract && (
                 <DetailRow

@@ -50,23 +50,26 @@ export const getUserTransactions = cache(async () => {
   }
 });
 
-export const getAllTransactions = cache(async () => {
-  const user = await getUserFromSession();
-  const isAdminUser = await isAdmin(user.walletAddress);
-  const result = await transactions.getAllTransactions(
-    {},
-    {
-      address: user.walletAddress,
-      userId: user.id,
-      isAdmin: !!isAdminUser,
+export const getAllTransactions = cache(
+  async ({ saleId }: { saleId?: string }) => {
+    const user = await getUserFromSession();
+    const isAdminUser = await isAdmin(user.walletAddress);
+    const result = await transactions.getAllTransactions(
+      { saleId },
+      {
+        address: user.walletAddress,
+        userId: user.id,
+        isAdmin: !!isAdminUser,
+      }
+    );
+
+    if (result.success) {
+      return { data: result.data, error: null };
+    } else {
+      return { data: null, error: result };
     }
-  );
-  if (result.success) {
-    return { data: result.data, error: null };
-  } else {
-    return { data: null, error: result };
   }
-});
+);
 
 export const getActiveSale = cache(async () => {
   const user = await getUserFromSession();

@@ -15,7 +15,7 @@ import { DashboardHeader } from './header';
 import {
   getCurrentUser,
   getUserFromSession,
-} from '@/lib/services/fetchers-server';
+} from '@/lib/services/fetchers.server';
 import BackgroundWrapper from '@/components/bg-wrapper';
 import { redirect } from 'next/navigation';
 

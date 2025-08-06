@@ -14,7 +14,7 @@ import {
 import { Separator } from '@mjs/ui/primitives/separator';
 import { Copy, ExternalLink } from 'lucide-react';
 import { copyToClipboard, formatDate } from '@mjs/utils/client';
-import { useTransactionById } from '@/lib/services/api';
+import { useTransactionById, useUser } from '@/lib/services/api';
 import { Prisma } from '@prisma/client';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
 import { useLocale } from 'next-intl';
@@ -23,6 +23,8 @@ import { TransactionStatus, FOP } from '@prisma/client';
 import { safeFormatCurrency } from '@mjs/utils/client';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import Decimal from 'decimal.js';
+import AppLink from '../link';
+import { toast } from '@mjs/ui/primitives/sonner';
 
 interface TransactionDetailsModalProps {
   open: boolean;
@@ -115,7 +117,7 @@ function DetailRow({
 }) {
   return (
     <div className='flex justify-between items-start py-2'>
-      <span className='text-sm font-medium text-muted-foreground min-w-[140px]'>
+      <span className='text-sm font-medium text-secondary min-w-[140px]'>
         {label}:
       </span>
       <div className='flex items-center gap-2 flex-1 justify-end'>
@@ -125,7 +127,12 @@ function DetailRow({
             variant='ghost'
             size='sm'
             className='h-6 w-6 p-0'
-            onClick={() => copyToClipboard(value)}
+            onClick={() => {
+              if (value) {
+                copyToClipboard(value);
+                toast.success('Copied to clipboard');
+              }
+            }}
           >
             <Copy className='h-3 w-3' />
           </Button>
@@ -141,6 +148,7 @@ export function TransactionDetailsModal({
   id,
 }: TransactionDetailsModalProps) {
   const { data, isLoading, error } = useTransactionById(id);
+  const { data: user } = useUser();
   const locale = useLocale();
 
   if (!id) return null;
@@ -174,7 +182,7 @@ export function TransactionDetailsModal({
                   `Transaction ${tx.id.slice(-8)}`
                 )}
               </DialogTitle>
-              <DialogDescription className='mt-1'>
+              <DialogDescription className='mt-1 text-secondary'>
                 {isLoading ? (
                   <Skeleton className='w-52 h-4' />
                 ) : (
@@ -187,6 +195,33 @@ export function TransactionDetailsModal({
         </DialogHeader>
 
         <div className='grid gap-6 py-4'>
+          {/* Financial Summary */}
+          <div>
+            <h3 className='text-lg font-semibold mb-3'>Financial Summary</h3>
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='glassy text-foreground p-4 rounded-lg'>
+                <div className='text-sm text-secondary'>Total Value</div>
+                <div className='text-2xl font-bold'>
+                  {safeFormatCurrency(
+                    {
+                      totalAmount: tx.totalAmount.toString(),
+                      currency: tx.paidCurrency,
+                    },
+                    {
+                      locale,
+                    }
+                  )}
+                </div>
+              </div>
+              <div className='glassy text-foreground p-4 rounded-lg'>
+                <div className='text-sm text-secondary'>Tokens Purchased</div>
+                <div className='text-2xl font-bold'>
+                  {formatNumber(new Decimal(tx.quantity).toNumber())}{' '}
+                  {tx.tokenSymbol}
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Basic Information */}
           <div>
             <h3 className='text-lg font-semibold mb-3'>Basic Information</h3>
@@ -244,6 +279,7 @@ export function TransactionDetailsModal({
                     totalAmount: tx.price.toString(),
                   },
                   {
+                    precision: isFiatCurrency ? 'FIAT' : 'CRYPTO',
                     locale,
                   }
                 )}
@@ -257,6 +293,7 @@ export function TransactionDetailsModal({
                   },
                   {
                     locale,
+                    precision: isFiatCurrency ? 'FIAT' : 'CRYPTO',
                   }
                 )}
               />
@@ -309,10 +346,12 @@ export function TransactionDetailsModal({
                       variant='ghost'
                       size='sm'
                       className='h-6 w-6 p-0'
-                      onClick={() =>
-                        tx.receivingWallet &&
-                        copyToClipboard(tx.receivingWallet)
-                      }
+                      onClick={() => {
+                        if (tx.receivingWallet) {
+                          copyToClipboard(tx.receivingWallet);
+                          toast.success('Wallet address copied to clipboard');
+                        }
+                      }}
                     >
                       <Copy className='h-3 w-3' />
                     </Button>
@@ -345,7 +384,14 @@ export function TransactionDetailsModal({
                           variant='ghost'
                           size='sm'
                           className='h-6 w-6 p-0'
-                          onClick={() => copyToClipboard(tx.txHash!)}
+                          onClick={() => {
+                            if (tx.txHash) {
+                              copyToClipboard(tx.txHash);
+                              toast.success(
+                                'Transaction hash copied to clipboard'
+                              );
+                            }
+                          }}
                         >
                           <Copy className='h-3 w-3' />
                         </Button>
@@ -440,43 +486,18 @@ export function TransactionDetailsModal({
           )}
 
           <Separator />
-
-          {/* Financial Summary */}
-          <div>
-            <h3 className='text-lg font-semibold mb-3'>Financial Summary</h3>
-            <div className='grid grid-cols-2 gap-4'>
-              <div className='glassy text-foreground p-4 rounded-lg'>
-                <div className='text-sm text-secondary'>Total Value</div>
-                <div className='text-2xl font-bold'>
-                  {safeFormatCurrency(
-                    {
-                      totalAmount: tx.totalAmount.toString(),
-                      currency: tx.paidCurrency,
-                    },
-                    {
-                      locale,
-                    }
-                  )}
-                </div>
-              </div>
-              <div className='glassy text-foreground p-4 rounded-lg'>
-                <div className='text-sm text-secondary'>Tokens Purchased</div>
-                <div className='text-2xl font-bold'>
-                  {formatNumber(new Decimal(tx.quantity).toNumber())}{' '}
-                  {tx.tokenSymbol}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div className='flex justify-end gap-2 pt-4 border-t'>
           <Button variant='outline' onClick={() => onOpenChange(false)}>
             Close
           </Button>
-          {tx.status === TransactionStatus.PENDING && (
-            <Button>Continue Transaction</Button>
-          )}
+          {user?.id === tx.userId &&
+            tx.status === TransactionStatus.PENDING && (
+              <AppLink href={`/dashboard/buy/${tx.id}`} prefetch>
+                <Button>Continue Transaction</Button>
+              </AppLink>
+            )}
         </div>
       </DialogContent>
     </Dialog>

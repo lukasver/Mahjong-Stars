@@ -1,7 +1,7 @@
 import { TransactionStatus } from '@prisma/client';
 import { DashboardCard } from './dashboard-card';
 import { DashboardCardError } from './dashboard-card-error';
-import { getUserTransactions } from '@/lib/services/fetchers-server';
+import { getUserTransactions } from '@/lib/services/fetchers.server';
 
 /**
  * Server component that fetches and displays the total number of token holders
