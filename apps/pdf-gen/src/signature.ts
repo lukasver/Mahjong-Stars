@@ -54,7 +54,7 @@ class DocumensoService {
         rec.push({
           name: 'Reviewer',
           email: this.APPROVER,
-          role: DocumentRole.Viewer,
+          role: DocumentRole.Cc,
           signingOrder:
             signingOrder === 'SEQUENTIAL' ? recipients.length + 1 : 1,
         });
@@ -173,7 +173,7 @@ class DocumensoService {
     // Create signature and email fields for each recipient
     recipients.forEach((rec, index) => {
       // Cannot add fields for CC or VIEWER roles
-      if (rec.role === DocumentRole.Viewer) {
+      if (rec.role === DocumentRole.Viewer || rec.role === DocumentRole.Cc) {
         return;
       }
 

@@ -521,9 +521,21 @@ class TransactionsController {
           saleId: true,
           quantity: true,
           userId: true,
+          status: true,
         },
       });
       invariant(tx, 'Transaction not found');
+
+      if (
+        ![
+          TransactionStatus.AWAITING_PAYMENT,
+          TransactionStatus.PENDING,
+        ].includes(tx.status)
+      ) {
+        throw new Error(
+          `Transaction cannot be deleted due to status: ${tx.status}`
+        );
+      }
       await this.cancelTransactionAndRestoreUnits(tx);
       return Success({ id: tx.id });
     } catch (e) {

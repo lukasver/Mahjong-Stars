@@ -94,7 +94,7 @@ export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','d
 
 export const SaftContractScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description','url','content','variables','version','parentId','isCurrent','saleId']);
 
-export const DocumentRecipientScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','fullname','email','role','status','signatureUrl','externalId','address','saftContractId']);
+export const DocumentRecipientScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','fullname','email','role','status','signatureUrl','externalId','storageKey','address','saftContractId']);
 
 export const DocumentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','fileName','url','type','userId','saleId','kycVerificationId']);
 
@@ -102,7 +102,7 @@ export const VestingScheduleScalarFieldEnumSchema = z.enum(['id','createdAt','up
 
 export const TokenDistributionScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','amount','distributionDate','txHash','status']);
 
-export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','rawPrice','price','totalAmount','formOfPayment','confirmationId','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidenceId','paymentDate']);
+export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','rawPrice','price','totalAmount','formOfPayment','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidenceId','paymentDate']);
 
 export const BlockchainScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','chainId','rpcUrl','explorerUrl','isTestnet','isEnabled']);
 
@@ -382,6 +382,10 @@ export const DocumentRecipientSchema = z.object({
   email: z.string(),
   signatureUrl: z.string().nullable(),
   externalId: z.number().int().nullable(),
+  /**
+   * Storage key for the signed document in bucket
+   */
+  storageKey: z.string().nullable(),
   address: z.string().nullable(),
   saftContractId: z.string().nullable(),
 })
@@ -477,7 +481,6 @@ export const SaleTransactionsSchema = z.object({
    * Total amount to be paid by the user
    */
   totalAmount: z.instanceof(Prisma.Decimal, { message: "Field 'totalAmount' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
-  confirmationId: z.string().nullable(),
   receivingWallet: z.string().nullable(),
   userId: z.string(),
   saleId: z.string(),

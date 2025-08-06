@@ -45,6 +45,8 @@ import {
 import Image from 'next/image';
 import { cn } from '@mjs/ui/lib/utils';
 import { shortenAddress } from 'thirdweb/utils';
+import { toast } from '@mjs/ui/primitives/sonner';
+import { getSignedAgreement } from '@/lib/services/fetchers';
 
 const statusColors: Record<TransactionStatus, string> = {
   PENDING:
@@ -281,9 +283,33 @@ const ActionButtons = ({
 }) => {
   const status = row.status;
   const [showDetails, setShowDetails] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState<
     'approve' | 'reject' | undefined
   >(undefined);
+
+  const handleViewSaft = async (id: string, agreementId: string) => {
+    console.log(id, agreementId);
+    try {
+      setIsLoading(true);
+      const response = await getSignedAgreement(agreementId);
+      if (response.error) {
+        toast.error('Failed to load agreement');
+        return;
+      }
+      // Handle successful response
+      console.log(response.data);
+      if (response.data?.agreement.downloadUrl) {
+        window.open(response.data?.agreement.downloadUrl, '_blank');
+      } else {
+        toast.error('No download URL found');
+      }
+    } catch {
+      toast.error('An error occurred while loading the agreement');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const Content = ({ isAdmin }: { isAdmin: boolean }) => {
     if (isAdmin) {
@@ -294,6 +320,14 @@ const ActionButtons = ({
             <Eye className='h-4 w-4 mr-2' />
             View Details
           </DropdownMenuItem>
+          {row.agreementId && (
+            <DropdownMenuItem
+              onClick={() => handleViewSaft(row.id, row.agreementId!)}
+            >
+              <Eye className='h-4 w-4 mr-2' />
+              View Saft
+            </DropdownMenuItem>
+          )}
           {status === TransactionStatus.PAYMENT_SUBMITTED && (
             <DropdownMenuItem onClick={() => setOpenDialog('approve')}>
               <CheckIcon className='h-4 w-4 mr-2 text-secondary' />

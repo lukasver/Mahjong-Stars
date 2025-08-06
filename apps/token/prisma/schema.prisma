@@ -274,6 +274,8 @@ model DocumentRecipient {
   status       DocumentSignatureStatus @default(CREATED)
   signatureUrl String?
   externalId   Int?
+  /// Storage key for the signed document in bucket
+  storageKey   String?
 
   user    User?   @relation(fields: [address], references: [walletAddress])
   address String?

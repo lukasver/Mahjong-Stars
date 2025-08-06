@@ -183,6 +183,18 @@ export const GET = withAuth(async (req, context, auth) => {
           );
           return NextResponse.json(data);
         }
+
+        if (identifier === 'agreement') {
+          const data = await documents.getAgreementById(
+            { agreementId: subIdentifier as string },
+            {
+              address: auth.address,
+              userId: auth.userId,
+              isAdmin: auth.isAdmin,
+            }
+          );
+          return NextResponse.json(data);
+        }
         return NextResponse.json({ error: 'Bad request' }, { status: 404 });
       }
     }

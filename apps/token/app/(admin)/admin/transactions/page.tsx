@@ -19,7 +19,7 @@ export default async function AdminTransactionsPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <AdminTransactions saleId={saleId as string | undefined} />;
+      <AdminTransactions saleId={saleId as string | undefined} />
     </HydrationBoundary>
   );
 }

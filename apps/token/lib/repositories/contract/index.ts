@@ -8,12 +8,16 @@ import { SaleStatus } from '@prisma/client';
 import { DocumensoSdk } from '@/lib/documents/documenso';
 import { env } from '@/common/config/env';
 import { DocumensoStatusToContractStatusMapping } from '@/common/schemas/dtos/contracts';
+import { StorageService } from '../documents/storage';
+import { agreementCache } from '@/lib/auth/cache';
 
 class ContractController {
   private documenso: DocumensoSdk;
+  private s3: StorageService;
 
-  constructor() {
+  constructor(readonly storage: StorageService) {
     this.documenso = new DocumensoSdk(env);
+    this.s3 = storage;
   }
 
   async getContract(_dto: unknown, ctx: ActionCtx) {
@@ -139,6 +143,169 @@ class ContractController {
 
     return Success({ recipient: { ...recipient, status } });
   }
+
+  async getAgreementById(id: string, _ctx: ActionCtx) {
+    try {
+      const agreement = await prisma.documentRecipient.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          externalId: true,
+          signatureUrl: true,
+          status: true,
+          SaleTransactions: {
+            select: {
+              id: true,
+              saleId: true,
+            },
+          },
+          storageKey: true,
+        },
+      });
+
+      if (!agreement) {
+        return Failure('Agreement not found');
+      }
+
+      let downloadUrl: string | null = null;
+      if (agreement.status === 'SIGNED' && agreement.externalId) {
+        const saleId = agreement.SaleTransactions?.saleId;
+        const txId = agreement.SaleTransactions?.id;
+
+        downloadUrl =
+          (await agreementCache.getOrSet(
+            agreement.externalId!.toString(),
+            async () => {
+              // If document exists in GCP storage, return the signed URL
+              if (agreement.storageKey) {
+                return this.s3.generateReadSignedUrl(
+                  'private',
+                  agreement.storageKey,
+                  { expires: Date.now() + 24 * 60 * 60 * 1000 } // 24 hours
+                );
+              }
+
+              // Else, download and store the document to GCP bucket
+              const result = await this.documenso.downloadAndStoreDocument(
+                agreement.id,
+                agreement.externalId!.toString(),
+                `sale/${saleId}/tx/${txId}/saft.pdf`
+              );
+
+              if (!result.success) {
+                throw new Error(
+                  `Failed to download and store document: ${result.error}`
+                );
+              }
+
+              return result.fileUrl;
+            }
+          )) || null;
+      }
+
+      return Success({ agreement: { ...agreement, downloadUrl } });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  /**
+   * Download and store a signed document to GCP storage
+   * @param agreementId - The agreement ID
+   * @param metadata - Optional metadata for the file
+   * @returns Promise with storage result
+   */
+  async downloadAndStoreAgreement(
+    agreementId: string,
+    _metadata?: {
+      transactionId?: string;
+      userId?: string;
+      saleId?: string;
+      customFileName?: string;
+    }
+  ) {
+    try {
+      const agreement = await prisma.documentRecipient.findUnique({
+        where: { id: agreementId },
+        select: {
+          id: true,
+          externalId: true,
+          status: true,
+          user: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      if (!agreement) {
+        return Failure('Agreement not found');
+      }
+
+      if (agreement.status !== 'SIGNED') {
+        return Failure('Agreement is not signed yet');
+      }
+
+      if (!agreement.externalId) {
+        return Failure('No external document ID found');
+      }
+
+      // Download and store to GCP
+      const result = await this.documenso.downloadAndStoreDocument(
+        agreement.id,
+        agreement.externalId!.toString(),
+        `documenso-${agreement.externalId}-${agreement.id}.pdf`
+      );
+
+      if (result.success) {
+        // Optionally store the file URL in your database
+        await prisma.documentRecipient.update({
+          where: { id: agreementId },
+          data: {
+            // You might want to add a field to store the GCP file URL
+            // gcpFileUrl: result.fileUrl,
+          },
+        });
+
+        return Success({
+          success: true,
+          fileUrl: result.fileUrl,
+          agreementId,
+        });
+      } else {
+        return Failure(result.error || 'Failed to store document');
+      }
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  /**
+   * Get a signed document from GCP storage
+   * @param fileName - The file name in GCP storage
+   * @returns Promise with the signed URL
+   */
+  async getStoredDocumentUrl(fileName: string) {
+    try {
+      const fileUrl = await this.s3.generateReadSignedUrl(
+        'private',
+        fileName,
+        { expires: Date.now() + 24 * 60 * 60 * 1000 } // 24 hours
+      );
+
+      if (!fileUrl) {
+        return Failure('File not found in storage');
+      }
+
+      return Success({ fileUrl });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
 }
 
-export default new ContractController();
+export default new ContractController(new StorageService());

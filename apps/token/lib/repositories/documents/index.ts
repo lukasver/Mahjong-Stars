@@ -18,19 +18,15 @@ import { StorageService } from './storage';
 import { z } from 'zod';
 import { KycStatusSchema } from '@/common/schemas/generated';
 import { Prisma } from '@prisma/client';
+import contractController from '../contract';
 
 class DocumentsController {
   private s3: StorageService;
-  private buckets: {
-    public: string;
-    private: string;
-  } = {
-    public: env.PUBLIC_BUCKET,
-    private: env.PRIVATE_BUCKET,
-  };
+  private contractController: typeof contractController;
 
   constructor(private readonly storage: StorageService) {
     this.s3 = this.storage;
+    this.contractController = contractController;
   }
 
   // this.service.getDocumentPresignedUrl(user, payload)
@@ -383,36 +379,39 @@ class DocumentsController {
    * @param node The current AST node.
    * @param variables The set to collect variable names.
    */
-  private collectVariablesFromDocument(node: any, variables: Set<string>) {
+  private collectVariablesFromDocument(node: unknown, variables: Set<string>) {
     if (!node || typeof node !== 'object') return;
+
+    const nodeObj = node as Record<string, unknown>;
 
     // Handle {{variable}} and {{{variable}}}
     if (
-      node.type === 'MustacheStatement' ||
-      node.type === 'SubExpression' ||
-      node.type === 'BlockStatement' ||
-      node.type === 'PartialStatement' ||
-      node.type === 'PartialBlockStatement' ||
-      node.type === 'DecoratorBlock' ||
-      node.type === 'Decorator'
+      nodeObj.type === 'MustacheStatement' ||
+      nodeObj.type === 'SubExpression' ||
+      nodeObj.type === 'BlockStatement' ||
+      nodeObj.type === 'PartialStatement' ||
+      nodeObj.type === 'PartialBlockStatement' ||
+      nodeObj.type === 'DecoratorBlock' ||
+      nodeObj.type === 'Decorator'
     ) {
-      if (node.path && node.path.original) {
-        variables.add(node.path.original);
+      const path = nodeObj.path as Record<string, unknown>;
+      if (path && path.original) {
+        variables.add(path.original as string);
       }
     }
 
-    if (node.type === 'ContentStatement' && node.value) {
+    if (nodeObj.type === 'ContentStatement' && nodeObj.value) {
       // No variable here, just content
     }
 
     // Recursively process child nodes
-    for (const key in node) {
-      if (Array.isArray(node[key])) {
-        node[key].forEach((child: any) =>
+    for (const key in nodeObj) {
+      if (Array.isArray(nodeObj[key])) {
+        (nodeObj[key] as unknown[]).forEach((child: unknown) =>
           this.collectVariablesFromDocument(child, variables)
         );
-      } else if (typeof node[key] === 'object' && node[key] !== null) {
-        this.collectVariablesFromDocument(node[key], variables);
+      } else if (typeof nodeObj[key] === 'object' && nodeObj[key] !== null) {
+        this.collectVariablesFromDocument(nodeObj[key], variables);
       }
     }
   }
@@ -434,6 +433,95 @@ class DocumentsController {
     const variables = new Set<string>();
     this.collectVariablesFromDocument(ast, variables);
     return Array.from(variables);
+  }
+
+  /**
+   * Get agreement by ID with download URL
+   */
+  async getAgreementById(dto: { agreementId: string }, ctx: ActionCtx) {
+    try {
+      const result = await this.contractController.getAgreementById(
+        dto.agreementId,
+        ctx
+      );
+      return result;
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  /**
+   * Download a signed document from Documenso
+   */
+  async downloadSignedDocument(dto: { documentId: string }, _ctx: ActionCtx) {
+    try {
+      // Import the DocumensoSdk here to avoid circular dependencies
+      const { DocumensoSdk } = await import('@/lib/documents/documenso');
+      const documenso = new DocumensoSdk(env);
+
+      const response = await documenso.downloadSignedDocument(dto.documentId);
+      const pdfBuffer = await response.arrayBuffer();
+
+      return Success({
+        data: Buffer.from(pdfBuffer),
+        contentType: 'application/pdf',
+        fileName: `documenso-${dto.documentId}.pdf`,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  /**
+   * Download and store a signed document to GCP storage
+   */
+  async downloadAndStoreAgreement(
+    dto: {
+      agreementId: string;
+      metadata?: {
+        transactionId?: string;
+        saleId?: string;
+        customFileName?: string;
+      };
+    },
+    _ctx: ActionCtx
+  ) {
+    try {
+      const result = await this.contractController.downloadAndStoreAgreement(
+        dto.agreementId,
+        dto.metadata
+      );
+      return result;
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
+  }
+
+  /**
+   * Get document details from Documenso
+   */
+  async getDocumentDetails(dto: { documentId: string }, _ctx: ActionCtx) {
+    try {
+      // Import the DocumensoSdk here to avoid circular dependencies
+      const { DocumensoSdk } = await import('@/lib/documents/documenso');
+      const documenso = new DocumensoSdk(env);
+
+      const document = await documenso.getDocumentDetails(dto.documentId);
+      const downloadUrl = await documenso.getDocumentDownloadUrl(
+        dto.documentId
+      );
+
+      return Success({
+        document,
+        downloadUrl,
+      });
+    } catch (e) {
+      logger(e);
+      return Failure(e);
+    }
   }
 }
 

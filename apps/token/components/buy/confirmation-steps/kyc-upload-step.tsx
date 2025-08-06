@@ -73,13 +73,11 @@ export function KycUploadStep({ onSuccess }: KycUploadStepProps) {
       );
 
       const keys = response.flatMap((key) => ({ key }));
-      const res = await associateDocumentsToUser({
+      await associateDocumentsToUser({
         documents: keys,
         type: 'KYC',
         transactionId: (txId as string) || undefined,
       });
-
-      console.debug('🚀 ~ kyc-upload-step.tsx:82 ~ res:', res);
 
       setSuccess(true);
       setFiles([]);

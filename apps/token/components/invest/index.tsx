@@ -26,9 +26,6 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
 
   return (
     <CardContainer title='Invest'>
-      {/* // Contract Viewer modal */}
-      {/* // Wallet connect indicator?? maybe but already in navbar */}
-      {/* // Token modal?? */}
       <div
         className={cn(
           'mb-6 font-medium grid grid-cols-1 items-center gap-x-4 gap-y-4 text-xs text-foreground'

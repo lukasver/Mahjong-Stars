@@ -29,6 +29,12 @@ export const adminCache = new Cacheable({
   ttl: cacheTTL,
 });
 
+export const agreementCache = new Cacheable({
+  namespace: 'agreement::action:',
+  // 2 minutes
+  ttl: '1d',
+});
+
 /**
  * Gets/Sets user from Database into cache
  */

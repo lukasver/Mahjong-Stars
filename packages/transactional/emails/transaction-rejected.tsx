@@ -39,9 +39,22 @@ export const TransactionRejectedNotification = ({
   walletAddress,
   transactionId,
   rejectionReason,
-  supportEmail = 'support@company.com',
+  supportEmail = 'hello@mahjonstars.com',
   paidCurrency,
-}: TransactionRejectedProps) => (
+}: {
+  userName: string;
+  tokenName: string;
+  tokenSymbol: string;
+  purchaseAmount: string;
+  transactionHash?: string;
+  transactionTime: string;
+  paymentMethod: string;
+  walletAddress: string;
+  transactionId?: string;
+  rejectionReason?: string;
+  supportEmail?: string;
+  paidCurrency?: string;
+}) => (
   <Html>
     <Head />
     <Preview>

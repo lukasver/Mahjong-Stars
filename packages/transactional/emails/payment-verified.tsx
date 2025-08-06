@@ -43,9 +43,24 @@ export const PaymentVerifiedNotification = ({
   transactionId,
   dashboardUrl = '#',
   transactionUrl,
-  supportEmail = 'support@company.com',
+  supportEmail = 'hello@mahjonstars.com',
   paidCurrency,
-}: PaymentVerifiedProps) => (
+}: {
+  userName: string;
+  tokenName: string;
+  tokenSymbol: string;
+  purchaseAmount: string;
+  tokenAmount: string;
+  transactionHash?: string;
+  transactionTime: string;
+  paymentMethod: string;
+  walletAddress: string;
+  transactionId?: string;
+  dashboardUrl?: string;
+  transactionUrl?: string;
+  supportEmail?: string;
+  paidCurrency?: string;
+}) => (
   <Html>
     <Head />
     <Preview>

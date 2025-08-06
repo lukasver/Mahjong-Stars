@@ -18,6 +18,7 @@ import {
 } from '@/common/types/transactions';
 import {
   BankDetails,
+  DocumentRecipient,
   DocumentSignatureStatus,
   FOP,
   Token,
@@ -447,6 +448,17 @@ export const getDocumentById = async (id: string | string[]) => {
         revalidate: ONE_DAY,
       },
     });
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+};
+
+export const getSignedAgreement = async (id: string) => {
+  try {
+    const data = await fetcher<{
+      agreement: DocumentRecipient & { downloadUrl: string | null };
+    }>(`/admin/agreement/${id}`);
     return { data, error: null };
   } catch (e) {
     return { data: null, error: e };

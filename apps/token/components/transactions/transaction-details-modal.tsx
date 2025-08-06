@@ -324,7 +324,6 @@ export function TransactionDetailsModal({
                 <DetailRow label='Amount Paid' value='Awaiting payment' />
               )}
               <DetailRow label='Currency' value={tx.paidCurrency} />
-              <DetailRow label='Raw Price' value={formatNumber(tx.rawPrice)} />
               {tx.comment && <DetailRow label='Comment' value={tx.comment} />}
             </div>
           </div>
@@ -355,23 +354,11 @@ export function TransactionDetailsModal({
                     >
                       <Copy className='h-3 w-3' />
                     </Button>
-                    <Button variant='ghost' size='sm' className='h-6 w-6 p-0'>
-                      <ExternalLink className='h-3 w-3' />
-                    </Button>
                   </div>
                 }
               />
-            </div>
-          </div>
-
-          {/* Blockchain Information (for crypto payments) */}
-          {isCryptoPayment && tx.txHash && (
-            <>
-              <Separator />
-              <div>
-                <h3 className='text-lg font-semibold mb-3'>
-                  Blockchain Information
-                </h3>
+              {/* Blockchain Information (for crypto payments) */}
+              {isCryptoPayment && tx.txHash && (
                 <div className='space-y-1'>
                   <DetailRow
                     label='Transaction Hash'
@@ -395,13 +382,21 @@ export function TransactionDetailsModal({
                         >
                           <Copy className='h-3 w-3' />
                         </Button>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='h-6 w-6 p-0'
-                        >
-                          <ExternalLink className='h-3 w-3' />
-                        </Button>
+                        {data?.explorerUrl && (
+                          <a
+                            href={data.explorerUrl}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                          >
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='h-6 w-6 p-0'
+                            >
+                              <ExternalLink className='h-3 w-3' />
+                            </Button>
+                          </a>
+                        )}
                       </div>
                     }
                   />
@@ -409,9 +404,9 @@ export function TransactionDetailsModal({
                     <DetailRow label='Network' value={tx?.blockchain?.name} />
                   )}
                 </div>
-              </div>
-            </>
-          )}
+              )}
+            </div>
+          </div>
 
           {/* Token Distribution Information */}
           {tx?.tokenDistributions && tx?.tokenDistributions.length > 0 && (

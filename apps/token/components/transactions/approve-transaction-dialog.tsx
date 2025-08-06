@@ -165,10 +165,15 @@ export function ApproveTransactionDialog({
                     Amount Paid:
                   </span>
                   <p>
-                    {formatAmount(
-                      transaction.amountPaid,
-                      transaction.paidCurrency
-                    )}
+                    {transaction.amountPaid
+                      ? formatAmount(
+                          transaction.amountPaid,
+                          transaction.paidCurrency
+                        )
+                      : transaction.status === 'REJECTED' ||
+                          transaction.status === 'CANCELLED'
+                        ? 'N/A'
+                        : 'Awaiting payment'}
                   </p>
                 </div>
               )}

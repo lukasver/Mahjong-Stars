@@ -15,21 +15,29 @@ export const formatCurrency = (
   const currency = options.currency;
   try {
     if (Intl) {
-      return new Intl.NumberFormat(locale || 'en-US', {
+      const formatted = new Intl.NumberFormat(locale || 'en-US', {
         ...(currency && { style: 'currency', currency }),
         ...(options.precision === 'CRYPTO'
           ? {
-              minimumFractionDigits: 4,
+              minimumFractionDigits: 0,
               maximumFractionDigits: 8,
             }
-          : {}),
+          : {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 4,
+            }),
         ...options,
       }).format(formated);
+
+      // Remove trailing zeros after decimal point
+      return formatted.replace(/\.?0+$/, '');
     }
   } catch {
-    return currency
-      ? `${currency} ${formated.toFixed(2)}`
-      : formated.toFixed(2);
+    const fixedValue = formated.toFixed(options.precision === 'CRYPTO' ? 8 : 4);
+    const formatted = currency ? `${currency} ${fixedValue}` : fixedValue;
+
+    // Remove trailing zeros after decimal point
+    return formatted.replace(/\.?0+$/, '');
   }
 };
 
@@ -48,7 +56,7 @@ export const safeFormatCurrency = (
     });
   } catch {
     return `${Decimal(paidAmount.totalAmount).toFixed(
-      precision === 'CRYPTO' ? 8 : 2
+      precision === 'CRYPTO' ? 8 : 4
     )} ${paidAmount.currency}`;
   }
 };
