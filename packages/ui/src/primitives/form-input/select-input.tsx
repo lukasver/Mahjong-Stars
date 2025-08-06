@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@mjs/ui/lib/utils';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { getInputClass, Input } from '../input';
@@ -27,7 +27,18 @@ export function SelectInput({ options, ...rest }: SelectInputProps) {
   const { onChange, value, placeholder, className, create, createLabel } = rest;
 
   const [shouldCreate, setShouldCreate] = useState(false);
+  const [displayValue, setDisplayValue] = useState(placeholder || '');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Find the selected option to display the correct label
+    const selectedOption = options?.find(
+      (option) => String(option.value) === String(value)
+    );
+    const newDisplayValue = selectedOption?.label || placeholder || '';
+
+    setDisplayValue(newDisplayValue);
+  }, [options, value, placeholder]);
 
   if (shouldCreate) {
     return (
@@ -71,7 +82,7 @@ export function SelectInput({ options, ...rest }: SelectInputProps) {
           className
         )}
       >
-        <SelectValue placeholder={placeholder} />
+        <SelectValue>{displayValue}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options?.map(({ value, id, label, disabled }) => {

@@ -85,9 +85,11 @@ const getInputProps = (
 export const TokenInformation = ({
   saleId,
   className,
+  step,
 }: {
   saleId?: string;
   className?: string;
+  step?: number;
 }) => {
   const t = useTranslations('admin.sales.create.basic');
   const { data, isLoading } = useSale(saleId);
@@ -98,9 +100,30 @@ export const TokenInformation = ({
   useEffect(() => {
     if (data && !isLoading) {
       const sale = data.sale;
+
       form.reset(sale);
+      if (sale.tokenContractChainId) {
+        form.setFieldValue('tokenContractChainId', sale.tokenContractChainId);
+      }
+      if (sale.currency) {
+        form.setFieldValue('currency', sale.currency);
+      }
     }
-  }, [data, isLoading]);
+  }, [data, isLoading, options, step]);
+
+  // // Preserve form values when options are loaded
+  // useEffect(() => {
+  //   if (options && data?.sale) {
+  //     const sale = data.sale;
+  //     // Always ensure the form values are set correctly when options are available
+  //     if (sale.tokenContractChainId) {
+  //       form.setFieldValue('tokenContractChainId', sale.tokenContractChainId);
+  //     }
+  //     if (sale.currency) {
+  //       form.setFieldValue('currency', sale.currency);
+  //     }
+  //   }
+  // }, [options, data?.sale]);
 
   useEffect(() => {
     window.scrollTo({
@@ -125,6 +148,11 @@ export const TokenInformation = ({
             const { name, type, label, description, props, optionKey } = input;
             if (optionKey && options) {
               props.options = options[optionKey as keyof typeof options];
+              console.log(`🔧 Setting options for ${name}:`, {
+                optionKey,
+                options: options[optionKey as keyof typeof options],
+                formValue: form.getFieldValue(name),
+              });
             }
 
             return (

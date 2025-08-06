@@ -31,7 +31,40 @@ export default function Page() {
       <InputOptionsProvider>
         <form.AppForm>
           <form className='container mx-auto' onSubmit={handleSubmit}>
-            <FormInput type='checkbox' name='test' label='Test' />
+            <FormInput
+              type='select'
+              name='test'
+              label='Test'
+              inputProps={{
+                options: [
+                  {
+                    id: 'cmdzywql7000f8o6px7ftqpkz',
+                    value: 97,
+                    label: 'BNB Smart Chain Testnet',
+                  },
+                  {
+                    id: 'cmdzywql7000g8o6p2803uo3p',
+                    value: 11155111,
+                    label: 'Sepolia',
+                  },
+                  {
+                    id: 'cmdzywql7000h8o6prb5pp38j',
+                    value: 84532,
+                    label: 'Base Sepolia',
+                  },
+                  {
+                    id: 'cmdzywql7000i8o6pb5te11sa',
+                    value: 8453,
+                    label: 'Base',
+                  },
+                  {
+                    id: 'cmdzywql7000j8o6p5z8d2kww',
+                    value: 56,
+                    label: 'BNB Smart Chain Mainnet',
+                  },
+                ],
+              }}
+            />
             <Button type='submit'>Submit</Button>
           </form>
         </form.AppForm>

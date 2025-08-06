@@ -1,7 +1,11 @@
 'use client';
 
 import { Stepper } from '@/components/stepper';
-import { AnimatePresence, FadeAnimation } from '@mjs/ui/components/motion';
+import {
+  AnimatePresence,
+  FadeAnimation,
+  motion,
+} from '@mjs/ui/components/motion';
 import { Button } from '@mjs/ui/primitives/button';
 import { useAppForm } from '@mjs/ui/primitives/form/index';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
@@ -39,7 +43,7 @@ export const CreateSaleForm = () => {
   const router = useRouter();
   const [step, setStep] = useQueryState(
     'step',
-    parseAsInteger.withDefault(1).withOptions({ shallow: false })
+    parseAsInteger.withDefault(1).withOptions({ shallow: true })
   );
   const [saleId, setSaleId] = useQueryState(
     'saleId',
@@ -327,11 +331,51 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
   return (
     <ErrorBoundary fallback={<div>Error with creating sale section</div>}>
       <div className='flex flex-col gap-4 min-h-[300px] h-full'>
-        <AnimatePresence>
-          {step === 1 && <TokenInformation key={1} saleId={saleId} />}
-          {step === 2 && <SaftInformation key={2} saleId={saleId} />}
-          {step === 3 && <PaymentInformation key={3} saleId={saleId} />}
-          {step === 4 && <ProjectInformation key={4} saleId={saleId} />}
+        <AnimatePresence mode='wait'>
+          {step === 1 && (
+            <motion.div
+              key={1}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <TokenInformation saleId={saleId} step={step} />
+            </motion.div>
+          )}
+          {step === 2 && (
+            <motion.div
+              key={2}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <SaftInformation saleId={saleId} />
+            </motion.div>
+          )}
+          {step === 3 && (
+            <motion.div
+              key={3}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <PaymentInformation saleId={saleId} />
+            </motion.div>
+          )}
+          {step === 4 && (
+            <motion.div
+              key={4}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <ProjectInformation saleId={saleId} />
+            </motion.div>
+          )}
         </AnimatePresence>
         {children}
       </div>
