@@ -6,11 +6,14 @@ import { VerifyEmail } from '../../components/verify-email';
 import BackgroundWrapper from '@/components/bg-wrapper';
 import { PointerEventsGuard } from '@/components/thirdweb/pointer-events-guard';
 import { getCurrentUser } from '@/lib/services/fetchers.server';
+import { cookies } from 'next/headers';
+import { COOKIE_PREFIX, MW_KEY } from '@/common/config/constants';
 
 export default async function Onboarding({ searchParams }: PageProps) {
-  const [res, params] = await Promise.all([
+  const [res, params, c] = await Promise.all([
     getCurrentUser().catch(() => null),
     searchParams,
+    cookies(),
   ]);
 
   if (!res?.data) {
@@ -19,7 +22,8 @@ export default async function Onboarding({ searchParams }: PageProps) {
 
   const user = res.data;
 
-  if (user.emailVerified) {
+  const magicWord = c.get(`${COOKIE_PREFIX}_${MW_KEY}`);
+  if (user.emailVerified && magicWord) {
     redirect('/dashboard');
   }
 
