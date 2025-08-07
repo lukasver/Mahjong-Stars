@@ -29,6 +29,7 @@ import { useSearchParams } from 'next/navigation';
 import { Tooltip } from '@mjs/ui/primitives/tooltip';
 import { useState } from 'react';
 import { TransactionFilters } from './transaction-filters';
+import { motion } from '@mjs/ui/components/motion';
 
 interface TransactionsProps {
   transactions?: TransactionWithRelations[] | AdminTransactionsWithRelations[];
@@ -95,30 +96,62 @@ export const Transactions = ({
 
   return (
     <div className='pt-4 md:pt-0'>
-      <Card
-        className={getGlassyCardClassName(
-          'mb-4 border border-gray-300/30 shadow-sm'
-        )}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.1,
+          duration: 0.6,
+        }}
       >
-        <CardHeader>
-          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between'>
-            <div>
-              <CardTitle className='text-foreground'>Transactions</CardTitle>
-              <CardDescription>
-                Pending transactions will be automatically cancelled after 6
-                hours.
-              </CardDescription>
+        <Card
+          className={getGlassyCardClassName(
+            'mb-4 border border-gray-300/30 shadow-sm'
+          )}
+        >
+          <CardHeader>
+            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between'>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  delay: 0.2,
+                  duration: 0.5,
+                }}
+              >
+                <CardTitle className='text-foreground'>Transactions</CardTitle>
+                <CardDescription>
+                  Pending transactions will be automatically cancelled after 6
+                  hours.
+                </CardDescription>
+              </motion.div>
+              <motion.div
+                className='flex flex-col gap-4 sm:flex-row sm:items-center'
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  delay: 0.3,
+                  duration: 0.5,
+                }}
+              >
+                <div className='flex items-center gap-2'>
+                  <NetworkStatus showChainId />
+                </div>
+              </motion.div>
             </div>
-            <div className='flex flex-col gap-4 sm:flex-row sm:items-center'>
-              <div className='flex items-center gap-2'>
-                <NetworkStatus showChainId />
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
+          </CardHeader>
+        </Card>
+      </motion.div>
 
-      <div className='min-h-[30rem] h-[75vh] mb-8'>
+      <motion.div
+        className='min-h-[30rem] h-[75vh] mb-8'
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.4,
+          duration: 0.6,
+        }}
+      >
         <DataTable
           columns={getColumns(isAdmin)}
           data={filteredTransactions}
@@ -129,44 +162,61 @@ export const Transactions = ({
           initialColumnVisibility={initialColumnVisibility}
         >
           <div className='flex items-center space-x-2 h-full flex-1 mr-2'>
-            <div className='flex-1'>
+            <motion.div
+              className='flex-1'
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: 0.5,
+                duration: 0.5,
+              }}
+            >
               <TransactionFilters
                 transactions={transactions}
                 isAdmin={isAdmin}
                 onFilteredDataChange={setFilteredTransactions}
               />
-            </div>
-            <DropdownMenu>
-              <Tooltip content='Export transactions'>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant='outline'
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: 0.6,
+                duration: 0.5,
+              }}
+            >
+              <DropdownMenu>
+                <Tooltip content='Export transactions'>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant='outline'
+                      disabled={isExporting}
+                      className='shrink-0'
+                    >
+                      <Download className='h-4 w-4' />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </Tooltip>
+                <DropdownMenuContent align='end'>
+                  <DropdownMenuLabel>Export Format</DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={() => handleExportTransactions('csv', saleId)}
                     disabled={isExporting}
-                    className='shrink-0'
                   >
-                    <Download className='h-4 w-4' />
-                  </Button>
-                </DropdownMenuTrigger>
-              </Tooltip>
-              <DropdownMenuContent align='end'>
-                <DropdownMenuLabel>Export Format</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => handleExportTransactions('csv', saleId)}
-                  disabled={isExporting}
-                >
-                  Export as CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleExportTransactions('xlsx', saleId)}
-                  disabled={isExporting}
-                >
-                  Export as Excel
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleExportTransactions('xlsx', saleId)}
+                    disabled={isExporting}
+                  >
+                    Export as Excel
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </motion.div>
           </div>
         </DataTable>
-      </div>
+      </motion.div>
     </div>
   );
 };

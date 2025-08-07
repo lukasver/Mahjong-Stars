@@ -73,6 +73,7 @@ import { SaleStatusType } from '@/common/schemas/generated';
 import { getGlassyCardClassName } from '@mjs/ui/components/cards';
 import { useSensitiveAction } from '../hooks/use-sensitive-action';
 import AppLink from '../link';
+import { motion } from '@mjs/ui/components/motion';
 
 export function ListSales({
   children,
@@ -197,342 +198,354 @@ export function ListSales({
 
   return (
     <div className={cn('flex-1 space-y-4 p-4', className)}>
-      {/* Stats Cards */}
-      {/* <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Total Sales</CardTitle>
-            <BarChart3 className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{salesData.length}</div>
-            <p className='text-xs text-muted-foreground'>
-              Active sales campaigns
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Open Sales</CardTitle>
-            <Calendar className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {salesData.filter((s) => s.status === 'OPEN').length}
-            </div>
-            <p className='text-xs text-muted-foreground'>
-              Currently accepting purchases
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Total Tokens</CardTitle>
-            <Package className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {formatNumber(
-                salesData.reduce(
-                  (acc, sale) => acc + sale.initialTokenQuantity,
-                  0
-                )
-              )}
-            </div>
-            <p className='text-xs text-muted-foreground'>
-              Tokens across all sales
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Available</CardTitle>
-            <Users className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {formatNumber(
-                salesData.reduce(
-                  (acc, sale) => acc + sale.availableTokenQuantity,
-                  0
-                )
-              )}
-            </div>
-            <p className='text-xs text-muted-foreground'>
-              Tokens still available
-            </p>
-          </CardContent>
-        </Card>
-      </div> */}
       {children}
 
       {/* Filters and Search */}
-      <Card className={getGlassyCardClassName('shadow')}>
-        <CardHeader className='flex flex-col sm:flex-row gap-2 justify-between'>
-          <div className='flex flex-col'>
-            {title && <CardTitle>{title}</CardTitle>}
-            {description && <CardDescription>{description}</CardDescription>}
-          </div>
-          <div className='flex items-center justify-between space-x-2'>
-            <div className='flex items-center space-x-2'>
-              <div className='relative'>
-                <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
-                <Input
-                  placeholder='Search sales...'
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className='pl-8 w-[300px]'
-                />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.1,
+          duration: 0.6,
+        }}
+      >
+        <Card className={getGlassyCardClassName('shadow')}>
+          <CardHeader className='flex flex-col sm:flex-row gap-2 justify-between'>
+            <motion.div
+              className='flex flex-col'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: 0.2,
+                duration: 0.5,
+              }}
+            >
+              {title && <CardTitle>{title}</CardTitle>}
+              {description && <CardDescription>{description}</CardDescription>}
+            </motion.div>
+            <motion.div
+              className='flex items-center justify-between space-x-2'
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: 0.3,
+                duration: 0.5,
+              }}
+            >
+              <div className='flex items-center space-x-2'>
+                <motion.div
+                  className='relative'
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    delay: 0.4,
+                    duration: 0.4,
+                  }}
+                >
+                  <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                  <Input
+                    placeholder='Search sales...'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className='pl-8 w-[300px]'
+                  />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    delay: 0.5,
+                    duration: 0.4,
+                  }}
+                >
+                  <SearchSelect
+                    showAll={false}
+                    placeholder='Filter by status...'
+                    options={[
+                      { label: 'All Status', value: 'all' },
+                      { label: 'Open', value: 'OPEN' },
+                      { label: 'Created', value: 'CREATED' },
+                      { label: 'Closed', value: 'CLOSED' },
+                      { label: 'Finished', value: 'FINISHED' },
+                    ]}
+                    onSearch={handleStatusFilterChange}
+                    isFilter={true}
+                  />
+                </motion.div>
               </div>
-              <SearchSelect
-                showAll={false}
-                placeholder='Filter by status...'
-                options={[
-                  { label: 'All Status', value: 'all' },
-                  { label: 'Open', value: 'OPEN' },
-                  { label: 'Created', value: 'CREATED' },
-                  { label: 'Closed', value: 'CLOSED' },
-                  { label: 'Finished', value: 'FINISHED' },
-                ]}
-                onSearch={handleStatusFilterChange}
-                isFilter={true}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className=''>
-          {/* Filter Summary */}
-          {(searchTerm || statusFilter !== 'all') && (
-            <div className='mb-4 flex items-center gap-2 text-sm text-muted-foreground'>
-              <span>
-                Showing {filteredSales.length} of {salesData?.sales.length || 0}{' '}
-                sales
-              </span>
-              <span>•</span>
-              <span>
-                {searchTerm && `Search: "${searchTerm}"`}
-                {searchTerm && statusFilter !== 'all' && ' • '}
-                {statusFilter !== 'all' && `Status: ${statusFilter}`}
-              </span>
-            </div>
-          )}
+            </motion.div>
+          </CardHeader>
+          <CardContent className=''>
+            {/* Filter Summary */}
+            {(searchTerm || statusFilter !== 'all') && (
+              <motion.div
+                className='mb-4 flex items-center gap-2 text-sm text-muted-foreground'
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: 0.6,
+                  duration: 0.4,
+                }}
+              >
+                <span>
+                  Showing {filteredSales.length} of{' '}
+                  {salesData?.sales.length || 0} sales
+                </span>
+                <span>•</span>
+                <span>
+                  {searchTerm && `Search: "${searchTerm}"`}
+                  {searchTerm && statusFilter !== 'all' && ' • '}
+                  {statusFilter !== 'all' && `Status: ${statusFilter}`}
+                </span>
+              </motion.div>
+            )}
 
-          {/* Data Table */}
-          <div className='rounded-md border bg-primary'>
-            <Table>
-              <TableHeader>
-                <TableRow className='text-secondary [&>th]:text-secondary'>
-                  <TableHead>Sale Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Token</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Available</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead>End Date</TableHead>
-                  <TableHead className='text-right'>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredSales?.map((sale) => {
-                  const progress =
-                    ((sale.initialTokenQuantity - sale.availableTokenQuantity) /
-                      sale.initialTokenQuantity) *
-                    100;
+            {/* Data Table */}
+            <motion.div
+              className='rounded-md border bg-primary'
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: 0.7,
+                duration: 0.6,
+              }}
+            >
+              <Table>
+                <TableHeader>
+                  <TableRow className='text-secondary [&>th]:text-secondary'>
+                    <TableHead>Sale Name</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Token</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Available</TableHead>
+                    <TableHead>Progress</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
+                    <TableHead className='text-right'>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredSales?.map((sale, index) => {
+                    const progress =
+                      ((sale.initialTokenQuantity -
+                        sale.availableTokenQuantity) /
+                        sale.initialTokenQuantity) *
+                      100;
 
-                  return (
-                    <TableRow key={sale.id}>
-                      <TableCell className='font-medium'>
-                        <div>
-                          <div className='font-medium'>{sale.name}</div>
-                          <div className='text-sm text-muted-foreground'>
-                            ID: {sale.id}
+                    return (
+                      <motion.tr
+                        key={sale.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          delay: 0.8 + index * 0.05,
+                          duration: 0.4,
+                        }}
+                        className='border-b'
+                      >
+                        <TableCell className='font-medium'>
+                          <div>
+                            <div className='font-medium'>{sale.name}</div>
+                            <div className='text-sm text-muted-foreground'>
+                              ID: {sale.id}
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(sale.status)}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className='font-medium'>{sale.tokenName}</div>
-                          <div className='text-sm text-muted-foreground'>
-                            {sale.tokenSymbol}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(sale.status)}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className='font-medium'>{sale.tokenName}</div>
+                            <div className='text-sm text-muted-foreground'>
+                              {sale.tokenSymbol}
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {formatCurrency(sale.tokenPricePerUnit, {
-                          currency: sale.currency,
-                          locale,
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className='font-medium'>
-                            {formatCurrency(sale.availableTokenQuantity, {
-                              locale,
-                            })}
+                        </TableCell>
+                        <TableCell>
+                          {formatCurrency(sale.tokenPricePerUnit, {
+                            currency: sale.currency,
+                            locale,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className='font-medium'>
+                              {formatCurrency(sale.availableTokenQuantity, {
+                                locale,
+                              })}
+                            </div>
+                            <div className='text-sm text-muted-foreground'>
+                              of{' '}
+                              {formatCurrency(sale.initialTokenQuantity, {
+                                locale,
+                              })}
+                            </div>
                           </div>
-                          <div className='text-sm text-muted-foreground'>
-                            of{' '}
-                            {formatCurrency(sale.initialTokenQuantity, {
-                              locale,
-                            })}
+                        </TableCell>
+                        <TableCell>
+                          <div className='flex items-center space-x-2'>
+                            <div className='w-full bg-secondary rounded-full h-2'>
+                              <div
+                                className='bg-primary h-2 rounded-full'
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            <span className='text-sm text-muted-foreground min-w-[3rem]'>
+                              {progress.toFixed(1)}%
+                            </span>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className='flex items-center space-x-2'>
-                          <div className='w-full bg-secondary rounded-full h-2'>
-                            <div
-                              className='bg-primary h-2 rounded-full'
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                          <span className='text-sm text-muted-foreground min-w-[3rem]'>
-                            {progress.toFixed(1)}%
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {formatDate(sale.saleStartDate, {
-                          locale,
-                          format: DateTime.DATE_MED,
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        {formatDate(sale.saleClosingDate, {
-                          locale,
-                          format: DateTime.DATE_MED,
-                        })}
-                      </TableCell>
-                      <TableCell className='text-right'>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant='ghost' className='h-8 w-8 p-0'>
-                              <span className='sr-only'>Open menu</span>
-                              <MoreHorizontal className='h-4 w-4' />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align='end'>
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem
-                              onClick={() => handleViewDetails(sale)}
-                            >
-                              <Eye className='mr-2 h-4 w-4' />
-                              View Details
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem asChild>
-                              <AppLink
-                                href={`/admin/transactions?saleId=${sale.id}`}
+                        </TableCell>
+                        <TableCell>
+                          {formatDate(sale.saleStartDate, {
+                            locale,
+                            format: DateTime.DATE_MED,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          {formatDate(sale.saleClosingDate, {
+                            locale,
+                            format: DateTime.DATE_MED,
+                          })}
+                        </TableCell>
+                        <TableCell className='text-right'>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant='ghost' className='h-8 w-8 p-0'>
+                                <span className='sr-only'>Open menu</span>
+                                <MoreHorizontal className='h-4 w-4' />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end'>
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() => handleViewDetails(sale)}
                               >
                                 <Eye className='mr-2 h-4 w-4' />
-                                View Transactions
-                              </AppLink>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <AppLink
-                                href={`/admin/sales/create?saleId=${sale.id}&step=1`}
-                              >
-                                <Edit className='mr-2 h-4 w-4' />
-                                Edit Sale
-                              </AppLink>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuSub>
-                              <DropdownMenuSubTrigger>
-                                Change Status
-                              </DropdownMenuSubTrigger>
-                              <DropdownMenuPortal>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem
-                                    disabled={sale.status === 'OPEN'}
-                                    className='bg-green-500'
-                                    onClick={() => {
-                                      setPendingOpenSaleId(sale.id);
-                                      setIsOpenDialogOpen(true);
-                                    }}
-                                  >
-                                    Open
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleUpdateStatus(sale.id, 'CLOSED')
-                                    }
-                                    disabled={['CLOSED', 'FINISHED'].includes(
-                                      sale.status
-                                    )}
-                                  >
-                                    Close
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuPortal>
-                            </DropdownMenuSub>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuSub>
-                              <DropdownMenuSubTrigger>
-                                <Download className='mr-2 h-4 w-4' />
-                                Export Transactions
-                              </DropdownMenuSubTrigger>
-                              <DropdownMenuPortal>
-                                <DropdownMenuSubContent>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleExportTransactions('csv', sale.id)
-                                    }
-                                    disabled={isExporting}
-                                  >
-                                    Export as CSV
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleExportTransactions('xlsx', sale.id)
-                                    }
-                                    disabled={isExporting}
-                                  >
-                                    Export as Excel
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuPortal>
-                            </DropdownMenuSub>
-                            {/* <DropdownMenuSeparator /> */}
-                            {/* <DropdownMenuItem className='text-destructive'>
-                              <Trash2 className='mr-2 h-4 w-4' />
-                              Delete Sale
-                            </DropdownMenuItem> */}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                                View Details
+                              </DropdownMenuItem>
 
-          {filteredSales.length === 0 && (
-            <div className='text-center py-8'>
-              <p className='text-muted-foreground'>
-                No sales found matching your criteria.
-              </p>
-              {(searchTerm || statusFilter !== 'all') && (
-                <div className='mt-2'>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={() => {
-                      setSearchTerm('');
-                      setStatusFilter('all');
-                    }}
-                  >
-                    Clear filters
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                              <DropdownMenuItem asChild>
+                                <AppLink
+                                  href={`/admin/transactions?saleId=${sale.id}`}
+                                >
+                                  <Eye className='mr-2 h-4 w-4' />
+                                  View Transactions
+                                </AppLink>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <AppLink
+                                  href={`/admin/sales/create?saleId=${sale.id}&step=1`}
+                                >
+                                  <Edit className='mr-2 h-4 w-4' />
+                                  Edit Sale
+                                </AppLink>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                  Change Status
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuPortal>
+                                  <DropdownMenuSubContent>
+                                    <DropdownMenuItem
+                                      disabled={sale.status === 'OPEN'}
+                                      className='bg-green-500'
+                                      onClick={() => {
+                                        setPendingOpenSaleId(sale.id);
+                                        setIsOpenDialogOpen(true);
+                                      }}
+                                    >
+                                      Open
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleUpdateStatus(sale.id, 'CLOSED')
+                                      }
+                                      disabled={['CLOSED', 'FINISHED'].includes(
+                                        sale.status
+                                      )}
+                                    >
+                                      Close
+                                    </DropdownMenuItem>
+                                  </DropdownMenuSubContent>
+                                </DropdownMenuPortal>
+                              </DropdownMenuSub>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                  <Download className='mr-2 h-4 w-4' />
+                                  Export Transactions
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuPortal>
+                                  <DropdownMenuSubContent>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleExportTransactions('csv', sale.id)
+                                      }
+                                      disabled={isExporting}
+                                    >
+                                      Export as CSV
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleExportTransactions(
+                                          'xlsx',
+                                          sale.id
+                                        )
+                                      }
+                                      disabled={isExporting}
+                                    >
+                                      Export as Excel
+                                    </DropdownMenuItem>
+                                  </DropdownMenuSubContent>
+                                </DropdownMenuPortal>
+                              </DropdownMenuSub>
+                              {/* <DropdownMenuSeparator /> */}
+                              {/* <DropdownMenuItem className='text-destructive'>
+                                <Trash2 className='mr-2 h-4 w-4' />
+                                Delete Sale
+                              </DropdownMenuItem> */}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </motion.tr>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </motion.div>
+
+            {filteredSales.length === 0 && (
+              <motion.div
+                className='text-center py-8'
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: 0.8,
+                  duration: 0.4,
+                }}
+              >
+                <p className='text-muted-foreground'>
+                  No sales found matching your criteria.
+                </p>
+                {(searchTerm || statusFilter !== 'all') && (
+                  <div className='mt-2'>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={() => {
+                        setSearchTerm('');
+                        setStatusFilter('all');
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
       {selectedSale && (
         <ErrorBoundary
           fallback={

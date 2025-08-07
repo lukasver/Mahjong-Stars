@@ -26,3 +26,22 @@
 • View personal transaction history
 
 # Providers
+
+Infrastructure:
+• Vercel
+
+Cronjobs:
+• Vercel
+
+Document Signature:
+• Documenso
+
+Storage:
+• GCP Cloud Storage
+
+PDF Generation:
+• @mjs/pdf-get @ GCP Cloud Run
+
+Exchange Rates:
+• Crypto: BNB Oracle
+• FIAT: cryptocompare.com
