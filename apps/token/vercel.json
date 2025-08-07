@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/webhooks/crons/transactions",
+      "schedule": "0 */3 * * *"
+    },
+    {
+      "path": "/api/webhooks/crons/sales",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
