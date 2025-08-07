@@ -9,11 +9,7 @@ const _PRIVATE_ROUTES: string[] = ['/dashboard'];
 const isE2ETest = process.env.E2E_TEST_MODE === 'true';
 
 export default async (req: NextRequest) => {
-  log(
-    '[MIDDLEWARE]',
-    req.nextUrl.pathname,
-    req.cookies.get(`${COOKIE_PREFIX}-${MW_KEY}`)
-  );
+  log('[MIDDLEWARE]', req.nextUrl.pathname);
 
   if (isE2ETest) {
     return NextResponse.next();

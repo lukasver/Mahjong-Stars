@@ -3,16 +3,16 @@ import { Confetti, ConfettiRef } from '@/components/confetti';
 import { Logo } from '@/components/logo';
 import { Button } from '@mjs/ui/primitives/button';
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useRef } from 'react';
 import { metadata } from '@/common/config/site';
 import { useTransactionById } from '@/lib/services/api';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
 import { cn } from '@mjs/ui/lib/utils';
 import AppLink from '@/components/link';
+import { motion } from '@mjs/ui/components/motion';
 
 export const SuccessContent = ({ className }: { className?: string }) => {
-  const router = useRouter();
   const { tx } = useParams();
   const { data, isLoading } = useTransactionById(tx as string);
   const t = useTranslations();
@@ -22,17 +22,47 @@ export const SuccessContent = ({ className }: { className?: string }) => {
 
   const supportEmail =
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL || metadata.supportEmail;
+
   return (
     <div className={cn(className)}>
       <div className='flex flex-col items-center justify-center h-full w-full p-8 rounded-xl gap-6 -mt-10'>
-        <div className='w-24 flex justify-center'>
+        <motion.div
+          className='w-24 flex justify-center'
+          initial={{ opacity: 0, scale: 0.8, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{
+            delay: 0.1,
+            duration: 0.6,
+            scale: { type: 'spring', visualDuration: 0.6, bounce: 0.2 },
+          }}
+        >
           <Logo variant='iconXl' />
-        </div>
-        <h2 className='text-3xl font-semibold text-center leading-tight max-w-[70%] sm:max-w-full'>
-          {t('transactions.success.title')}
-        </h2>
+        </motion.div>
+        <motion.h2
+          className='text-3xl font-semibold text-center leading-tight max-w-[70%] sm:max-w-full'
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: 0.3,
+            duration: 0.6,
+          }}
+        >
+          {isLoading ? (
+            <Skeleton className='w-[200px] h-4' />
+          ) : (
+            t('transactions.success.title')
+          )}
+        </motion.h2>
 
-        <div className='text-center text-base font-medium text-foreground max-w-[85%] sm:max-w-[60%] leading-7'>
+        <motion.div
+          className='text-center text-base font-medium text-foreground max-w-[85%] sm:max-w-[60%] leading-7'
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: 0.5,
+            duration: 0.5,
+          }}
+        >
           {isLoading ? (
             <div className='flex flex-col items-center gap-3 w-full'>
               <Skeleton className='w-[200px] h-4' />
@@ -41,25 +71,17 @@ export const SuccessContent = ({ className }: { className?: string }) => {
           ) : tokenSymbol ? (
             t('transactions.success.description', { tokenSymbol })
           ) : null}
-        </div>
+        </motion.div>
 
-        {/* //TODO! should render if crypto tx and we have reference of blockchain scanner. */}
-        {/* {url && (
-        <div className='flex items-center mt-2 mb-2'>
-          <a
-            href={url}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='flex items-center gap-1 text-sm text-primary underline hover:text-primary/80 transition-colors'
-          >
-            {t('transactions.success.transactionLink', {
-              defaultValue: 'View transaction details',
-            })}
-            <ExternalLink size={16} className='ml-1' />
-          </a>
-        </div>
-      )} */}
-        <div className='flex flex-row gap-4'>
+        <motion.div
+          className='flex flex-row gap-4'
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: 0.7,
+            duration: 0.5,
+          }}
+        >
           <AppLink href={`/dashboard/transactions?id=${tx}`}>
             <Button type='button' variant='primary' className='w-full max-w-xs'>
               {t('transactions.success.button')}
@@ -76,13 +98,21 @@ export const SuccessContent = ({ className }: { className?: string }) => {
               </Button>
             </a>
           )}
-        </div>
-        <div className='text-secondary mt-2'>
+        </motion.div>
+        <motion.div
+          className='text-secondary mt-2'
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: 0.9,
+            duration: 0.5,
+          }}
+        >
           {t('transactions.success.supportText')}{' '}
           <a href={`mailto:${supportEmail}`} className='underline'>
             {supportEmail}
           </a>
-        </div>
+        </motion.div>
         <Confetti
           ref={confettiRef}
           className='absolute left-50% top-50% size-full -z-10'

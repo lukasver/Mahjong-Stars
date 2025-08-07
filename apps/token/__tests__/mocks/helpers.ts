@@ -88,7 +88,6 @@ export const mockTransactions = (data?: Partial<SaleTransactions>) => {
     deletedAt: null,
     tokenSymbol: faker.word.noun({ length: { min: 3, max: 5 } }),
     formOfPayment: isCrypto ? FOPSchema.enum.CRYPTO : FOPSchema.enum.TRANSFER,
-    confirmationId: faker.helpers.arrayElement([faker.string.uuid(), null]),
     receivingWallet: faker.finance.ethereumAddress(),
     status,
     userId: faker.database.mongodbObjectId(),
@@ -105,8 +104,8 @@ export const mockTransactions = (data?: Partial<SaleTransactions>) => {
     blockchainId: null,
     totalAmount: paid,
     rejectionReason: null,
-    paymentEvidence: null,
     paymentDate: null,
+    paymentEvidenceId: null,
     ...data,
   } satisfies SaleTransactions;
 };

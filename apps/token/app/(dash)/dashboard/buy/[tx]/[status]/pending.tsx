@@ -2,9 +2,12 @@
 import { Button } from '@mjs/ui/primitives/button';
 import { ExternalLink, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { metadata } from '@/common/config/site';
+import { useTransactionById } from '@/lib/services/api';
+import { useEffect } from 'react';
+import { TransactionStatus } from '@prisma/client';
 
 /**
  * Pending status page for dashboard actions.
@@ -13,12 +16,8 @@ import { metadata } from '@/common/config/site';
  */
 const Pending = () => {
   const router = useRouter();
-  const query = useSearchParams();
+  const { tx } = useParams();
   const t = useTranslations();
-  const url = query.get('urlTxHash') as string | undefined;
-  const projectName = query.get('projectName') as string | undefined;
-  const txHash = query.get('txHash') as string | undefined;
-  const transactionId = query.get('transactionId') as string | undefined;
   const supportEmail = metadata.supportEmail;
 
   const handleDashboardClick = () => {
@@ -28,6 +27,33 @@ const Pending = () => {
   const handleContactClick = () => {
     window.location.href = `mailto:${supportEmail}?subject=Transaction%20Review%20Inquiry`;
   };
+
+  const { data, isLoading } = useTransactionById(tx as string);
+
+  useEffect(() => {
+    console.log(
+      '🚀 ~ pending.tsx:35 ~ data?.transaction?.status:',
+      data?.transaction?.status
+    );
+
+    if (
+      !isLoading &&
+      data?.transaction?.status &&
+      ![
+        TransactionStatus.AWAITING_PAYMENT,
+        TransactionStatus.COMPLETED,
+        TransactionStatus.PAYMENT_SUBMITTED,
+        TransactionStatus.PAYMENT_VERIFIED,
+        TransactionStatus.TOKENS_DISTRIBUTED,
+      ].includes(data?.transaction.status as TransactionStatus)
+    ) {
+      if (data?.transaction.status === TransactionStatus.COMPLETED) {
+        router.replace(`/dashboard/buy/${tx}`);
+      } else {
+        router.replace(`/dashboard/buy/${tx}/failure`);
+      }
+    }
+  }, [data?.transaction?.status, isLoading]);
 
   return (
     <div className='flex flex-col items-center justify-center h-full w-full p-8 rounded-xl gap-6 -mt-10 min-h-[80dvh]'>
@@ -47,27 +73,29 @@ const Pending = () => {
 
       <div className='text-center text-base font-medium text-foreground max-w-[85%] sm:max-w-[60%] leading-7'>
         {t('status.pending.text', {
-          projectName: projectName || 'Mahjong Stars',
+          projectName: data?.transaction?.sale?.name || 'Mahjong Stars',
         })}
       </div>
 
-      {(txHash || transactionId) && (
+      {(data?.transaction?.txHash || data?.transaction?.id) && (
         <div className='w-full max-w-md'>
           <div className='bg-gray-50 rounded-lg p-4 border'>
             <div className='text-sm font-medium text-gray-700 mb-2'>
-              {txHash ? 'Transaction Hash:' : 'Transaction ID:'}
+              {data?.transaction?.txHash
+                ? 'Transaction Hash:'
+                : 'Transaction ID:'}
             </div>
             <div className='text-sm font-mono text-gray-900 break-all'>
-              {txHash || transactionId}
+              {data?.transaction?.txHash || data?.transaction?.id}
             </div>
           </div>
         </div>
       )}
 
-      {url && (
+      {data?.explorerUrl && (
         <div className='flex items-center mt-2 mb-2'>
           <a
-            href={url}
+            href={data?.explorerUrl}
             target='_blank'
             rel='noopener noreferrer'
             className='flex items-center gap-1 text-sm text-primary underline hover:text-primary/80 transition-colors'
