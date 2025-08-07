@@ -1,5 +1,5 @@
 import 'server-only';
-import { getSessionCookie } from '../auth/cookies';
+import { deleteSessionCookie, getSessionCookie } from '../auth/cookies';
 import { verifyJwt } from '../auth/thirdweb';
 import users from '../repositories/users';
 import transactions from '../repositories/transactions';
@@ -11,12 +11,15 @@ import { cache } from 'react';
 import { SaleStatus, TransactionStatus } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import { decimalsToString } from '@/common/schemas/dtos/utils';
+import { redirect } from 'next/navigation';
 
 export const getUserFromSession = cache(async () => {
   const verified = await getSessionCookie()
     .then((d) => verifyJwt(d || ''))
     .catch(() => null);
   if (!verified || !verified.valid) {
+    await deleteSessionCookie();
+    redirect('/');
     throw new Error('Invalid session');
   }
   return getUserFromCache(verified.parsedJWT.sub);

@@ -62,7 +62,7 @@ export const env = createEnv({
     EMAIL_OCTOPUS_LIST_ID: z.string().min(1),
     EMAIL_OCTOPUS_API_KEY: z.string().min(1),
     JWT_SECRET: z.string().min(1),
-    CRON_SERVICE_API_KEY: z.string().min(1),
+    CRON_SECRET: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_THIRDWEB_CLIENT_ID: z.string().min(1),
@@ -112,7 +112,7 @@ export const env = createEnv({
     EMAIL_OCTOPUS_LIST_ID: process.env.EMAIL_OCTOPUS_LIST_ID,
     EMAIL_OCTOPUS_API_KEY: process.env.EMAIL_OCTOPUS_API_KEY,
     JWT_SECRET: process.env.JWT_SECRET,
-    CRON_SERVICE_API_KEY: process.env.CRON_SERVICE_API_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
   },
   skipValidation: process.env.NODE_ENV === 'test',
 });
