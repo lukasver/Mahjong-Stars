@@ -9,7 +9,7 @@ const handler = async (req: Request) => {
     invariant(apiKey, 'API key is required');
     const [type, token] = apiKey.split(' ');
     invariant(type === 'Bearer', 'Invalid API key');
-    invariant(token === env.CRON_SERVICE_API_KEY, 'Invalid API key');
+    invariant(token === env.CRON_SECRET, 'Invalid API key');
 
     if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
       return Response.json(
