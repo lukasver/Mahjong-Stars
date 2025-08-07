@@ -12,6 +12,7 @@ import { invariant } from '@epic-web/invariant';
 import { DateTime } from 'luxon';
 import { headers } from 'next/headers';
 import { EmailVerificationService } from '../emails';
+import { hashJwt } from '@/lib/utils/jwt-hash';
 
 class UsersController {
   private readonly emailVerification: EmailVerificationService;
@@ -89,7 +90,7 @@ class UsersController {
 
     const session = await prisma.session.create({
       data: {
-        token: jwt,
+        token: hashJwt(jwt),
         expiresAt,
         ipAddress: getIpAddress(new Headers(h)),
         userAgent: getUserAgent(new Headers(h)),
@@ -131,19 +132,21 @@ class UsersController {
         })
         .toJSDate();
 
+      const hashedJwt = jwt ? hashJwt(jwt) : undefined;
+
       const user = await prisma.user.upsert({
         where: {
           walletAddress: address,
         },
         update: {
-          ...(jwt && {
+          ...(hashedJwt && {
             sessions: {
               connectOrCreate: {
                 where: {
-                  token: jwt,
+                  token: hashedJwt,
                 },
                 create: {
-                  token: jwt,
+                  token: hashedJwt,
                   expiresAt,
                   ipAddress,
                   userAgent,
@@ -162,10 +165,10 @@ class UsersController {
           profile: {
             create: {},
           },
-          ...(jwt && {
+          ...(hashedJwt && {
             sessions: {
               create: {
-                token: jwt,
+                token: hashedJwt,
                 expiresAt: new Date(expirationTime || Date.now() + ONE_DAY),
                 ipAddress,
                 userAgent,
@@ -332,6 +335,31 @@ class UsersController {
     }
     return;
   }
+
+  public crons = {
+    async cleanUp(type: 'all' | 'expired') {
+      console.debug(
+        `Running sessions cleanup cronjob: ${DateTime.now().toLocaleString(DateTime.DATETIME_FULL)}`
+      );
+      console.time('sessions-cleanup');
+      // Delete all sessions that are expired.
+      return await prisma.session
+        .deleteMany({
+          where:
+            type === 'expired'
+              ? {
+                  expiresAt: {
+                    lte: DateTime.now().toJSDate(),
+                  },
+                }
+              : {},
+        })
+        .then((res) => {
+          console.timeEnd('sessions-cleanup');
+          return res;
+        });
+    },
+  };
 }
 
 export default new UsersController(

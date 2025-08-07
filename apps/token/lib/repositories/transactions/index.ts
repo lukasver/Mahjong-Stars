@@ -536,7 +536,7 @@ class TransactionsController {
           `Transaction cannot be deleted due to status: ${tx.status}`
         );
       }
-      await this.cancelTransactionAndRestoreUnits(tx);
+      await this.cancelTransactionAndRestoreUnits(tx, 'Cancelled by user');
       return Success({ id: tx.id });
     } catch (e) {
       logger(e);
@@ -564,99 +564,151 @@ class TransactionsController {
     }
   }
 
-  async pendingCronJobTransactions() {
-    const sixHoursAgo = DateTime.local().minus({ hours: 6 }).toJSDate();
-    // const oneMinuteAgo = DateTime.local().minus({ minutes: 1 }).toJSDate();
+  public crons = {
+    cleanUp: async () => {
+      console.debug(
+        `Running transactions cleanup cronjob: ${DateTime.now().toLocaleString(DateTime.DATETIME_FULL)}`
+      );
+      console.time('transactions-cleanup');
+      const sixHoursAgo = DateTime.local().minus({ hours: 6 }).toJSDate();
 
-    try {
-      const transactions = await prisma.saleTransactions.findMany({
-        where: {
-          AND: [
-            { status: TransactionStatus.PENDING },
-            { NOT: { formOfPayment: FOP.CRYPTO } },
-            {
-              sale: {
-                status: SaleStatus.OPEN,
+      try {
+        const txs = await prisma.saleTransactions.findMany({
+          where: {
+            AND: [
+              {
+                status: {
+                  in: [
+                    TransactionStatus.PENDING,
+                    TransactionStatus.AWAITING_PAYMENT,
+                  ],
+                },
+              },
+              {
+                sale: {
+                  status: {
+                    in: [
+                      SaleStatus.OPEN,
+                      SaleStatus.FINISHED,
+                      SaleStatus.CLOSED,
+                    ],
+                  },
+                },
+              },
+              {
+                createdAt: { lte: sixHoursAgo },
+              },
+            ],
+          },
+          select: {
+            id: true,
+            quantity: true,
+            user: {
+              select: {
+                email: true,
+                emailVerified: true,
+                profile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
               },
             },
-            {
-              createdAt: { lte: sixHoursAgo },
+            sale: {
+              select: {
+                id: true,
+                name: true,
+                tokenSymbol: true,
+              },
             },
-          ],
-        },
-      });
-      // Process transactions that are not paid in crypto
-      if (transactions.length > 0) {
-        await Promise.all(
-          transactions.map((transaction) =>
-            this.cancelTransactionAndRestoreUnits(transaction)
-          )
+            saleId: true,
+          },
+        });
+
+        await prisma.$transaction(async (prisma) => {
+          await prisma.saleTransactions.updateMany({
+            where: {
+              id: { in: txs.map((tx) => tx.id) },
+            },
+            data: {
+              status: TransactionStatus.CANCELLED,
+              comment:
+                'Transaction cancelled for not being confirmed after time limit',
+            },
+          });
+
+          let groupedTxsBySaleId: Record<
+            string,
+            Array<(typeof txs)[number]>
+          > = {};
+
+          // group transactions by saleId to prepare for next step
+          groupedTxsBySaleId = txs.reduce((acc, tx) => {
+            if (!acc[tx.saleId]) {
+              acc[tx.saleId] = [];
+            }
+            acc[tx.saleId]?.push(tx);
+            return acc;
+          }, groupedTxsBySaleId);
+
+          // Restore sum of all units to each sale affected
+          return await Promise.all(
+            Object.entries(groupedTxsBySaleId).map(([saleId, groupedTxs]) => {
+              const quantityToReturn = groupedTxs.reduce((acc, tx) => {
+                return acc.add(tx.quantity);
+              }, new Prisma.Decimal(0));
+              return prisma.sale.update({
+                where: { id: saleId },
+                data: {
+                  availableTokenQuantity: {
+                    increment: quantityToReturn.toNumber(),
+                  },
+                },
+              });
+            })
+          );
+        });
+
+        // Notify user by email
+        await Promise.allSettled(
+          txs
+            .filter((tx) => tx.user.emailVerified)
+            .map((tx) =>
+              this.notificator.send({
+                to: {
+                  email: tx.user.email,
+                  name: tx.user.profile?.firstName
+                    ? `${tx.user.profile.firstName} ${tx.user.profile.lastName || ''}`.trim()
+                    : undefined,
+                },
+                subject: 'Transaction cancelled',
+                template: 'transactionCancelled',
+                props: {
+                  userName: tx.user.profile?.firstName
+                    ? `${tx.user.profile.firstName} ${tx.user.profile.lastName || ''}`.trim()
+                    : tx.user.email,
+                  saleName: tx.sale.name,
+                  transactionId: tx.id,
+                  quantity: tx.quantity.toString(),
+                  tokenSymbol: tx.sale.tokenSymbol,
+                  reason:
+                    'Transaction cancelled for not being confirmed after time limit',
+                  supportEmail: metadata.supportEmail,
+                },
+              })
+            )
         );
+
+        return Success({});
+      } catch (e) {
+        logger(e);
+        return Failure(e);
+      } finally {
+        console.timeEnd('transactions-cleanup');
       }
-
-      const cryptoTransactions = await prisma.saleTransactions.findMany({
-        where: {
-          AND: [
-            {
-              status: {
-                in: [
-                  TransactionStatus.PAYMENT_VERIFIED,
-                  TransactionStatus.PENDING,
-                ],
-              },
-              formOfPayment: FOP.CRYPTO,
-            },
-            {
-              sale: {
-                status: SaleStatus.OPEN,
-              },
-            },
-            {
-              createdAt: { lte: sixHoursAgo },
-            },
-          ],
-        },
-      });
-
-      if (cryptoTransactions.length > 0) {
-        //TODO: Implement this
-        // for (const tx of cryptoTransactions) {
-        //   // If there we know which blockchain the transaction has been broadcasted, then we can check
-        //   if (tx.txHash && isValidChainId(tx.blockchainId)) {
-        //     nodeProvider
-        //       .getTransaction(tx.blockchainId, tx.txHash)
-        //       .then((result) => {
-        //         //transaction was confirmed in blockchain
-        //         if (result && result.confirmations > 0) {
-        //           prisma.saleTransactions.update({
-        //             where: {
-        //               uuid: tx.uuid,
-        //             },
-        //             data: {
-        //               status: TransactionStatus.PAYMENT_VERIFIED,
-        //             },
-        //           });
-        //         }
-        //         // IF null then means transaction is pending, and by previous search, it has been pending for at least 6 hours.
-        //         if (result === null) {
-        //           cancelTransactionAndRestoreUnits(tx);
-        //         }
-        //       });
-        //   } else {
-        //     // If we have a pending crypto transaction without txHash we can assume it was never broadcasted by the user to the blockchain
-        //     if (tx.status === TransactionStatus.PENDING) {
-        //       cancelTransactionAndRestoreUnits(tx);
-        //     }
-        //   }
-        // }
-      }
-
-      return Success({});
-    } catch (e) {
-      logger(e);
-      return Failure(e);
-    }
-  }
+    },
+  };
 
   /**
    * Get pending contact transactions for a user in the current open sale.

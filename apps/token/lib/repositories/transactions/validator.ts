@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { prisma } from '@/db';
 import { HttpError } from '../errors';
 import HttpStatusCode from '../httpStatusCodes';
-import { checkSaleDateIsNotExpired } from '../sales/functions';
+
 import {
   FOP,
   Sale,
@@ -276,8 +276,12 @@ export class TransactionValidator {
     }
   }
 
-  private static validateSaleDateNotExpired(sale: Sale): void {
-    checkSaleDateIsNotExpired(sale);
+  static validateSaleDateNotExpired(sale: Pick<Sale, 'saleClosingDate'>): void {
+    if (DateTime.fromJSDate(sale.saleClosingDate) <= DateTime.now()) {
+      throw new Error(
+        `Sale closing date is in the past: ${sale.saleClosingDate}`
+      );
+    }
   }
 
   private static async validateUserExists(

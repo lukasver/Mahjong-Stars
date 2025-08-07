@@ -17,10 +17,6 @@ import logger from '@/lib/services/logger.server';
 import { invariant } from '@epic-web/invariant';
 import { Prisma, SaftContract, Sale, SaleStatus } from '@prisma/client';
 import { DateTime } from 'luxon';
-import {
-  changeActiveSaleToFinish,
-  checkSaleDateIsNotExpired,
-} from './functions';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
 import mime from 'mime-types';
 import { Document } from '@/common/schemas/generated';
@@ -35,6 +31,7 @@ import { z } from 'zod';
 import { SaleInformationItem } from '@/common/schemas/dtos/sales/information';
 import { StorageService } from '../documents/storage';
 import { BankDetailsForm } from '@/components/admin/create-sales/utils';
+import { TransactionValidator as validator } from '../transactions/validator';
 
 const QUERY_MAPPING = {
   active: {
@@ -94,10 +91,10 @@ class SalesController {
           DateTime.fromJSDate(activeSale.saleClosingDate) <= DateTime.now();
         const isSaleCompleted =
           activeSale.availableTokenQuantity &&
-          activeSale.availableTokenQuantity < 0;
+          activeSale.availableTokenQuantity <= 0;
         // if sale closing date is expired or no more available units to sell, then update status to finished.
         if (isSaleFinished || isSaleCompleted) {
-          await changeActiveSaleToFinish(activeSale);
+          await this.changeActiveSaleToFinish(activeSale);
           sales = [];
         }
       }
@@ -368,7 +365,7 @@ class SalesController {
       });
       invariant(sale, 'Sale not found in DB');
       if (status === SaleStatus.OPEN) {
-        checkSaleDateIsNotExpired(sale);
+        validator.validateSaleDateNotExpired(sale);
       }
       const updatedSale = await prisma.sale.update({
         where: { id: sale.id },
@@ -977,6 +974,44 @@ class SalesController {
     }
   }
 
+  public crons = {
+    cleanUp: async () => {
+      console.debug(
+        `Running sales cleanup cronjob: ${DateTime.now().toLocaleString(DateTime.DATETIME_FULL)}`
+      );
+      console.time('sales-cleanup');
+      const sales = await prisma.sale.findMany({
+        where: {
+          status: SaleStatus.OPEN,
+          OR: [
+            {
+              saleClosingDate: {
+                lte: DateTime.now().toJSDate(),
+              },
+            },
+            {
+              availableTokenQuantity: {
+                lte: 0,
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (sales?.length) {
+        await prisma.sale.updateMany({
+          where: {
+            id: { in: sales.map((s) => s.id) },
+          },
+          data: { status: SaleStatus.FINISHED },
+        });
+      }
+      console.timeEnd('sales-cleanup');
+    },
+  };
+
   private parseTokenData(data: Partial<SaleWithRelations>): SaleWithToken {
     const tokenData = {
       chainId: data?.token?.TokensOnBlockchains?.[0]?.chainId,
@@ -989,6 +1024,21 @@ class SalesController {
     };
     return Object.assign(data, { token: tokenData }) as SaleWithToken;
   }
+
+  private changeActiveSaleToFinish = async (
+    sale: Pick<Sale, 'id'>
+  ): Promise<Sale[]> => {
+    await prisma.sale.update({
+      where: {
+        id: sale.id,
+      },
+      data: {
+        status: SaleStatus.FINISHED,
+      },
+    });
+    // respond with empty sale[] since current sale is no longer active.
+    return [];
+  };
 }
 
 export default new SalesController(new StorageService());

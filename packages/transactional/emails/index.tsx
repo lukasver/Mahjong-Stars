@@ -9,6 +9,7 @@ import { AdminTransactionNotification } from './admin-transaction-confirmed';
 import { ICOSaleOpenedEmail } from './sale-opened';
 import { PaymentVerifiedNotification } from './payment-verified';
 import { TransactionRejectedNotification } from './transaction-rejected';
+import { TransactionCancelledEmail } from './transaction-cancelled';
 
 const templates = {
   contact: ContactFormEmail,
@@ -22,6 +23,7 @@ const templates = {
   adminTransactionConfirmed: AdminTransactionNotification,
   paymentVerified: PaymentVerifiedNotification,
   transactionRejected: TransactionRejectedNotification,
+  transactionCancelled: TransactionCancelledEmail,
 };
 
 export { templates };

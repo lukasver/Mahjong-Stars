@@ -47,6 +47,7 @@ import { FOP, Prisma } from '@prisma/client';
 import { erc20Abi } from '../services/crypto/ABI';
 import Decimal from 'decimal.js';
 import { cookies } from 'next/headers';
+import { hashJwt } from '@/lib/utils/jwt-hash';
 
 export const hasActiveSession = async (address: string, token: string) => {
   const sessions = await prisma.session.findMany({
@@ -54,7 +55,9 @@ export const hasActiveSession = async (address: string, token: string) => {
       expiresAt: {
         gt: new Date(),
       },
-      token,
+      token: {
+        equals: hashJwt(token),
+      },
       user: {
         walletAddress: address,
       },
@@ -62,6 +65,7 @@ export const hasActiveSession = async (address: string, token: string) => {
     select: {
       id: true,
       expiresAt: true,
+      token: true,
     },
   });
 
@@ -156,21 +160,24 @@ export const logout = loginActionClient
     await deleteSessionCookie();
     if (data) {
       const verified = await verifyJwt(data);
-      void Promise.allSettled([
-        verified.valid && authCache.delete(verified.parsedJWT.sub),
-        prisma.session
-          .delete({
-            where: {
-              token: data,
-            },
-          })
-          .catch((e) => {
-            console.error(
-              'index.ts:122 ~ e:',
-              e instanceof Error ? e.message : e
-            );
-          }),
-      ]);
+      if (verified.valid) {
+        const hashedJwt = hashJwt(data);
+        void Promise.allSettled([
+          authCache.delete(verified.parsedJWT.sub),
+          prisma.session
+            .delete({
+              where: {
+                token: hashedJwt,
+              },
+            })
+            .catch((e) => {
+              console.error(
+                'index.ts:122 ~ e:',
+                e instanceof Error ? e.message : e
+              );
+            }),
+        ]);
+      }
     }
     if (_redirect) {
       redirect(redirectTo || '/');
