@@ -21,6 +21,7 @@ type SaleKeys = Partial<
     | 'tokenId'
     | 'tokenTotalSupply'
     | 'information'
+    | 'comparisonPricePerUnit'
     | 'bannerId'
   >
 >;

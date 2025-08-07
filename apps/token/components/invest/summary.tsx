@@ -13,7 +13,7 @@ import { FIAT_CURRENCIES } from '@/common/config/constants';
 export const PurchaseSummary = ({
   sale,
 }: {
-  sale: Pick<SaleWithToken, 'tokenPricePerUnit'>;
+  sale: Pick<SaleWithToken, 'tokenPricePerUnit' | 'comparisonPricePerUnit'>;
 }) => {
   const form = useFormContext() as unknown as UseAppForm;
   const paidAmount = useStore(form.store, (state) => {
@@ -31,10 +31,13 @@ export const PurchaseSummary = ({
     return { quantity, tokenSymbol };
   });
 
-  const { base, bonus, total } = calculateTokens(
-    tokenBought.quantity,
-    sale.tokenPricePerUnit
-  );
+  const { base, bonus, total } = sale?.comparisonPricePerUnit
+    ? calculateTokens(
+        tokenBought.quantity,
+        sale.tokenPricePerUnit,
+        sale?.comparisonPricePerUnit
+      )
+    : {};
   const locale = useLocale();
 
   return (
@@ -42,7 +45,7 @@ export const PurchaseSummary = ({
       purchased={tokenBought}
       base={base?.toLocaleString()}
       bonus={bonus?.toLocaleString()}
-      total={total?.toLocaleString()}
+      total={total?.toLocaleString() || tokenBought.quantity}
       paid={paidAmount}
       locale={locale}
     />
@@ -117,7 +120,7 @@ export const PurchaseSummaryCard = ({
 const calculateTokens = (
   quantity: string,
   currentPrice: string | Decimal = '0.012',
-  publicPrice: string | Decimal = '0.3'
+  publicPrice: string | Decimal
 ) => {
   try {
     const PUBLIC_PRICE_PER_TOKEN = new Prisma.Decimal(publicPrice);
@@ -150,7 +153,12 @@ const calculateTokens = (
   }
 };
 
-export const DiscountBanner = () => {
+export const DiscountBanner = ({
+  sale,
+}: {
+  sale: Pick<SaleWithToken, 'comparisonPricePerUnit'>;
+}) => {
+  const comparisonPricePerUnit = sale?.comparisonPricePerUnit;
   const form = useFormContext() as unknown as UseAppForm;
   const { quantity, symbol, basePPU } = useStore(form.store, (state) => {
     // @ts-expect-error wontfix
@@ -166,10 +174,16 @@ export const DiscountBanner = () => {
     return null;
   }
 
-  const { base, bonus, total } = calculateTokens(quantity, basePPU);
+  if (!comparisonPricePerUnit) {
+    return null;
+  }
+  const { base, bonus, total } = calculateTokens(
+    quantity,
+    basePPU,
+    comparisonPricePerUnit
+  );
 
   const percentage = calculateBonusPercentage(base, total);
-
   return (
     <div className='p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg'>
       <div className='flex justify-between text-sm'>

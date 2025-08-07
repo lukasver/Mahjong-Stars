@@ -31,9 +31,10 @@ import { useRouter } from 'next/navigation';
 import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
 import { useAction } from 'next-safe-action/hooks';
 import { deleteOwnTransaction } from '@/lib/actions';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { getQueryClient } from '@/app/providers';
 import Image from 'next/image';
+import { TransactionStatus } from '@prisma/client';
 
 interface TokenModalProps {
   open: TransactionModalTypes | null;
@@ -112,7 +113,10 @@ export const TokenInvestModals = (props: TokenModalProps) => {
           {props.open === TransactionModalTypes.Contract && <SaftModal />}
           {props.open === TransactionModalTypes.Loading && <LoadingModal />}
           {props.open === TransactionModalTypes.PendingTx && (
-            <PendingTransactionModal sale={props.sale} />
+            <PendingTransactionModal
+              sale={props.sale}
+              onClose={() => props.handleModal(null)}
+            />
           )}
           {props.open === TransactionModalTypes.WalletLogin && (
             <WalletLoginModal />
@@ -152,7 +156,13 @@ const LoadingModal = () => {
   );
 };
 
-const PendingTransactionModal = ({ sale }: { sale: SaleWithToken }) => {
+const PendingTransactionModal = ({
+  sale,
+  onClose,
+}: {
+  sale: SaleWithToken;
+  onClose: () => void;
+}) => {
   const { data, isLoading } = usePendingTransactionsForSale(sale.id);
   const locale = useLocale();
   const router = useRouter();
@@ -168,6 +178,18 @@ const PendingTransactionModal = ({ sale }: { sale: SaleWithToken }) => {
       },
     }
   );
+
+  const tx = data?.transactions?.find(
+    (t) =>
+      t.status === TransactionStatus.PENDING ||
+      t.status === TransactionStatus.AWAITING_PAYMENT
+  );
+
+  useEffect(() => {
+    if (!tx && !isLoading) {
+      onClose?.();
+    }
+  }, [tx, isLoading]);
 
   if (isLoading) {
     return (
@@ -185,10 +207,9 @@ const PendingTransactionModal = ({ sale }: { sale: SaleWithToken }) => {
       </div>
     );
   }
-  const tx = data?.transactions[0];
 
   if (!tx) {
-    return <div>No pending transactions</div>;
+    return null;
   }
 
   const handleDeleteTx = () => {

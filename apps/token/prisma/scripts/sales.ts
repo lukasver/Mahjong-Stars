@@ -59,6 +59,7 @@ export async function seedOpenSale(prisma: PrismaClient) {
       availableTokenQuantity: 29_166_667,
       toWalletsAddress: process.env.NEXT_PUBLIC_TEST_WALLET!,
       tokenPricePerUnit: Prisma.Decimal('0.012'),
+      comparisonPricePerUnit: Prisma.Decimal('0.030'),
       saftCheckbox: false,
       status: SaleStatus.OPEN,
       tokenContractAddress: token.contractAddress,

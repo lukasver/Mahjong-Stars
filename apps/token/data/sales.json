@@ -17,6 +17,7 @@
     "tokenContractAddress": null,
     "tokenContractChainId": null,
     "tokenTotalSupply": "888888888",
+    "comparisonPricePerUnit": "0.030",
     "requiresKYC": true,
     "information": [
       {
@@ -89,6 +90,7 @@
     "tokenContractAddress": null,
     "tokenContractChainId": null,
     "tokenTotalSupply": "888888888",
+    "comparisonPricePerUnit": "0.030",
     "requiresKYC": true,
     "information": [
       {
@@ -161,6 +163,7 @@
     "tokenName": "Mahjong Stars Token",
     "tokenSymbol": "MJS",
     "tokenPricePerUnit": "0.018",
+    "comparisonPricePerUnit": "0.030",
     "toWalletsAddress": "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70",
     "saftCheckbox": true,
     "tokenContractAddress": null,
@@ -238,6 +241,7 @@
     "tokenName": "Mahjong Stars Token",
     "tokenSymbol": "MJS",
     "tokenPricePerUnit": "0.025",
+    "comparisonPricePerUnit": "0.030",
     "toWalletsAddress": "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70",
     "saftCheckbox": true,
     "tokenContractAddress": null,

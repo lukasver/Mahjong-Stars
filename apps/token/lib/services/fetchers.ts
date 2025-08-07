@@ -211,6 +211,7 @@ export const getSaleInvestInfo = async (id: string) => {
         | 'token'
         | 'requiresKYC'
         | 'tokenSymbol'
+        | 'comparisonPricePerUnit'
       > & {
         blockchain: Pick<Blockchain, 'chainId' | 'name'>;
       };

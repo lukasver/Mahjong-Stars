@@ -208,6 +208,8 @@ model Sale {
   tokenSymbol            String
   tokenTotalSupply       String?
   tokenPricePerUnit      Decimal       @db.Decimal(36, 18)
+  /// Used to compare calculate bonus gains comparing tokenPPU against this value
+  comparisonPricePerUnit Decimal?      @db.Decimal(36, 18)
   toWalletsAddress       String
   saleClosingDate        DateTime
   createdBy              String

@@ -11,6 +11,7 @@ import { InvestForm } from './form';
 import { DiscountBanner } from './summary';
 import { usePendingTransactionsForSale, useUser } from '@/lib/services/api';
 import { VerifyMandatoryEmail } from '@/components/buy/verify-mandatory-email';
+import { TransactionStatus } from '@prisma/client';
 
 export function Invest({ sale }: { sale: SaleWithToken }) {
   const [open, setOpen] = useState<TransactionModalTypes | null>(null);
@@ -19,7 +20,15 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
   const { data } = usePendingTransactionsForSale(sale.id);
 
   useEffect(() => {
-    if (data?.transactions.length && !open) {
+    if (
+      data?.transactions.length &&
+      data?.transactions.some(
+        (t) =>
+          t.status === TransactionStatus.PENDING ||
+          t.status === TransactionStatus.AWAITING_PAYMENT
+      ) &&
+      !open
+    ) {
       setOpen(TransactionModalTypes.PendingTx);
     }
   }, [data]);
@@ -32,7 +41,7 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
         )}
       >
         <InvestForm sale={sale} openModal={setOpen}>
-          <DiscountBanner />
+          <DiscountBanner sale={sale} />
         </InvestForm>
       </div>
       <TokenInvestModals open={open} handleModal={setOpen} sale={sale} />

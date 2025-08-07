@@ -815,6 +815,7 @@ class SalesController {
           availableTokenQuantity: true,
           maximumTokenBuyPerUser: true,
           minimumTokenBuyPerUser: true,
+          comparisonPricePerUnit: true,
           saleStartDate: true,
           tokenSymbol: true,
           saleClosingDate: true,

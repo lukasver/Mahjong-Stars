@@ -90,7 +90,7 @@ export const ProfileScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt'
 
 export const AddressScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','city','zipCode','country','state','street','formattedAddress','latitude','longitude']);
 
-export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','catchPhrase','bannerId','status','currency','initialTokenQuantity','availableTokenQuantity','maximumTokenBuyPerUser','minimumTokenBuyPerUser','saleStartDate','tokenContractAddress','tokenContractChainId','tokenId','tokenName','tokenSymbol','tokenTotalSupply','tokenPricePerUnit','toWalletsAddress','saleClosingDate','createdBy','saftCheckbox','requiresKYC','information']);
+export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','catchPhrase','bannerId','status','currency','initialTokenQuantity','availableTokenQuantity','maximumTokenBuyPerUser','minimumTokenBuyPerUser','saleStartDate','tokenContractAddress','tokenContractChainId','tokenId','tokenName','tokenSymbol','tokenTotalSupply','tokenPricePerUnit','comparisonPricePerUnit','toWalletsAddress','saleClosingDate','createdBy','saftCheckbox','requiresKYC','information']);
 
 export const SaftContractScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description','url','content','variables','version','parentId','isCurrent','saleId']);
 
@@ -315,6 +315,10 @@ export const SaleSchema = z.object({
   tokenSymbol: z.string(),
   tokenTotalSupply: z.string().nullable(),
   tokenPricePerUnit: z.instanceof(Prisma.Decimal, { message: "Field 'tokenPricePerUnit' must be a Decimal. Location: ['Models', 'Sale']"}),
+  /**
+   * Used to compare calculate bonus gains comparing tokenPPU against this value
+   */
+  comparisonPricePerUnit: z.instanceof(Prisma.Decimal, { message: "Field 'comparisonPricePerUnit' must be a Decimal. Location: ['Models', 'Sale']"}).nullable(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),

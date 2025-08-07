@@ -102,10 +102,10 @@ export const TokenInformation = ({
       const sale = data.sale;
 
       form.reset(sale);
-      if (sale.tokenContractChainId) {
+      if (sale?.tokenContractChainId) {
         form.setFieldValue('tokenContractChainId', sale.tokenContractChainId);
       }
-      if (sale.currency) {
+      if (sale?.currency) {
         form.setFieldValue('currency', sale.currency);
       }
     }

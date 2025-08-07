@@ -9,7 +9,7 @@ import {
 } from '@mjs/ui/primitives/form';
 import { FormInput } from '@mjs/ui/primitives/form-input';
 import useActiveAccount from '@/components/hooks/use-active-account';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { Button } from '@mjs/ui/primitives/button';
 import {
   useInputOptions,
@@ -93,7 +93,6 @@ export const InvestForm = ({
 
   const sale = data?.sale;
 
-  const t = useTranslations('Global');
   const locale = useLocale();
   const form = useAppForm({
     // @ts-expect-error fixme
