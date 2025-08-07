@@ -1,5 +1,5 @@
 import 'server-only';
-import { deleteSessionCookie, getSessionCookie } from '../auth/cookies';
+import { getSessionCookie } from '../auth/cookies';
 import { verifyJwt } from '../auth/thirdweb';
 import users from '../repositories/users';
 import transactions from '../repositories/transactions';
@@ -18,9 +18,7 @@ export const getUserFromSession = cache(async () => {
     .then((d) => verifyJwt(d || ''))
     .catch(() => null);
   if (!verified || !verified.valid) {
-    await deleteSessionCookie();
-    redirect('/');
-    throw new Error('Invalid session');
+    redirect('/in?error=invalid_session');
   }
   return getUserFromCache(verified.parsedJWT.sub);
 });

@@ -99,7 +99,7 @@ export const TransactionCancelledEmail = ({
               • No tokens will be transferred to your wallet
             </Text>
             <Text style={styles.listItem}>
-              • If you made a payment, a refund will be processed automatically
+              • If you made a payment, please request a refund via email
             </Text>
             <Text style={styles.listItem}>
               • You may attempt to purchase again if the sale is still active
@@ -116,21 +116,6 @@ export const TransactionCancelledEmail = ({
             <Button style={styles.button} href={`mailto:${supportEmail}`}>
               Contact Support
             </Button>
-          </Section>
-
-          <Section style={styles.nextStepsSection}>
-            <Heading style={styles.h3}>Support Information:</Heading>
-            <Text style={styles.paragraph}>
-              Our support team is available to help you with:
-            </Text>
-            <Text style={styles.listItem}>
-              • Clarifying the reason for cancellation
-            </Text>
-            <Text style={styles.listItem}>• Processing refund requests</Text>
-            <Text style={styles.listItem}>• Resolving technical issues</Text>
-            <Text style={styles.listItem}>
-              • Providing guidance for future purchases
-            </Text>
           </Section>
 
           <Hr style={styles.divider} />
