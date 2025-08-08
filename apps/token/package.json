@@ -44,9 +44,6 @@
 		"seed": "tsx prisma/seed.ts"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.844.0",
-		"@aws-sdk/s3-request-presigner": "^3.844.0",
-		"@coinbase/onchainkit": "latest",
 		"@documenso/sdk-typescript": "^0.3.1",
 		"@epic-web/invariant": "^1.0.0",
 		"@google-cloud/storage": "^7.16.0",
@@ -63,7 +60,6 @@
 		"@tanstack/react-store": "^0.7.3",
 		"@vercel/functions": "^2.2.2",
 		"@vercel/og": "^0.6.8",
-		"alchemy-sdk": "^3.5.9",
 		"cacheable": "^1.10.1",
 		"canvas-confetti": "^1.9.3",
 		"decimal.js": "^10.6.0",
@@ -80,19 +76,15 @@
 		"nuqs": "^2.4.3",
 		"pino": "^9.7.0",
 		"react": "19.1.0",
-		"react-blockies": "^1.4.1",
 		"react-dom": "^19.1.0",
-		"react-dropzone": "^14.2.3",
-		"react-easy-crop": "^5.0.5",
 		"resend": "^4.5.1",
 		"sanitize-html": "^2.17.0",
 		"server-only": "^0.0.1",
-		"sharp": "^0.34.2",
+		"sharp": "^0.34.3",
 		"thirdweb": "^5.102.0",
 		"usehooks-ts": "^3.1.1",
 		"xlsx": "^0.18.5",
 		"zod": "^3.25.67",
-		"zod-form-data": "^2.0.7",
 		"zod-prisma-types": "^3.2.4"
 	},
 	"browserslist": {
