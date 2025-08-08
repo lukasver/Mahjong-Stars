@@ -98,49 +98,56 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className={cn('w-full', className)}>
-      <div className={cn(headerClassName, 'flex items-center py-4')}>
+      <div
+        className={cn(
+          headerClassName,
+          'flex flex-col md:flex-row items-center py-2 md:py-4 gap-2'
+        )}
+      >
         {children}
 
-        {searchKey && (
-          <Input
-            placeholder={searchPlaceholder}
-            value={
-              (table.getColumn(searchKey)?.getFilterValue() as string) ?? ''
-            }
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
-            className='max-w-sm'
-          />
-        )}
-        {showColumnVisibility && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline' className='ml-auto'>
-                Columns <ChevronDown className='ml-2 h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className='capitaliz'
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <div className='flex items-center gap-2 w-full md:w-auto [&>*]:flex-1'>
+          {searchKey && (
+            <Input
+              placeholder={searchPlaceholder}
+              value={
+                (table.getColumn(searchKey)?.getFilterValue() as string) ?? ''
+              }
+              onChange={(event) =>
+                table.getColumn(searchKey)?.setFilterValue(event.target.value)
+              }
+              className='max-w-sm'
+            />
+          )}
+          {showColumnVisibility && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline' className='ml-auto w-full md:w-auto'>
+                  Columns <ChevronDown className='ml-2 h-4 w-4' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className='capitaliz'
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
       <div className='rounded-md border'>
         <Table>

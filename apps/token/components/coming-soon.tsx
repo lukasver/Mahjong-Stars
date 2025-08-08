@@ -35,14 +35,14 @@ export const ComingSoonContent = ({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center h-full w-full p-8 rounded-xl gap-6 -mt-10',
+        'flex flex-col items-center justify-center h-full w-full p-4 sm:p-6 md:p-8 rounded-xl gap-4 sm:gap-6 -mt-10',
         className
       )}
     >
-      <div className='w-24 flex justify-center'>
+      <div className='w-16 sm:w-20 md:w-24 flex justify-center'>
         <Logo variant='iconXl' />
       </div>
-      <h2 className='text-3xl font-semibold text-center leading-tight max-w-[70%] sm:max-w-full'>
+      <h2 className='text-xl sm:text-2xl md:text-3xl font-semibold text-center leading-tight max-w-full'>
         {t('soon')}
       </h2>
       {to && (

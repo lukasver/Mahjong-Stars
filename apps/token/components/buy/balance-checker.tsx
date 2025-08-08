@@ -159,12 +159,12 @@ export function BalanceChecker({
   return (
     <div className='space-y-4'>
       {/* Balance Display */}
-      <div className='space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600'>
+      <div className='space-y-3 p-3 sm:p-4 bg-slate-700/30 rounded-lg border border-slate-600'>
         <h4 className='text-white font-medium flex items-center gap-2'>
           <Wallet className='h-4 w-4' />
-          Wallet Balance
+          <span className='text-sm sm:text-base'>Wallet Balance</span>
         </h4>
-        <div className='space-y-2 text-sm'>
+        <div className='space-y-2 text-xs sm:text-sm'>
           <div className='flex justify-between'>
             <span className='text-gray-400'>Available Balance:</span>
             <div className='flex items-center gap-2'>
@@ -183,7 +183,9 @@ export function BalanceChecker({
                 )}
               </span>
               {hasInsufficientFunds && (
-                <Badge variant='destructive'>Insufficient</Badge>
+                <Badge variant='destructive' className='text-xs'>
+                  Insufficient
+                </Badge>
               )}
             </div>
           </div>
@@ -224,18 +226,20 @@ export function BalanceChecker({
             </div>
 
             <div className='space-y-2'>
-              <h5 className='text-base font-medium '>How to add funds:</h5>
-              <ul className='text-sm text-foreground space-y-1'>
+              <h5 className='text-sm sm:text-base font-medium'>
+                How to add funds:
+              </h5>
+              <ul className='text-xs sm:text-sm text-foreground space-y-1'>
                 {getAddFundsInstructions().map((instruction, index) => (
                   <li key={index} className='flex items-start gap-2'>
                     <span className='text-secondary mt-0.5'>•</span>
-                    <span>{instruction}</span>
+                    <span className='break-words'>{instruction}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className='flex gap-2 justify-end pt-2'>
+            <div className='flex flex-col sm:flex-row gap-2 justify-end pt-2'>
               <Button
                 size='sm'
                 variant='outline'

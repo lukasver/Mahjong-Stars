@@ -41,12 +41,12 @@ export const SearchBar = ({
     <div
       className={cn(
         className,
-        'bg-background relative flex min-w-[150px] flex-row items-center justify-end py-[1.5px]'
+        'bg-background relative flex min-w-[120px] sm:min-w-[150px] flex-row items-center justify-end py-[1.5px]'
       )}
     >
       <Input
         id='search-input'
-        className='w-full'
+        className='w-full text-sm sm:text-base'
         onChange={(e) => handleChange(e.target.value)}
         value={searchValue || ''}
         type='text'
@@ -54,10 +54,13 @@ export const SearchBar = ({
       />
       <span className='absolute right-2'>
         {searchValue && searchValue.length > 0 && !isPending && (
-          <Icons.x onClick={handleClear} className='ml-2 cursor-pointer' />
+          <Icons.x
+            onClick={handleClear}
+            className='ml-2 cursor-pointer h-4 w-4 sm:h-5 sm:w-5'
+          />
         )}
         {isPending && (searchValue || searchValue === '') && (
-          <Icons.loader className='text-primary ml-2 size-6 animate-spin' />
+          <Icons.loader className='text-primary ml-2 size-5 sm:size-6 animate-spin' />
         )}
       </span>
     </div>

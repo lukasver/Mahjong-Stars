@@ -197,7 +197,7 @@ export function ListSales({
   };
 
   return (
-    <div className={cn('flex-1 space-y-4 p-4', className)}>
+    <div className={cn('flex-1 space-y-4 md:p-4', className)}>
       {children}
 
       {/* Filters and Search */}
@@ -209,8 +209,12 @@ export function ListSales({
           duration: 0.6,
         }}
       >
-        <Card className={getGlassyCardClassName('shadow')}>
-          <CardHeader className='flex flex-col sm:flex-row gap-2 justify-between'>
+        <Card
+          className={getGlassyCardClassName(
+            'shadow max-w-[355px] sm:max-w-none w-full'
+          )}
+        >
+          <CardHeader className='flex flex-col sm:flex-row gap-2 justify-between p-4 md:p-6'>
             <motion.div
               className='flex flex-col'
               initial={{ opacity: 0, x: -20 }}
@@ -232,9 +236,9 @@ export function ListSales({
                 duration: 0.5,
               }}
             >
-              <div className='flex items-center space-x-2'>
+              <div className='flex items-center flex-col sm:flex-row gap-2 flex-1'>
                 <motion.div
-                  className='relative'
+                  className='relative w-full'
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{
@@ -242,15 +246,16 @@ export function ListSales({
                     duration: 0.4,
                   }}
                 >
-                  <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                  <Search className='absolute left-2 top-2.5 h-4 w-4 text-secondary' />
                   <Input
                     placeholder='Search sales...'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className='pl-8 w-[300px]'
+                    className='pl-8 w-full md:w-[300px]'
                   />
                 </motion.div>
                 <motion.div
+                  className='w-full'
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{
@@ -275,11 +280,11 @@ export function ListSales({
               </div>
             </motion.div>
           </CardHeader>
-          <CardContent className=''>
+          <CardContent className='p-0 md:p-6'>
             {/* Filter Summary */}
             {(searchTerm || statusFilter !== 'all') && (
               <motion.div
-                className='mb-4 flex items-center gap-2 text-sm text-muted-foreground'
+                className='mb-4 flex items-center gap-2 text-sm text-secondary'
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -302,7 +307,7 @@ export function ListSales({
 
             {/* Data Table */}
             <motion.div
-              className='rounded-md border bg-primary'
+              className='rounded-b border bg-primary flex justify-center sm:block sm:max-w-none w-full min-h-[30rem] max-h-screen h-full'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -346,7 +351,7 @@ export function ListSales({
                         <TableCell className='font-medium'>
                           <div>
                             <div className='font-medium'>{sale.name}</div>
-                            <div className='text-sm text-muted-foreground'>
+                            <div className='text-sm text-secondary'>
                               ID: {sale.id}
                             </div>
                           </div>
@@ -355,7 +360,7 @@ export function ListSales({
                         <TableCell>
                           <div>
                             <div className='font-medium'>{sale.tokenName}</div>
-                            <div className='text-sm text-muted-foreground'>
+                            <div className='text-sm text-secondary'>
                               {sale.tokenSymbol}
                             </div>
                           </div>
@@ -373,7 +378,7 @@ export function ListSales({
                                 locale,
                               })}
                             </div>
-                            <div className='text-sm text-muted-foreground'>
+                            <div className='text-sm text-secondary'>
                               of{' '}
                               {formatCurrency(sale.initialTokenQuantity, {
                                 locale,
@@ -389,7 +394,7 @@ export function ListSales({
                                 style={{ width: `${progress}%` }}
                               />
                             </div>
-                            <span className='text-sm text-muted-foreground min-w-[3rem]'>
+                            <span className='text-sm text-secondary min-w-[3rem]'>
                               {progress.toFixed(1)}%
                             </span>
                           </div>
@@ -524,7 +529,7 @@ export function ListSales({
                   duration: 0.4,
                 }}
               >
-                <p className='text-muted-foreground'>
+                <p className='text-secondary'>
                   No sales found matching your criteria.
                 </p>
                 {(searchTerm || statusFilter !== 'all') && (

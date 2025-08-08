@@ -15,7 +15,7 @@ export default function AdminTransactions({ saleId }: { saleId?: string }) {
 
   if (!data?.transactions) {
     return (
-      <div className='flex flex-col items-center justify-center h-full min-h-[60dvh]'>
+      <div className='flex flex-col items-center justify-center h-full min-h-screen md:min-h-[60dvh]'>
         <Placeholder
           icon={BanknoteArrowUp}
           title='No transactions found'

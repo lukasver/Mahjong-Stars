@@ -51,7 +51,7 @@ const featureCards: FeatureCard[] = [
  */
 export function FeatureCards() {
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-4 gap-4 md:gap-6'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6'>
       {featureCards.map((card, index) => (
         <motion.div
           key={card.id}
@@ -64,26 +64,26 @@ export function FeatureCards() {
           }}
           className={cn(
             'relative overflow-hidden rounded-lg border border-zinc-200/20 bg-zinc-900/50 backdrop-blur-sm',
-            'aspect-square p-4 flex flex-col justify-between',
+            'aspect-square p-3 sm:p-4 flex flex-col justify-between',
             'hover:border-zinc-200/40 transition-colors duration-300'
           )}
         >
-          <div className='flex-1 flex flex-col items-center justify-center text-center space-y-4'>
-            <div className='relative w-24 h-24 xl:w-28 xl:h-28'>
+          <div className='flex-1 flex flex-col items-center justify-center text-center space-y-3 sm:space-y-4'>
+            <div className='relative w-32 h-32 sm:w-32 sm:h-32 md:w-24 md:h-24 xl:w-28 xl:h-28'>
               <Image
                 src={card.imageSrc}
                 alt={card.imageAlt}
                 fill
                 className='object-contain'
-                sizes='(max-width: 768px) 96px, 128px'
+                sizes='(max-width: 640px) 64px, (max-width: 768px) 80px, (max-width: 1024px) 96px, 128px'
               />
             </div>
 
-            <div className='space-y-2'>
-              <h3 className='text-sm md:text-base font-bold text-white leading-tight'>
+            <div className='space-y-1 sm:space-y-2'>
+              <h3 className='text-xs sm:text-sm md:text-base font-bold text-white leading-tight'>
                 {card.title}
               </h3>
-              <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
+              <p className='text-xs text-zinc-300 leading-relaxed'>
                 {card.description}
               </p>
             </div>

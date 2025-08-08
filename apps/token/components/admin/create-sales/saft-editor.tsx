@@ -130,8 +130,8 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
 
       <div>
         <p className='mb-1'>Create new version</p>
-        <div className='grid grid-cols-3 gap-4'>
-          <div className='col-span-2'>
+        <div className='grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4'>
+          <div className='col-span-1 sm:col-span-2'>
             <form.Field
               name='content'
               // biome-ignore lint/correctness/noChildrenProp: <explanation>

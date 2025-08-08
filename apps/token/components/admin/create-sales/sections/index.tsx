@@ -139,7 +139,7 @@ export const TokenInformation = ({
         description='Manage basic information'
         className={className}
       >
-        <ul className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+        <ul className='grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4'>
           {Object.keys(formSchemaShape).map((key) => {
             const input = getInputProps(key as keyof typeof formSchemaShape, t);
             if (!input) {
@@ -148,11 +148,6 @@ export const TokenInformation = ({
             const { name, type, label, description, props, optionKey } = input;
             if (optionKey && options) {
               props.options = options[optionKey as keyof typeof options];
-              console.log(`🔧 Setting options for ${name}:`, {
-                optionKey,
-                options: options[optionKey as keyof typeof options],
-                formValue: form.getFieldValue(name),
-              });
             }
 
             return (
@@ -164,6 +159,7 @@ export const TokenInformation = ({
                   description={description}
                   message={true}
                   inputProps={props}
+                  descriptionClassName={'text-secondary'}
                 />
               </li>
             );
@@ -189,7 +185,7 @@ export const SaftInformation = ({
   }, []);
   if (!saleId) {
     //TODO! improve
-    return <div>No saleId</div>;
+    return <div>No saleId: Create the sale on the first step</div>;
   }
   return (
     <motion.div {...animation}>
@@ -394,6 +390,10 @@ export const PaymentInformation = ({
       handleAddBankToForm(saleBanks.banks as unknown as BankDetailsForm[]);
     }
   }, [saleBanks, isLoading]);
+
+  if (!saleId) {
+    return <div>No saleId: Create the sale on the first step</div>;
+  }
 
   return (
     <motion.div {...animation}>

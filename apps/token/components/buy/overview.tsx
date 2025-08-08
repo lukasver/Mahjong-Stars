@@ -113,10 +113,14 @@ const Row = ({
   render?: boolean;
 }) =>
   render ? (
-    <div className='flex justify-between items-center w-full'>
-      <span className='text-base font-medium text-secondary'>{title}</span>
+    <div className='flex justify-between items-center w-full gap-2'>
+      <span className='text-sm sm:text-base font-medium text-secondary break-words'>
+        {title}
+      </span>
       {value && (
-        <span className='text-sm text-foreground font-semibold'>{value}</span>
+        <span className='text-xs sm:text-sm text-foreground font-semibold break-words text-right'>
+          {value}
+        </span>
       )}
     </div>
   ) : null;

@@ -11,6 +11,8 @@ import {
   TransactionWithRelations,
 } from '@/common/types/transactions';
 import React from 'react';
+import { cn } from '@mjs/ui/lib/utils';
+import { motion, AnimatePresence } from '@mjs/ui/components/motion';
 
 interface TransactionFiltersProps {
   transactions?: TransactionWithRelations[] | AdminTransactionsWithRelations[];
@@ -18,6 +20,7 @@ interface TransactionFiltersProps {
   onFilteredDataChange?: (
     filteredData: (TransactionWithRelations | AdminTransactionsWithRelations)[]
   ) => void;
+  className?: string;
 }
 
 interface FilterState {
@@ -30,6 +33,7 @@ export const TransactionFilters = ({
   transactions,
   isAdmin = false,
   onFilteredDataChange,
+  className,
 }: TransactionFiltersProps) => {
   const transactionsRef = useRef(JSON.stringify(transactions));
 
@@ -158,86 +162,110 @@ export const TransactionFilters = ({
     transactionsRef.current = JSON.stringify(transactions);
   }, [isDifferent]);
 
+  const renderClearFilters =
+    debouncedSearchTerm ||
+    filters.statusFilter !== 'all' ||
+    filters.paymentTypeFilter !== 'all';
+
   return (
-    <>
-      {/* Filters and Search */}
-      <div className='flex flex-col sm:flex-row gap-2 justify-between'>
-        <div className='flex items-center space-x-2'>
-          <div className='relative'>
-            <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
-            <Input
-              placeholder='Search transactions...'
-              value={filters.searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className='pl-8 w-[300px]'
+    <div
+      className={cn(
+        className,
+        'flex flex-col sm:flex-row gap-2 justify-between'
+      )}
+    >
+      <div className='flex items-center gap-2 flex-col sm:flex-row'>
+        <div className='relative w-full sm:w-auto flex'>
+          <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+          <Input
+            placeholder='Search transactions...'
+            value={filters.searchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className='pl-8 w-full sm:w-[300px]'
+          />
+          {/* Clear filters button for mobile viewport */}
+          <div className='absolute -right-[58px] top-0 md:hidden!'>
+            <ClearButton
+              onClearFilters={handleClearFilters}
+              render={!!renderClearFilters}
+              className='md:hidden'
             />
           </div>
-          <SearchSelect
-            showAll={false}
-            placeholder='Status'
-            options={[
-              { label: 'All Status', value: 'all' },
-              { label: 'Pending', value: 'PENDING' },
-              { label: 'Awaiting Payment', value: 'AWAITING_PAYMENT' },
-              { label: 'Payment Submitted', value: 'PAYMENT_SUBMITTED' },
-              { label: 'Payment Verified', value: 'PAYMENT_VERIFIED' },
-              { label: 'Rejected', value: 'REJECTED' },
-              { label: 'Cancelled', value: 'CANCELLED' },
-              { label: 'Tokens Distributed', value: 'TOKENS_DISTRIBUTED' },
-              { label: 'Completed', value: 'COMPLETED' },
-              { label: 'Refunded', value: 'REFUNDED' },
-            ]}
-            onSearch={handleStatusFilterChange}
-            isFilter={true}
-          />
-          <SearchSelect
-            showAll={false}
-            placeholder='Payment Type'
-            options={[
-              { label: 'All Payment Types', value: 'all' },
-              { label: 'Crypto', value: 'CRYPTO' },
-              { label: 'Transfer', value: 'TRANSFER' },
-              // { label: 'Card', value: 'CARD' },
-            ]}
-            onSearch={handlePaymentTypeFilterChange}
-            isFilter={true}
-          />
-
-          {/* Clear filters button */}
-
-          {(debouncedSearchTerm ||
-            filters.statusFilter !== 'all' ||
-            filters.paymentTypeFilter !== 'all') && (
-            <Button variant='outline' onClick={handleClearFilters}>
-              <BrushCleaningIcon className='size-4' />
-              <span className='sr-only'>Clear filters</span>
-            </Button>
-          )}
         </div>
-      </div>
+        <SearchSelect
+          showAll={false}
+          placeholder='Status'
+          options={[
+            { label: 'All Status', value: 'all' },
+            { label: 'Pending', value: 'PENDING' },
+            { label: 'Awaiting Payment', value: 'AWAITING_PAYMENT' },
+            { label: 'Payment Submitted', value: 'PAYMENT_SUBMITTED' },
+            { label: 'Payment Verified', value: 'PAYMENT_VERIFIED' },
+            { label: 'Rejected', value: 'REJECTED' },
+            { label: 'Cancelled', value: 'CANCELLED' },
+            { label: 'Tokens Distributed', value: 'TOKENS_DISTRIBUTED' },
+            { label: 'Completed', value: 'COMPLETED' },
+            { label: 'Refunded', value: 'REFUNDED' },
+          ]}
+          onSearch={handleStatusFilterChange}
+          isFilter={true}
+        />
+        <SearchSelect
+          showAll={false}
+          placeholder='Payment Type'
+          options={[
+            { label: 'All Payment Types', value: 'all' },
+            { label: 'Crypto', value: 'CRYPTO' },
+            { label: 'Transfer', value: 'TRANSFER' },
+            // { label: 'Card', value: 'CARD' },
+          ]}
+          onSearch={handlePaymentTypeFilterChange}
+          isFilter={true}
+        />
 
-      {/* Filter Summary */}
-      {/* {(debouncedSearchTerm ||
-          filters.statusFilter !== 'all' ||
-          filters.paymentTypeFilter !== 'all') && (
-          <div className='mb-4 flex items-center gap-2 text-sm text-muted-foreground'>
-            <span>
-              Showing {filteredTransactions.length} of{' '}
-              {transactions?.length || 0} transactions
-            </span>
-            <span>•</span>
-            <span>
-              {debouncedSearchTerm && `Search: "${debouncedSearchTerm}"`}
-              {debouncedSearchTerm &&
-                (filters.statusFilter !== 'all' || filters.paymentTypeFilter !== 'all') &&
-                ' • '}
-              {filters.statusFilter !== 'all' && `Status: ${filters.statusFilter}`}
-              {filters.statusFilter !== 'all' && filters.paymentTypeFilter !== 'all' && ' • '}
-              {filters.paymentTypeFilter !== 'all' && `Payment: ${filters.paymentTypeFilter}`}
-            </span>
-          </div>
-        )} */}
-    </>
+        {/* Clear filters button for desktop viewport */}
+        <ClearButton
+          onClearFilters={handleClearFilters}
+          render={!!renderClearFilters}
+          className='hidden! md:block'
+        />
+      </div>
+    </div>
+  );
+};
+
+const ClearButton = ({
+  render,
+  onClearFilters,
+  className,
+}: {
+  onClearFilters: () => void;
+  className?: string;
+  render: boolean;
+}) => {
+  return (
+    <AnimatePresence>
+      {render && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{
+            duration: 0.2,
+            scale: { type: 'spring', visualDuration: 0.2, bounce: 0.1 },
+          }}
+        >
+          <Button
+            variant='outline'
+            onClick={onClearFilters}
+            className={className}
+          >
+            <BrushCleaningIcon className='size-4' />
+            <span className='sr-only'>Clear filters</span>
+          </Button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

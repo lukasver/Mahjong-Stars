@@ -45,11 +45,11 @@ export function IcoPhasesLoading() {
 export function RecentTransactionsLoading() {
   return (
     <Card className='border-zinc-800 bg-zinc-900/50'>
-      <CardHeader>
+      <CardHeader className='p-1 sm:p-6'>
         <CardTitle>Recent Transactions</CardTitle>
         <CardDescription>Latest token purchases and sales</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className='p-0 sm:p-6'>
         <div className='space-y-4'>
           <div className='rounded-md border border-zinc-800'>
             <div className='overflow-x-auto'>

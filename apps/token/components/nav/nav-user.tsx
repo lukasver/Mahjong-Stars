@@ -48,7 +48,7 @@ export function NavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className='w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg'
+            className='w-[--radix-dropdown-menu-trigger-width] min-w-48 sm:min-w-56 rounded-lg'
             side={isMobile ? 'bottom' : 'right'}
             align='end'
             sideOffset={4}
@@ -62,16 +62,16 @@ export function NavUser() {
                     isSiwe={!!user?.isSiwe}
                   />
                 </ErrorBoundary>
-                <div className='grid flex-1 text-left text-sm leading-tight gap-1'>
+                <div className='grid flex-1 text-left text-xs sm:text-sm leading-tight gap-1 min-w-0'>
                   {isLoading ? (
-                    <Skeleton className='w-24 h-4' />
+                    <Skeleton className='w-20 sm:w-24 h-3 sm:h-4' />
                   ) : (
                     <span className='truncate font-semibold'>
                       {user?.name || 'Anonymous'}
                     </span>
                   )}
                   {isLoading ? (
-                    <Skeleton className='w-36 h-3' />
+                    <Skeleton className='w-28 sm:w-36 h-2 sm:h-3' />
                   ) : user?.email ? (
                     <EmailIndicator
                       isSiwe={!!user?.isSiwe}
@@ -138,7 +138,7 @@ const EmailIndicator = (props: EmailIndicatorProps) => {
   if (!email) {
     return null;
   }
-  return <span className='truncate text-xs max-w-sm'>{email}</span>;
+  return <span className='truncate text-xs max-w-full'>{email}</span>;
 };
 
 type AvatarIndicatorProps = {
@@ -153,7 +153,7 @@ const AvatarIndicator = (props: AvatarIndicatorProps) => {
   }
 
   return (
-    <Avatar className='h-8 w-8 rounded-lg'>
+    <Avatar className='h-7 w-7 sm:h-8 sm:w-8 rounded-lg'>
       <AvatarImage src={image || MahjongStarsIcon.src} alt={name || 'Avatar'} />
       <AvatarFallback className='rounded-lg'>CN</AvatarFallback>
     </Avatar>

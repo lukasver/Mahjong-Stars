@@ -26,6 +26,12 @@ const config: PlaywrightTestConfig = {
     baseURL: process.env.CI
       ? process.env.PLAYWRIGHT_TEST_BASE_URL
       : `http://localhost:${process.env.PORT || 3000}`,
+    // https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation#examples
+    extraHTTPHeaders: {
+      'x-vercel-protection-bypass':
+        process.env.VERCEL_AUTOMATION_BYPASS_SECRET!,
+      'x-vercel-set-bypass-cookie': 'true',
+    },
   },
   projects: [project[0]!],
   testDir: './src/__tests__/',

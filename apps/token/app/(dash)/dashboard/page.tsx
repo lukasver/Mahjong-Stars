@@ -50,7 +50,7 @@ export default async function DashboardPage(_props: PageProps) {
       >
         {/* <Suspense fallback={<FundraisingProgressLoading />}> */}
         <FundraisingProgress>
-          <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4'>
             <Suspense fallback={<DashboardCardLoading />}>
               <UserTokensCard />
             </Suspense>
@@ -76,7 +76,7 @@ export default async function DashboardPage(_props: PageProps) {
         </div>
       </ErrorBoundary> */}
 
-      <div className='grid gap-6 lg:grid-cols-2'>
+      <div className='grid gap-4 sm:gap-6 lg:grid-cols-2'>
         {/* <TokenMetrics /> */}
         <Suspense fallback={<RecentTransactionsLoading />}>
           <RecentTransactionsSSR />

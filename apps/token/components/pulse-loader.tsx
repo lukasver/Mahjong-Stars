@@ -17,10 +17,12 @@ export function PulseLoader({
           width={80}
           src={MahjongStarsIconXl}
           alt='Mahjong Stars Logo'
-          className='animate-spin aspect-square'
+          className='animate-spin aspect-square w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20'
         />
       </span>
-      {children || <span className='text-xl font-bold font-head'>{text}</span>}
+      {children || (
+        <span className='text-lg sm:text-xl font-bold font-head'>{text}</span>
+      )}
     </div>
   );
 }

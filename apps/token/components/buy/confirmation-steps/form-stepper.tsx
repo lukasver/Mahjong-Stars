@@ -22,7 +22,7 @@ export function FormStepper({
   setStep,
 }: FormStepperProps) {
   return (
-    <Card className={getGlassyCardClassName('px-4')}>
+    <Card className={getGlassyCardClassName('px-2 sm:px-4')}>
       <Stepper
         currentStep={step}
         steps={steps}

@@ -93,7 +93,10 @@ export const NetworkStatusWithIcon = ({
       />
 
       <span
-        className={cn('text-sm font-medium', compact && 'hidden sm:inline')}
+        className={cn(
+          'text-xs sm:text-sm font-medium',
+          compact && 'hidden sm:inline'
+        )}
       >
         {statusInfo.name}
       </span>

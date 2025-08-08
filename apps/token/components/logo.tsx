@@ -28,6 +28,7 @@ export const Logo = ({
         height={80}
         width={100}
         priority
+        // className='w-auto h-6 sm:h-8 md:h-10'
       />
     </figure>
   );

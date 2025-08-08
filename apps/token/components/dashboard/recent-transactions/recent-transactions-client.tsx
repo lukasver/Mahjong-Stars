@@ -56,7 +56,7 @@ export function RecentTransactions({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
-          <CardHeader>
+          <CardHeader className=''>
             <CardTitle>Recent Transactions</CardTitle>
             <CardDescription>Latest token purchases and sales</CardDescription>
           </CardHeader>
@@ -67,7 +67,7 @@ export function RecentTransactions({
           transition={{ delay: 0.4, duration: 0.4 }}
           className='h-full max-h-[calc(100%-100px)] overflow-y-auto scrollbar-hidden'
         >
-          <CardContent>
+          <CardContent className='p-0 sm:p-6'>
             <div className='space-y-4'>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}

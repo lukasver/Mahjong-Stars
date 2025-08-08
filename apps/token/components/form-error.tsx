@@ -92,7 +92,7 @@ export const FormError = ({ type, title, message, icon }: FormErrorProps) => {
     <Alert className={content.className}>
       {content.icon}
       <AlertDescription className='text-white/90 space-y-1'>
-        <h4 className='text-sm font-medium text-red-800 dark:text-red-200'>
+        <h4 className='text-xs sm:text-sm font-medium text-red-800 dark:text-red-200'>
           {content.title}
         </h4>
         <p className='text-xs text-red-700 dark:text-red-300'>

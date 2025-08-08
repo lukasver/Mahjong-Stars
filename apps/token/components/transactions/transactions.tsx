@@ -106,7 +106,7 @@ export const Transactions = ({
       >
         <Card
           className={getGlassyCardClassName(
-            'mb-4 border border-gray-300/30 shadow-sm'
+            'mb-4 border border-gray-300/30 shadow-sm max-w-[calc(100vw-3%)] sm:max-w-none w-full'
           )}
         >
           <CardHeader>
@@ -120,7 +120,7 @@ export const Transactions = ({
                 }}
               >
                 <CardTitle className='text-foreground'>Transactions</CardTitle>
-                <CardDescription>
+                <CardDescription className='wrap-normal'>
                   Pending transactions will be automatically cancelled after 6
                   hours.
                 </CardDescription>
@@ -144,7 +144,7 @@ export const Transactions = ({
       </motion.div>
 
       <motion.div
-        className='min-h-[30rem] h-[75vh] mb-8'
+        className='max-w-[350px] flex justify-center sm:block sm:max-w-none w-full min-h-[30rem] max-h-screen h-full mb-8'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -161,7 +161,7 @@ export const Transactions = ({
           showColumnVisibility={true}
           initialColumnVisibility={initialColumnVisibility}
         >
-          <div className='flex items-center space-x-2 h-full flex-1 mr-2'>
+          <div className='flex items-center gap-2 w-full md:w-auto h-full flex-1 md:mr-2'>
             <motion.div
               className='flex-1'
               initial={{ opacity: 0, x: -10 }}
@@ -184,6 +184,7 @@ export const Transactions = ({
                 delay: 0.6,
                 duration: 0.5,
               }}
+              className='self-end md:self-center'
             >
               <DropdownMenu>
                 <Tooltip content='Export transactions'>

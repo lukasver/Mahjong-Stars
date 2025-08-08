@@ -28,20 +28,23 @@
 # Providers
 
 Infrastructure:
-• Vercel
+• [Vercel](https://vercel.com)
 
 Cronjobs:
-• Vercel
+• [Vercel](https://vercel.com/docs/cron-jobs)
 
 Document Signature:
-• Documenso
+• [Documenso](https://documenso.com)
 
 Storage:
-• GCP Cloud Storage
+• [GCP Cloud Storage](https://cloud.google.com/storage)
 
 PDF Generation:
-• @mjs/pdf-get @ GCP Cloud Run
+• [@mjs/pdf-gen](../packages/pdf-gen) @ [GCP Cloud Run](https://cloud.google.com/run)
 
 Exchange Rates:
-• Crypto: BNB Oracle
-• FIAT: cryptocompare.com
+• Crypto: [BNB Oracle](https://docs.bnbchain.org/docs/oracle-relayer)
+• FIAT: [cryptocompare.com](https://www.cryptocompare.com)
+
+Web3 & Auth:
+• [Thirdweb](https://thirdweb.com)

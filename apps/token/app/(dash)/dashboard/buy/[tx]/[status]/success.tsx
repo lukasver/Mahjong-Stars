@@ -38,7 +38,9 @@ const Success = () => {
     }
   }, [data?.transaction?.status, isLoading]);
 
-  return <SuccessContent className='min-h-[60dvh] grid place-content-center' />;
+  return (
+    <SuccessContent className='min-h-screen md:min-h-[60dvh] grid place-content-center' />
+  );
 };
 
 export default Success;

@@ -28,7 +28,7 @@ function SalesPageLoader() {
         </div>
       </header>
 
-      <main className='flex-1 space-y-4 p-4'>
+      <main className='flex-1 space-y-4 md:p-4'>
         {/* Stats Cards Loader */}
         <StatsCardsLoader />
 

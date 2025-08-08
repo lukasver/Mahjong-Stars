@@ -57,7 +57,7 @@ export function DateInput({ ...props }: DateInputProps) {
           variant='outline'
           data-empty={!value}
           className={cn(
-            'data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal w-full',
+            'data-[empty=true]:text-foreground w-[280px] justify-start text-left font-normal w-full',
             '[&>span]:flex [&>span]:flex-1 [&>span]:items-center [&>span]:justify-center [&>span]:gap-4',
             className
           )}

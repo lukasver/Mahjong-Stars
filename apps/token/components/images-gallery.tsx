@@ -36,14 +36,14 @@ function ImagesSection({ images }: { images: ImageItem[] }) {
 
   return (
     <>
-      <div className='columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4'>
+      <div className='columns-1 gap-2 sm:gap-4 sm:columns-2 xl:columns-3 2xl:columns-4'>
         {images.map(({ id, src }, idx) => {
           if (!isAbsoluteUrl(src)) return null;
           return (
             <Button
               key={id}
               variant='ghost'
-              className='after:content after:shadow-highlight group relative mb-5 block w-full cursor-zoom-in after:pointer-events-none after:absolute after:inset-0 after:rounded-lg p-0 h-auto'
+              className='after:content after:shadow-highlight group relative mb-3 sm:mb-5 block w-full cursor-zoom-in after:pointer-events-none after:absolute after:inset-0 after:rounded-lg p-0 h-auto'
               onClick={() =>
                 handleImageClick({ id, src, alt: `promo-image-${id}` })
               }
@@ -70,14 +70,14 @@ function ImagesSection({ images }: { images: ImageItem[] }) {
       {/* Image Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className='max-w-4xl max-h-[90vh] p-0'>
-          <DialogHeader className='absolute top-4 right-4 z-10'>
+          <DialogHeader className='absolute top-2 sm:top-4 right-2 sm:right-4 z-10'>
             <Button
               variant='ghost'
               size='icon'
               onClick={handleCloseModal}
-              className='h-8 w-8 rounded-full bg-black/50 text-white hover:bg-black/70'
+              className='h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-black/50 text-white hover:bg-black/70'
             >
-              <X className='h-4 w-4' />
+              <X className='h-3 w-3 sm:h-4 sm:w-4' />
               <span className='sr-only'>Close</span>
             </Button>
           </DialogHeader>

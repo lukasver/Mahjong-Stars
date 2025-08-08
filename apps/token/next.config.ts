@@ -1,6 +1,7 @@
 import bundleAnalyzer from '@next/bundle-analyzer';
 import { type NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import { publicUrl } from './common/config/env';
 
 const BUNDLE_ANALIZER_ON = process.env.ANALYZE === 'true';
 
@@ -19,8 +20,8 @@ const ANALYTICS_PROVIDERS = `eu.posthog.com`;
 const GOOGLE_CSP = `https://fonts.googleapis.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha https://www.google.com/recaptcha/enterprise.js https://www.gstatic.com/recaptcha/releases/`;
 const MAIN_DOMAIN =
   process.env.NODE_ENV === 'production'
-    ? `https://*.mahjongstars.com https://mjs-web.vercel.app`
-    : `https://*.mahjongstars.com https://*.vercel.app http://localhost:3000 http://proxyman.debug:3000`;
+    ? `https://*.mahjongstars.com https://mjs-web.vercel.app ${publicUrl}`
+    : `https://*.mahjongstars.com https://*.vercel.app http://localhost:3000`;
 const E_SIGN_DOMAIN = `https://*.documenso.com/`;
 const MINIO_DOMAIN =
   process.env.NODE_ENV === 'production' && process.env.IS_STAGE !== 'true'

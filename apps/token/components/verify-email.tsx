@@ -58,12 +58,16 @@ export function VerifyEmail({ token }: { token: string }) {
 
   return (
     <Card className={getGlassyCardClassName('shadow-2xl')}>
-      <CardHeader>
-        <CardTitle>{titleMapping[step]?.title}</CardTitle>
-        <CardDescription>{titleMapping[step]?.description}</CardDescription>
+      <CardHeader className='pb-3'>
+        <CardTitle className='text-lg sm:text-xl'>
+          {titleMapping[step]?.title}
+        </CardTitle>
+        <CardDescription className='text-sm'>
+          {titleMapping[step]?.description}
+        </CardDescription>
       </CardHeader>
 
-      <CardContent className='space-y-4'>
+      <CardContent className='space-y-3 sm:space-y-4'>
         <AnimatePresence>
           {step === 1 && (
             <MagicWordForm
