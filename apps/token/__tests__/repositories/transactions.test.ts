@@ -1,9 +1,30 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  afterAll,
+} from 'vitest';
 import nock from 'nock';
-import * as db from '@/lib/db/prisma';
-import { Prisma, SaleTransactions, Sale, SaftContract } from '@prisma/client';
+import { prisma as db } from '@/lib/db/prisma';
+import {
+  Prisma,
+  SaleTransactions,
+  Sale,
+  SaftContract,
+  TransactionStatus,
+  User,
+} from '@prisma/client';
 import TransactionsController from '@/lib/repositories/transactions';
-import { mockTransactions, mockUsers } from '../mocks/helpers';
+import {
+  createMockSaleWithToken,
+  mockProfile,
+  mockTransactions,
+  mockUsers,
+} from '../mocks/helpers';
+import { faker } from '@faker-js/faker';
 const Decimal = Prisma.Decimal;
 
 vi.mock('server-only', () => ({}));
@@ -43,13 +64,123 @@ function createCtx(overrides = {}) {
  * Mocks prisma, logger, and blocks HTTP. Uses vi for stubs.
  */
 describe('TransactionsController', () => {
-  beforeEach(() => {
+  let adminUser: User;
+  let regularUser: User;
+  let testSale: Sale;
+  let txs: SaleTransactions[] = [];
+
+  beforeEach(async () => {
     vi.restoreAllMocks();
+    // Clean up database before each test
+    await db.saleTransactions.deleteMany();
+    await db.sale.deleteMany();
+    await db.user.deleteMany();
+
+    const mUser = mockUsers();
+    // Create test data
+    adminUser = await db.user.create({
+      data: {
+        ...mUser,
+        profile: {
+          create: mockProfile(),
+        },
+        userRole: {
+          create: {
+            role: {
+              connectOrCreate: {
+                where: { name: 'ADMIN' },
+                create: { name: 'ADMIN' },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const mUserRegular = mockUsers();
+
+    regularUser = await db.user.create({
+      data: {
+        ...mUserRegular,
+        profile: {
+          create: mockProfile(),
+        },
+      },
+    });
+
+    const { sale, token } = await createMockSaleWithToken(db, {
+      userAddress: adminUser.walletAddress,
+      currency: 'USD',
+    });
+    testSale = sale;
+    // Create test transactions
+    txs = await db.saleTransactions.createManyAndReturn({
+      data: [
+        {
+          id: faker.string.uuid(),
+          tokenSymbol: 'TEST',
+          quantity: 100,
+          formOfPayment: 'CRYPTO',
+          receivingWallet: faker.finance.ethereumAddress(),
+          status: TransactionStatus.PENDING,
+          paidCurrency: 'ETH',
+          saleId: testSale.id,
+          userId: regularUser.id,
+          rawPrice: '150',
+          price: 1.5,
+          totalAmount: 150,
+        },
+        {
+          id: faker.string.uuid(),
+          tokenSymbol: 'TEST',
+          quantity: 200,
+          formOfPayment: 'TRANSFER',
+          receivingWallet: faker.finance.ethereumAddress(),
+          status: TransactionStatus.PAYMENT_VERIFIED,
+          paidCurrency: 'USD',
+          saleId: testSale.id,
+          userId: regularUser.id,
+          rawPrice: '300',
+          price: 1.5,
+          totalAmount: 300,
+          approvedBy: adminUser.id,
+        },
+      ],
+    });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     nock.cleanAll();
+  });
+
+  afterAll(async () => {
+    // Clean up after each test
+    if (txs.length > 0) {
+      await db.saleTransactions.deleteMany({
+        where: {
+          id: {
+            in: txs.map((tx) => tx.id),
+          },
+        },
+      });
+    }
+    if (testSale) {
+      await db.sale.deleteMany({
+        where: {
+          id: testSale.id,
+        },
+      });
+    }
+    if (adminUser?.id || regularUser?.id) {
+      await db.user.deleteMany({
+        where: {
+          id: {
+            in: [adminUser.id, regularUser.id],
+          },
+        },
+      });
+    }
   });
 
   describe('getAllTransactions', () => {
@@ -58,7 +189,7 @@ describe('TransactionsController', () => {
         mockTransactions(),
         mockTransactions(),
       ];
-      vi.spyOn(db.prisma.saleTransactions, 'findMany').mockResolvedValue(
+      vi.spyOn(db.saleTransactions, 'findMany').mockResolvedValue(
         fakeTransactions
       );
       const ctx = createCtx({ isAdmin: true });
@@ -97,15 +228,11 @@ describe('TransactionsController', () => {
         id: 'tx-1',
         quantity: new Prisma.Decimal(10),
       });
-      vi.spyOn(db.prisma.sale, 'findUnique').mockResolvedValue(sale as Sale);
-      vi.spyOn(db.prisma.saleTransactions, 'findFirst').mockResolvedValue(null);
-      vi.spyOn(db.prisma, '$transaction').mockImplementation(async (fn) =>
-        fn(db.prisma)
-      );
-      vi.spyOn(db.prisma.sale, 'update').mockResolvedValue(sale as Sale);
-      vi.spyOn(db.prisma.saleTransactions, 'create').mockResolvedValue(
-        transaction
-      );
+      vi.spyOn(db.sale, 'findUnique').mockResolvedValue(sale as Sale);
+      vi.spyOn(db.saleTransactions, 'findFirst').mockResolvedValue(null);
+      vi.spyOn(db, '$transaction').mockImplementation(async (fn) => fn(db));
+      vi.spyOn(db.sale, 'update').mockResolvedValue(sale as Sale);
+      vi.spyOn(db.saleTransactions, 'create').mockResolvedValue(transaction);
 
       const ctx = createCtx();
       const dto = {
@@ -127,7 +254,7 @@ describe('TransactionsController', () => {
     });
 
     it('returns failure if sale not found', async () => {
-      vi.spyOn(db.prisma.sale, 'findUnique').mockResolvedValue(null);
+      vi.spyOn(db.sale, 'findUnique').mockResolvedValue(null);
       const ctx = createCtx();
       const dto = {
         tokenSymbol: 'TKN',

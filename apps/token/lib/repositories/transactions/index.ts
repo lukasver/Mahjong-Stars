@@ -7,7 +7,6 @@ import { ActionCtx } from '@/common/schemas/dtos/sales';
 import {
   CreateTransactionDto,
   GetTransactionDto,
-  UpdateTransactionDto,
 } from '@/common/schemas/dtos/transactions';
 import {
   decimalsToString,
@@ -228,29 +227,6 @@ class TransactionsController {
     } catch (error) {
       logger(error);
       return Failure(error);
-    }
-  }
-
-  /**
-   * Update a transaction (admin only).
-   */
-  async updateTransactionStatus(
-    dto: { id: string; status: TransactionStatus },
-    ctx: ActionCtx
-  ) {
-    invariant(ctx.isAdmin, 'Forbidden');
-    invariant(dto.id, 'Id missing');
-    invariant(dto.status, 'Status missing');
-    try {
-      const transaction = await prisma.saleTransactions.update({
-        where: { id: String(dto.id) },
-        data: { status: dto.status },
-        include: { sale: true, user: { include: { profile: true } } },
-      });
-      return Success({ transaction });
-    } catch (e) {
-      logger(e);
-      return Failure(e);
     }
   }
 
@@ -494,20 +470,6 @@ class TransactionsController {
   }
 
   /**
-   * Delete all transactions (dev only).
-   */
-  async deleteAllTransactions() {
-    invariant(process.env.NODE_ENV === 'development', 'Forbidden');
-    try {
-      const transaction = await prisma.saleTransactions.deleteMany();
-      return Success({ transaction });
-    } catch (e) {
-      logger(e);
-      return Failure(e);
-    }
-  }
-
-  /**
    * Delete own transaction by id.
    */
   async deleteOwnTransaction(dto: { id: string }, ctx: ActionCtx) {
@@ -538,26 +500,6 @@ class TransactionsController {
       }
       await this.cancelTransactionAndRestoreUnits(tx, 'Cancelled by user');
       return Success({ id: tx.id });
-    } catch (e) {
-      logger(e);
-      return Failure(e);
-    }
-  }
-
-  /**
-   * Update a transaction by id.
-   */
-  async updateTransactionById(
-    dto: { id: string } & UpdateTransactionDto,
-    _ctx: ActionCtx
-  ) {
-    try {
-      invariant(dto.id, 'Transaction id missing');
-      const transaction = await prisma.saleTransactions.update({
-        where: { id: String(dto.id) },
-        data: { ...dto },
-      });
-      return Success({ transaction });
     } catch (e) {
       logger(e);
       return Failure(e);
@@ -711,36 +653,6 @@ class TransactionsController {
   };
 
   /**
-   * Get pending contact transactions for a user in the current open sale.
-   */
-  async pendingContactTransactions(_dto: unknown, ctx: ActionCtx) {
-    try {
-      invariant(ctx.userId, 'Not authorized');
-      const sale = await prisma.sale.findFirst({ where: { status: 'OPEN' } });
-      invariant(sale, 'There is no open sale');
-      const pendingTransaction = await prisma.saleTransactions.findFirst({
-        where: {
-          AND: [{ saleId: sale.id, userId: ctx.userId }, { status: 'PENDING' }],
-        },
-      });
-      invariant(pendingTransaction, 'There are no pending transactions');
-      let responseData = {};
-      if (pendingTransaction.agreementId) {
-        // const data = await urlContract(pendingTransaction.agreementId);
-        const data = { isSign: false, urlSign: null };
-        responseData = {
-          isSign: data.isSign || null,
-          urlSign: data.urlSign || null,
-        };
-      }
-      return Success(responseData);
-    } catch (e) {
-      logger(e);
-      return Failure(e);
-    }
-  }
-
-  /**
    * Get user transactions for a specific sale.
    */
   async userTransactionsForSale(
@@ -849,24 +761,6 @@ class TransactionsController {
 
       return Success({
         id: recipient.id,
-      });
-    } catch (e) {
-      logger(e);
-      return Failure(e);
-    }
-  }
-
-  async getContractForTransaction(
-    dto: { txId: string; recipientId: string },
-    _ctx: ActionCtx
-  ) {
-    try {
-      //TODO! add own user check?
-      const recipient = await prisma.documentRecipient.findUnique({
-        where: { id: dto.recipientId },
-      });
-      return Success({
-        recipient,
       });
     } catch (e) {
       logger(e);

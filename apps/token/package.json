@@ -38,6 +38,7 @@
 		"db:seed:prod": "dotenv -e .env.production.local -- npx prisma db seed -- --environment production",
 		"db:reset": "pnpm run db:push --force-reset && pnpm run db:seed && pnpm run db:generate",
 		"db:reset:stage": "dotenv -e .env.stage.local -- npx prisma db push && pnpm run db:seed:stage && pnpm run db:generate",
+		"db:reset:test": "dotenv -e .env.test -- npx prisma db push && pnpm run db:generate",
 		"check-types": "tsc -p tsconfig.json --noEmit"
 	},
 	"prisma": {
@@ -124,7 +125,6 @@
 		"tsx": "^4.20.3",
 		"typescript": "5.8.3",
 		"vite-tsconfig-paths": "^5.1.4",
-		"vitest": "^3.2.4",
-		"wrangler": "^4.24.3"
+		"vitest": "^3.2.4"
 	}
 }
