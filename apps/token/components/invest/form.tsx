@@ -1,40 +1,10 @@
 'use client';
 
-import { useCallback, useRef, useState, useTransition } from 'react';
-import {
-  UseAppForm,
-  useAppForm,
-  useFormContext,
-  useStore,
-} from '@mjs/ui/primitives/form';
-import { FormInput } from '@mjs/ui/primitives/form-input';
-import useActiveAccount from '@/components/hooks/use-active-account';
-import { useLocale } from 'next-intl';
-import { Button } from '@mjs/ui/primitives/button';
-import {
-  useInputOptions,
-  usePendingTransactionsForSale,
-  useSaleInvestInfo,
-  useUser,
-} from '@/lib/services/api';
-import calculator from '@/lib/services/pricefeeds';
-
-import { Prisma } from '@prisma/client';
-import { toast } from '@mjs/ui/primitives/sonner';
-import z from 'zod';
 import { invariant } from '@epic-web/invariant';
-import { SaleWithToken } from '@/common/types/sales';
-import { Account } from 'thirdweb/wallets';
-import { formatCurrency } from '@mjs/utils/client';
-import { FileText, Shield } from 'lucide-react';
-import { FIAT_CURRENCIES } from '@/common/config/constants';
 import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
-import { useAction } from 'next-safe-action/hooks';
-import { InvestFormSchema } from './schemas';
-import { createTransaction } from '@/lib/actions';
-import { InferSafeActionFnResult } from 'next-safe-action';
-import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@mjs/ui/primitives/alert';
+import { Button } from '@mjs/ui/primitives/button';
+import { Card, CardContent } from '@mjs/ui/primitives/card';
 import {
   Dialog,
   DialogContent,
@@ -42,14 +12,43 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@mjs/ui/primitives/dialog';
-import { PurchaseSummary } from './summary';
-import { TransactionModalTypes } from '@/common/types';
-import { getQueryClient } from '@/app/providers';
-
-import { Card, CardContent } from '@mjs/ui/primitives/card';
-import { Skeleton } from '@mjs/ui/primitives/skeleton';
+import {
+  UseAppForm,
+  useAppForm,
+  useFormContext,
+  useStore,
+} from '@mjs/ui/primitives/form';
+import { FormInput } from '@mjs/ui/primitives/form-input';
 import { Input } from '@mjs/ui/primitives/input';
+import { Skeleton } from '@mjs/ui/primitives/skeleton';
+import { toast } from '@mjs/ui/primitives/sonner';
+import { formatCurrency } from '@mjs/utils/client';
+import { Prisma } from '@prisma/client';
+import { FileText, Shield } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { InferSafeActionFnResult } from 'next-safe-action';
+import { useAction } from 'next-safe-action/hooks';
+import { useCallback, useRef, useState, useTransition } from 'react';
+import { Account } from 'thirdweb/wallets';
+import z from 'zod';
+import { getQueryClient } from '@/app/providers';
+import { FIAT_CURRENCIES } from '@/common/config/constants';
+import { TransactionModalTypes } from '@/common/types';
+import { SaleWithToken } from '@/common/types/sales';
 import { FormError, FormErrorProps } from '@/components/form-error';
+import useActiveAccount from '@/components/hooks/use-active-account';
+import { createTransaction } from '@/lib/actions';
+import {
+  useInputOptions,
+  usePendingTransactionsForSale,
+  useSaleInvestInfo,
+  useUser,
+} from '@/lib/services/api';
+import calculator from '@/lib/services/pricefeeds';
+import { InvestFormSchema } from './schemas';
+import { PurchaseSummary } from './summary';
+
 const Decimal = Prisma.Decimal;
 
 export const InvestForm = ({
@@ -133,14 +132,14 @@ export const InvestForm = ({
       return;
     }
     try {
-      // const token = getNetworkToken(chain, values.paymentCurrency);
-
       const { amount } = await calculator.calculateAmountToPay({
         currency: form.state.values.paid.currency,
         quantity: v,
         sale: sale,
         pricePerUnit: form.state.values.paid.ppu,
         tokenDecimals: sale?.token?.decimals || 18,
+        // Add fee if we have a BPS fee configured
+        addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
       });
 
       if (!amount) {
@@ -148,14 +147,7 @@ export const InvestForm = ({
           'Error calculating amount, please refresh and try again'
         );
       }
-
       form.setFieldValue('paid.amount', amount);
-      // setValue('quantity', quantity);
-      // setValue(
-      //   'paymentAmount',
-      //   isCryptoFOP ? amount : currency(amount, { precision: 2 }).toString()
-      // );
-      // setValue('paymentAmountCrypto', bigNumber || '');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Unknown error');
     }
@@ -207,6 +199,8 @@ export const InvestForm = ({
           quantity: String(q),
           sale: sale,
           currency,
+          // Add fee if we have a BPS fee configured
+          addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
           // tokenDecimals: decimals,
         });
         // form.reset({})

@@ -175,6 +175,7 @@ export class AmountCalculatorService {
    * @param boughtTokenCurrency {Currency}
    * @param tokenDecimals {number} amount of decimals of the token if is crypto payment
    * @param activeSale
+   * @param addFee {boolean} if true, the amount will be calculated with the management fee. By default addFee is true if sale currency is different from payment currency
    * @returns
    */
   calculateAmountToPay = async (args: {
@@ -183,6 +184,7 @@ export class AmountCalculatorService {
     sale: Pick<Sale, 'currency' | 'tokenPricePerUnit'>;
     pricePerUnit?: string | null;
     tokenDecimals?: number;
+    addFee?: boolean;
   }) => {
     const { quantity, currency, sale, pricePerUnit, tokenDecimals } = args;
 
@@ -197,7 +199,7 @@ export class AmountCalculatorService {
           currency: currency,
           base: sale.tokenPricePerUnit?.toString(),
           quantity: Number(quantity) || 1,
-          addFee: sale?.currency !== currency,
+          addFee: args.addFee || sale?.currency !== currency,
           precision: tokenDecimals,
         });
 
@@ -208,7 +210,7 @@ export class AmountCalculatorService {
       amountToPay = this.getTotalAmount({
         pricePerUnit: finalPPU,
         quantity: quantity || '0',
-        addFee: sale?.currency !== currency,
+        addFee: args.addFee || sale?.currency !== currency,
         precision: tokenDecimals,
       });
     }
