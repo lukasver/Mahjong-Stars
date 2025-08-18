@@ -1,3 +1,12 @@
+import { faker } from '@faker-js/faker';
+import {
+  Prisma,
+  PrismaClient,
+  Profile,
+  Sale,
+  TransactionStatus,
+} from '@prisma/client';
+import { defineChain } from 'thirdweb';
 import { CRYPTO_CURRENCIES, FIAT_CURRENCIES } from '@/common/config/constants';
 import { GetExchangeRate } from '@/common/schemas/dtos/rates';
 import {
@@ -11,10 +20,7 @@ import {
   ALLOWED_CHAINS,
   NETWORK_TO_TOKEN_MAPPING,
 } from '@/lib/services/crypto/config';
-import { faker } from '@faker-js/faker';
-import { PrismaClient, Profile, TransactionStatus } from '@prisma/client';
-import { Prisma } from '@prisma/client';
-import { defineChain } from 'thirdweb';
+
 const Decimal = Prisma.Decimal;
 
 export const mockExchangeRates: GetExchangeRate = {
@@ -104,7 +110,7 @@ export const mockTransactions = (data?: Partial<SaleTransactions>) => {
     paidCurrency: currency,
     approvedBy: null,
     txHash: isCrypto ? faker.finance.ethereumAddress() : null,
-    agreementId: faker.string.nanoid(25),
+    agreementId: null,
     blockchainId: null,
     totalAmount: paid,
     rejectionReason: null,
@@ -261,6 +267,12 @@ export const createMockSaleWithToken = async (
     },
     update: {},
     select: {
+      blockchain: {
+        select: {
+          id: true,
+          chainId: true,
+        },
+      },
       token: {
         select: {
           id: true,
@@ -307,4 +319,127 @@ export const createMockSaleWithToken = async (
     } as Prisma.SaleCreateInput,
   });
   return { sale: saleCreated, token: tobCreated };
+};
+
+/**
+ * Cleanup function to delete test context. It is required to pass which entities to delete to avoid deleting other tests context.
+ */
+export const cleanUpTestContext = async (
+  db: PrismaClient,
+  {
+    transactions,
+    sales,
+    users,
+  }: {
+    transactions?: SaleTransactions[];
+    sales?: Sale[];
+    users?: User[];
+  }
+) => {
+  console.time('[cleanUpTestContext]');
+  if (transactions?.length) {
+    const toDelete = transactions.map((tx) => tx?.id).filter(Boolean);
+    if (toDelete?.length) {
+      await db.saleTransactions.deleteMany({
+        where: {
+          id: {
+            in: toDelete,
+          },
+        },
+      });
+    }
+  }
+  if (sales?.length || transactions?.length) {
+    const toDelete = [
+      ...(sales?.map((sale) => sale?.id) || []),
+      ...(transactions?.map((tx) => tx?.saleId) || []),
+    ].filter(Boolean);
+    if (toDelete?.length) {
+      await db.sale.deleteMany({
+        where: {
+          id: { in: toDelete },
+        },
+      });
+    }
+  }
+  if (users && users?.filter((user) => user?.id)?.length) {
+    const toDelete = users.map((user) => user?.id).filter(Boolean);
+    if (toDelete?.length) {
+      await db.user.deleteMany({
+        where: {
+          id: {
+            in: toDelete,
+          },
+        },
+      });
+    }
+  }
+  console.timeEnd('[cleanUpTestContext]');
+};
+
+/**
+ * Create a test scenario with admin user, user, sale and transaction.
+ * Ideal to be used inside test hooks
+ */
+export const createScenario = async (db: PrismaClient) => {
+  const [adminUser, regularUser] = await Promise.all([
+    db.user.create({
+      data: {
+        ...mockUsers(),
+        profile: {
+          create: mockProfile(),
+        },
+        userRole: {
+          create: {
+            role: {
+              connectOrCreate: {
+                where: { name: 'ADMIN' },
+                create: { name: 'ADMIN' },
+              },
+            },
+          },
+        },
+      },
+    }),
+    db.user.create({
+      data: {
+        ...mockUsers({ email: 'test@example.com' }),
+        profile: {
+          create: mockProfile(),
+        },
+        emailVerified: true,
+      },
+    }),
+  ]);
+
+  const { sale, transaction, token } = await createMockSaleWithToken(db, {
+    userAddress: adminUser.walletAddress,
+    currency: 'USD',
+  }).then(async ({ sale, token }) => {
+    // biome-ignore lint/correctness/noUnusedVariables: destructured to remove id
+    const { id, ...tx } = mockTransactions({
+      blockchainId: token.blockchain.id,
+      tokenSymbol: token.token.symbol,
+    });
+
+    return {
+      token,
+      sale,
+      transaction: await db.saleTransactions.create({
+        data: {
+          ...tx,
+          saleId: sale.id,
+          userId: regularUser.id,
+        },
+      }),
+    };
+  });
+
+  return {
+    sale,
+    user: regularUser,
+    admin: adminUser,
+    transaction,
+    token,
+  };
 };

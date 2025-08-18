@@ -48,3 +48,9 @@ Exchange Rates:
 
 Web3 & Auth:
 • [Thirdweb](https://thirdweb.com)
+
+# Demos
+
+Admin flow: https://www.loom.com/share/5d7968aed3604c3db28897775104b937
+User purchase flow (FIAT): https://www.loom.com/share/c0bd4db6222f49c88a65d66432daf24e?sid=155e0949-2c04-458c-a285-87f3e59616c0
+User purchase flow (CRYPTO): https://www.loom.com/share/405a5d890deb4b06ad6b556920280867?sid=6e0b242a-99c8-4d33-8efb-c378810b4cea

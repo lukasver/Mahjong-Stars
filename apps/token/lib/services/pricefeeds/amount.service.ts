@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { BigNumberish, parseUnits } from 'ethers';
 import { FIAT_CURRENCIES } from '@/common/config/constants';
-import { Sale } from '@/common/schemas/generated';
 import { GetExchangeRate } from '@/common/schemas/dtos/rates';
+import { Sale } from '@/common/schemas/generated';
 
 const Decimal = Prisma.Decimal;
 
@@ -39,7 +39,12 @@ type GetRateFetcher = (
 export class AmountCalculatorService {
   public FIAT_PRECISION: number = 4;
   public CRYPTO_PRECISION: number = 8;
-  public BASIS_POINTS: number = new Decimal(2).div(10000).toNumber();
+  // 2 BPS or 0.02% or 0.0002 in decimal format
+  public BASIS_POINTS: number = new Decimal(
+    process.env.NEXT_PUBLIC_FEE_BPS || 2
+  )
+    .div(10000)
+    .toNumber();
   private getRateFetcher: GetRateFetcher;
 
   constructor(fetcher: GetRateFetcher) {

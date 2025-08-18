@@ -1,19 +1,17 @@
-import { DateTime } from 'luxon';
-import { prisma } from '@/db';
-import { HttpError } from '../errors';
-import HttpStatusCode from '../httpStatusCodes';
-
 import {
+  Blockchain,
   FOP,
+  Prisma,
   Sale,
   SaleStatus,
   SaleTransactions,
   TransactionStatus,
   User,
-  Blockchain,
-  Prisma,
 } from '@prisma/client';
 import Decimal from 'decimal.js';
+import { DateTime } from 'luxon';
+import { prisma } from '@/db';
+import { TransactionValidationError } from '../errors';
 
 const USER_SELECT_QUERY = {
   id: true,
@@ -39,23 +37,44 @@ export type UserPayload = Prisma.UserGetPayload<{
 }>;
 
 /**
+ * Interface for transaction creation data validation
+ */
+interface TransactionCreationData {
+  userId: string;
+  saleId: string;
+  tokenSymbol: string;
+  quantity: number;
+  formOfPayment: FOP;
+  totalAmount: Decimal | string;
+  paidCurrency: string;
+  receivingWallet?: string;
+  comment?: string;
+}
+
+/**
+ * Interface for transaction update data validation
+ */
+interface TransactionUpdateData {
+  txHash?: string;
+  blockchainId?: string;
+  comment?: string;
+  confirmationId?: string;
+  paymentEvidence?: string;
+  paymentDate?: Date;
+  rejectionReason?: string;
+  approvedBy?: string;
+}
+
+/**
  * Validates transaction creation and confirmation requirements
  */
 export class TransactionValidator {
   /**
    * Validates all conditions for creating a new transaction in PENDING state
    */
-  static async validateTransactionCreation(transactionData: {
-    userId: string;
-    saleId: string;
-    tokenSymbol: string;
-    quantity: number;
-    formOfPayment: FOP;
-    totalAmount: Decimal | string;
-    paidCurrency: string;
-    receivingWallet?: string;
-    comment?: string;
-  }): Promise<{
+  static async validateTransactionCreation(
+    transactionData: TransactionCreationData
+  ): Promise<{
     sale: Sale;
     user: UserPayload;
     pendingTransaction?: SaleTransactions | null;
@@ -65,7 +84,10 @@ export class TransactionValidator {
     const user = await this.validateUserExists(userId);
 
     if (!user) {
-      throw new HttpError(HttpStatusCode.NOT_FOUND, 'User not found');
+      throw new TransactionValidationError('CREATION', 'User not found', {
+        field: 'user',
+        value: userId,
+      });
     }
 
     // Validate required data
@@ -86,6 +108,9 @@ export class TransactionValidator {
     // Validate user-specific rules
     // this.validateUserSpecificRules(user, quantity, sale);
 
+    // Validate KYC requirements if sale requires KYC
+    this.validateKYCRequirements(sale, user);
+
     // Validate SAFT contract requirements
     await this.validateSaftContractRequirements(sale, user);
 
@@ -102,16 +127,7 @@ export class TransactionValidator {
   static async validateTransactionStatusUpdate(
     transactionId: string,
     newStatus: TransactionStatus,
-    updateData?: {
-      txHash?: string;
-      blockchainId?: string;
-      comment?: string;
-      confirmationId?: string;
-      paymentEvidence?: string;
-      paymentDate?: Date;
-      rejectionReason?: string;
-      approvedBy?: string;
-    }
+    updateData?: TransactionUpdateData
   ): Promise<{
     transaction: SaleTransactions & {
       sale: Sale;
@@ -192,36 +208,64 @@ export class TransactionValidator {
 
   // Private validation methods
 
-  private static validateRequiredData(transactionData: any): void {
+  private static validateRequiredData(
+    transactionData: TransactionCreationData
+  ): void {
     if (!transactionData.userId || !transactionData.saleId) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        'Transaction data missing or incomplete'
+      throw new TransactionValidationError(
+        'CREATION',
+        'Transaction data missing or incomplete',
+        {
+          field: transactionData.userId ? 'saleId' : 'userId',
+          value: transactionData.userId || transactionData.saleId,
+        }
       );
     }
 
     if (!transactionData.quantity || transactionData.quantity <= 0) {
-      throw new HttpError(HttpStatusCode.BAD_REQUEST, 'Invalid token quantity');
+      throw new TransactionValidationError(
+        'CREATION',
+        'Invalid token quantity',
+        {
+          field: 'quantity',
+          value: transactionData.quantity,
+        }
+      );
     }
 
     if (!transactionData.formOfPayment) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        'Form of payment is required'
+      throw new TransactionValidationError(
+        'CREATION',
+        'Form of payment is required',
+        {
+          field: 'formOfPayment',
+          value: transactionData.formOfPayment,
+        }
       );
     }
 
     if (!transactionData.totalAmount || !transactionData.paidCurrency) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        'Payment amount and currency are required'
+      throw new TransactionValidationError(
+        'CREATION',
+        'Payment amount and currency are required',
+        {
+          field: transactionData.totalAmount ? 'paidCurrency' : 'totalAmount',
+          value: {
+            totalAmount: transactionData.totalAmount,
+            paidCurrency: transactionData.paidCurrency,
+          },
+        }
       );
     }
 
     if (!transactionData.tokenSymbol) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        'Token symbol is required'
+      throw new TransactionValidationError(
+        'CREATION',
+        'Token symbol is required',
+        {
+          field: 'tokenSymbol',
+          value: transactionData.tokenSymbol,
+        }
       );
     }
   }
@@ -232,7 +276,10 @@ export class TransactionValidator {
     });
 
     if (!sale) {
-      throw new HttpError(HttpStatusCode.BAD_REQUEST, 'Sale not found');
+      throw new TransactionValidationError('CREATION', 'Sale not found', {
+        field: 'sale',
+        value: saleId,
+      });
     }
 
     return sale;
@@ -240,9 +287,14 @@ export class TransactionValidator {
 
   private static validateSaleStatus(sale: Sale): void {
     if (sale.status !== SaleStatus.OPEN) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        `Sale is not open for transactions. Current status: ${sale.status}`
+      throw new TransactionValidationError(
+        'CREATION',
+        `Sale is not open for transactions. Current status: ${sale.status}`,
+        {
+          field: 'sale',
+          value: sale.id,
+          currentStatus: sale.status,
+        }
       );
     }
   }
@@ -252,34 +304,57 @@ export class TransactionValidator {
       sale.availableTokenQuantity !== null &&
       sale.availableTokenQuantity < quantity
     ) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
+      throw new TransactionValidationError(
+        'CREATION',
         'Cannot buy more tokens than available amount',
-        sale
+        {
+          field: 'sale',
+          value: sale.id,
+          requestedQuantity: quantity,
+          availableQuantity: sale.availableTokenQuantity,
+        }
       );
     }
 
     // Validate minimum token buy per user
     if (quantity < sale.minimumTokenBuyPerUser) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        `Minimum token buy per user is ${sale.minimumTokenBuyPerUser}`
+      throw new TransactionValidationError(
+        'CREATION',
+        `Minimum token buy per user is ${sale.minimumTokenBuyPerUser}`,
+        {
+          field: 'sale',
+          value: sale.id,
+          requestedQuantity: quantity,
+          minimumRequired: sale.minimumTokenBuyPerUser,
+        }
       );
     }
 
     // Validate maximum token buy per user if set
     if (sale.maximumTokenBuyPerUser && quantity > sale.maximumTokenBuyPerUser) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        `Maximum token buy per user is ${sale.maximumTokenBuyPerUser}`
+      throw new TransactionValidationError(
+        'CREATION',
+        `Maximum token buy per user is ${sale.maximumTokenBuyPerUser}`,
+        {
+          field: 'sale',
+          value: sale.id,
+          requestedQuantity: quantity,
+          maximumAllowed: sale.maximumTokenBuyPerUser,
+        }
       );
     }
   }
 
   static validateSaleDateNotExpired(sale: Pick<Sale, 'saleClosingDate'>): void {
     if (DateTime.fromJSDate(sale.saleClosingDate) <= DateTime.now()) {
-      throw new Error(
-        `Sale closing date is in the past: ${sale.saleClosingDate}`
+      throw new TransactionValidationError(
+        'CREATION',
+        `Sale closing date is in the past: ${sale.saleClosingDate}`,
+        {
+          field: 'sale',
+          value: 'unknown',
+          saleClosingDate: sale.saleClosingDate,
+        }
       );
     }
   }
@@ -295,7 +370,10 @@ export class TransactionValidator {
     });
 
     if (!user) {
-      throw new HttpError(HttpStatusCode.BAD_REQUEST, 'User not found');
+      throw new TransactionValidationError('CREATION', 'User not found', {
+        field: 'user',
+        value: userId,
+      });
     }
     return user;
   }
@@ -313,10 +391,16 @@ export class TransactionValidator {
     });
 
     if (pendingTransaction) {
-      throw new HttpError(
-        HttpStatusCode.CONFLICT,
+      throw new TransactionValidationError(
+        'CREATION',
         'Cannot create a new transaction if user has a pending one',
-        { transaction: pendingTransaction }
+        {
+          field: 'user',
+          value: userId,
+          saleId,
+          pendingTransactionId: pendingTransaction.id,
+          transaction: pendingTransaction,
+        }
       );
     }
 
@@ -349,16 +433,36 @@ export class TransactionValidator {
   //   }
   // }
 
-  // private static validateKYCRequirements(user: UserPayload): void {
-  //   return; // NOT ENABLED FOR NOW
-  // Check if user has completed KYC verification
-  // if (!user.kycVerification || user?.kycVerification?.status !== 'VERIFIED') {
-  //   throw new HttpError(
-  //     HttpStatusCode.BAD_REQUEST,
-  //     'KYC verification is required for this sale'
-  //   );
-  // }
-  // }
+  private static validateKYCRequirements(sale: Sale, user: UserPayload): void {
+    // Transaction is allowed to proceed if KYC is not done since user will be prompted to update its documents.
+    if (sale.requiresKYC) {
+      if (!user.email) {
+        throw new TransactionValidationError(
+          'CREATION',
+          'User email is required for KYC verification',
+          {
+            field: 'user',
+            value: user.id,
+            saleId: sale.id,
+            requiresKYC: true,
+          }
+        );
+      }
+      if (!user.emailVerified) {
+        throw new TransactionValidationError(
+          'CREATION',
+          'User email must be verified for KYC verification',
+          {
+            field: 'user',
+            value: user.id,
+            saleId: sale.id,
+            requiresKYC: true,
+            emailVerified: false,
+          }
+        );
+      }
+    }
+  }
 
   private static async validateSaftContractRequirements(
     sale: Sale,
@@ -366,15 +470,28 @@ export class TransactionValidator {
   ): Promise<void> {
     if (sale.saftCheckbox) {
       if (!userData?.email) {
-        throw new HttpError(
-          HttpStatusCode.BAD_REQUEST,
-          'User email is required for SAFT contract, please validate your email'
+        throw new TransactionValidationError(
+          'CREATION',
+          'User email is required for SAFT contract, please validate your email',
+          {
+            field: 'user',
+            value: userData.id,
+            saleId: sale.id,
+            requiresSaft: true,
+          }
         );
       }
       if (!userData.emailVerified) {
-        throw new HttpError(
-          HttpStatusCode.BAD_REQUEST,
-          'User email is required for SAFT contract, please validate your email'
+        throw new TransactionValidationError(
+          'CREATION',
+          'User email is required for SAFT contract, please validate your email',
+          {
+            field: 'user',
+            value: userData.id,
+            saleId: sale.id,
+            requiresSaft: true,
+            emailVerified: false,
+          }
         );
       }
     }
@@ -401,7 +518,14 @@ export class TransactionValidator {
     });
 
     if (!transaction) {
-      throw new HttpError(HttpStatusCode.NOT_FOUND, 'Transaction not found');
+      throw new TransactionValidationError(
+        'STATUS_UPDATE',
+        'Transaction not found',
+        {
+          field: 'transaction',
+          value: transactionId,
+        }
+      );
     }
 
     return transaction;
@@ -445,23 +569,32 @@ export class TransactionValidator {
     const allowedTransitions = validTransitions[currentStatus];
 
     if (!allowedTransitions.includes(newStatus)) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        `Invalid status transition from ${currentStatus} to ${newStatus}`
+      throw new TransactionValidationError(
+        'STATUS_UPDATE',
+        `Invalid status transition from ${currentStatus} to ${newStatus}`,
+        {
+          field: 'status',
+          value: { from: currentStatus, to: newStatus },
+          allowedTransitions,
+        }
       );
     }
   }
 
   private static validateTransactionUpdateData(
     newStatus: TransactionStatus,
-    updateData?: any
+    updateData?: TransactionUpdateData
   ): void {
     // Validate required data for specific status transitions
     if (newStatus === TransactionStatus.PAYMENT_SUBMITTED) {
       if (!updateData?.paymentEvidence) {
-        throw new HttpError(
-          HttpStatusCode.BAD_REQUEST,
-          'Payment evidence is required for PAYMENT_SUBMITTED status'
+        throw new TransactionValidationError(
+          'STATUS_UPDATE',
+          'Payment evidence is required for PAYMENT_SUBMITTED status',
+          {
+            field: 'paymentEvidence',
+            value: updateData?.paymentEvidence,
+          }
         );
       }
     }
@@ -471,18 +604,26 @@ export class TransactionValidator {
       updateData?.txHash
     ) {
       if (!updateData?.blockchainId) {
-        throw new HttpError(
-          HttpStatusCode.BAD_REQUEST,
-          'Blockchain ID is required when providing transaction hash'
+        throw new TransactionValidationError(
+          'STATUS_UPDATE',
+          'Blockchain ID is required when providing transaction hash',
+          {
+            field: 'blockchainId',
+            value: updateData?.blockchainId,
+          }
         );
       }
     }
 
     if (newStatus === TransactionStatus.REJECTED) {
       if (!updateData?.rejectionReason) {
-        throw new HttpError(
-          HttpStatusCode.BAD_REQUEST,
-          'Rejection reason is required for REJECTED status'
+        throw new TransactionValidationError(
+          'STATUS_UPDATE',
+          'Rejection reason is required for REJECTED status',
+          {
+            field: 'rejectionReason',
+            value: updateData?.rejectionReason,
+          }
         );
       }
     }
@@ -494,9 +635,14 @@ export class TransactionValidator {
   ): Promise<void> {
     // Validate transaction hash format
     if (!updateData.txHash.match(/^0x[a-fA-F0-9]{64}$/)) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        'Invalid transaction hash format'
+      throw new TransactionValidationError(
+        'STATUS_UPDATE',
+        'Invalid transaction hash format',
+        {
+          field: 'txHash',
+          value: updateData.txHash,
+          expectedFormat: '0x followed by 64 hexadecimal characters',
+        }
       );
     }
 
@@ -506,13 +652,25 @@ export class TransactionValidator {
     });
 
     if (!blockchain) {
-      throw new HttpError(HttpStatusCode.BAD_REQUEST, 'Blockchain not found');
+      throw new TransactionValidationError(
+        'STATUS_UPDATE',
+        'Blockchain not found',
+        {
+          field: 'blockchainId',
+          value: updateData.blockchainId,
+        }
+      );
     }
 
     if (!blockchain.isEnabled) {
-      throw new HttpError(
-        HttpStatusCode.BAD_REQUEST,
-        'Blockchain is not enabled'
+      throw new TransactionValidationError(
+        'STATUS_UPDATE',
+        'Blockchain is not enabled',
+        {
+          field: 'blockchainId',
+          value: updateData.blockchainId,
+          isEnabled: blockchain.isEnabled,
+        }
       );
     }
 
@@ -526,9 +684,15 @@ export class TransactionValidator {
     });
 
     if (existingTransaction) {
-      throw new HttpError(
-        HttpStatusCode.CONFLICT,
-        'Transaction hash already exists'
+      throw new TransactionValidationError(
+        'STATUS_UPDATE',
+        'Transaction hash already exists',
+        {
+          field: 'txHash',
+          value: updateData.txHash,
+          blockchainId: updateData.blockchainId,
+          existingTransactionId: existingTransaction.id,
+        }
       );
     }
   }

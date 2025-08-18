@@ -19,12 +19,15 @@ import {
 } from '@prisma/client';
 import TransactionsController from '@/lib/repositories/transactions';
 import {
+  cleanUpTestContext,
   createMockSaleWithToken,
   mockProfile,
   mockTransactions,
   mockUsers,
 } from '../mocks/helpers';
 import { faker } from '@faker-js/faker';
+import { CreateTransactionDto } from '@/common/schemas/dtos/transactions';
+import { decimalsToString } from '@/common/schemas/dtos/utils';
 const Decimal = Prisma.Decimal;
 
 vi.mock('server-only', () => ({}));
@@ -72,9 +75,11 @@ describe('TransactionsController', () => {
   beforeEach(async () => {
     vi.restoreAllMocks();
     // Clean up database before each test
-    await db.saleTransactions.deleteMany();
-    await db.sale.deleteMany();
-    await db.user.deleteMany();
+    await cleanUpTestContext(db, {
+      transactions: txs,
+      sales: [testSale],
+      users: [adminUser, regularUser],
+    });
 
     const mUser = mockUsers();
     // Create test data
@@ -108,7 +113,7 @@ describe('TransactionsController', () => {
       },
     });
 
-    const { sale, token } = await createMockSaleWithToken(db, {
+    const { sale } = await createMockSaleWithToken(db, {
       userAddress: adminUser.walletAddress,
       currency: 'USD',
     });
@@ -195,7 +200,9 @@ describe('TransactionsController', () => {
       const ctx = createCtx({ isAdmin: true });
       const result = await TransactionsController.getAllTransactions({}, ctx);
       if (result.success) {
-        expect(result.data.transactions).toEqual(fakeTransactions);
+        expect(result.data.transactions).toEqual(
+          decimalsToString(fakeTransactions)
+        );
         expect(result.data.quantity).toBe(2);
       } else {
         throw new Error('Expected success but got failure');
@@ -230,9 +237,19 @@ describe('TransactionsController', () => {
       });
       vi.spyOn(db.sale, 'findUnique').mockResolvedValue(sale as Sale);
       vi.spyOn(db.saleTransactions, 'findFirst').mockResolvedValue(null);
-      vi.spyOn(db, '$transaction').mockImplementation(async (fn) => fn(db));
+      vi.spyOn(db, '$transaction').mockImplementation(async (input) => {
+        if (Array.isArray(input)) {
+          // Handle array-based syntax: prisma.$transaction([promise1, promise2, ...])
+          return Promise.all(input);
+        } else if (typeof input === 'function') {
+          // Handle function-based syntax: prisma.$transaction(async (tx) => { ... })
+          return input(db);
+        }
+        throw new Error('Invalid $transaction input');
+      });
       vi.spyOn(db.sale, 'update').mockResolvedValue(sale as Sale);
       vi.spyOn(db.saleTransactions, 'create').mockResolvedValue(transaction);
+      vi.spyOn(db.user, 'findUnique').mockResolvedValue(regularUser);
 
       const ctx = createCtx();
       const dto = {
@@ -242,10 +259,14 @@ describe('TransactionsController', () => {
         receivingWallet: null,
         saleId: 'sale-1',
         comment: null,
-        amountPaid: '10',
+        totalAmount: new Prisma.Decimal(10),
         paidCurrency: 'USD',
-      };
+      } satisfies CreateTransactionDto;
+
       const result = await TransactionsController.createTransaction(dto, ctx);
+
+      console.log('🚀 ~ transactions.test.ts:250 ~ result:', result);
+
       if (result.success) {
         expect(result.data.transaction).toBeDefined();
       } else {
@@ -266,6 +287,7 @@ describe('TransactionsController', () => {
         amountPaid: '10',
         paidCurrency: 'USD',
       };
+      // @ts-expect-error - test
       const result = await TransactionsController.createTransaction(dto, ctx);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -288,8 +310,7 @@ describe('TransactionsController', () => {
         totalAmount: new Prisma.Decimal(1234.5678),
       });
       const user = mockUsers({ email: 'test@example.com' });
-      // @ts-expect-error: mockUsers returns a shape with profile
-      const profile = user.profile;
+      const profile = mockProfile();
       const address = {
         city: 'TestCity',
         zipCode: '12345',
@@ -320,9 +341,9 @@ describe('TransactionsController', () => {
         </div>
       `;
       // The controller expects variables to be of type SaftContract["variables"], but does not use it. Pass as empty object with test-only workaround.
-      const variables = {} as SaftContract['variables'];
+      // const variables = {} as SaftContract['variables'];
       // Act
-      const { contract, variables: resultVars } =
+      const { contract, variables } =
         TransactionsController.parseTransactionVariablesToContract({
           tx,
           user,
@@ -330,7 +351,6 @@ describe('TransactionsController', () => {
           address,
           sale,
           contract: contractTemplate,
-          variables,
           inputVariables: {},
         });
 
@@ -346,26 +366,26 @@ describe('TransactionsController', () => {
       expect(contract).toContain(tx.quantity.toString());
       expect(contract).toContain(tx.tokenSymbol);
       expect(contract).toContain(tx.paidCurrency);
-      expect(contract).toContain(resultVars.paid.amount);
+      expect(contract).toContain(variables.paid.amount);
       expect(contract).toContain(sale.currency);
-      expect(contract).toContain(resultVars.sale.equivalentAmount);
-      expect(contract).toContain(resultVars['date']);
+      expect(contract).toContain(variables.sale.equivalentAmount);
+      expect(contract).toContain(variables['date']);
       // Assert: variables object contains all expected keys
-      expect(resultVars.recipient.firstName).toBe(profile.firstName);
-      expect(resultVars.recipient.lastName).toBe(profile.lastName);
-      expect(resultVars.recipient.email).toBe(user.email);
-      expect(resultVars.recipient.city).toBe(address.city);
-      expect(resultVars.recipient.zipcode).toBe(address.zipCode);
-      expect(resultVars.recipient.state).toBe(address.state);
-      expect(resultVars.recipient.country).toBe(address.country);
-      expect(resultVars.token.quantity).toBe(tx.quantity.toString());
-      expect(resultVars.token.symbol).toBe(tx.tokenSymbol);
-      expect(resultVars.paid.currency).toBe(tx.paidCurrency);
-      expect(resultVars.sale.currency).toBe(sale.currency);
-      expect(resultVars.sale.equivalentAmount).toBe(
+      expect(variables.recipient.firstName).toBe(profile.firstName);
+      expect(variables.recipient.lastName).toBe(profile.lastName);
+      expect(variables.recipient.email).toBe(user.email);
+      expect(variables.recipient.city).toBe(address.city);
+      expect(variables.recipient.zipcode).toBe(address.zipCode);
+      expect(variables.recipient.state).toBe(address.state);
+      expect(variables.recipient.country).toBe(address.country);
+      expect(variables.token.quantity).toBe(tx.quantity.toString());
+      expect(variables.token.symbol).toBe(tx.tokenSymbol);
+      expect(variables.paid.currency).toBe(tx.paidCurrency);
+      expect(variables.sale.currency).toBe(sale.currency);
+      expect(variables.sale.equivalentAmount).toBe(
         new Decimal(tx.quantity).mul(sale.tokenPricePerUnit).toFixed(2)
       );
-      expect(resultVars['date']).toMatch(/\d{4}-\d{2}-\d{2}/);
+      expect(variables['date']).toMatch(/\d{4}-\d{2}-\d{2}/);
     });
   });
 

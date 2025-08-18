@@ -1,12 +1,12 @@
-import { AmountCalculatorService } from '@/lib/services/pricefeeds/amount.service';
 import { faker } from '@faker-js/faker';
 import { Prisma } from '@prisma/client';
 // import { BigNumber } from 'ethers';
 import nock from 'nock';
 import sinon from 'sinon';
-import { mockExchangeRates } from './mocks/helpers';
+import { afterEach, describe, expect, it } from 'vitest';
 import { CRYPTO_CURRENCIES, FIAT_CURRENCIES } from '@/common/config/constants';
-import { describe, it, expect, afterEach } from 'vitest';
+import { AmountCalculatorService } from '@/lib/services/pricefeeds/amount.service';
+import { mockExchangeRates } from './mocks/helpers';
 
 async function getExchangeRate() {
   return { data: mockExchangeRates, error: null };
@@ -256,8 +256,11 @@ describe('Amount Calculator service', () => {
 
   describe('Management fees calculation', () => {
     it('Should work in random cases', () => {
-      const payloads = Array.from(Array(100), () => {
-        const precision = faker.helpers.arrayElement([2, 8]);
+      const payloads = Array.from(Array(1000), () => {
+        const precision = faker.helpers.arrayElement([
+          service.FIAT_PRECISION,
+          service.CRYPTO_PRECISION,
+        ]);
         return {
           pricePerUnit: String(
             faker.number.float({
@@ -271,6 +274,7 @@ describe('Amount Calculator service', () => {
           precision,
         };
       });
+
       let _index = 1;
       for (const payload of payloads) {
         const amount = service.getTotalAmount(payload);
@@ -285,12 +289,15 @@ describe('Amount Calculator service', () => {
             })
           );
           const fee = amountWithoutFee.mul(service.BASIS_POINTS);
+          expect(amountWithoutFee.lessThanOrEqualTo(amount)).toBe(true);
           expect(
             amountWithoutFee.toString(),
             `Error: \n            Fee: ${fee}\n            amount: ${amount}\n            amountWithoutFee: ${amountWithoutFee}\n            `
           ).not.toBe(amount);
+          // If we are adding fee, the amount should be equal to the control (ppu * quantity) plus fee
           expect(amount).toBe(control.add(fee).toFixed(payload.precision));
         } else {
+          // If we are not adding fee, the amount should be equal to the control (ppu * quantity)
           expect(amount).toBe(control.toFixed(payload.precision));
         }
         _index++;
