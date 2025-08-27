@@ -1,10 +1,11 @@
-import { Locale } from "@/lib/i18n";
-import { getTranslations } from "@/lib/i18n/get-dictionaries";
-import { applyUTM } from "@/lib/utm";
-import Icon from "@/public/static/favicons/favicon-48x48.png";
 import Image from "next/image";
 import Link from "next/link";
 import { Banner as BannerComponent } from "nextra/components";
+import { Locale } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n/get-dictionaries";
+import { metadata } from "@/lib/site-config";
+import { applyUTM } from "@/lib/utm";
+import Icon from "@/public/static/favicons/favicon-48x48.png";
 
 export const Banner = async ({ lang }: { lang: Locale }) => {
 	const t = await getTranslations(lang);
@@ -16,7 +17,7 @@ export const Banner = async ({ lang }: { lang: Locale }) => {
 					blurDataURL={Icon.blurDataURL}
 					priority
 					src={Icon.src}
-					alt="MJS Token"
+					alt={`${metadata.tokenSymbol} Token`}
 					width={20}
 					height={20}
 				/>

@@ -1,6 +1,6 @@
 # Welcome to Mahjong Stars
 
-![MJS Banner](/static/images/banner.png)
+![TILE Banner](/static/images/banner.png)
 
 ## The Next Evolution of Social Gaming
 
@@ -98,7 +98,7 @@ Ready to experience the future of social gaming? Explore our documentation to le
 
 ## Quick Start Guide
 
-![MJS Banner](/static/images/comingsoon.webp)
+![TILE Banner](/static/images/comingsoon.webp)
 
 #### 🎮 Manual Play
 
@@ -305,7 +305,7 @@ Experience the future of mahjong gaming with our revolutionary AI-powered platfo
 - ✅ **In-game purchases** for avatars and items
 - ✅ **Transaction fees** for platform activities
 
-### $MJS Token Utility
+### $TILE Token Utility
 
 - 🎯 **Governance Rights**: Vote on platform updates and features
 - 🎯 **Staking Rewards**: Earn additional tokens through staking
@@ -313,9 +313,9 @@ Experience the future of mahjong gaming with our revolutionary AI-powered platfo
 - 🎯 **NFT Marketplace**: Primary currency for trading in-game assets
 - 🎯 **Revenue Sharing**: Participate in platform revenue distribution
 
-## $MJS Token Overview
+## $TILE Token Overview
 
-**$MJS** is our utility token with multiple uses:
+**$TILE** is our utility token with multiple uses:
 
 - **Governance Rights**: Vote on platform updates and features
 - **Staking Rewards**: Earn additional tokens through staking
@@ -323,11 +323,11 @@ Experience the future of mahjong gaming with our revolutionary AI-powered platfo
 - **NFT Marketplace**: Primary currency for trading in-game assets
 - **Revenue Sharing**: Participate in platform revenue distribution
 
-Mahjong Stars leverages the **$MJS utility token** and **StarsPoints** to drive a scalable Web3 economy, enabling user rewards, premium gameplay, and sustainable monetization. Our structured tokenomics are designed for long-term value creation and community growth.
+Mahjong Stars leverages the **$TILE utility token** and **StarsPoints** to drive a scalable Web3 economy, enabling user rewards, premium gameplay, and sustainable monetization. Our structured tokenomics are designed for long-term value creation and community growth.
 
-### Are $MJS and StarsPoints the same thing?
+### Are $TILE and StarsPoints the same thing?
 
-**No, StarsPoints are not the same as $MJS**.
+**No, StarsPoints are not the same as $TILE**.
 
 **StarsPoints** are the primary and exclusive in-game currency used for:
 
@@ -336,9 +336,9 @@ Mahjong Stars leverages the **$MJS utility token** and **StarsPoints** to drive 
 - In-game purchases (avatars, items, decorations)
 - Transaction fees for platform activities
 
-## $MJS Token Distribution
+## $TILE Token Distribution
 
-### Total Supply: 888,888,888 $MJS
+### Total Supply: 888,888,888 $TILE
 
 Our token distribution follows a carefully balanced approach to ensure sustainable growth, team incentives, and community rewards:
 
@@ -394,7 +394,7 @@ Join the Mahjong Stars ecosystem and be part of the future of social gaming with
 
 ### TGE Unlock: 5.22%
 
-- **Total TGE Tokens**: 46,359,036 $MJS
+- **Total TGE Tokens**: 46,359,036 $TILE
 - **TGE Market Cap**: $1,390,771 (including all unlocks)
 - **Fully Diluted Valuation**: $26,666,667
 
@@ -475,11 +475,11 @@ Mahjong Stars has developed an innovative revenue model that combines traditiona
 
 #### Capital Raise
 
-| Capital Raise                                 | Amount (USD)   |
-| --------------------------------------------- | -------------- |
-| Capital Raise 2025                            | $3,000,000     |
-| Capital Raise via $MJS Token Launch (Q4 2025) | $4,000,000     |
-| **Total Capital Raise**                       | **$7,000,000** |
+| Capital Raise                                  | Amount (USD)   |
+| ---------------------------------------------- | -------------- |
+| Capital Raise 2025                             | $3,000,000     |
+| Capital Raise via $TILE Token Launch (Q4 2025) | $4,000,000     |
+| **Total Capital Raise**                        | **$7,000,000** |
 
 ### Key Financial Milestones
 
@@ -558,7 +558,7 @@ Mahjong Stars has developed an innovative revenue model that combines traditiona
 
 #### Token Integration
 
-- **$MJS Utility**: Premium features and governance rights
+- **$TILE Utility**: Premium features and governance rights
 - **Staking Rewards**: Additional revenue from token staking
 - **NFT Trading**: Marketplace commission revenue
 - **DeFi Features**: Potential yield farming and liquidity mining
@@ -660,7 +660,7 @@ Mahjong Stars follows a carefully planned roadmap designed to establish market l
 - 🎯 **Marketing & Influencer Rollout**: Comprehensive promotion campaign
 - 🎯 **NFT Marketplace Live**: Full digital asset trading platform
 - 🎯 **Version 2.0 Launch**: Enhanced features and UI improvements
-- 🎯 **$MJS Token Launch**: Token generation event and exchange listings
+- 🎯 **$TILE Token Launch**: Token generation event and exchange listings
 
 #### Strategic Initiatives
 
@@ -1291,7 +1291,7 @@ The global mahjong market represents one of the largest untapped opportunities i
 **Blockchain Advantages:**
 
 - **NFT Marketplace**: Unique digital asset ownership and trading
-- **Token Economy**: Sustainable tokenomics with $MJS utility token
+- **Token Economy**: Sustainable tokenomics with $TILE utility token
 - **Decentralized Features**: Transparent and secure gaming environment
 - **Community Governance**: Player-driven platform development
 
@@ -1402,7 +1402,7 @@ Mahjong Stars is the world's first AI-powered Web3 social mahjong gaming platfor
 
 - **AI Training**: Create and train AI avatars that learn your playing style
 - **24/7 Gameplay**: Your AI continues playing and earning while you're away
-- **Web3 Integration**: NFT marketplace, crypto wallet integration, and $MJS token utility
+- **Web3 Integration**: NFT marketplace, crypto wallet integration, and $TILE token utility
 - **Social Features**: Advanced community features and friend systems
 - **Proven Expertise**: Built by a team with 10+ years of mahjong gaming experience
 
@@ -1471,9 +1471,9 @@ Absolutely! Our **Hybrid Play Mode** allows you to:
 
 **Important**: StarsPoints have no value outside the game and are for in-game use only.
 
-### What is the $MJS token?
+### What is the $TILE token?
 
-**$MJS** is our utility token with multiple uses:
+**$TILE** is our utility token with multiple uses:
 
 - **Governance Rights**: Vote on platform updates and features
 - **Staking Rewards**: Earn additional tokens through staking
@@ -1490,9 +1490,9 @@ Absolutely! Our **Hybrid Play Mode** allows you to:
 - **1:1 Rate**: Convert virtual gains to real-world value
 - **Additional Revenue**: Platform earns commission on withdrawal reward purchases
 
-### When will the $MJS token launch?
+### When will the $TILE token launch?
 
-The $MJS token is scheduled to launch in **Q4 2025** following our platform launch and initial user acquisition. This will include:
+The $TILE token is scheduled to launch in **Q4 2025** following our platform launch and initial user acquisition. This will include:
 
 - Token Generation Event (TGE)
 - Major DEX listings

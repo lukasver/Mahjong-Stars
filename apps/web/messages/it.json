@@ -175,8 +175,8 @@
         "answer": "Le entrate sono generate da commissioni di iscrizione, servizi IA premium, vendita di oggetti di gioco e commissioni sulle transazioni NFT."
       },
       "5": {
-        "question": "Cos'è $MJS in questo contesto?",
-        "answer": "$MJS è il token di utilità della piattaforma, utilizzato per acquistare oggetti di gioco, scambiare NFT, puntare per la quota di entrate e ricompense e supportare l'economia di gioco."
+        "question": "Cos'è $TILE in questo contesto?",
+        "answer": "$TILE è il token di utilità della piattaforma, utilizzato per acquistare oggetti di gioco, scambiare NFT, puntare per la quota di entrate e ricompense e supportare l'economia di gioco."
       },
       "6": {
         "question": "C'è una componente NFT?",
@@ -192,7 +192,7 @@
       },
       "9": {
         "question": "Qual è la roadmap per il 2025?",
-        "answer": "Q1: Rilascio della versione beta\nQ2: Raccolta fondi e partnership\nQ3: Lancio della V2 e marketplace NFT\nQ4: Lancio del token $MJS e quotazioni negli exchange"
+        "answer": "Q1: Rilascio della versione beta\nQ2: Raccolta fondi e partnership\nQ3: Lancio della V2 e marketplace NFT\nQ4: Lancio del token $TILE e quotazioni negli exchange"
       }
     }
   },
@@ -248,7 +248,7 @@
     "subscribePlaceholder": "Inserisci la tua email",
     "contact": "Contattaci",
     "banner": {
-      "title": "Il token $MJS è in arrivo 🚀"
+      "title": "Il token $TILE è in arrivo 🚀"
     }
   },
   "Hero": {
@@ -463,8 +463,8 @@
           "answer": "Le entrate sono generate da commissioni di iscrizione, servizi IA premium, vendita di oggetti di gioco e commissioni sulle transazioni NFT."
         },
         "5": {
-          "question": "Cos'è $MJS in questo contesto?",
-          "answer": "$MJS è il token di utilità della piattaforma, utilizzato per acquistare oggetti di gioco, scambiare NFT, puntare per la quota di entrate e ricompense e supportare l'economia di gioco."
+          "question": "Cos'è $TILE in questo contesto?",
+          "answer": "$TILE è il token di utilità della piattaforma, utilizzato per acquistare oggetti di gioco, scambiare NFT, puntare per la quota di entrate e ricompense e supportare l'economia di gioco."
         },
         "6": {
           "question": "C'è una componente NFT?",
@@ -480,7 +480,7 @@
         },
         "9": {
           "question": "Qual è la roadmap per il 2025?",
-          "answer": "Q1: Rilascio della versione beta\nQ2: Raccolta fondi e partnership\nQ3: Lancio della V2 e marketplace NFT\nQ4: Lancio del token $MJS e quotazioni negli exchange"
+          "answer": "Q1: Rilascio della versione beta\nQ2: Raccolta fondi e partnership\nQ3: Lancio della V2 e marketplace NFT\nQ4: Lancio del token $TILE e quotazioni negli exchange"
         }
       }
     },
@@ -563,7 +563,7 @@
       "subscribePlaceholder": "Inserisci la tua email",
       "contact": "Contattaci",
       "banner": {
-        "title": "Il token $MJS è in arrivo 🚀"
+        "title": "Il token $TILE è in arrivo 🚀"
       }
     }
   }

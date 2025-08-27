@@ -1,6 +1,6 @@
 {
 	"name": "@mjs/web",
-	"description": "$MJS is the core utility token of Mahjong Stars, enabling NFT trading, AI upgrades, tournament access, and revenue staking. Participate in a multi-billion dollar Web3 opportunity and fuel the first global social mahjong platform with real-world value and AI liquidity.",
+	"description": "Mahjong Stars landing page",
 	"version": "1.0.0",
 	"author": {
 		"name": "Lucas Verdiell",

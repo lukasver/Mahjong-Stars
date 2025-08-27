@@ -179,8 +179,8 @@
 				"answer": "A receita é gerada a partir de taxas de inscrição, serviços premium de IA, vendas de itens no jogo e taxas de transação de NFT."
 			},
 			"5": {
-				"question": "O que é $MJS neste contexto?",
-				"answer": "O $MJS é o token de utilidade da plataforma, usado para comprar itens no jogo, negociar NFTs, apostar para participação nos lucros e recompensas e apoiar a economia do jogo."
+				"question": "O que é $TILE neste contexto?",
+				"answer": "O $TILE é o token de utilidade da plataforma, usado para comprar itens no jogo, negociar NFTs, apostar para participação nos lucros e recompensas e apoiar a economia do jogo."
 			},
 			"6": {
 				"question": "Existe um componente NFT?",
@@ -196,7 +196,7 @@
 			},
 			"9": {
 				"question": "Qual o roadmap para 2025?",
-				"answer": "T1: Lançamento da versão beta\nT2: Captação de recursos e parcerias\nT3: Lançamento da V2 e mercado NFT\nT4: Lançamento do token $MJS e listagem em exchanges"
+				"answer": "T1: Lançamento da versão beta\nT2: Captação de recursos e parcerias\nT3: Lançamento da V2 e mercado NFT\nT4: Lançamento do token $TILE e listagem em exchanges"
 			}
 		}
 	},

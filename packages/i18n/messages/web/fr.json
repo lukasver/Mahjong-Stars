@@ -179,8 +179,8 @@
 				"answer": "Les revenus sont générés à partir des frais d'inscription, des services IA premium, des ventes d'objets en jeu et des frais de transaction NFT."
 			},
 			"5": {
-				"question": "Qu'est-ce que le $MJS dans ce contexte ?",
-				"answer": "Le $MJS est le jeton utilitaire de la plateforme, utilisé pour acheter des objets en jeu, échanger des NFT, miser pour obtenir une part des revenus et des récompenses, et soutenir l'économie du jeu."
+				"question": "Qu'est-ce que le $TILE dans ce contexte ?",
+				"answer": "Le $TILE est le jeton utilitaire de la plateforme, utilisé pour acheter des objets en jeu, échanger des NFT, miser pour obtenir une part des revenus et des récompenses, et soutenir l'économie du jeu."
 			},
 			"6": {
 				"question": "Y a-t-il un composant NFT ?",
@@ -196,7 +196,7 @@
 			},
 			"9": {
 				"question": "Quelle est la feuille de route pour 2025 ?",
-				"answer": "T1 : Lancement de la version bêta\nT2 : Collecte de fonds et partenariats\nT3 : Lancement de la V2 et place de marché NFT\nT4 : Lancement du jeton $MJS et inscriptions aux bourses"
+				"answer": "T1 : Lancement de la version bêta\nT2 : Collecte de fonds et partenariats\nT3 : Lancement de la V2 et place de marché NFT\nT4 : Lancement du jeton $TILE et inscriptions aux bourses"
 			}
 		}
 	},

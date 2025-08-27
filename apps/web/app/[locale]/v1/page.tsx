@@ -1,3 +1,8 @@
+import { cn } from "@mjs/ui/lib/utils";
+import { Button } from "@mjs/ui/primitives/button";
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 import CharactersCarousel from "@/components/CharactersCarousel";
 import Footer from "@/components/Footer";
 import { GameVariants } from "@/components/GameVariants";
@@ -9,11 +14,6 @@ import { LandingNewsletterSection } from "@/components/landing/newsletter/Landin
 import { LandingSocialProof } from "@/components/landing/social-proof/LandingSocialProof";
 import Background from "@/public/static/images/bg.webp";
 import Characters from "@/public/static/images/chars1.webp";
-import { cn } from "@mjs/ui/lib/utils";
-import { Button } from "@mjs/ui/primitives/button";
-import { getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function Home({
 	params,
@@ -27,18 +27,6 @@ export default async function Home({
 	}
 	return (
 		<div className="flex flex-col w-full items-center fancy-overlay">
-			{/* <LandingSocialProofBand invert={false} className='hidden md:flex'>
-        <LandingSocialProofBandItem>
-          Fast, reliable, and secure
-        </LandingSocialProofBandItem>
-
-        <LandingSocialProofBandItem>
-          $MJS Token coming soon
-        </LandingSocialProofBandItem>
-
-    
-      </LandingSocialProofBand> */}
-
 			<div className={cn("w-full")}>
 				<Header
 					className="fixed top-0 left-0 right-0 mb-0 lg:mb-0 mx-auto z-110 bg-transparent"

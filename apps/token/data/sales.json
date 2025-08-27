@@ -10,7 +10,7 @@
     "saleStartDate": "2025-09-01T00:00:00Z",
     "saleClosingDate": "2025-09-30T23:59:59Z",
     "tokenName": "Mahjong Stars Token",
-    "tokenSymbol": "MJS",
+    "tokenSymbol": "TILE",
     "tokenPricePerUnit": "0.012",
     "toWalletsAddress": "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70",
     "saftCheckbox": true,
@@ -28,12 +28,12 @@
       {
         "type": "textarea",
         "label": "Token Overview",
-        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+        "value": "$TILE is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
       },
       {
         "type": "text",
         "label": "Total Supply",
-        "value": "888,888,888 $MJS"
+        "value": "888,888,888 $TILE"
       },
       {
         "type": "text",
@@ -83,7 +83,7 @@
     "saleStartDate": "2025-10-01T00:00:00Z",
     "saleClosingDate": "2025-10-30T23:59:59Z",
     "tokenName": "Mahjong Stars Token",
-    "tokenSymbol": "MJS",
+    "tokenSymbol": "TILE",
     "tokenPricePerUnit": "0.016",
     "toWalletsAddress": "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70",
     "saftCheckbox": true,
@@ -101,12 +101,12 @@
       {
         "type": "textarea",
         "label": "Token Overview",
-        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+        "value": "$TILE is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
       },
       {
         "type": "text",
         "label": "Total Supply",
-        "value": "888,888,888 $MJS"
+        "value": "888,888,888 $TILE"
       },
       {
         "type": "text",
@@ -116,7 +116,7 @@
       {
         "type": "textarea",
         "label": "Revenue Model",
-        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $MJS provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
+        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $TILE provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
       },
       {
         "type": "text",
@@ -131,7 +131,7 @@
       {
         "type": "textarea",
         "label": "Development Milestones",
-        "value": "Q3 2025: Foundation Phase with Beta Unity Build Released, Core Team Assembled, Fundraise Completion, Unity Development Ramp-Up. Q4 2025: Expansion & Launch Phase with Marketing & Influencer Rollout, NFT Marketplace Live, Version 2.0 Launch, $MJS Token Launch."
+        "value": "Q3 2025: Foundation Phase with Beta Unity Build Released, Core Team Assembled, Fundraise Completion, Unity Development Ramp-Up. Q4 2025: Expansion & Launch Phase with Marketing & Influencer Rollout, NFT Marketplace Live, Version 2.0 Launch, $TILE Token Launch."
       },
       {
         "type": "textarea",
@@ -161,7 +161,7 @@
     "saleStartDate": "2025-11-01T00:00:00Z",
     "saleClosingDate": "2025-11-30T23:59:59Z",
     "tokenName": "Mahjong Stars Token",
-    "tokenSymbol": "MJS",
+    "tokenSymbol": "TILE",
     "tokenPricePerUnit": "0.018",
     "comparisonPricePerUnit": "0.030",
     "toWalletsAddress": "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70",
@@ -179,12 +179,12 @@
       {
         "type": "textarea",
         "label": "Token Overview",
-        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+        "value": "$TILE is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
       },
       {
         "type": "text",
         "label": "Total Supply",
-        "value": "888,888,888 $MJS"
+        "value": "888,888,888 $TILE"
       },
       {
         "type": "text",
@@ -194,7 +194,7 @@
       {
         "type": "textarea",
         "label": "Revenue Model",
-        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $MJS provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
+        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $TILE provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
       },
       {
         "type": "text",
@@ -239,7 +239,7 @@
     "saleStartDate": "2025-12-01T00:00:00Z",
     "saleClosingDate": "2025-12-30T23:59:59Z",
     "tokenName": "Mahjong Stars Token",
-    "tokenSymbol": "MJS",
+    "tokenSymbol": "TILE",
     "tokenPricePerUnit": "0.025",
     "comparisonPricePerUnit": "0.030",
     "toWalletsAddress": "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70",
@@ -257,12 +257,12 @@
       {
         "type": "textarea",
         "label": "Token Overview",
-        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+        "value": "$TILE is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
       },
       {
         "type": "text",
         "label": "Total Supply",
-        "value": "888,888,888 $MJS"
+        "value": "888,888,888 $TILE"
       },
       {
         "type": "text",
@@ -272,7 +272,7 @@
       {
         "type": "textarea",
         "label": "Revenue Model",
-        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $MJS provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
+        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $TILE provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
       },
       {
         "type": "text",
@@ -317,7 +317,7 @@
     "saleStartDate": "2026-01-01T00:00:00Z",
     "saleClosingDate": "2026-01-31T23:59:59Z",
     "tokenName": "Mahjong Stars Token",
-    "tokenSymbol": "MJS",
+    "tokenSymbol": "TILE",
     "tokenPricePerUnit": "0.030",
     "toWalletsAddress": "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70",
     "saftCheckbox": false,
@@ -334,12 +334,12 @@
       {
         "type": "textarea",
         "label": "Token Overview",
-        "value": "$MJS is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
+        "value": "$TILE is our utility token with multiple uses including governance rights to vote on platform updates and features, staking rewards to earn additional tokens, premium features for exclusive tournaments and AI capabilities, NFT marketplace as primary currency for trading in-game assets, and revenue sharing to participate in platform revenue distribution."
       },
       {
         "type": "text",
         "label": "Total Supply",
-        "value": "888,888,888 $MJS"
+        "value": "888,888,888 $TILE"
       },
       {
         "type": "text",
@@ -349,7 +349,7 @@
       {
         "type": "textarea",
         "label": "Revenue Model",
-        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $MJS provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
+        "value": "StarsPoints serve as the primary in-game currency for entry fees, AI service access, in-game purchases, and transaction fees. $TILE provides governance rights, staking rewards, premium features, NFT marketplace access, and revenue sharing opportunities."
       },
       {
         "type": "text",
