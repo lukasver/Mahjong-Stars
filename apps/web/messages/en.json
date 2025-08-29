@@ -193,7 +193,8 @@
       },
       "error": {
         "title": "Something went wrong. Please try again.",
-        "captchaFailed": "Captcha failed"
+        "captchaFailed": "Captcha failed",
+        "codeInvalid": "Invalid code"
       }
     },
     "validation": {
@@ -481,7 +482,8 @@
         },
         "error": {
           "title": "Something went wrong. Please try again.",
-          "captchaFailed": "Captcha failed"
+          "captchaFailed": "Captcha failed",
+          "codeInvalid": "Invalid code"
         }
       },
       "validation": {

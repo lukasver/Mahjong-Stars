@@ -43,8 +43,8 @@
         "6": "Amico… credo che il negozio abbia dei tavoli??",
         "7": "Ho visto il sistema a punti. È piuttosto geniale",
         "8": "C'è un personaggio chiamato Jenny… è fredda",
-        "9": "Penso che puoi vincere cose che contano davvero…",
-        "10": "Aspetta… gli NFT ci sono davvero?!?"
+        "9": "Credo che puoi vincere cose che contano davvero…",
+        "10": "Aspetta… ci sono davvero gli NFT?!?"
       },
       "3": {
         "1": "Mani veloci vincono. Le tue tremano",
@@ -187,7 +187,8 @@
       },
       "error": {
         "title": "Qualcosa è andato storto. Riprova.",
-        "captchaFailed": "Captcha fallito"
+        "captchaFailed": "Captcha fallito",
+        "codeInvalid": "Codice non valido"
       }
     },
     "validation": {
@@ -220,7 +221,7 @@
       },
       "1": {
         "question": "Cosa rende Mahjong Stars unico?",
-        "answer": "Avatar IA che imparano il tuo stile di gioco, gameplay 24/7 tramite bot IA, integrazione NFT e crittografica, meccaniche di gioco sociale integrate e accesso multipiattaforma tramite un'app basata su Unity."
+        "answer": "Avatar IA che imparano il tuo stile di gioco, gameplay 24/7 tramite bot IA, integrazione NFT e crittografia, meccaniche di gioco sociale integrate e accesso multipiattaforma tramite un'app basata su Unity."
       },
       "2": {
         "question": "Qual è il ruolo dell'IA nel gioco?",
@@ -329,7 +330,7 @@
     }
   },
   "Newsletter": {
-    "title": "Non perdere mai un aggiornamento!",
+    "title": "Non perderti nessun aggiornamento!",
     "description": "Iscriviti alla nostra newsletter per ricevere gli ultimi annunci, notizie e offerte esclusive.",
     "placeholder": "Inserisci il tuo indirizzo email",
     "button": "Iscriviti",
@@ -422,7 +423,7 @@
       }
     },
     "Newsletter": {
-      "title": "Non perdere mai un aggiornamento!",
+      "title": "Non perderti nessun aggiornamento!",
       "description": "Iscriviti alla nostra newsletter per ricevere gli ultimi annunci, notizie e offerte esclusive.",
       "placeholder": "Inserisci il tuo indirizzo email",
       "button": "Iscriviti",
@@ -475,7 +476,8 @@
         },
         "error": {
           "title": "Qualcosa è andato storto. Riprova.",
-          "captchaFailed": "Captcha fallito"
+          "captchaFailed": "Captcha fallito",
+          "codeInvalid": "Codice non valido"
         }
       },
       "validation": {
@@ -568,7 +570,7 @@
         },
         "1": {
           "question": "Cosa rende Mahjong Stars unico?",
-          "answer": "Avatar IA che imparano il tuo stile di gioco, gameplay 24/7 tramite bot IA, integrazione NFT e crittografica, meccaniche di gioco sociale integrate e accesso multipiattaforma tramite un'app basata su Unity."
+          "answer": "Avatar IA che imparano il tuo stile di gioco, gameplay 24/7 tramite bot IA, integrazione NFT e crittografia, meccaniche di gioco sociale integrate e accesso multipiattaforma tramite un'app basata su Unity."
         },
         "2": {
           "question": "Qual è il ruolo dell'IA nel gioco?",
@@ -644,8 +646,8 @@
           "6": "Amico… credo che il negozio abbia dei tavoli??",
           "7": "Ho visto il sistema a punti. È piuttosto geniale",
           "8": "C'è un personaggio chiamato Jenny… è fredda",
-          "9": "Penso che puoi vincere cose che contano davvero…",
-          "10": "Aspetta… gli NFT ci sono davvero?!?"
+          "9": "Credo che puoi vincere cose che contano davvero…",
+          "10": "Aspetta… ci sono davvero gli NFT?!?"
         },
         "3": {
           "1": "Mani veloci vincono. Le tue tremano",
