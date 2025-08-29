@@ -4,6 +4,7 @@ import { Icons } from "@mjs/ui/components/icons";
 import { FadeAnimation } from "@mjs/ui/components/motion";
 import { RainbowButton } from "@mjs/ui/components/rainbow-button";
 import { Button } from "@mjs/ui/primitives/button";
+import { CardDescription } from "@mjs/ui/primitives/card";
 import { useAppForm } from "@mjs/ui/primitives/form";
 import { FormInput } from "@mjs/ui/primitives/form-input";
 import { Separator } from "@mjs/ui/primitives/separator";
@@ -11,7 +12,7 @@ import { toast } from "@mjs/ui/primitives/sonner";
 import { Mail, Phone, Ticket, User, Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useRef, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { Quest, questResultValidator } from "@/components/claim/types";
 import { Confetti, ConfettiRef } from "@/components/confetti";
 import { metadata } from "@/data/config/metadata";
@@ -36,9 +37,11 @@ export default function ClaimForm({
     null,
   );
   const [isPending, startTransition] = useTransition();
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { captureEvent, PostHogEvents } = usePostHog();
   const confettiRef = useRef<ConfettiRef>(null);
   const router = useRouter();
+
   async function onSubmit(data: Record<string, string>) {
     if (isPending) return;
     const captcha = altchaRef.current?.value;
@@ -73,6 +76,13 @@ export default function ClaimForm({
         });
         form.reset();
         altchaRef.current?.reset();
+        // Needed so the confetti is triggered after the transition is complete
+        startTransition(() => {
+          setIsSubmitted(true);
+        });
+        setTimeout(() => {
+          router.push("/");
+        }, 8000);
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "An error occurred";
@@ -106,9 +116,38 @@ export default function ClaimForm({
     form.handleSubmit();
   };
 
+  // Show congratulations message after successful submission
+  if (isSubmitted) {
+    return (
+      <div className="text-center space-y-6 py-8">
+        <FadeAnimation delay={0.1} duration={0.8} ease="easeOut" scale>
+          <div className="space-y-4">
+            <div className="text-6xl">🎉</div>
+            <h2 className="text-2xl font-bold text-foreground">
+              {t("messages.success.title")}
+            </h2>
+            <CardDescription className="text-secondary">
+              {t("messages.success.description")}
+            </CardDescription>
+            <p className="text-sm text-muted-foreground">
+              Redirecting to home page...
+            </p>
+          </div>
+        </FadeAnimation>
+        <Confetti
+          ref={confettiRef}
+          className="absolute inset-0 size-full z-10"
+        />
+      </div>
+    );
+  }
+
   return (
     <form.AppForm>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <button onClick={() => setIsSubmitted(true)} type="button">
+          Submit
+        </button>
         <FadeAnimation
           delay={0.1}
           className="space-y-4"
@@ -216,13 +255,6 @@ export default function ClaimForm({
             </div>
           </div>
         </FadeAnimation>
-        <Confetti
-          ref={confettiRef}
-          className="absolute left-50% top-50% size-full -z-10"
-          onMouseEnter={() => {
-            confettiRef.current?.fire({});
-          }}
-        />
       </form>
     </form.AppForm>
   );

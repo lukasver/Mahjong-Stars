@@ -129,12 +129,20 @@ export class Sheets {
 		return parsed;
 	}
 
-	async validateClaim(questId: string, targetSheetId: string) {
+	async validateClaim(questId: string, targetSheetId: string, _code: string) {
 		// Should check if the sheet has a limit, and if the user is inside the limit
 		const parsed = await this.getQuestData(questId);
 		const existingCount = await this.countBySingleColumn(targetSheetId);
 
-		const { expiration, limit, status } = parsed;
+		const { expiration, limit, status, code } = parsed;
+
+		if (code !== _code) {
+			throw new SheetsError(
+				"Invalid code",
+				SHEETS_ERROR_CODES.CODE_INVALID,
+				400,
+			);
+		}
 
 		if (expiration) {
 			const now = new Date();

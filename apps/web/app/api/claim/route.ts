@@ -1,4 +1,3 @@
-import { invariant } from "@epic-web/invariant";
 import { verifySolution } from "altcha-lib";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -29,8 +28,6 @@ const handler = async (req: Request) => {
 
 			const { captcha, ...formData } = result.data;
 
-			console.debug("🚀 ~ route.ts:30 ~ result.data:", result.data);
-
 			const verified = await verifySolution(captcha, hmacKey);
 			if (!verified) {
 				return NextResponse.json({
@@ -38,24 +35,9 @@ const handler = async (req: Request) => {
 					error: "Captacha verification failed",
 				});
 			}
-
-			//TODO! send results
-			const quest = await sheets.getById(result.data.results);
-			invariant(quest, "Quest not found");
-
-			// I should check if there are more values in the form than what is allowed.
-
-			console.debug("🚀 ~ route.ts:41 ~ quest:", quest);
-			const res = await sheets.submitClaim(
-				result.data.id,
-				formData as QuestResponse,
-			);
-
-			console.debug("🚀 ~ route.ts:48 ~ res:", res);
-
+			await sheets.submitClaim(result.data.id, formData as QuestResponse);
 			return NextResponse.json({
 				success: true,
-				message: "Claimed",
 			});
 		}
 
@@ -69,6 +51,13 @@ const handler = async (req: Request) => {
 
 			// Handle specific error codes
 			switch (code) {
+				case SHEETS_ERROR_CODES.CODE_INVALID:
+					return NextResponse.json(
+						{
+							success: false,
+						},
+						{ status: 400 },
+					);
 				case SHEETS_ERROR_CODES.QUEST_EXPIRED:
 				case SHEETS_ERROR_CODES.QUEST_FINALIZED:
 				case SHEETS_ERROR_CODES.QUEST_LIMIT_REACHED:
@@ -84,7 +73,6 @@ const handler = async (req: Request) => {
 				case SHEETS_ERROR_CODES.SHEET_NOT_FOUND:
 					return NextResponse.json(
 						{
-							error: "Invalid quest",
 							success: false,
 						},
 						{ status: statusCode },
