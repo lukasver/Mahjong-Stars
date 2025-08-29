@@ -23,6 +23,7 @@ export const questResultValidator = z
 	.object({
 		code: z.string().min(1, "Code is required"),
 		id: z.string().min(1, "Quest ID is required"),
+		submissionId: z.string().min(1, "Submission ID is required"),
 		results: z.string().min(1, "Results identifier is required"),
 	})
 	.passthrough();

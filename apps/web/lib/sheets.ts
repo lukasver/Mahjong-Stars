@@ -136,8 +136,6 @@ export class Sheets {
 
 		const { expiration, limit, status, code } = parsed;
 
-		console.debug("LALALa", code, _code);
-
 		if (code?.trim() !== _code?.trim()) {
 			throw new SheetsError(
 				"Invalid code",
@@ -187,10 +185,67 @@ export class Sheets {
 
 	async submitClaim(questId: string, data: QuestResponse) {
 		await this.validateClaim(questId, data.results, data.code);
-		return this.append(data.results, data);
+		return this.append(data.results, {
+			submissionId: data.submissionId,
+			id: data.id,
+		});
 	}
 
-	private async append(sheetId: string, data: QuestResponse) {
+	async updateClaim(resultsSheetId: string, data: QuestResponse) {
+		const { id: _, submissionId, results: _r, ...rest } = data;
+		await this.updateRowById(resultsSheetId, {
+			sheetName: "Sheet1",
+			idToFind: submissionId,
+			newValues: rest,
+			startCol: "C",
+		});
+	}
+
+	private async updateRowById(
+		sheetId: string,
+		opts: {
+			sheetName: string;
+			idToFind: string;
+			newValues: Record<string, string>;
+			startCol: string;
+		},
+	) {
+		// 1. Read all IDs in column A
+		const { data } = await this.client.spreadsheets.values.get({
+			spreadsheetId: sheetId,
+			range: `${opts.sheetName || "Sheet1"}!A:A`, // only column A
+		});
+
+		const rows = data.values || [];
+		let rowIndex = -1;
+
+		// 2. Find the row where column A matches the given ID
+		rows.forEach((row, i) => {
+			if (row[0] === opts.idToFind) {
+				rowIndex = i + 1; // Google Sheets is 1-based
+			}
+		});
+
+		if (rowIndex === -1) {
+			throw new Error(`ID "${opts.idToFind}" not found in column A`);
+		}
+
+		// 3. Update that row (starting from column B so ID in column A is preserved)
+		const startCol = opts.startCol || "C";
+		const endCol = String.fromCharCode(
+			"A".charCodeAt(0) + Object.keys(opts.newValues).length + 1,
+		);
+		const range = `${opts.sheetName}!${startCol}${rowIndex}:${endCol}${rowIndex}`;
+
+		return this.client.spreadsheets.values.update({
+			spreadsheetId: sheetId,
+			range,
+			valueInputOption: "USER_ENTERED",
+			requestBody: { values: [Object.values(opts.newValues)] },
+		});
+	}
+
+	private async append(sheetId: string, data: Record<string, string>) {
 		const res = await this.client.spreadsheets.values.append({
 			spreadsheetId: sheetId,
 			// Todo we should check the length based on data?

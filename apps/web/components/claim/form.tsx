@@ -3,6 +3,7 @@ import { invariant } from "@epic-web/invariant";
 import { Icons } from "@mjs/ui/components/icons";
 import { FadeAnimation } from "@mjs/ui/components/motion";
 import { RainbowButton } from "@mjs/ui/components/rainbow-button";
+import { cn } from "@mjs/ui/lib/utils";
 import { Button } from "@mjs/ui/primitives/button";
 import { CardDescription } from "@mjs/ui/primitives/card";
 import { useAppForm } from "@mjs/ui/primitives/form";
@@ -10,9 +11,11 @@ import { FormInput } from "@mjs/ui/primitives/form-input";
 import { Separator } from "@mjs/ui/primitives/separator";
 import { toast } from "@mjs/ui/primitives/sonner";
 import { Mail, Phone, Ticket, User, Wallet } from "lucide-react";
+import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState, useTransition } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import { Quest, questResultValidator } from "@/components/claim/types";
 import { Confetti, ConfettiRef } from "@/components/confetti";
 import { metadata } from "@/data/config/metadata";
@@ -23,66 +26,98 @@ import { usePostHog } from "../PostHogProvider";
 type ClaimFormProps = Pick<
   Quest,
   "id" | "inputs" | "expiration" | "results"
-> & {};
+> & {
+  className?: string;
+};
 
 export default function ClaimForm({
   id,
   inputs,
   expiration,
   results,
+  className,
 }: ClaimFormProps) {
+  const submissionId = useRef(nanoid());
   const t = useTranslations("ClaimForm");
+  const [isClaimed, setIsClaimed] = useLocalStorage<string | false>(`mjs-${id}`, false);
+  const [step, setStep] = useState(0);
   const locale = useLocale();
   const altchaRef = useRef<{ value: string | null; reset: () => void } | null>(
     null,
   );
   const [isPending, startTransition] = useTransition();
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const { captureEvent, PostHogEvents } = usePostHog();
   const confettiRef = useRef<ConfettiRef>(null);
   const router = useRouter();
 
   async function onSubmit(data: Record<string, string>) {
+
     if (isPending) return;
+    if (!submissionId.current) {
+      submissionId.current = nanoid();
+    }
     const captcha = altchaRef.current?.value;
     startTransition(async () => {
       try {
-        invariant(captcha, t("messages.error.captchaFailed"));
-        const result = await fetch("/api/claim", {
-          method: "POST",
-          body: JSON.stringify(Object.assign(data, { captcha })),
-        }).then((res) => res.json() as Promise<{ success: boolean }>);
+        const { id, code, ...rest } = data;
 
-        if (!result.success) {
-          if ("error" in result) {
-            if (result.error === SHEETS_ERROR_CODES.QUEST_FINALIZED) {
-              setTimeout(() => {
-                router.push("/");
-              }, 2000);
-              throw new Error(t("messages.error.questFinalized"));
+
+
+        if (step === 0) {
+          invariant(captcha, t("messages.error.captchaFailed"));
+          const result = await fetch("/api/claim", {
+            method: "POST",
+            body: JSON.stringify({ captcha, id, code, submissionId: submissionId.current, results: rest.results }),
+          }).then((res) => res.json() as Promise<{ success: boolean }>);
+
+          if (!result.success) {
+            if ("error" in result) {
+              if (result.error === SHEETS_ERROR_CODES.QUEST_FINALIZED) {
+                setTimeout(() => {
+                  router.push("/");
+                }, 2000);
+                throw new Error(t("messages.error.questFinalized"));
+              }
+              if (result.error === SHEETS_ERROR_CODES.CODE_INVALID) {
+                toast.error(t("messages.error.codeInvalid"));
+                form.reset();
+                return;
+              }
             }
+            throw new Error(t("messages.error.title"));
           }
-          throw new Error(t("messages.error.title"));
+          setStep(1);
         }
 
-        // Should submit the form to the corresponding spreadsheet
-        toast.success(t("messages.success.title"), {
-          description: t("messages.success.description"),
-          duration: 4000,
-        });
-        captureEvent(PostHogEvents.claimQuest, {
-          questId: id,
-          ...data,
-        });
-        form.reset();
-        altchaRef.current?.reset();
-        // Needed so the confetti is triggered after the transition is complete
-        startTransition(() => {
-          setIsSubmitted(true);
-        });
-        setTimeout(() => {
-          router.push("/");
-        }, 8000);
+        if (step === 1) {
+          const result = await fetch("/api/claim", {
+            method: "POST",
+            body: JSON.stringify({ captcha, submissionId: submissionId.current, ...rest }),
+          }).then((res) => res.json() as Promise<{ success: boolean }>);
+
+          if (!result.success) {
+            throw new Error(t("messages.error.title"));
+          }
+
+          // Should submit the form to the corresponding spreadsheet
+          toast.success(t("messages.success.title"), {
+            description: t("messages.success.description"),
+            duration: 4000,
+          });
+          captureEvent(PostHogEvents.claimQuest, {
+            questId: id,
+            ...rest,
+          });
+          form.reset();
+          altchaRef.current?.reset();
+          // Needed so the confetti is triggered after the transition is complete
+          startTransition(() => {
+            setIsClaimed(submissionId.current);
+          });
+          setTimeout(() => {
+            router.push("/");
+          }, 8000);
+        }
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "An error occurred";
@@ -97,6 +132,7 @@ export default function ClaimForm({
     },
     defaultValues: {
       id: id,
+      submissionId: submissionId.current,
       code: "",
       results: results || "",
       ...(inputs?.reduce(
@@ -117,7 +153,7 @@ export default function ClaimForm({
   };
 
   // Show congratulations message after successful submission
-  if (isSubmitted) {
+  if (isClaimed) {
     return (
       <div className="text-center space-y-6 py-8">
         <FadeAnimation delay={0.1} duration={0.8} ease="easeOut" scale>
@@ -144,8 +180,7 @@ export default function ClaimForm({
 
   return (
     <form.AppForm>
-      <form onSubmit={handleSubmit} className="space-y-4">
-
+      <form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
         <FadeAnimation
           delay={0.1}
           className="space-y-4"
@@ -153,49 +188,55 @@ export default function ClaimForm({
           ease="easeOut"
           scale
         >
-          <FadeAnimation delay={0.1} duration={0.6} ease="easeOut" scale>
-            <FormInput
-              name="code"
-              type="text"
-              label={t("fields.code.label")}
-              inputProps={{
-                placeholder: t("fields.code.placeholder"),
-                required: true,
-                autoComplete: "off",
-                icon: getIcon("code"),
-              }}
-            />
-          </FadeAnimation>
-
-          {inputs?.map((input, index) => (
-            <FadeAnimation
-              key={input}
-              delay={0.2 + index * 0.1}
-              duration={0.6}
-              ease="easeOut"
-              scale
-            >
-              <FormInput
-                name={input}
-                type="text"
-                label={t(`fields.${input}.label`)}
-                inputProps={{
-                  required: true,
-                  icon: getIcon(input),
-                  placeholder: t(`fields.${input}.placeholder`),
-                }}
-              />
-            </FadeAnimation>
-          ))}
-        </FadeAnimation>
-
-        <FadeAnimation
-          delay={0.5 + (inputs?.length || 0) * 0.1}
-          duration={0.6}
-          ease="easeOut"
-          scale
-        >
-          <Altcha ref={altchaRef} language={locale} />
+          {step === 0 && (
+            <>
+              <FadeAnimation delay={0.1} duration={0.6} ease="easeOut" scale>
+                <FormInput
+                  name="code"
+                  type="text"
+                  label={t("fields.code.label")}
+                  inputProps={{
+                    placeholder: t("fields.code.placeholder"),
+                    required: true,
+                    autoComplete: "off",
+                    icon: getIcon("code"),
+                  }}
+                />
+              </FadeAnimation>
+              <FadeAnimation
+                delay={0.5 + (inputs?.length || 0) * 0.1}
+                duration={0.6}
+                ease="easeOut"
+                scale
+              >
+                <Altcha ref={altchaRef} language={locale} />
+              </FadeAnimation>
+            </>
+          )}
+          {step === 1 && (
+            <>
+              {inputs?.map((input, index) => (
+                <FadeAnimation
+                  key={input}
+                  delay={0.2 + index * 0.1}
+                  duration={0.6}
+                  ease="easeOut"
+                  scale
+                >
+                  <FormInput
+                    name={input}
+                    type={input === "email" ? "email" : "text"}
+                    label={t(`fields.${input}.label`)}
+                    inputProps={{
+                      required: true,
+                      icon: getIcon(input),
+                      placeholder: t(`fields.${input}.placeholder`),
+                    }}
+                  />
+                </FadeAnimation>
+              ))}
+            </>
+          )}
         </FadeAnimation>
 
         <FadeAnimation

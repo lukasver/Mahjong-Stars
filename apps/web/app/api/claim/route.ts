@@ -14,28 +14,56 @@ const handler = async (req: Request) => {
 	try {
 		if (req.method === "POST") {
 			const body = await req.json();
+
 			const result = questResultValidator
+				.pick({
+					code: true,
+					id: true,
+					results: true,
+					submissionId: true,
+				})
 				.merge(z.object({ captcha: z.string().min(1, "Captcha is required") }))
 				.passthrough()
 				.safeParse(body);
+			if (result.success) {
+				if (!result.success) {
+					return NextResponse.json(
+						{ error: "Invalid request", success: false },
+						{ status: 400 },
+					);
+				}
+				const { captcha, ...formData } = result.data;
+				const verified = await verifySolution(captcha, hmacKey);
+				if (!verified) {
+					return NextResponse.json({
+						success: false,
+						error: "Captacha verification failed",
+					});
+				}
 
-			if (!result.success) {
-				return NextResponse.json(
-					{ error: "Invalid request", success: false },
-					{ status: 400 },
+				// Should add the entry to the sheet
+				const res = await sheets.submitClaim(
+					formData.id,
+					formData as QuestResponse,
 				);
-			}
+			} else {
+				const result = questResultValidator
+					.pick({
+						submissionId: true,
+						results: true,
+					})
+					.passthrough()
+					.safeParse(body);
+				if (result.success) {
+					const { captcha: _, ...formData } = result.data;
 
-			const { captcha, ...formData } = result.data;
-
-			const verified = await verifySolution(captcha, hmacKey);
-			if (!verified) {
-				return NextResponse.json({
-					success: false,
-					error: "Captacha verification failed",
-				});
+					// Should update the sheet entry with the form data
+					await sheets.updateClaim(formData.results, formData as QuestResponse);
+				} else {
+					throw new Error("Invalid request");
+				}
 			}
-			await sheets.submitClaim(result.data.id, formData as QuestResponse);
+			// await sheets.submitClaim(result.data.id, formData as QuestResponse);
 			return NextResponse.json({
 				success: true,
 			});
@@ -55,6 +83,7 @@ const handler = async (req: Request) => {
 					return NextResponse.json(
 						{
 							success: false,
+							error: SHEETS_ERROR_CODES.CODE_INVALID,
 						},
 						{ status: 400 },
 					);

@@ -51,6 +51,7 @@
 		"lucide-react": "^0.475.0",
 		"mime-types": "^2.1.35",
 		"motion": "^12.15.0",
+		"nanoid": "^5.1.5",
 		"next": "15.4.5",
 		"next-contentlayer2": "0.5.7",
 		"next-intl": "4.1.0",
