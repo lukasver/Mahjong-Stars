@@ -145,9 +145,7 @@ export default function ClaimForm({
   return (
     <form.AppForm>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <button onClick={() => setIsSubmitted(true)} type="button">
-          Submit
-        </button>
+
         <FadeAnimation
           delay={0.1}
           className="space-y-4"
@@ -225,7 +223,7 @@ export default function ClaimForm({
           <div className="pt-4">
             <div className="flex items-center gap-4 mb-4">
               <Separator className="flex-1" />
-              <span className="text-muted-foreground text-sm">
+              <span className="text-muted-foreground text-sm text-center">
                 {t("notifications")}
               </span>
               <Separator className="flex-1" />

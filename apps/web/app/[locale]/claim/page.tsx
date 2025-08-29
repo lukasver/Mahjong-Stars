@@ -4,7 +4,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@mjs/ui/primitives/dialog";
-import { MessageSquare } from "lucide-react";
+import { Gift } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ContactFormModal } from "@/components/ContactForm";
@@ -33,7 +33,7 @@ export default async function ClaimFormPage({ searchParams }: PageProps) {
 			<DialogContent className="sm:max-w-[500px]">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						<MessageSquare className="h-5 w-5" />
+						<Gift className="h-5 w-5" />
 						{t("title")}
 					</DialogTitle>
 					<DialogDescription className="text-secondary-300">

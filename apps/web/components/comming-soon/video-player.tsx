@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { cn } from '@mjs/ui/lib/utils';
-import { useEffect, useRef } from 'react';
-import { useWindowSize } from 'usehooks-ts';
-import { AnimatePresence, motion } from '@mjs/ui/components/motion';
-import { useVideoPlayer } from '../use-video-player';
+import { AnimatePresence, motion } from "@mjs/ui/components/motion";
+import { cn } from "@mjs/ui/lib/utils";
+import { useEffect, useRef } from "react";
+import { useWindowSize } from "usehooks-ts";
+import { useVideoPlayer } from "../use-video-player";
 
 function VideoPlayer({
   src,
@@ -15,9 +15,9 @@ function VideoPlayer({
 }: {
   src: { src: string; type: string } | { src: string; type: string }[];
   mobileSrc:
-    | { src: string; type: string }
-    | { src: string; type: string }[]
-    | null;
+  | { src: string; type: string }
+  | { src: string; type: string }[]
+  | null;
   className?: string;
   poster?: string;
   mNumber: number;
@@ -30,7 +30,7 @@ function VideoPlayer({
   const handlePlayVideo = () => {
     if (videoRef.current) {
       videoRef.current.play().catch((err) => {
-        console.error('Video play failed:', err);
+        console.error("Video play failed:", err);
       });
     }
   };
@@ -50,18 +50,18 @@ function VideoPlayer({
     };
 
     // Add event listeners
-    video.addEventListener('play', handlePlay);
-    video.addEventListener('pause', handlePause);
-    video.addEventListener('ended', handleEnded);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handleEnded);
 
     // Initial state check
     setIsPlaying(!video.paused && !video.ended);
 
     // Cleanup
     return () => {
-      video.removeEventListener('play', handlePlay);
-      video.removeEventListener('pause', handlePause);
-      video.removeEventListener('ended', handleEnded);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handleEnded);
     };
   }, [isMobile, mobileSrc, src]);
 
@@ -77,23 +77,22 @@ function VideoPlayer({
           animate={{ opacity: 1 }}
           transition={{
             duration: 0.4,
-            scale: { type: 'tween', visualDuration: 0.4, bounce: 0.5 },
+            scale: { type: "tween", visualDuration: 0.4, bounce: 0.5 },
           }}
-          className='contents'
+          className="contents"
         >
           <video
-            id='video'
+            id="video"
             ref={videoRef}
             autoPlay
             muted
             loop
             playsInline
             className={cn(
-              'absolute w-full object-contain bottom-[25%] md:bottom-auto md:inset-0',
-              'hide-play-button',
-              mNumber === 1 && 'h-full',
-              mNumber !== 1 && 'h-full',
-              className
+              "absolute w-full object-contain bottom-[25%] md:bottom-auto md:inset-0",
+              "hide-play-button",
+              mNumber !== 1 && "h-full",
+              className,
             )}
             {...(poster ? { poster } : {})}
           >
@@ -107,11 +106,11 @@ function VideoPlayer({
           <div
             onClick={!isPlaying ? handlePlayVideo : undefined}
             className={cn(
-              'absolute inset-0 z-1 h-[75%] sm:hidden',
+              "absolute inset-0 z-1 h-[75%] sm:hidden",
               isMobile &&
-                mobileSrc &&
-                'bg-gradient-to-t from-[#920B0A] from-8% via-[#920B0A] via-5% to-transparent to-10%',
-              !isPlaying && 'z-50'
+              mobileSrc &&
+              "bg-gradient-to-t from-[#920B0A] from-8% via-[#920B0A] via-5% to-transparent to-10%",
+              !isPlaying && "z-50",
             )}
           />
           {/* Optionally, show a custom play button if !isPlaying */}
@@ -127,7 +126,7 @@ function VideoPlayer({
         animate={{ opacity: 1 }}
         transition={{
           duration: 0.4,
-          scale: { type: 'tween', visualDuration: 0.4, bounce: 0.5 },
+          scale: { type: "tween", visualDuration: 0.4, bounce: 0.5 },
         }}
       >
         <video
@@ -136,10 +135,11 @@ function VideoPlayer({
           muted
           loop
           playsInline
-          style={{ height: 'inherit' }}
+          style={{ height: "inherit" }}
           className={cn(
-            'absolute inset-0 w-full xl:object-contain hidden md:block 3xl:min-h-screen',
-            className
+            "absolute inset-0 w-full xl:object-contain hidden md:block 3xl:min-h-screen",
+            mNumber === 1 && "2xl:w-[90%]",
+            className,
           )}
           {...(poster ? { poster } : {})}
         >
