@@ -131,7 +131,8 @@
       },
       "error": {
         "title": "Une erreur s'est produite. Veuillez réessayer.",
-        "captchaFailed": "Captcha échoué"
+        "captchaFailed": "Captcha échoué",
+        "codeInvalid": "Code invalide"
       }
     },
     "validation": {
@@ -224,7 +225,7 @@
       },
       "1": {
         "question": "Qu'est-ce qui rend Mahjong Stars unique ?",
-        "answer": "Des avatars IA qui apprennent votre style de jeu, un jeu 24 h/24 et 7 j/7 via des robots IA, l'intégration de NFT et de cryptomonnaies, des mécanismes de jeu social intégrés et un accès multiplateforme via une application basée sur Unity."
+        "answer": "Des avatars IA qui apprennent votre style de jeu, un jeu 24 h/24 et 7 j/7 via des robots IA, l'intégration NFT et crypto, des mécanismes de jeu social intégrés et un accès multiplateforme via une application basée sur Unity."
       },
       "2": {
         "question": "Quel est le rôle de l'IA dans le jeu ?",
@@ -232,7 +233,7 @@
       },
       "3": {
         "question": "Que sont les StarsPoints et comment fonctionnent-ils ?",
-        "answer": "Les StarsPoints sont la monnaie du jeu :\n- Achetables via des monnaies fiduciaires ou des cryptomonnaies\n- Utilisés pour l'accès au jeu, les robots IA, les objets et les frais\n- N'ont aucune valeur en dehors de la plateforme\n- Génèrent des revenus grâce à l'utilisation du jeu"
+        "answer": "Les StarsPoints sont la monnaie du jeu :\n- Achetables via des devises fiduciaires ou crypto\n- Utilisés pour l'accès au jeu, les robots IA, les objets et les frais\n- N'ont aucune valeur en dehors de la plateforme\n- Génèrent des revenus grâce à l'utilisation du jeu"
       },
       "4": {
         "question": "Comment Mahjong Stars génère-t-il des revenus ?",
@@ -240,7 +241,7 @@
       },
       "5": {
         "question": "Qu'est-ce que $TILE dans ce contexte ?",
-        "answer": "Le $TILE est le jeton utilitaire de la plateforme, utilisé pour acheter des objets en jeu, échanger des NFT, miser pour une part des revenus et des récompenses, et soutenir l'économie du jeu."
+        "answer": "$TILE est le jeton utilitaire de la plateforme, utilisé pour acheter des objets en jeu, échanger des NFT, miser pour une part des revenus et des récompenses, et soutenir l'économie du jeu."
       },
       "6": {
         "question": "Y a-t-il un composant NFT ?",
@@ -272,15 +273,15 @@
       "1": {
         "1": "Wouah.",
         "2": "Ambiance - impeccable.",
-        "3": "Awwww je suis morte.",
+        "3": "Oh là là, je suis morte.",
         "4": "Oh là là. Je viens de vous voler tous vos Star Points ? xoxo",
-        "5": "Discrètement obsédée par ce pantalon.",
+        "5": "J'adore secrètement ce pantalon.",
         "6": "IYKYK. Et si vous ne savez pas, abonnez-vous. Je n'ai pas toute la journée.",
         "7": "Mamma mia… ils vont craquer pour moi, n'est-ce pas ?",
         "8": "Mercure est rétrograde et carré à Saturne. Ne vous sentez pas mal de jouer si mal, c'était sans espoir.",
         "9": "Ces couleurs sont absolument ÉPOUSTOUFLANTES.",
         "10": "Cette veste en cuir donne une énergie de divorcée riche et j'adore ça.",
-        "11": "Ce type en pull dégage zéro énergie rizz #désolée.",
+        "11": "Ce mec au pull dégage zéro énergie de dragueur #désoléemaisnon",
         "12": "On dit heureux dans les jeux, malheureux en amour. Je suis désolée de vous dire que je n'ai eu que des petits amis horribles.",
         "13": "C'est comme… une unité totale… c'est tout.",
         "14": "Oups. Je viens de vous briser le cœur ?",
@@ -289,7 +290,9 @@
         "17": "Dites-en moins, j'en ai vu assez. Je crois que je suis amoureuse.",
         "18": "C'est plus chaud que le climat géopolitique actuel. Sans blague.",
         "19": "IA ceci, IA cela. Qu'est-il arrivé aux petites amies manipulatrices mignonnes ?",
-        "20": "Si seulement vous pouviez voir ce que mes beaux yeux numériques peuvent…"
+        "20": "Si seulement vous pouviez voir ce que mes beaux yeux numériques peuvent…",
+        "_character": "Bubble Girl",
+        "_tone": "Stylish, flirty, curious. She’s seeing secret things on her phone and reacting with hype but no details"
       },
       "2": {
         "1": "Ça s'appelle Bang Bang Mahjong. Je jure que c'est vrai !",
@@ -301,7 +304,9 @@
         "7": "J'ai vu le système de points. C'est assez génial",
         "8": "Il y a un personnage qui s'appelle Jenny… elle est froide",
         "9": "Je crois que vous pouvez gagner des choses qui comptent vraiment…",
-        "10": "Attendez… les NFT sont vraiment là ?!?"
+        "10": "Attendez… les NFT sont vraiment là ?!",
+        "_character": "Nervous Sweater Guy",
+        "_tone": "Don’t panic. The game’s almost here"
       },
       "3": {
         "1": "Les mains rapides gagnent. Les vôtres tremblent",
@@ -314,10 +319,12 @@
         "8": "Dépensez pour une table si cela vous aide à vous concentrer. Vous en aurez besoin",
         "9": "Les mouvements spéciaux sont amusants. À moins que je n'utilise les miens sur vous",
         "10": "Points, avantages, améliorations. Tout est gaspillé si vous ne jouez pas intelligemment",
-        "11": "Oui, vous pouvez jouer contre des robots. Ils jouent mieux que la plupart d'entre vous",
+        "11": "Oui, vous pouvez jouer aux robots. Ils jouent mieux que la plupart d'entre vous",
         "12": "Gagnez des points. Échangez contre des NFT. Mais ne soyez pas gourmand",
         "13": "Vendez votre jeu de tuiles si vous voulez. Vous perdrez quand même contre moi",
-        "14": "Valeur réelle, douleur numérique. Bienvenue à Mahjong Stars"
+        "14": "Valeur réelle, douleur numérique. Bienvenue à Mahjong Stars",
+        "_character": "Granny + her cat",
+        "_tone": "Grumpy. Wise. Ruthlessly honest"
       }
     }
   }

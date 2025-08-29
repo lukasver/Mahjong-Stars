@@ -28,7 +28,7 @@
         "description": "Jogue a qualquer momento. Suba no ranking e aprimore suas habilidades."
       },
       "trainableAI": {
-        "title": "IA Treinável que Joga do Seu Jeito",
+        "title": "IA Treinável Que Joga do Seu Jeito",
         "description": "Personalize uma IA para aprender e se adaptar ao seu estilo de jogo."
       },
       "collectCharacters": {
@@ -69,7 +69,7 @@
     "mrsChen": {
       "quote": "Eu esqueci mais mãos vencedoras do que você já jogou.",
       "name": "Sra. Chen",
-      "description": "A Sra. Chen é uma veterana implacável do Mahjong que está esmagando mesas desde antes de você nascer. Implacável em estratégia e um pouco assustadora, ela impõe respeito com apenas um olhar — e seu gato mal-humorado é tão crítico quanto ela. Subestime-a por sua conta e risco."
+      "description": "A Sra. Chen é uma veterana implacável do Mahjong que está esmagando mesas desde antes de você nascer. Implacável em estratégia e um pouco assustadora, ela impõe respeito apenas com um olhar — e seu gato mal-humorado é tão crítico quanto ela. Subestime-a por sua conta e risco."
     },
     "uncleCai": {
       "quote": "Enquanto você conta as peças, eu conto minhas vitórias.",
@@ -83,7 +83,7 @@
     "placeholder": "Digite seu endereço de e-mail",
     "button": "Inscrever-se",
     "button2": "Inscreva-se Agora",
-    "footer": "já inscrito",
+    "footer": "já se inscreveu",
     "success": "Obrigado por se inscrever!",
     "errors": {
       "email": "Por favor, digite um endereço de e-mail válido"
@@ -131,31 +131,32 @@
       },
       "error": {
         "title": "Algo deu errado. Por favor, tente novamente.",
-        "captchaFailed": "Captcha falhou"
+        "captchaFailed": "Captcha falhou",
+        "codeInvalid": "Código inválido"
       }
     },
     "validation": {
       "name": {
-        "required": "O nome é obrigatório",
+        "required": "Nome é obrigatório",
         "minLength": "O nome deve ter pelo menos 2 caracteres."
       },
       "email": {
-        "required": "O e-mail é obrigatório",
+        "required": "E-mail é obrigatório",
         "invalid": "Por favor, digite um endereço de e-mail válido."
       },
       "subject": {
-        "required": "O assunto é obrigatório",
+        "required": "Assunto é obrigatório",
         "minLength": "O assunto deve ter pelo menos 5 caracteres."
       },
       "message": {
-        "required": "A mensagem é obrigatória",
+        "required": "Mensagem é obrigatória",
         "minLength": "A mensagem deve ter pelo menos 10 caracteres.",
         "maxLength": "A mensagem deve ter menos de 1000 caracteres."
       }
     }
   },
   "ClaimForm": {
-    "title": "Resgate suas Recompensas",
+    "title": "Resgate Suas Recompensas",
     "description": "Encontre códigos em nossas redes sociais e resgate-os aqui.",
     "fields": {
       "code": {
@@ -266,27 +267,27 @@
       "2": "Não entre em pânico. O jogo está quase aqui",
       "3": "Ela está pronta. Você também deveria estar."
     },
-    "description": "Inscreva-se e talvez, <br /> só talvez, nós o deixemos saber primeiro.",
+    "description": "Inscreva-se e talvez, <br /> só talvez, nós o deixemos entrar primeiro.",
     "agreeTerms": "Ao clicar em 'Inscrever-se', você concorda com nossos <terms>Termos e Condições</terms> e <privacy>Política de Privacidade</privacy>.",
     "lines": {
       "1": {
-        "1": "Sheeeeeeeeeesh.",
+        "1": "Nossa!",
         "2": "Vibes - impecáveis.",
         "3": "Ai, meu Deus, morri.",
-        "4": "Nossa. Acabei de te roubar todos os seus Star Points? xoxo",
-        "5": "Obcecada por essas calças.",
+        "4": "Ops. Acabei de te roubar todos os seus Star Points? xoxo",
+        "5": "Obcecada por essa calça.",
         "6": "Se você sabe, você sabe. E se você não sabe, inscreva-se. Não tenho o dia todo.",
         "7": "Mamma mia… eles vão ficar apaixonados por mim, não é?",
-        "8": "Mercúrio está retrógrado e em quadratura com Saturno. Não se sinta mal por jogar mal, era sem esperança.",
+        "8": "Mercúrio está retrógrado e em quadratura com Saturno. Não se sinta mal por jogar mal, era impossível.",
         "9": "Essas cores são incríveis!",
         "10": "Essa jaqueta de couro está dando uma vibe de rica divorciada e eu estou amando.",
-        "11": "Esse cara de suéter não tem absolutamente nenhum charme #sorrynotsorry",
-        "12": "Dizem que feliz nos jogos, infeliz no amor. Sinto muito em dizer que só tive namorados terríveis.",
-        "13": "É tipo… unidade total… isso é tudo.",
+        "11": "Esse cara de suéter não tem nada de charme #sorrynotsorry",
+        "12": "Dizem que quem é feliz nos jogos é infeliz no amor. Sinto muito em dizer que só tive namorados terríveis.",
+        "13": "É tipo… uma unidade total… isso é tudo.",
         "14": "Ops. Acabei de te partir o coração?",
         "15": "Essas peças são tão extravagantes.",
         "16": "Na verdade, \"não seja quadrado\" é um termo pejorativo e acho que devemos ser cuidadosos com nossas palavras.",
-        "17": "Diga menos, eu vi o suficiente. Acho que estou apaixonada.",
+        "17": "Diga menos, eu já vi o suficiente. Acho que estou apaixonada.",
         "18": "Isso é mais quente que o clima geopolítico atual. Sem brincadeira.",
         "19": "IA isso, IA aquilo. O que aconteceu com as namoradas manipuladoras e fofas?",
         "20": "Se você pudesse ver o que meus belos olhos digitais podem…"
@@ -301,20 +302,20 @@
         "7": "Eu vi o sistema de pontos. É meio genial",
         "8": "Tem uma personagem chamada Jenny… ela é fria",
         "9": "Acho que você pode ganhar coisas que realmente importam…",
-        "10": "Espera… NFTs realmente estão nisso?!",
+        "10": "Espera… NFTs realmente estão nisso?!?"
       },
       "3": {
         "1": "Mãos rápidas vencem. As suas estão tremendo",
         "2": "Bang Bang Mahjong. Você vai bater a cabeça tentando acompanhar",
         "3": "Não há sorte aqui. Apenas habilidade. Que você não tem",
-        "4": "Não apenas combine. Pense. Se você conseguir",
+        "4": "Não apenas combine. Pense. Se puder",
         "5": "Velocidade importa. Mas não se você for burro",
         "6": "Você pode comprar efeitos, mas não talento",
         "7": "Skins são fofas. Vitórias são melhores",
         "8": "Gaste em uma mesa se isso te ajudar a focar. Você vai precisar",
         "9": "Movimentos especiais são divertidos. A menos que eu esteja usando os meus em você",
         "10": "Pontos, vantagens, atualizações. Tudo desperdiçado se você não jogar com inteligência",
-        "11": "Sim, você pode jogar com bots. Eles jogam melhor que a maioria de vocês",
+        "11": "Sim, você pode jogar contra bots. Eles jogam melhor que a maioria de vocês",
         "12": "Ganhe pontos. Troque por NFTs. Mas não fique ganancioso",
         "13": "Venda seu conjunto de peças se quiser. Você ainda vai perder para mim",
         "14": "Valor real, dor digital. Bem-vindo ao Mahjong Stars"
