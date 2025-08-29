@@ -97,6 +97,66 @@
       "description": "Uncle Cai is a streetwise Mahjong master who's seen it all — and usually wins it all. Laid-back with a sharp mind, he prefers to fan himself and let others sweat. His old-school swag, gold chain, and deadpan humor make him a legend both at the table and on the streets."
     }
   },
+  "ClaimForm": {
+    "title": "Claim Your Rewards",
+    "description": "Find codes in our socials and redeem them here.",
+    "fields": {
+      "code": {
+        "label": "Promo Code",
+        "placeholder": "Enter your promo code"
+      },
+      "wallet": {
+        "label": "Wallet Address",
+        "placeholder": "0x..."
+      },
+      "name": {
+        "label": "Name",
+        "placeholder": "Tony Kong"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "tony@mahjongstars.com"
+      },
+      "telegram": {
+        "label": "Telegram handle",
+        "placeholder": "https://t.me/..."
+      },
+      "discord": {
+        "label": "Discord handle",
+        "placeholder": "https://discord.gg/..."
+      },
+      "twitter": {
+        "label": "Twitter handle",
+        "placeholder": "https://x.com/..."
+      },
+      "newsletter": {
+        "label": "Newsletter",
+        "placeholder": "Subscribe to our newsletter"
+      }
+    },
+    "captcha": {
+      "label": "I'm not a robot",
+      "protection": "Protected by ALTCHA"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "claim": "Claim now!",
+      "claiming": "Claiming..."
+    },
+    "messages": {
+      "success": {
+        "title": "Claimed!",
+        "description": "Thank you for your claim. We will get in touch with you shortly."
+      },
+      "error": {
+        "title": "Something went wrong.",
+        "captchaFailed": "Captcha failed",
+        "questFinalized": "Quest finalized"
+      }
+    },
+    "followUs": "Follow us on our socials to get more codes!",
+    "notifications": "Turn on notifications in our socials to get your codes first!"
+  },
   "ContactForm": {
     "title": "Contact Us",
     "description": "Send us a message and we'll get back to you as soon as possible.",
@@ -443,6 +503,66 @@
           "maxLength": "Message must be less than 1000 characters."
         }
       }
+    },
+    "ClaimForm": {
+      "title": "Claim Your Rewards",
+      "description": "Find codes in our socials and redeem them here.",
+      "fields": {
+        "code": {
+          "label": "Promo Code",
+          "placeholder": "Enter your promo code"
+        },
+        "wallet": {
+          "label": "Wallet Address",
+          "placeholder": "0x..."
+        },
+        "name": {
+          "label": "Name",
+          "placeholder": "Tony Kong"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "tony@mahjongstars.com"
+        },
+        "telegram": {
+          "label": "Telegram handle",
+          "placeholder": "https://t.me/..."
+        },
+        "discord": {
+          "label": "Discord handle",
+          "placeholder": "https://discord.gg/..."
+        },
+        "twitter": {
+          "label": "Twitter handle",
+          "placeholder": "https://x.com/..."
+        },
+        "newsletter": {
+          "label": "Newsletter",
+          "placeholder": "Subscribe to our newsletter"
+        }
+      },
+      "captcha": {
+        "label": "I'm not a robot",
+        "protection": "Protected by ALTCHA"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "claim": "Claim now!",
+        "claiming": "Claiming..."
+      },
+      "messages": {
+        "success": {
+          "title": "Claimed!",
+          "description": "Thank you for your claim. We will get in touch with you shortly."
+        },
+        "error": {
+          "title": "Something went wrong.",
+          "captchaFailed": "Captcha failed",
+          "questFinalized": "Quest finalized"
+        }
+      },
+      "followUs": "Follow us on our socials to get more codes!",
+      "notifications": "Turn on notifications in our socials to get your codes first!"
     },
     "Faq": {
       "title": "Frequently Asked Questions",

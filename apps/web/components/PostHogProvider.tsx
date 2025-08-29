@@ -73,6 +73,7 @@ export const PostHogEvents = {
 	contactFormSubmit: "submited_contact_form",
 	newsletterSubscribe: "subscribed_to_newsletter",
 	newsletterUnsubscribe: "unsubscribed_from_newsletter",
+	claimQuest: "claimed_quest",
 } as const;
 
 type PostHogEvent = (typeof PostHogEvents)[keyof typeof PostHogEvents];

@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { ComponentProps } from 'react';
-import { getInputClass, Input } from '../input';
-import { useFormContext } from '../form/tanstack-form';
-import { Textarea } from '../textarea';
-import { PasswordInput } from './password';
-import { InputTypes, SelectOption } from './types';
-import { Checkbox } from '../checkbox';
-import { cn } from '@mjs/ui/lib/utils';
-import { SelectInput } from './select-input';
-import { isObject } from 'motion/react';
-import { DateInput, DateInputProps } from './date-input';
-import { UseAppForm } from '../form';
-import { CurrencyInput, CurrencyInputProps } from './currency-input';
+import { cn } from "@mjs/ui/lib/utils";
+import { isObject } from "motion/react";
+import { ComponentProps } from "react";
+import { Checkbox } from "../checkbox";
+import { UseAppForm } from "../form";
+import { useFormContext } from "../form/tanstack-form";
+import { getInputClass, Input } from "../input";
+import { Textarea } from "../textarea";
+import { CurrencyInput, CurrencyInputProps } from "./currency-input";
+import { DateInput, DateInputProps } from "./date-input";
+import { PasswordInput } from "./password";
+import { SelectInput } from "./select-input";
+import { InputTypes, SelectOption } from "./types";
 
 interface DefaultInputProps extends ComponentProps<typeof Input> {
   options?: never;
-  type: 'text';
+  type: "text";
 }
 interface SelectorInputProps extends ComponentProps<typeof SelectInput> {
-  type: 'select';
+  type: "select";
   options: SelectOption[];
 }
 
@@ -37,12 +37,12 @@ export type FormInputProps = {
   message?: true | null;
   className?: string;
   descriptionClassName?: string;
-  type: InputTypes | 'hidden';
+  type: InputTypes | "hidden";
   inputProps?: Partial<InputUnionProps> & {
     required?: boolean;
   };
-  listeners?: React.ComponentProps<UseAppForm['AppField']>['listeners'];
-  validators?: React.ComponentProps<UseAppForm['AppField']>['validators'];
+  listeners?: React.ComponentProps<UseAppForm["AppField"]>["listeners"];
+  validators?: React.ComponentProps<UseAppForm["AppField"]>["validators"];
 };
 
 // // Base interface with common properties
@@ -86,8 +86,8 @@ export type FormInputProps = {
 //   | AddressInputProps
 //   | AudioVideoLinkInputProps
 
-type InputWrapperProps = Omit<FormInputProps['inputProps'], 'type'> & {
-  type: FormInputProps['type'];
+type InputWrapperProps = Omit<FormInputProps["inputProps"], "type"> & {
+  type: FormInputProps["type"];
 };
 
 /**
@@ -107,7 +107,7 @@ export function FormInput({
 }: FormInputProps) {
   const form = useFormContext() as unknown as UseAppForm;
   if (!form) {
-    throw new Error('FormInput must be used within a Form');
+    throw new Error("FormInput must be used within a Form");
   }
 
   return (
@@ -116,17 +116,17 @@ export function FormInput({
         <field.FormItem className={cn(className)}>
           <div
             className={cn(
-              type === 'checkbox' &&
-                'flex flex-1 justify-between items-center gap-2',
-              type === 'checkbox' && getInputClass(),
-              type !== 'checkbox' && 'contents'
+              type === "checkbox" &&
+              "flex flex-1 justify-between items-center gap-2",
+              type === "checkbox" && getInputClass(),
+              type !== "checkbox" && "contents",
             )}
           >
             {label && (
               <field.FormLabel
                 className={cn(
-                  type === 'checkbox' && 'flex-1',
-                  'text-foreground'
+                  type === "checkbox" && "flex-1",
+                  "text-foreground",
                 )}
               >
                 {label}
@@ -145,10 +145,10 @@ export function FormInput({
                     field.handleChange(e);
                     return;
                   }
-                  if (isObject(e) && 'target' in e) {
+                  if (isObject(e) && "target" in e) {
                     if (e.target instanceof HTMLInputElement) {
                       const value =
-                        type === 'checkbox' ? e.target.checked : e.target.value;
+                        type === "checkbox" ? e.target.checked : e.target.value;
                       field.handleChange(value);
                     }
                     return;
@@ -162,14 +162,14 @@ export function FormInput({
           {description && (
             <field.FormDescription
               className={cn(
-                'overflow-x-auto scrollbar-hidden whitespace-nowrap',
-                descriptionClassName
+                "overflow-x-auto scrollbar-hidden whitespace-nowrap",
+                descriptionClassName,
               )}
             >
               {description}
             </field.FormDescription>
           )}
-          {message && <field.FormMessage className='text-secondary-100' />}
+          {message && <field.FormMessage className="text-secondary-100" />}
         </field.FormItem>
       )}
     </form.AppField>
@@ -179,24 +179,24 @@ export function FormInput({
 //TODO! controlled props needs to be added here to remove most expect errors
 function InputWrapper({ type, ...props }: InputWrapperProps) {
   switch (type) {
-    case 'text':
-      return <Input type='text' {...props} />;
-    case 'number':
-      return <Input type='number' {...props} />;
-    case 'email':
-      return <Input type='email' {...props} />;
-    case 'password':
-      return <PasswordInput type='password' {...props} />;
-    case 'textarea':
+    case "text":
+      return <Input type="text" {...props} />;
+    case "number":
+      return <Input type="number" {...props} />;
+    case "email":
+      return <Input type="email" {...props} />;
+    case "password":
+      return <PasswordInput type="password" {...props} />;
+    case "textarea":
       return <Textarea {...props} />;
-    case 'checkbox':
+    case "checkbox":
       // @ts-expect-error fixme
       return <Checkbox checked={!!props.value} {...props} />;
-    case 'select':
+    case "select":
       return <SelectInput {...(props as SelectorInputProps)} />;
-    case 'date':
+    case "date":
       return <DateInput {...(props as DateInputProps)} />;
-    case 'currency':
+    case "currency":
       return <CurrencyInput {...(props as CurrencyInputProps)} />;
     default:
       return <Input {...props} />;

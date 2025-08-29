@@ -1,6 +1,6 @@
 import { cn } from "@mjs/ui/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
-import { VariantProps, cva } from "class-variance-authority";
+import { cva, VariantProps } from "class-variance-authority";
 import React from "react";
 
 //TODO! fix rstyles
@@ -37,7 +37,7 @@ const rainbowButtonVariants = cva(
 
 interface RainbowButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-		VariantProps<typeof rainbowButtonVariants> {
+	VariantProps<typeof rainbowButtonVariants> {
 	asChild?: boolean;
 }
 

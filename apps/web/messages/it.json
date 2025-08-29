@@ -9,7 +9,7 @@
       "2": "Non farti prendere dal panico. Il gioco è quasi qui",
       "3": "È pronta. Meglio esserlo anche tu."
     },
-    "description": "Iscriviti e forse, <br /> solo forse, ti faremo entrare per primi.",
+    "description": "Iscriviti e forse, <br /> solo forse, ti faremo entrare per primo.",
     "agreeTerms": "Facendo clic su \"Iscriviti\", accetti i nostri <terms>Termini e condizioni</terms> e l' <privacy>Informativa sulla privacy</privacy>.",
     "lines": {
       "1": {
@@ -59,7 +59,7 @@
         "10": "Punti, vantaggi, aggiornamenti. Tutto sprecato se non giochi in modo intelligente",
         "11": "Sì, puoi giocare con i bot. Giocano meglio della maggior parte di voi",
         "12": "Guadagna punti. Scambia per NFT. Ma non diventare avido",
-        "13": "Vendi il tuo set di tessere se vuoi. Mi perderai comunque",
+        "13": "Vendi il tuo set di tessere se vuoi. Perderai comunque contro di me",
         "14": "Valore reale, dolore digitale. Benvenuto in Mahjong Stars"
       }
     }
@@ -88,8 +88,68 @@
     "uncleCai": {
       "quote": "Mentre conti le tessere, io conto le mie vittorie.",
       "name": "Uncle Cai",
-      "description": "Uncle Cai è un maestro di Mahjong di strada che ha visto tutto, e di solito vince tutto. Disinvolto con una mente acuta, preferisce rinfrescarsi con un ventaglio e lasciare che gli altri sudino. Il suo stile old-school, la catena d'oro e l'umorismo impassibile lo rendono una leggenda sia al tavolo che per le strade."
+      "description": "Uncle Cai è un maestro di Mahjong di strada che ha visto tutto, e di solito vince tutto. Disinvolto con una mente acuta, preferisce tenersi fresco e lasciare che gli altri sudino. Il suo stile old-school, la catena d'oro e l'umorismo impassibile lo rendono una leggenda sia al tavolo che per strada."
     }
+  },
+  "ClaimForm": {
+    "title": "Richiedi le tue ricompense",
+    "description": "Trova i codici sui nostri social e riscattali qui.",
+    "fields": {
+      "code": {
+        "label": "Codice Promo",
+        "placeholder": "Inserisci il tuo codice promozionale"
+      },
+      "wallet": {
+        "label": "Indirizzo Wallet",
+        "placeholder": "0x..."
+      },
+      "name": {
+        "label": "Nome",
+        "placeholder": "Tony Kong"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "tony@mahjongstars.com"
+      },
+      "telegram": {
+        "label": "Username Telegram",
+        "placeholder": "https://t.me/..."
+      },
+      "discord": {
+        "label": "Username Discord",
+        "placeholder": "https://discord.gg/..."
+      },
+      "twitter": {
+        "label": "Username Twitter",
+        "placeholder": "https://x.com/..."
+      },
+      "newsletter": {
+        "label": "Newsletter",
+        "placeholder": "Iscriviti alla nostra newsletter"
+      }
+    },
+    "captcha": {
+      "label": "Non sono un robot",
+      "protection": "Protetto da ALTCHA"
+    },
+    "buttons": {
+      "cancel": "Annulla",
+      "claim": "Richiedi ora!",
+      "claiming": "Richiesta in corso..."
+    },
+    "messages": {
+      "success": {
+        "title": "Richiesta completata!",
+        "description": "Grazie per la tua richiesta. Ti contatteremo a breve."
+      },
+      "error": {
+        "title": "Qualcosa è andato storto.",
+        "captchaFailed": "Captcha fallito",
+        "questFinalized": "Missione completata"
+      }
+    },
+    "followUs": "Seguici sui nostri social per ottenere più codici!",
+    "notifications": "Attiva le notifiche sui nostri social per ricevere i tuoi codici per primo!"
   },
   "ContactForm": {
     "title": "Contattaci",
@@ -187,7 +247,7 @@
         "answer": "Oltre 600 milioni di giocatori di mahjong in tutto il mondo. Il settore dei giochi Web3 dovrebbe superare i 30 miliardi di dollari nel 2025, offrendo enormi opportunità."
       },
       "8": {
-        "question": "Chi c'è dietro al progetto?",
+        "question": "Chi c'è dietro il progetto?",
         "answer": "Il team comprende esperti di Mahjong Logic, PokerStars Asia e Coinbase Asia, con una profonda esperienza nel settore dei giochi e nel Web3."
       },
       "9": {
@@ -358,7 +418,7 @@
       "uncleCai": {
         "quote": "Mentre conti le tessere, io conto le mie vittorie.",
         "name": "Uncle Cai",
-        "description": "Uncle Cai è un maestro di Mahjong di strada che ha visto tutto, e di solito vince tutto. Disinvolto con una mente acuta, preferisce rinfrescarsi con un ventaglio e lasciare che gli altri sudino. Il suo stile old-school, la catena d'oro e l'umorismo impassibile lo rendono una leggenda sia al tavolo che per le strade."
+        "description": "Uncle Cai è un maestro di Mahjong di strada che ha visto tutto, e di solito vince tutto. Disinvolto con una mente acuta, preferisce tenersi fresco e lasciare che gli altri sudino. Il suo stile old-school, la catena d'oro e l'umorismo impassibile lo rendono una leggenda sia al tavolo che per strada."
       }
     },
     "Newsletter": {
@@ -438,6 +498,66 @@
         }
       }
     },
+    "ClaimForm": {
+      "title": "Richiedi le tue ricompense",
+      "description": "Trova i codici sui nostri social e riscattali qui.",
+      "fields": {
+        "code": {
+          "label": "Codice Promo",
+          "placeholder": "Inserisci il tuo codice promozionale"
+        },
+        "wallet": {
+          "label": "Indirizzo Wallet",
+          "placeholder": "0x..."
+        },
+        "name": {
+          "label": "Nome",
+          "placeholder": "Tony Kong"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "tony@mahjongstars.com"
+        },
+        "telegram": {
+          "label": "Username Telegram",
+          "placeholder": "https://t.me/..."
+        },
+        "discord": {
+          "label": "Username Discord",
+          "placeholder": "https://discord.gg/..."
+        },
+        "twitter": {
+          "label": "Username Twitter",
+          "placeholder": "https://x.com/..."
+        },
+        "newsletter": {
+          "label": "Newsletter",
+          "placeholder": "Iscriviti alla nostra newsletter"
+        }
+      },
+      "captcha": {
+        "label": "Non sono un robot",
+        "protection": "Protetto da ALTCHA"
+      },
+      "buttons": {
+        "cancel": "Annulla",
+        "claim": "Richiedi ora!",
+        "claiming": "Richiesta in corso..."
+      },
+      "messages": {
+        "success": {
+          "title": "Richiesta completata!",
+          "description": "Grazie per la tua richiesta. Ti contatteremo a breve."
+        },
+        "error": {
+          "title": "Qualcosa è andato storto.",
+          "captchaFailed": "Captcha fallito",
+          "questFinalized": "Missione completata"
+        }
+      },
+      "followUs": "Seguici sui nostri social per ottenere più codici!",
+      "notifications": "Attiva le notifiche sui nostri social per ricevere i tuoi codici per primo!"
+    },
     "Faq": {
       "title": "Domande Frequenti",
       "description": "Trova le risposte alle domande più comuni sul nostro gioco di Mahjong Web3:",
@@ -475,7 +595,7 @@
           "answer": "Oltre 600 milioni di giocatori di mahjong in tutto il mondo. Il settore dei giochi Web3 dovrebbe superare i 30 miliardi di dollari nel 2025, offrendo enormi opportunità."
         },
         "8": {
-          "question": "Chi c'è dietro al progetto?",
+          "question": "Chi c'è dietro il progetto?",
           "answer": "Il team comprende esperti di Mahjong Logic, PokerStars Asia e Coinbase Asia, con una profonda esperienza nel settore dei giochi e nel Web3."
         },
         "9": {
@@ -490,7 +610,7 @@
         "2": "Non farti prendere dal panico. Il gioco è quasi qui",
         "3": "È pronta. Meglio esserlo anche tu."
       },
-      "description": "Iscriviti e forse, <br /> solo forse, ti faremo entrare per primi.",
+      "description": "Iscriviti e forse, <br /> solo forse, ti faremo entrare per primo.",
       "agreeTerms": "Facendo clic su \"Iscriviti\", accetti i nostri <terms>Termini e condizioni</terms> e l' <privacy>Informativa sulla privacy</privacy>.",
       "lines": {
         "1": {
@@ -540,7 +660,7 @@
           "10": "Punti, vantaggi, aggiornamenti. Tutto sprecato se non giochi in modo intelligente",
           "11": "Sì, puoi giocare con i bot. Giocano meglio della maggior parte di voi",
           "12": "Guadagna punti. Scambia per NFT. Ma non diventare avido",
-          "13": "Vendi il tuo set di tessere se vuoi. Mi perderai comunque",
+          "13": "Vendi il tuo set di tessere se vuoi. Perderai comunque contro di me",
           "14": "Valore reale, dolore digitale. Benvenuto in Mahjong Stars"
         }
       }

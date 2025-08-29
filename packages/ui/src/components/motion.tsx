@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
 import {
   AnimatePresence,
   motion,
-  useInView,
   type UseInViewOptions,
+  useInView,
   type Variants,
-} from 'motion/react';
+} from "motion/react";
 
 export function EnterAnimation({
   children,
@@ -26,7 +26,7 @@ export function EnterAnimation({
       transition={{
         delay,
         duration,
-        scale: { type: 'spring', visualDuration: duration, bounce: 0.5 },
+        scale: { type: "spring", visualDuration: duration, bounce: 0.5 },
       }}
       className={className}
     >
@@ -40,19 +40,30 @@ export function FadeAnimation({
   delay = 0,
   className,
   duration = 0.2,
+  ease = "easeOut",
+  scale = false,
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
   duration?: number;
+  ease?: string;
+  scale?: boolean;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{
+        opacity: 0,
+        ...(scale && { scale: 0.95 }),
+      }}
+      animate={{
+        opacity: 1,
+        ...(scale && { scale: 1 }),
+      }}
       transition={{
         delay: delay * 0.5,
         duration: duration,
+        ease: ease,
       }}
       className={className}
     >
@@ -79,7 +90,7 @@ export function LoadingAnimation({
       transition={{
         duration,
         repeat: Infinity,
-        ease: 'easeInOut',
+        ease: "easeInOut",
         times: [0, 0.5, 1],
       }}
       className={className}

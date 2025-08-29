@@ -15,15 +15,15 @@
       "1": {
         "1": "Wouah.",
         "2": "Ambiance - impeccable.",
-        "3": "Oh là là, je suis morte.",
+        "3": "Awwww je suis morte.",
         "4": "Oh là là. Je viens de vous voler tous vos Star Points ? xoxo",
-        "5": "J'adore secrètement ce pantalon.",
+        "5": "Discrètement obsédée par ce pantalon.",
         "6": "IYKYK. Et si vous ne savez pas, abonnez-vous. Je n'ai pas toute la journée.",
         "7": "Mamma mia… ils vont craquer pour moi, n'est-ce pas ?",
         "8": "Mercure est rétrograde et carré à Saturne. Ne vous sentez pas mal de jouer si mal, c'était sans espoir.",
         "9": "Ces couleurs sont absolument ÉPOUSTOUFLANTES.",
         "10": "Cette veste en cuir donne une énergie de divorcée riche et j'adore ça.",
-        "11": "Ce mec au pull dégage zéro énergie de dragueur #désoléemaisnon",
+        "11": "Ce type en pull dégage zéro énergie rizz #désolée.",
         "12": "On dit heureux dans les jeux, malheureux en amour. Je suis désolée de vous dire que je n'ai eu que des petits amis horribles.",
         "13": "C'est comme… une unité totale… c'est tout.",
         "14": "Oups. Je viens de vous briser le cœur ?",
@@ -83,13 +83,73 @@
     "mrsChen": {
       "quote": "J'ai oublié plus de mains gagnantes que vous n'en avez jamais jouées.",
       "name": "Mme Chen",
-      "description": "Mme Chen est une vétérane du Mahjong pragmatique qui écrase les tables depuis avant votre naissance. Farouchement stratégique et un peu terrifiante, elle impose le respect d'un simple regard, et son chat grincheux est tout aussi critique. Sous-estimez-la à vos risques et périls."
+      "description": "Mme Chen est une vétérante du Mahjong pragmatique qui écrase les tables depuis avant votre naissance. Farouchement stratégique et un peu terrifiante, elle impose le respect d'un simple regard, et son chat grincheux est tout aussi critique. Sous-estimez-la à vos risques et périls."
     },
     "uncleCai": {
       "quote": "Pendant que vous comptez les tuiles, je compte mes victoires.",
       "name": "Oncle Cai",
       "description": "L'oncle Cai est un maître du Mahjong des rues qui a tout vu, et qui gagne généralement tout. Décontracté et vif d'esprit, il préfère s'éventer et laisser les autres transpirer. Son style old-school, sa chaîne en or et son humour impassible font de lui une légende à la fois à la table et dans les rues."
     }
+  },
+  "ClaimForm": {
+    "title": "Réclamez vos récompenses",
+    "description": "Trouvez des codes sur nos réseaux sociaux et échangez-les ici.",
+    "fields": {
+      "code": {
+        "label": "Code promotionnel",
+        "placeholder": "Entrez votre code promotionnel"
+      },
+      "wallet": {
+        "label": "Adresse du portefeuille",
+        "placeholder": "0x..."
+      },
+      "name": {
+        "label": "Nom",
+        "placeholder": "Tony Kong"
+      },
+      "email": {
+        "label": "E-mail",
+        "placeholder": "tony@mahjongstars.com"
+      },
+      "telegram": {
+        "label": "Identifiant Telegram",
+        "placeholder": "https://t.me/..."
+      },
+      "discord": {
+        "label": "Identifiant Discord",
+        "placeholder": "https://discord.gg/..."
+      },
+      "twitter": {
+        "label": "Identifiant Twitter",
+        "placeholder": "https://x.com/..."
+      },
+      "newsletter": {
+        "label": "Newsletter",
+        "placeholder": "Abonnez-vous à notre newsletter"
+      }
+    },
+    "captcha": {
+      "label": "Je ne suis pas un robot",
+      "protection": "Protégé par ALTCHA"
+    },
+    "buttons": {
+      "cancel": "Annuler",
+      "claim": "Réclamer maintenant !",
+      "claiming": "Réclamation en cours…"
+    },
+    "messages": {
+      "success": {
+        "title": "Réclamé !",
+        "description": "Merci pour votre réclamation. Nous vous contacterons bientôt."
+      },
+      "error": {
+        "title": "Une erreur s'est produite.",
+        "captchaFailed": "Captcha échoué",
+        "questFinalized": "Quête terminée"
+      }
+    },
+    "followUs": "Suivez-nous sur nos réseaux sociaux pour obtenir plus de codes !",
+    "notifications": "Activez les notifications sur nos réseaux sociaux pour obtenir vos codes en priorité !"
   },
   "ContactForm": {
     "title": "Contactez-nous",
@@ -160,7 +220,7 @@
       },
       "1": {
         "question": "Qu'est-ce qui rend Mahjong Stars unique ?",
-        "answer": "Des avatars IA qui apprennent votre style de jeu, un jeu 24 h/24 et 7 j/7 grâce aux robots IA, l'intégration NFT et crypto, des mécanismes de jeu social intégrés et un accès multiplateforme via une application basée sur Unity."
+        "answer": "Des avatars IA qui apprennent votre style de jeu, un jeu 24 h/24 et 7 j/7 via des robots IA, l'intégration de NFT et de cryptomonnaies, des mécanismes de jeu social intégrés et un accès multiplateforme via une application basée sur Unity."
       },
       "2": {
         "question": "Quel est le rôle de l'IA dans le jeu ?",
@@ -168,19 +228,19 @@
       },
       "3": {
         "question": "Que sont les StarsPoints et comment fonctionnent-ils ?",
-        "answer": "Les StarsPoints sont la monnaie du jeu :\n- Achetables via des devises fiduciaires ou des cryptomonnaies\n- Utilisés pour l'accès au jeu, les robots IA, les objets et les frais\n- N'ont aucune valeur en dehors de la plateforme\n- Génèrent des revenus grâce à l'utilisation du jeu"
+        "answer": "Les StarsPoints sont la monnaie du jeu :\n- Achetables via des monnaies fiduciaires ou des cryptomonnaies\n- Utilisés pour l'accès au jeu, les robots IA, les objets et les frais\n- N'ont aucune valeur en dehors de la plateforme\n- Génèrent des revenus grâce à l'utilisation du jeu"
       },
       "4": {
         "question": "Comment Mahjong Stars génère-t-il des revenus ?",
         "answer": "Les revenus sont générés à partir des frais d'inscription, des services IA premium, des ventes d'objets en jeu et des frais de transaction NFT."
       },
       "5": {
-        "question": "Qu'est-ce que le $TILE dans ce contexte ?",
-        "answer": "Le $TILE est le jeton utilitaire de la plateforme, utilisé pour acheter des objets en jeu, échanger des NFT, miser pour obtenir une part des revenus et des récompenses, et soutenir l'économie du jeu."
+        "question": "Qu'est-ce que $TILE dans ce contexte ?",
+        "answer": "Le $TILE est le jeton utilitaire de la plateforme, utilisé pour acheter des objets en jeu, échanger des NFT, miser pour une part des revenus et des récompenses, et soutenir l'économie du jeu."
       },
       "6": {
         "question": "Y a-t-il un composant NFT ?",
-        "answer": "Oui. Les joueurs peuvent débloquer, échanger et louer des NFT. Le retrait des NFT permet de convertir les gains en jeu en valeur réelle via des plateformes tierces."
+        "answer": "Oui. Les joueurs peuvent débloquer, échanger et louer des NFT. Le retrait de NFT permet de convertir les gains en jeu en valeur réelle via des plateformes tierces."
       },
       "7": {
         "question": "Quelle est la taille du marché potentiel ?",
@@ -192,7 +252,7 @@
       },
       "9": {
         "question": "Quelle est la feuille de route pour 2025 ?",
-        "answer": "T1 : Lancement de la version bêta\nT2 : Collecte de fonds et partenariats\nT3 : Lancement de la V2 et place de marché NFT\nT4 : Lancement du jeton $TILE et inscriptions aux bourses"
+        "answer": "T1 : Lancement de la version bêta\nT2 : Collecte de fonds et partenariats\nT3 : Lancement de la V2 et marché NFT\nT4 : Lancement du jeton $TILE et inscriptions aux bourses"
       }
     }
   },
@@ -212,7 +272,7 @@
     "features": {
       "stayInGame": {
         "title": "Restez dans le jeu, restez au top",
-        "description": "Jouez à tout moment. Gravissez le classement et développez vos compétences."
+        "description": "Jouez à tout moment. Montez au classement et développez vos compétences."
       },
       "trainableAI": {
         "title": "IA entraînable qui joue à votre façon",
@@ -220,7 +280,7 @@
       },
       "collectCharacters": {
         "title": "Collectionnez l'inoubliable",
-        "description": "Débloquez des personnages rares et des objets exclusifs grâce à votre blockchain."
+        "description": "Débloquez des personnages rares et des objets exclusifs avec votre blockchain."
       },
       "bringFriends": {
         "title": "Amenez vos amis à la table",
@@ -233,11 +293,11 @@
     "variants": {
       "shenzhen": {
         "title": "Règles du Mahjong de Shenzhen, aussi appelé Hong Kong",
-        "description": "Découvrez l'excitation trépidante de cette variante de Mahjong où vous conservez stratégiquement vos Kungs."
+        "description": "Découvrez l'excitation trépidante de cette variante de Mahjong où vous conservez stratégiquement vos Kongs."
       },
       "riichi": {
         "title": "Règles du Mahjong Riichi",
-        "description": "La variante de Mahjong japonaise palpitante. Disponible plus tard en 2025."
+        "description": "La variante de Mahjong japonaise palpitante. À venir plus tard en 2025."
       }
     }
   },
@@ -253,14 +313,14 @@
   },
   "Hero": {
     "title": "<span>Rejoignez le jeu de Mahjong</span> <span>Web3</span>",
-    "subtitle": "Défiez vos amis à Mahjong Stars où des personnages stylés règnent sur le jeu !"
+    "subtitle": "Défiez vos amis à Mahjong Stars où des personnages cool règnent sur le jeu !"
   },
   "Navigation": {
     "links": {
       "home": "ACCUEIL",
       "features": "FONCTIONNALITÉS",
       "game": "JEU",
-      "character": "PERSONNAGES",
+      "character": "PERSONNAGE",
       "support": "SUPPORT"
     },
     "buttons": {
@@ -269,7 +329,7 @@
     }
   },
   "Newsletter": {
-    "title": "Ne ratez aucune mise à jour !",
+    "title": "Ne manquez aucune mise à jour !",
     "description": "Abonnez-vous à notre newsletter pour recevoir les dernières annonces, actualités et offres exclusives.",
     "placeholder": "Entrez votre adresse e-mail",
     "button": "S'abonner",
@@ -288,7 +348,7 @@
         "home": "ACCUEIL",
         "features": "FONCTIONNALITÉS",
         "game": "JEU",
-        "character": "PERSONNAGES",
+        "character": "PERSONNAGE",
         "support": "SUPPORT"
       },
       "buttons": {
@@ -298,7 +358,7 @@
     },
     "Hero": {
       "title": "<span>Rejoignez le jeu de Mahjong</span> <span>Web3</span>",
-      "subtitle": "Défiez vos amis à Mahjong Stars où des personnages stylés règnent sur le jeu !"
+      "subtitle": "Défiez vos amis à Mahjong Stars où des personnages cool règnent sur le jeu !"
     },
     "About": {
       "title": "Qu'est-ce que Mahjong Stars ?",
@@ -309,7 +369,7 @@
       "features": {
         "stayInGame": {
           "title": "Restez dans le jeu, restez au top",
-          "description": "Jouez à tout moment. Gravissez le classement et développez vos compétences."
+          "description": "Jouez à tout moment. Montez au classement et développez vos compétences."
         },
         "trainableAI": {
           "title": "IA entraînable qui joue à votre façon",
@@ -317,7 +377,7 @@
         },
         "collectCharacters": {
           "title": "Collectionnez l'inoubliable",
-          "description": "Débloquez des personnages rares et des objets exclusifs grâce à votre blockchain."
+          "description": "Débloquez des personnages rares et des objets exclusifs avec votre blockchain."
         },
         "bringFriends": {
           "title": "Amenez vos amis à la table",
@@ -330,11 +390,11 @@
       "variants": {
         "shenzhen": {
           "title": "Règles du Mahjong de Shenzhen, aussi appelé Hong Kong",
-          "description": "Découvrez l'excitation trépidante de cette variante de Mahjong où vous conservez stratégiquement vos Kungs."
+          "description": "Découvrez l'excitation trépidante de cette variante de Mahjong où vous conservez stratégiquement vos Kongs."
         },
         "riichi": {
           "title": "Règles du Mahjong Riichi",
-          "description": "La variante de Mahjong japonaise palpitante. Disponible plus tard en 2025."
+          "description": "La variante de Mahjong japonaise palpitante. À venir plus tard en 2025."
         }
       }
     },
@@ -353,7 +413,7 @@
       "mrsChen": {
         "quote": "J'ai oublié plus de mains gagnantes que vous n'en avez jamais jouées.",
         "name": "Mme Chen",
-        "description": "Mme Chen est une vétérane du Mahjong pragmatique qui écrase les tables depuis avant votre naissance. Farouchement stratégique et un peu terrifiante, elle impose le respect d'un simple regard, et son chat grincheux est tout aussi critique. Sous-estimez-la à vos risques et périls."
+        "description": "Mme Chen est une vétérante du Mahjong pragmatique qui écrase les tables depuis avant votre naissance. Farouchement stratégique et un peu terrifiante, elle impose le respect d'un simple regard, et son chat grincheux est tout aussi critique. Sous-estimez-la à vos risques et périls."
       },
       "uncleCai": {
         "quote": "Pendant que vous comptez les tuiles, je compte mes victoires.",
@@ -362,7 +422,7 @@
       }
     },
     "Newsletter": {
-      "title": "Ne ratez aucune mise à jour !",
+      "title": "Ne manquez aucune mise à jour !",
       "description": "Abonnez-vous à notre newsletter pour recevoir les dernières annonces, actualités et offres exclusives.",
       "placeholder": "Entrez votre adresse e-mail",
       "button": "S'abonner",
@@ -438,6 +498,66 @@
         }
       }
     },
+    "ClaimForm": {
+      "title": "Réclamez vos récompenses",
+      "description": "Trouvez des codes sur nos réseaux sociaux et échangez-les ici.",
+      "fields": {
+        "code": {
+          "label": "Code promotionnel",
+          "placeholder": "Entrez votre code promotionnel"
+        },
+        "wallet": {
+          "label": "Adresse du portefeuille",
+          "placeholder": "0x..."
+        },
+        "name": {
+          "label": "Nom",
+          "placeholder": "Tony Kong"
+        },
+        "email": {
+          "label": "E-mail",
+          "placeholder": "tony@mahjongstars.com"
+        },
+        "telegram": {
+          "label": "Identifiant Telegram",
+          "placeholder": "https://t.me/..."
+        },
+        "discord": {
+          "label": "Identifiant Discord",
+          "placeholder": "https://discord.gg/..."
+        },
+        "twitter": {
+          "label": "Identifiant Twitter",
+          "placeholder": "https://x.com/..."
+        },
+        "newsletter": {
+          "label": "Newsletter",
+          "placeholder": "Abonnez-vous à notre newsletter"
+        }
+      },
+      "captcha": {
+        "label": "Je ne suis pas un robot",
+        "protection": "Protégé par ALTCHA"
+      },
+      "buttons": {
+        "cancel": "Annuler",
+        "claim": "Réclamer maintenant !",
+        "claiming": "Réclamation en cours…"
+      },
+      "messages": {
+        "success": {
+          "title": "Réclamé !",
+          "description": "Merci pour votre réclamation. Nous vous contacterons bientôt."
+        },
+        "error": {
+          "title": "Une erreur s'est produite.",
+          "captchaFailed": "Captcha échoué",
+          "questFinalized": "Quête terminée"
+        }
+      },
+      "followUs": "Suivez-nous sur nos réseaux sociaux pour obtenir plus de codes !",
+      "notifications": "Activez les notifications sur nos réseaux sociaux pour obtenir vos codes en priorité !"
+    },
     "Faq": {
       "title": "Foire aux questions",
       "description": "Trouvez les réponses aux questions fréquentes sur notre jeu de Mahjong Web3 :",
@@ -448,7 +568,7 @@
         },
         "1": {
           "question": "Qu'est-ce qui rend Mahjong Stars unique ?",
-          "answer": "Des avatars IA qui apprennent votre style de jeu, un jeu 24 h/24 et 7 j/7 grâce aux robots IA, l'intégration NFT et crypto, des mécanismes de jeu social intégrés et un accès multiplateforme via une application basée sur Unity."
+          "answer": "Des avatars IA qui apprennent votre style de jeu, un jeu 24 h/24 et 7 j/7 via des robots IA, l'intégration de NFT et de cryptomonnaies, des mécanismes de jeu social intégrés et un accès multiplateforme via une application basée sur Unity."
         },
         "2": {
           "question": "Quel est le rôle de l'IA dans le jeu ?",
@@ -456,19 +576,19 @@
         },
         "3": {
           "question": "Que sont les StarsPoints et comment fonctionnent-ils ?",
-          "answer": "Les StarsPoints sont la monnaie du jeu :\n- Achetables via des devises fiduciaires ou des cryptomonnaies\n- Utilisés pour l'accès au jeu, les robots IA, les objets et les frais\n- N'ont aucune valeur en dehors de la plateforme\n- Génèrent des revenus grâce à l'utilisation du jeu"
+          "answer": "Les StarsPoints sont la monnaie du jeu :\n- Achetables via des monnaies fiduciaires ou des cryptomonnaies\n- Utilisés pour l'accès au jeu, les robots IA, les objets et les frais\n- N'ont aucune valeur en dehors de la plateforme\n- Génèrent des revenus grâce à l'utilisation du jeu"
         },
         "4": {
           "question": "Comment Mahjong Stars génère-t-il des revenus ?",
           "answer": "Les revenus sont générés à partir des frais d'inscription, des services IA premium, des ventes d'objets en jeu et des frais de transaction NFT."
         },
         "5": {
-          "question": "Qu'est-ce que le $TILE dans ce contexte ?",
-          "answer": "Le $TILE est le jeton utilitaire de la plateforme, utilisé pour acheter des objets en jeu, échanger des NFT, miser pour obtenir une part des revenus et des récompenses, et soutenir l'économie du jeu."
+          "question": "Qu'est-ce que $TILE dans ce contexte ?",
+          "answer": "Le $TILE est le jeton utilitaire de la plateforme, utilisé pour acheter des objets en jeu, échanger des NFT, miser pour une part des revenus et des récompenses, et soutenir l'économie du jeu."
         },
         "6": {
           "question": "Y a-t-il un composant NFT ?",
-          "answer": "Oui. Les joueurs peuvent débloquer, échanger et louer des NFT. Le retrait des NFT permet de convertir les gains en jeu en valeur réelle via des plateformes tierces."
+          "answer": "Oui. Les joueurs peuvent débloquer, échanger et louer des NFT. Le retrait de NFT permet de convertir les gains en jeu en valeur réelle via des plateformes tierces."
         },
         "7": {
           "question": "Quelle est la taille du marché potentiel ?",
@@ -480,7 +600,7 @@
         },
         "9": {
           "question": "Quelle est la feuille de route pour 2025 ?",
-          "answer": "T1 : Lancement de la version bêta\nT2 : Collecte de fonds et partenariats\nT3 : Lancement de la V2 et place de marché NFT\nT4 : Lancement du jeton $TILE et inscriptions aux bourses"
+          "answer": "T1 : Lancement de la version bêta\nT2 : Collecte de fonds et partenariats\nT3 : Lancement de la V2 et marché NFT\nT4 : Lancement du jeton $TILE et inscriptions aux bourses"
         }
       }
     },
@@ -496,15 +616,15 @@
         "1": {
           "1": "Wouah.",
           "2": "Ambiance - impeccable.",
-          "3": "Oh là là, je suis morte.",
+          "3": "Awwww je suis morte.",
           "4": "Oh là là. Je viens de vous voler tous vos Star Points ? xoxo",
-          "5": "J'adore secrètement ce pantalon.",
+          "5": "Discrètement obsédée par ce pantalon.",
           "6": "IYKYK. Et si vous ne savez pas, abonnez-vous. Je n'ai pas toute la journée.",
           "7": "Mamma mia… ils vont craquer pour moi, n'est-ce pas ?",
           "8": "Mercure est rétrograde et carré à Saturne. Ne vous sentez pas mal de jouer si mal, c'était sans espoir.",
           "9": "Ces couleurs sont absolument ÉPOUSTOUFLANTES.",
           "10": "Cette veste en cuir donne une énergie de divorcée riche et j'adore ça.",
-          "11": "Ce mec au pull dégage zéro énergie de dragueur #désoléemaisnon",
+          "11": "Ce type en pull dégage zéro énergie rizz #désolée.",
           "12": "On dit heureux dans les jeux, malheureux en amour. Je suis désolée de vous dire que je n'ai eu que des petits amis horribles.",
           "13": "C'est comme… une unité totale… c'est tout.",
           "14": "Oups. Je viens de vous briser le cœur ?",

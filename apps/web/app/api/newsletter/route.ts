@@ -1,6 +1,6 @@
-import { siteConfig } from "@/data/config/site.settings";
 // @ts-expect-error fixme
 import { NewsletterAPI } from "@shipixen/pliny/newsletter";
+import { siteConfig } from "@/data/config/site.settings";
 
 export const dynamic = "force-static";
 

@@ -154,6 +154,66 @@
 			}
 		}
 	},
+	"ClaimForm": {
+		"title": "Claim Your Rewards",
+		"description": "Find codes in our socials and redeem them here.",
+		"fields": {
+			"code": {
+				"label": "Promo Code",
+				"placeholder": "Enter your promo code"
+			},
+			"wallet": {
+				"label": "Wallet Address",
+				"placeholder": "0x..."
+			},
+			"name": {
+				"label": "Name",
+				"placeholder": "Tony Kong"
+			},
+			"email": {
+				"label": "Email",
+				"placeholder": "tony@mahjongstars.com"
+			},
+			"telegram": {
+				"label": "Telegram handle",
+				"placeholder": "https://t.me/..."
+			},
+			"discord": {
+				"label": "Discord handle",
+				"placeholder": "https://discord.gg/..."
+			},
+			"twitter": {
+				"label": "Twitter handle",
+				"placeholder": "https://x.com/..."
+			},
+			"newsletter": {
+				"label": "Newsletter",
+				"placeholder": "Subscribe to our newsletter"
+			}
+		},
+		"captcha": {
+			"label": "I'm not a robot",
+			"protection": "Protected by ALTCHA"
+		},
+		"buttons": {
+			"cancel": "Cancel",
+			"claim": "Claim now!",
+			"claiming": "Claiming..."
+		},
+		"messages": {
+			"success": {
+				"title": "Claimed!",
+				"description": "Thank you for your claim. We will get in touch with you shortly."
+			},
+			"error": {
+				"title": "Something went wrong.",
+				"captchaFailed": "Captcha failed",
+				"questFinalized": "Quest finalized"
+			}
+		},
+		"followUs": "Follow us on our socials to get more codes!",
+		"notifications": "Turn on notifications in our socials to get your codes first!"
+	},
 	"Faq": {
 		"title": "Frequently Asked Questions",
 		"description": "Find answers to common inquiries about our Web3 Mahjong Game:",
