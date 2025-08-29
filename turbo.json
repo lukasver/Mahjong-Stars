@@ -70,7 +70,9 @@
 				"EMAIL_FROM",
 				"EMAILOCTOPUS_API_KEY",
 				"EMAILOCTOPUS_LIST_ID",
-				"MOBILE_OPTIMIZED"
+				"MOBILE_OPTIMIZED",
+				"GOOGLE_SHEET_ID",
+				"GCP_SERVICE_ACCOUNT"
 			]
 		},
 		"@mjs/docs#build": {
