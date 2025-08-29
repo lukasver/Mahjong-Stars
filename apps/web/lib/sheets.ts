@@ -136,7 +136,9 @@ export class Sheets {
 
 		const { expiration, limit, status, code } = parsed;
 
-		if (code !== _code) {
+		console.debug("LALALa", code, _code);
+
+		if (code?.trim() !== _code?.trim()) {
 			throw new SheetsError(
 				"Invalid code",
 				SHEETS_ERROR_CODES.CODE_INVALID,
@@ -184,7 +186,7 @@ export class Sheets {
 	}
 
 	async submitClaim(questId: string, data: QuestResponse) {
-		await this.validateClaim(questId, data.results);
+		await this.validateClaim(questId, data.results, data.code);
 		return this.append(data.results, data);
 	}
 
