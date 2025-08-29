@@ -1,5 +1,3 @@
-"use client";
-
 import {
 	DialogContent,
 	DialogDescription,
@@ -52,3 +50,5 @@ export default async function ClaimModalPage({ searchParams }: PageProps) {
 		</DialogContent>
 	);
 }
+
+export const revalidate = 3600;

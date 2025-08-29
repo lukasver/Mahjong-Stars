@@ -1,3 +1,4 @@
+import "server-only";
 import { invariant } from "@epic-web/invariant";
 import { cache } from "react";
 import { questParser } from "@/components/claim/types";
