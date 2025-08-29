@@ -1,11 +1,13 @@
-'use client';
+"use client";
 
-import { useAppForm } from '@mjs/ui/primitives/form/index';
-import { InputOptionsProvider } from '@/components/hooks/use-input-options';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
-import { FormInput } from '@mjs/ui/primitives/form-input';
-import { Button } from '@mjs/ui/primitives/button';
-import { useCallback } from 'react';
+import { useAppForm } from "@mjs/ui/primitives/form/index";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { useCallback } from "react";
+import { NATIVE_TOKEN_ADDRESS } from "thirdweb";
+import { bsc } from "thirdweb/chains";
+import { BuyWidget } from "thirdweb/react";
+import { InputOptionsProvider } from "@/components/hooks/use-input-options";
+import { client } from "@/lib/auth/thirdweb-client";
 
 export default function Page() {
   const form = useAppForm({
@@ -14,7 +16,7 @@ export default function Page() {
       test: true,
     },
     onSubmit: async ({ value }) => {
-      console.debug('SOY ONSUBMIT', value);
+      console.debug("SOY ONSUBMIT", value);
     },
   });
 
@@ -24,12 +26,21 @@ export default function Page() {
       e.stopPropagation();
       form.handleSubmit();
     },
-    [form]
+    [form],
   );
   return (
     <NuqsAdapter>
       <InputOptionsProvider>
-        <form.AppForm>
+        <div className='h-screen w-screen grid place-items-center'>
+          <BuyWidget
+            client={client}
+            title="Get Funds"
+            tokenAddress={NATIVE_TOKEN_ADDRESS}
+            chain={bsc}
+            amount={"59"}
+          />
+        </div>
+        {/* <form.AppForm>
           <form className='container mx-auto' onSubmit={handleSubmit}>
             <FormInput
               type='select'
@@ -67,7 +78,7 @@ export default function Page() {
             />
             <Button type='submit'>Submit</Button>
           </form>
-        </form.AppForm>
+        </form.AppForm> */}
       </InputOptionsProvider>
     </NuqsAdapter>
   );

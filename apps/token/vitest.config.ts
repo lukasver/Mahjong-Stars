@@ -1,36 +1,35 @@
-import react from '@vitejs/plugin-react';
-import tsConfigPaths from 'vite-tsconfig-paths';
-import { defineConfig } from 'vitest/config';
+import react from "@vitejs/plugin-react";
+import dotenv from "dotenv";
+import tsConfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vitest/config";
 
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.test' });
+dotenv.config({ path: ".env.test" });
 
 export default defineConfig({
-  // @ts-ignore -- types mismatch between versions
-  plugins: [tsConfigPaths(), react()],
-  test: {
-    globals: true,
-    passWithNoTests: true,
-    // setupFiles: './__tests__/setup-tests.ts',
-    css: false,
-    outputFile: {
-      json: 'coverage/report.json',
-    },
-    coverage: {
-      reporter: ['text', 'json', 'html', 'text-summary'],
-      include: ['__tests__/**/*.ts', '__tests__/**/*.tsx'],
-      exclude: ['**/node_modules/**', '**/dist/**', '**/tests/**'],
-    },
-    clearMocks: true,
-    mockReset: true,
-    restoreMocks: true,
-    unstubGlobals: true,
-    unstubEnvs: true,
-    include: ['__tests__/**/?(*.)test.?(c|m)[jt]s?(x)'],
-    environment: 'node',
-  },
-  define: {
-    'process.env': process.env,
-  },
+	// @ts-ignore -- types mismatch between versions
+	plugins: [tsConfigPaths(), react()],
+	test: {
+		globals: true,
+		passWithNoTests: true,
+		// setupFiles: './__tests__/setup-tests.ts',
+		css: false,
+		outputFile: {
+			json: "coverage/report.json",
+		},
+		coverage: {
+			reporter: ["text", "json", "html", "text-summary"],
+			include: ["__tests__/**/*.ts", "__tests__/**/*.tsx"],
+			exclude: ["**/node_modules/**", "**/dist/**", "**/tests/**"],
+		},
+		clearMocks: true,
+		mockReset: true,
+		restoreMocks: true,
+		unstubGlobals: true,
+		unstubEnvs: true,
+		include: ["__tests__/**/?(*.)test.?(c|m)[jt]s?(x)"],
+		environment: "node",
+	},
+	define: {
+		"process.env": process.env,
+	},
 });

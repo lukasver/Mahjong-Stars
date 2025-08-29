@@ -82,7 +82,7 @@
 		"sanitize-html": "^2.17.0",
 		"server-only": "^0.0.1",
 		"sharp": "^0.34.3",
-		"thirdweb": "^5.102.0",
+		"thirdweb": "^5.105.37",
 		"usehooks-ts": "^3.1.1",
 		"xlsx": "^0.18.5",
 		"zod": "^3.25.67",
