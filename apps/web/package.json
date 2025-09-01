@@ -42,7 +42,6 @@
 		"clsx": "^2.1.1",
 		"contentlayer2": "0.5.7",
 		"date-fns": "^3.6.0",
-		"deepmerge-ts": "^7.1.5",
 		"esbuild": "^0.25.3",
 		"framer-motion": "^12.12.1",
 		"github-slugger": "^2.0.0",
@@ -97,6 +96,7 @@
 		"@types/react": "19.1.5",
 		"@types/rtl-detect": "^1.0.3",
 		"cross-env": "^7.0.3",
+		"deepmerge-ts": "^7.1.5",
 		"rimraf": "^6.0.1",
 		"typescript": "^5.8.3",
 		"vfile": "^6.0.3"

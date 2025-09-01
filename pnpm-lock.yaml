@@ -438,9 +438,6 @@ importers:
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
-      deepmerge-ts:
-        specifier: ^7.1.5
-        version: 7.1.5
       esbuild:
         specifier: ^0.25.3
         version: 0.25.4
@@ -598,6 +595,9 @@ importers:
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
+      deepmerge-ts:
+        specifier: ^7.1.5
+        version: 7.1.5
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
