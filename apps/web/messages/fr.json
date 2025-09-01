@@ -151,7 +151,8 @@
       "error": {
         "title": "Une erreur s'est produite.",
         "captchaFailed": "Captcha échoué",
-        "questFinalized": "Quête terminée"
+        "questFinalized": "Quête terminée",
+        "invalidCode": "Code invalide"
       }
     },
     "followUs": "Suivez-nous sur nos réseaux sociaux pour obtenir plus de codes !",

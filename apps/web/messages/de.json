@@ -151,7 +151,8 @@
       "error": {
         "title": "Etwas ist schief gelaufen.",
         "captchaFailed": "Captcha fehlgeschlagen",
-        "questFinalized": "Quest abgeschlossen"
+        "questFinalized": "Quest abgeschlossen",
+        "invalidCode": "Ungültiger Code"
       }
     },
     "followUs": "Folge uns in den sozialen Medien, um weitere Codes zu erhalten!",

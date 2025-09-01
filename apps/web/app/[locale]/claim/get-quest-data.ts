@@ -26,6 +26,7 @@ export const getQuestData = cache(async (id: string) => {
 			const expirationDate = parsed.expiration;
 			const currentDate = new Date();
 			if (expirationDate < currentDate) {
+				console.debug("Quest is expired");
 				return null;
 			}
 		}

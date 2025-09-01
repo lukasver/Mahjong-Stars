@@ -151,7 +151,8 @@
       "error": {
         "title": "Something went wrong.",
         "captchaFailed": "Captcha failed",
-        "questFinalized": "Quest finalized"
+        "questFinalized": "Quest finalized",
+        "invalidCode": "Invalid code"
       }
     },
     "followUs": "Follow us on our socials to get more codes!",

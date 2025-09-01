@@ -151,7 +151,8 @@
       "error": {
         "title": "Algo salió mal.",
         "captchaFailed": "Captcha fallido",
-        "questFinalized": "Misión finalizada"
+        "questFinalized": "Misión finalizada",
+        "invalidCode": "Código inválido"
       }
     },
     "followUs": "¡Síguenos en nuestras redes sociales para obtener más códigos!",

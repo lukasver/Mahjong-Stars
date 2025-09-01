@@ -145,7 +145,8 @@
       "error": {
         "title": "Qualcosa è andato storto.",
         "captchaFailed": "Captcha fallito",
-        "questFinalized": "Missione completata"
+        "questFinalized": "Missione completata",
+        "invalidCode": "Codice non valido"
       }
     },
     "followUs": "Seguici sui nostri social per ottenere più codici!",

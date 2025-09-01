@@ -1,9 +1,8 @@
 // const { withContentlayer } = require("next-contentlayer2");
 import createMDX from "@next/mdx";
-import mdxConfig from "./mdx.config";
-
 import { type NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import mdxConfig from "./mdx.config";
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
 	enabled: process.env.ANALYZE === "true",
@@ -107,7 +106,11 @@ export default () => {
 			dirs: ["app", "components", "layouts", "scripts"],
 		},
 		compiler: {
-			removeConsole: { exclude: ["error", "warn", "debug", "info"] },
+			...(process.env.NODE_ENV === "production" && {
+				removeConsole: {
+					exclude: ["error", "warn", "debug", "info"],
+				},
+			}),
 		},
 		experimental: {
 			scrollRestoration: true,

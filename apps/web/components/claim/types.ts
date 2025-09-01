@@ -5,11 +5,23 @@ export const questParser = z.object({
 	code: z.string().min(1),
 	inputs: z.preprocess(
 		(val) => (typeof val === "string" ? val.split(",").filter(Boolean) : []),
-		z.array(z.string()),
+		z.array(z.string()).min(1),
 	),
 	limit: z.coerce.number(),
-	start: z.coerce.date(),
-	expiration: z.coerce.date().optional(),
+	start: z
+		.string()
+		.transform((val) => {
+			return new Date(val);
+		})
+		// @ts-ignore checking invalid date
+		.refine((d) => d instanceof Date && !isNaN(d), {
+			message: "Invalid date format",
+		}),
+	expiration: z
+		.string()
+		.optional()
+		.transform((val) => val && new Date(val))
+		.optional(),
 	status: z.enum(["DRAFT", "FINALIZED"]).optional(),
 	results: z
 		.string()

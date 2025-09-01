@@ -151,7 +151,8 @@
       "error": {
         "title": "エラーが発生しました。",
         "captchaFailed": "CAPTCHA認証に失敗しました",
-        "questFinalized": "クエストは終了しました"
+        "questFinalized": "クエストは終了しました",
+        "invalidCode": "無効なコード"
       }
     },
     "followUs": "さらに多くのコードを入手するには、ソーシャルメディアでフォローしてください！",

@@ -46,4 +46,6 @@ export default async function ClaimFormPage({ searchParams }: PageProps) {
 	);
 }
 
-export const revalidate = 3600 // 1 hour;
+// Value in seconds
+export const revalidate = 60 // 1 minute;
+// export const revalidate = 3600 // 1 hour;

@@ -151,7 +151,8 @@
       "error": {
         "title": "문제가 발생했습니다.",
         "captchaFailed": "캡차 실패",
-        "questFinalized": "퀘스트 완료"
+        "questFinalized": "퀘스트 완료",
+        "invalidCode": "잘못된 코드"
       }
     },
     "followUs": "더 많은 코드를 얻으려면 소셜 미디어를 팔로우하세요!",
