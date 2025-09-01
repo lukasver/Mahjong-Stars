@@ -13,10 +13,19 @@ export const questParser = z.object({
 		.transform((val) => {
 			return new Date(val);
 		})
-		// @ts-ignore checking invalid date
-		.refine((d) => d instanceof Date && !isNaN(d), {
-			message: "Invalid date format",
-		}),
+		.refine(
+			(d) => {
+				// @ts-ignore
+				if (!(d instanceof Date) || isNaN(d)) {
+					return false;
+				}
+				const now = new Date();
+				return now >= d;
+			},
+			{
+				message: "Invalid date format",
+			},
+		),
 	expiration: z
 		.string()
 		.optional()
