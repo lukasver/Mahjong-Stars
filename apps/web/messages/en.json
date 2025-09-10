@@ -190,6 +190,10 @@
       "newsletter": {
         "label": "Newsletter",
         "placeholder": "Subscribe to our newsletter"
+      },
+      "phone": {
+        "label": "Phone number",
+        "placeholder": "+1 555 123-4567"
       }
     },
     "captcha": {

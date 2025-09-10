@@ -7,7 +7,7 @@ import { useWindowSize } from "usehooks-ts";
 import { useVideoPlayer } from "../use-video-player";
 
 function VideoPlayer({
-  src,
+  src: _src,
   mobileSrc,
   className,
   poster,
@@ -63,61 +63,64 @@ function VideoPlayer({
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("ended", handleEnded);
     };
-  }, [isMobile, mobileSrc, src]);
+  }, [isMobile, mobileSrc, _src]);
 
-  if (isMobile) {
-    if (!mobileSrc) {
-      return null;
-    }
+  // if (isMobile) {
+  //   if (!mobileSrc) {
+  //     return null;
+  //   }
 
-    return (
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{
-            duration: 0.4,
-            scale: { type: "tween", visualDuration: 0.4, bounce: 0.5 },
-          }}
-          className="contents"
-        >
-          <video
-            id="video"
-            ref={videoRef}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className={cn(
-              "absolute w-full object-contain bottom-[25%] md:bottom-auto md:inset-0",
-              "hide-play-button",
-              mNumber !== 1 && "h-full",
-              className,
-            )}
-            {...(poster ? { poster } : {})}
-          >
-            {Array.isArray(mobileSrc) ? (
-              mobileSrc.map((props) => <source key={props.src} {...props} />)
-            ) : (
-              <source {...mobileSrc} />
-            )}
-            Your browser does not support the video tag.
-          </video>
-          <div
-            onClick={!isPlaying ? handlePlayVideo : undefined}
-            className={cn(
-              "absolute inset-0 z-1 h-[75%] sm:hidden",
-              isMobile &&
-              mobileSrc &&
-              "bg-gradient-to-t from-[#920B0A] from-8% via-[#920B0A] via-5% to-transparent to-10%",
-              !isPlaying && "z-50",
-            )}
-          />
-          {/* Optionally, show a custom play button if !isPlaying */}
-        </motion.div>
-      </AnimatePresence>
-    );
-  }
+  //   return (
+  //     <AnimatePresence>
+  //       <motion.div
+  //         initial={{ opacity: 0 }}
+  //         animate={{ opacity: 1 }}
+  //         transition={{
+  //           duration: 0.4,
+  //           scale: { type: "tween", visualDuration: 0.4, bounce: 0.5 },
+  //         }}
+  //         className="contents"
+
+  //       >
+  //         <video
+  //           id="video"
+  //           ref={videoRef}
+  //           autoPlay
+  //           muted
+  //           loop
+  //           playsInline
+  //           className={cn(
+  //             "absolute w-full object-contain bottom-[25%] md:bottom-auto md:inset-0",
+  //             "hide-play-button",
+  //             mNumber !== 1 && "h-full",
+  //             className,
+  //           )}
+  //           {...(poster ? { poster } : {})}
+  //         >
+  //           {Array.isArray(mobileSrc) ? (
+  //             mobileSrc.map((props) => <source key={props.src} {...props} />)
+  //           ) : (
+  //             <source {...mobileSrc} />
+  //           )}
+  //           Your browser does not support the video tag.
+  //         </video>
+  //         <div
+  //           onClick={!isPlaying ? handlePlayVideo : undefined}
+  //           className={cn(
+  //             "absolute inset-0 z-1 h-[75%] sm:hidden",
+  //             isMobile &&
+  //             mobileSrc &&
+  //             "bg-gradient-to-t from-[#920B0A] from-8% via-[#920B0A] via-5% to-transparent to-10%",
+  //             !isPlaying && "z-50",
+  //           )}
+  //         />
+  //         {/* Optionally, show a custom play button if !isPlaying */}
+  //       </motion.div>
+  //     </AnimatePresence>
+  //   );
+  // }
+
+  const src = (isMobile && mobileSrc) ? mobileSrc : _src;
 
   return (
     <AnimatePresence>
@@ -128,6 +131,7 @@ function VideoPlayer({
           duration: 0.4,
           scale: { type: "tween", visualDuration: 0.4, bounce: 0.5 },
         }}
+        className={cn((isMobile && mobileSrc) ? 'contents' : 'relative w-full h-full contents')}
       >
         <video
           ref={videoRef}
@@ -137,8 +141,11 @@ function VideoPlayer({
           playsInline
           style={{ height: "inherit" }}
           className={cn(
-            "absolute inset-0 w-full xl:object-contain hidden md:block 3xl:min-h-screen",
-            mNumber === 1 && "2xl:w-[90%]",
+            isMobile ?
+              `absolute w-full object-contain bottom-[${mNumber === 2 ? '30%' : '25%'}] md:bottom-auto md:inset-0` :
+              "absolute size-full object-cover 4xl:object-contain hidden md:block",
+            isMobile && "hide-play-button",
+            !isPlaying && isMobile && "z-50",
             className,
           )}
           {...(poster ? { poster } : {})}
@@ -150,6 +157,17 @@ function VideoPlayer({
           )}
           Your browser does not support the video tag.
         </video>
+        {isMobile && <div
+          onClick={!isPlaying ? handlePlayVideo : undefined}
+          className={cn(
+            "absolute inset-0 z-1 h-[75%] sm:hidden",
+            isMobile &&
+            mobileSrc && mNumber !== 1 &&
+            "bg-gradient-to-t from-[#920B0A] from-8% via-[#920B0A] via-5% to-transparent to-10%",
+            mobileSrc && mNumber === 1 && "bg-gradient-to-t from-[#710408] from-2% via-[#710408] via-5% to-transparent to-10%",
+            !isPlaying && "z-50",
+          )}
+        />}
       </motion.div>
     </AnimatePresence>
   );

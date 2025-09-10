@@ -190,6 +190,10 @@
       "newsletter": {
         "label": "Newsletter",
         "placeholder": "Newsletter abonnieren"
+      },
+      "phone": {
+        "label": "Telefonnummer",
+        "placeholder": "+49 30 12345678"
       }
     },
     "captcha": {
