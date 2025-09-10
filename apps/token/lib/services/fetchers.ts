@@ -479,6 +479,7 @@ export const getBlockchains = async () => {
 				| "explorerUrl"
 			>[];
 		}>(`/blockchains`);
+
 		return { data, error: null };
 	} catch (e) {
 		return { data: null, error: e };

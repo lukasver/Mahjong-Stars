@@ -14,12 +14,10 @@ import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
 import { copyToClipboard, safeFormatCurrency } from "@mjs/utils/client";
 import { TransactionStatus } from "@prisma/client";
-import { BanknoteIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { FIAT_CURRENCIES, ONE_MINUTE } from "@/common/config/constants";
-import { metadata } from "@/common/config/site";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import {
   BankDetailsCard,
@@ -27,7 +25,6 @@ import {
 } from "@/components/bank-details";
 import { BalanceChecker } from "@/components/buy/balance-checker";
 import { PurchaseSummaryCard } from "@/components/invest/summary";
-import { Placeholder } from "@/components/placeholder";
 import { PulseLoader } from "@/components/pulse-loader";
 import {
   associateDocumentsToUser,
@@ -43,6 +40,7 @@ import {
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
 import { CryptoPaymentButton } from "./crypto-payment-btn";
+import { OnRampWidget } from "./onramp";
 import { isFileWithPreview } from "./utils";
 
 interface PaymentStepProps {
@@ -227,6 +225,8 @@ const FiatPayment = ({
   tx: TransactionByIdWithRelations;
   onSuccess: () => void;
 }) => {
+
+
   const { data: banks, isLoading: isBanksLoading } = useSaleBanks(
     tx?.sale?.id || "",
   );
@@ -317,7 +317,8 @@ const FiatPayment = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <Placeholder
+        <OnRampWidget transaction={tx} />
+        {/* <Placeholder
           icon={BanknoteIcon}
           title="No config for transfer payment"
           description="Contact support"
@@ -325,7 +326,7 @@ const FiatPayment = ({
           <a href={`mailto:${metadata.supportEmail}`}>
             {metadata.supportEmail}
           </a>
-        </Placeholder>
+        </Placeholder> */}
       </motion.div>
     );
   }

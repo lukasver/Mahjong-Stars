@@ -195,7 +195,9 @@ export const InvestForm = ({
         invariant(q, "Quantity is required");
         invariant(currency, "Currency is required");
         invariant(decimals, "Decimals are required");
-        const { pricePerUnit, amount } = await calculator.calculateAmountToPay({
+        const { pricePerUnit, amount, fees } = await calculator.calculateAmountToPay({
+
+
           quantity: String(q),
           sale: sale,
           currency,
@@ -203,6 +205,7 @@ export const InvestForm = ({
           addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
           // tokenDecimals: decimals,
         });
+        console.log("🚀 ~ form.tsx:200 ~ fees:", pricePerUnit, amount, fees);
         // form.reset({})
         form.setFieldValue("paid.amount", amount);
         form.setFieldValue("paid.ppu", pricePerUnit);

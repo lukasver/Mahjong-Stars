@@ -592,6 +592,37 @@ model TokensOnBlockchains {
   @@map("tokens_on_blockchains")
 }
 
+model Currency {
+  id        String    @id @default(cuid()) @db.Text
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+
+  name   String
+  symbol String       @unique
+  type   CurrencyType
+
+  Sale             Sale[]
+  SaleTransactions SaleTransactions[]
+  banks            BankDetails[]
+  ratesFrom        ExchangeRates[]    @relation("from")
+  ratesTo          ExchangeRates[]    @relation("to")
+}
+
+//TODO pending implement logic for storing
+model ExchangeRates {
+  id           String   @id @default(cuid()) @db.Text
+  from         Currency @relation(fields: [fromCurrency], references: [symbol], name: "from")
+  fromCurrency String
+  to           Currency @relation(fields: [toCurrency], references: [symbol], name: "to")
+  toCurrency   String
+  rate         Decimal  @db.Decimal(36, 18)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("exchange_rates")
+}
+
 enum RegistrationStep {
   REGISTRATION_NEW_ACCOUNT
   REGISTRATION_PERSONAL_DETAIL
@@ -610,21 +641,6 @@ enum SaleStatus {
   OPEN
   CLOSED
   FINISHED
-}
-
-model Currency {
-  id        String    @id @default(cuid()) @db.Text
-  createdAt DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
-  deletedAt DateTime? @db.Timestamptz(6)
-
-  name   String
-  symbol String       @unique
-  type   CurrencyType
-
-  Sale             Sale[]
-  SaleTransactions SaleTransactions[]
-  banks            BankDetails[]
 }
 
 enum CurrencyType {

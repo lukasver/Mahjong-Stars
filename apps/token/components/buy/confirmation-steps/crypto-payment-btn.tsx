@@ -1,4 +1,8 @@
-import { TransactionButton, useSimulateTransaction } from 'thirdweb/react';
+import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
+import { Button } from "@mjs/ui/primitives/button";
+import { TokensOnBlockchains } from "@prisma/client";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
 import {
   defineChain,
   getContract,
@@ -7,17 +11,13 @@ import {
   prepareTransaction,
   resolveMethod,
   toUnits,
-} from 'thirdweb';
-import { transfer } from 'thirdweb/extensions/erc20';
-import { client } from '@/lib/auth/thirdweb-client';
-import { TokensOnBlockchains } from '@prisma/client';
-import { useState } from 'react';
-import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
-import { useAction } from 'next-safe-action/hooks';
-import { confirmCryptoTransaction } from '@/lib/actions';
-import { DialogLoader } from '../dialog-loader';
-import { Button } from '@mjs/ui/primitives/button';
-import useActiveAccount from '@/components/hooks/use-active-account';
+} from "thirdweb";
+import { transfer } from "thirdweb/extensions/erc20";
+import { TransactionButton, useSimulateTransaction } from "thirdweb/react";
+import useActiveAccount from "@/components/hooks/use-active-account";
+import { confirmCryptoTransaction } from "@/lib/actions";
+import { client } from "@/lib/auth/thirdweb-client";
+import { DialogLoader } from "../dialog-loader";
 
 export function CryptoPaymentButton({
   chain,
@@ -28,17 +28,14 @@ export function CryptoPaymentButton({
   onSuccess,
 }: {
   chain:
-    | Pick<
-        TokensOnBlockchains,
-        | 'contractAddress'
-        | 'decimals'
-        | 'isNative'
-        | 'name'
-        | 'tokenSymbol'
-        | 'id'
-        | 'chainId'
-      >
-    | undefined;
+  | Pick<
+    TokensOnBlockchains,
+    | "contractAddress"
+    | "decimals"
+    | "isNative"
+    | "chainId"
+  >
+  | undefined;
   toWallet: string | undefined;
   amount: string;
   disabled?: boolean;
@@ -56,7 +53,7 @@ export function CryptoPaymentButton({
       setIsTransactionDialogOpen(false);
     },
     onError: (error) => {
-      console.error('Transaction error', error);
+      console.error("Transaction error", error);
       setIsTransactionDialogOpen(false);
     },
   });
@@ -94,7 +91,7 @@ export function CryptoPaymentButton({
     }
     // ERC-20
     if (chain.decimals === 18) {
-      console.log('ENTRE AL transferFrom');
+      console.log("ENTRE AL transferFrom");
 
       const txs = transfer({
         contract,
@@ -107,7 +104,7 @@ export function CryptoPaymentButton({
     } else {
       const txs = prepareContractCall({
         contract,
-        method: resolveMethod('transfer'),
+        method: resolveMethod("transfer"),
         params: [
           activeAccount?.address!,
           toWallet,
@@ -120,7 +117,7 @@ export function CryptoPaymentButton({
 
   const handleTxConfirmed: React.ComponentProps<
     typeof TransactionButton
-  >['onTransactionConfirmed'] = (receipt) => {
+  >["onTransactionConfirmed"] = (receipt) => {
     execute({
       txId,
       receipt: receipt.transactionHash,
@@ -133,22 +130,23 @@ export function CryptoPaymentButton({
   return (
     <>
       <TransactionButton
+        className='w-full'
         disabled={disabled}
         transaction={handleTransaction}
         onTransactionSent={(result) => {
-          console.log('Transaction submitted', result.transactionHash);
+          console.log("Transaction submitted", result.transactionHash);
           setTransactionHash(result.transactionHash);
           setIsTransactionDialogOpen(true);
         }}
         onTransactionConfirmed={handleTxConfirmed}
         onError={(error) => {
-          console.error('Transaction error', error);
+          console.error("Transaction error", error);
           setIsTransactionDialogOpen(false);
         }}
       >
         Proceed to pay
       </TransactionButton>
-      {process.env.NODE_ENV === 'development' && (
+      {process.env.NODE_ENV === "development" && (
         <Button
           onClick={() =>
             simulateTx({
@@ -162,15 +160,15 @@ export function CryptoPaymentButton({
       )}
 
       <DialogLoader
-        title='Processing Transaction'
-        description='Your transaction is being processed on the blockchain. Please do not close this window.'
+        title="Processing Transaction"
+        description="Your transaction is being processed on the blockchain. Please do not close this window."
         open={isTransactionDialogOpen}
         onOpenChange={setIsTransactionDialogOpen}
         isAlertDialog={true}
       >
-        <div className='mt-4 text-center'>
-          <p className='text-sm text-muted-foreground'>Transaction Hash:</p>
-          <p className='text-xs font-mono break-all mt-1'>{transactionHash}</p>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-muted-foreground">Transaction Hash:</p>
+          <p className="text-xs font-mono break-all mt-1">{transactionHash}</p>
         </div>
       </DialogLoader>
     </>

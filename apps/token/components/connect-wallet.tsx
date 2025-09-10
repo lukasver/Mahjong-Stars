@@ -40,6 +40,8 @@ export const ConnectWallet = ({
   onConnect?: (wallet: Wallet) => void;
   chains: { chainId: number }[];
 }) => {
+
+  console.log("🚀 ~ connect-wallet.tsx:43 ~ chains:", props.chains);
   const mappedLocale = locale ? localeMapping[locale] : "en_US";
   const { signout } = useActiveAccount();
 

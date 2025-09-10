@@ -76,15 +76,12 @@ const LoginComponent = async () => {
   });
 
   invariant(data?.chains, "Chains not configured");
-  const chains =
-    process.env.NODE_ENV === "production"
-      ? data.chains.filter((chain) => !chain.isTestnet)
-      : data.chains;
+
 
   return (
     <HydrationBoundary state={dehydrate(qc)}>
       <div className="w-full max-w-[300px] [&>button]:w-full!">
-        <ConnectWallet chains={chains} />
+        <ConnectWallet chains={data.chains} />
       </div>
     </HydrationBoundary>
   );

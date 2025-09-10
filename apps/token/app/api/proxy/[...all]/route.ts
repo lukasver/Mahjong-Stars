@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { env } from "@/common/config/env";
 import { TransactionStatusSchema } from "@/common/schemas/generated";
+import blockchains from "@/lib/repositories/chains";
 import documents from "@/lib/repositories/documents";
 import rates from "@/lib/repositories/feeds/rates";
 import sales from "@/lib/repositories/sales";
 import transactions from "@/lib/repositories/transactions";
 import users from "@/lib/repositories/users";
-import { getBlockchains } from "@/lib/services/fetchers.server";
+
 import { withAuth } from "./_auth";
 
 /**
@@ -89,6 +90,8 @@ export const GET = withAuth(async (req, context, auth) => {
 						toArray?.length > 1 ? toArray : to,
 					);
 
+					console.log("🚀 ~ route.ts:93 ~ data:", data);
+
 					return NextResponse.json(data);
 				}
 				return NextResponse.json({ error: "Bad request" }, { status: 404 });
@@ -156,7 +159,8 @@ export const GET = withAuth(async (req, context, auth) => {
 			}
 
 			case "blockchains": {
-				return NextResponse.json(await getBlockchains());
+				const res = await blockchains.getAll();
+				return NextResponse.json(res);
 			}
 
 			case "admin": {

@@ -9,6 +9,7 @@ import { getUserFromCache } from "../auth/cache";
 import { getSessionCookie } from "../auth/cookies";
 import { verifyJwt } from "../auth/thirdweb";
 import { prisma } from "../db/prisma";
+import blockchains from "../repositories/chains";
 import sales from "../repositories/sales";
 import transactions from "../repositories/transactions";
 import users from "../repositories/users";
@@ -161,25 +162,10 @@ export const getIcoPhases = cache(async () => {
 });
 
 export const getBlockchains = cache(async () => {
-	try {
-		const chains = await prisma.blockchain.findMany({
-			where: {
-				isEnabled: true,
-			},
-			select: {
-				chainId: true,
-				explorerUrl: true,
-				isTestnet: true,
-				name: true,
-				isEnabled: true,
-				rpcUrl: true,
-			},
-			orderBy: {
-				chainId: "asc",
-			},
-		});
-		return { data: { chains }, error: null };
-	} catch (error) {
-		return { data: null, error: error };
+	const result = await blockchains.getAll();
+	if (result.success) {
+		return { data: result.data, error: null };
+	} else {
+		return { data: null, error: result };
 	}
 });
