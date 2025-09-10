@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import useActiveAccount from '@/components/hooks/use-active-account';
-import { useCallback, useState } from 'react';
-import { toast } from '@mjs/ui/primitives/sonner';
-import { useAction } from 'next-safe-action/hooks';
-
-import { AdminActionPayload } from '@/lib/auth/admin-wallet-auth';
-import { verifyAdminAction } from '@/lib/actions/admin';
+import { toast } from "@mjs/ui/primitives/sonner";
+import { useAction } from "next-safe-action/hooks";
+import { useCallback, useState } from "react";
+import useActiveAccount from "@/components/hooks/use-active-account";
+import { verifyAdminAction } from "@/lib/actions/admin";
+import { AdminActionPayload } from "@/lib/auth/admin-wallet-auth";
 
 interface UseAdminWalletAuthOptions {
   action: string;
@@ -42,7 +41,7 @@ export const useAdminWalletAuth = ({
    */
   const requestSignature = useCallback(async () => {
     if (!activeAccount) {
-      setState((prev) => ({ ...prev, error: 'No wallet connected' }));
+      setState((prev) => ({ ...prev, error: "No wallet connected" }));
       return false;
     }
 
@@ -63,11 +62,11 @@ export const useAdminWalletAuth = ({
       const signature = await signMessage(messageToSign);
 
       if (!signature) {
-        throw new Error('Failed to get signature from wallet');
+        throw new Error("Failed to get signature from wallet");
       }
 
       if (!chainId) {
-        throw new Error('No chain ID retrieved from wallet');
+        throw new Error("No chain ID retrieved from wallet");
       }
 
       // Verify signature on server
@@ -84,13 +83,15 @@ export const useAdminWalletAuth = ({
           isAuthenticated: true,
           error: null,
         });
-        toast.success('Admin authentication successful');
+        if (process.env.NODE_ENV === "development") {
+          toast.success("Admin authentication successful");
+        }
         return true;
       } else {
         const error =
           result?.serverError ||
-          result?.validationErrors?._errors?.join(', ') ||
-          'Verification failed';
+          result?.validationErrors?._errors?.join(", ") ||
+          "Verification failed";
         setState({
           isLoading: false,
           isAuthenticated: false,
@@ -101,7 +102,7 @@ export const useAdminWalletAuth = ({
       }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error occurred';
+        error instanceof Error ? error.message : "Unknown error occurred";
       setState({
         isLoading: false,
         isAuthenticated: false,

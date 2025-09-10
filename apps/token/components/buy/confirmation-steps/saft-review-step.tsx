@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
+import { invariant } from "@epic-web/invariant";
+import { motion } from "@mjs/ui/components/motion";
+import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
+import { AlertDialog } from "@mjs/ui/primitives/alert-dialog";
+import { Button } from "@mjs/ui/primitives/button";
 import {
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@mjs/ui/primitives/card';
-import { Button } from '@mjs/ui/primitives/button';
-import { motion } from '@mjs/ui/components/motion';
-import { generateContractForTransaction } from '@/lib/actions';
+} from "@mjs/ui/primitives/card";
+import { useAppForm } from "@mjs/ui/primitives/form";
+import { FormInput } from "@mjs/ui/primitives/form-input";
+import { toast } from "@mjs/ui/primitives/sonner";
+import { useParams } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
+import { parseAsString, useQueryState } from "nuqs";
+import { useCallback, useEffect, useState } from "react";
+import { ContractDialogConfirmSignature } from "@/components/buy/contract/dialog-confirm-signature";
+import { ContractDialogFailed } from "@/components/buy/contract/dialog-failed";
+import { ContractDialogLoading } from "@/components/buy/contract/dialog-loading";
+import { useBeforeUnload } from "@/components/hooks/use-before-unload";
+import { generateContractForTransaction } from "@/lib/actions";
 import {
-  useSaleSaftForTransaction,
-  useSaftForTransactionDetails,
   useRecipientForCurrentTransactionSaft,
-} from '@/lib/services/api';
-import { useParams } from 'next/navigation';
-import { useAppForm } from '@mjs/ui/primitives/form';
-import { FormInput } from '@mjs/ui/primitives/form-input';
-import { useAction } from 'next-safe-action/hooks';
-import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
-import { parseAsString, useQueryState } from 'nuqs';
-import { invariant } from '@epic-web/invariant';
-import { toast } from '@mjs/ui/primitives/sonner';
-import { AlertDialog } from '@mjs/ui/primitives/alert-dialog';
-import { useBeforeUnload } from '@/components/hooks/use-before-unload';
-import { ContractDialogFailed } from '@/components/buy/contract/dialog-failed';
-import { ContractDialogConfirmSignature } from '@/components/buy/contract/dialog-confirm-signature';
-import { ContractDialogLoading } from '@/components/buy/contract/dialog-loading';
-import { getLabel, getVariablesAsNestedObjects, saftFormSchema } from './utils';
-import { getQueryClient } from '@/app/providers';
+  useSaftForTransactionDetails,
+  useSaleSaftForTransaction,
+} from "@/lib/services/api";
+import { getQueryClient } from "@/lib/services/query";
+import { getLabel, getVariablesAsNestedObjects, saftFormSchema } from "./utils";
 
 interface SaftReviewStepProps {
   onSuccess: () => void;
@@ -45,18 +45,18 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
   const { data: recipient, isLoading: isRecipientLoading } =
     useRecipientForCurrentTransactionSaft(txId ? (txId as string) : undefined);
 
-  const [cid, setCid] = useQueryState('cid', parseAsString);
+  const [cid, setCid] = useQueryState("cid", parseAsString);
   const [openDialog, setOpenDialog] = useState(!!cid);
 
   const action = useActionListener(useAction(generateContractForTransaction), {
-    successMessage: 'Document generation in process, please stand by...',
+    successMessage: "Document generation in process, please stand by...",
     onSuccess: (_data) => {
       const data = _data as unknown as { id: string };
       if (data && data.id) {
         setCid(data.id);
         setOpenDialog(true);
       } else {
-        toast.error('Error generating contract');
+        toast.error("Error generating contract");
       }
     },
   });
@@ -75,7 +75,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
     onSubmit: ({ value }) => {
       // Avoid executing multiple times
       if (action.isExecuting) return;
-      invariant(data, 'Error retrieving sale saft data');
+      invariant(data, "Error retrieving sale saft data");
       const formData = {
         ...value,
         contractId: value.contractId || data.id,
@@ -94,17 +94,17 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
       e.stopPropagation();
       form.handleSubmit();
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
     if (isRecipientLoading) return;
     // In case user has already a generated SAFT for this tx, open the modal so he can confirm signature
-    if (recipient && recipient?.recipient?.status === 'SENT_FOR_SIGNATURE') {
+    if (recipient && recipient?.recipient?.status === "SENT_FOR_SIGNATURE") {
       setCid(recipient.recipient.id);
       setOpenDialog(!!recipient.recipient.id);
     }
-    if (recipient && recipient?.recipient?.status === 'SIGNED') {
+    if (recipient && recipient?.recipient?.status === "SIGNED") {
       setOpenDialog(false);
       onSuccess();
     }
@@ -114,7 +114,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
 
   if (error)
     return (
-      <CardContent className='text-destructive'>
+      <CardContent className="text-destructive">
         Error loading SAFT: {error}
       </CardContent>
     );
@@ -135,9 +135,9 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
               transition={{ delay: 0.3, duration: 0.4 }}
             >
               <Button
-                variant='accent'
+                variant="accent"
                 onClick={() => onSuccess()}
-                className='mt-4'
+                className="mt-4"
               >
                 Next
               </Button>
@@ -164,12 +164,12 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
       </motion.div>
       <CardContent>
         <form.AppForm>
-          <form className='space-y-4' onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.4 }}
-              className='grid grid-cols-2 gap-4'
+              className="grid grid-cols-2 gap-4"
             >
               {variables.map((v, index) => (
                 <motion.div
@@ -180,7 +180,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
                 >
                   <FormInput
                     name={`variables.${v}`}
-                    type='text'
+                    type="text"
                     label={getLabel(v)}
                   />
                 </motion.div>
@@ -191,17 +191,17 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.5 }}
-              className='mt-6'
+              className="mt-6"
             >
-              <CardTitle className='text-base mb-2'>Contract Preview</CardTitle>
+              <CardTitle className="text-base mb-2">Contract Preview</CardTitle>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.9, duration: 0.6 }}
-                className='max-h-3xl overflow-y-auto'
+                className="max-h-3xl overflow-y-auto"
               >
                 <div
-                  className='border rounded p-3 prose prose-invert w-full max-w-none! max-h-96 sm:max-h-svh overflow-y-auto'
+                  className="border rounded p-3 prose prose-invert w-full max-w-none! max-h-96 sm:max-h-svh overflow-y-auto"
                   dangerouslySetInnerHTML={{
                     __html: template,
                   }}
@@ -214,26 +214,26 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
               transition={{ delay: 1.1, duration: 0.4 }}
             >
               <Button
-                type='submit'
-                variant='accent'
-                className='w-full'
+                type="submit"
+                variant="accent"
+                className="w-full"
                 loading={action.isExecuting}
               >
                 Sign Contract
               </Button>
             </motion.div>
-            {process.env.NODE_ENV === 'development' && (
+            {process.env.NODE_ENV === "development" && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.3, duration: 0.4 }}
               >
                 <Button
-                  type='button'
-                  variant='outline'
+                  type="button"
+                  variant="outline"
                   onClick={() => {
-                    console.log('ERRORS', form.getAllErrors());
-                    console.log('VALS', form.state.values);
+                    console.log("ERRORS", form.getAllErrors());
+                    console.log("VALS", form.state.values);
                   }}
                 >
                   Reset
@@ -250,10 +250,10 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
           onClose={() => setOpenDialog(false)}
           onConfirmSignature={() => {
             setOpenDialog(false);
-            toast.success('Document signed');
+            toast.success("Document signed");
             const keys = [
-              ['saft', 'details'],
-              ['transactions', txId, 'recipient'],
+              ["saft", "details"],
+              ["transactions", txId, "recipient"],
             ];
             keys.forEach((key) => {
               getQueryClient().invalidateQueries({
@@ -284,12 +284,12 @@ const SaftGenerationDialog = ({
   onConfirmSignature,
 }: SaftGenerationDialogProps) => {
   useBeforeUnload(
-    'Make sure to sign the contract before closing the page. You can always come back to it later.'
+    "Make sure to sign the contract before closing the page. You can always come back to it later.",
   );
-  const [_, setCid] = useQueryState('cid', parseAsString);
+  const [_, setCid] = useQueryState("cid", parseAsString);
   const { data, isLoading } = useSaftForTransactionDetails(
     id as string,
-    enabled
+    enabled,
   );
 
   if (!enabled || !id) return null;
@@ -299,12 +299,12 @@ const SaftGenerationDialog = ({
   const handleCancelGeneration = () => {
     // Close the dialog and reset the state
     // This will be handled by the parent component through the AlertDialog onOpenChange
-    console.log('Contract generation cancelled by user');
+    console.log("Contract generation cancelled by user");
     setCid(null);
     onClose?.();
   };
 
-  if (isLoading || status === 'CREATED') {
+  if (isLoading || status === "CREATED") {
     return (
       <ContractDialogLoading
         onCancel={handleCancelGeneration}
@@ -313,7 +313,7 @@ const SaftGenerationDialog = ({
     );
   }
 
-  if (data && status && ['SIGNED', 'SENT_FOR_SIGNATURE'].includes(status)) {
+  if (data && status && ["SIGNED", "SENT_FOR_SIGNATURE"].includes(status)) {
     return (
       <ContractDialogConfirmSignature id={id} onSuccess={onConfirmSignature} />
     );

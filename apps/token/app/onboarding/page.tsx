@@ -1,13 +1,14 @@
 // import { getSession } from '../../lib/auth/better-auth/auth';
-import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
-import { VerifyEmail } from '../../components/verify-email';
 
-import BackgroundWrapper from '@/components/bg-wrapper';
-import { PointerEventsGuard } from '@/components/thirdweb/pointer-events-guard';
-import { getCurrentUser } from '@/lib/services/fetchers.server';
-import { cookies } from 'next/headers';
-import { COOKIE_PREFIX, MW_KEY } from '@/common/config/constants';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { COOKIE_PREFIX, MW_KEY } from "@/common/config/constants";
+import BackgroundWrapper from "@/components/bg-wrapper";
+import { PulseLoader } from "@/components/pulse-loader";
+import { PointerEventsGuard } from "@/components/thirdweb/pointer-events-guard";
+import { getCurrentUser } from "@/lib/services/fetchers.server";
+import { VerifyEmail } from "../../components/verify-email";
 
 export default async function Onboarding({ searchParams }: PageProps) {
   const [res, params, c] = await Promise.all([
@@ -17,20 +18,20 @@ export default async function Onboarding({ searchParams }: PageProps) {
   ]);
 
   if (!res?.data) {
-    redirect('/?error=unauthorized');
+    redirect("/?error=unauthorized");
   }
 
   const user = res.data;
 
   const magicWord = c.get(`${COOKIE_PREFIX}_${MW_KEY}`);
   if (user.emailVerified && magicWord) {
-    redirect('/dashboard');
+    redirect("/dashboard");
   }
 
   return (
     <Container>
-      <Suspense fallback={<div>Loading...</div>}>
-        <VerifyEmail token={params.token ? String(params.token) : ''} />
+      <Suspense fallback={<PulseLoader text="Wait for it..." />}>
+        <VerifyEmail token={params.token ? String(params.token) : ""} />
       </Suspense>
     </Container>
   );
@@ -39,17 +40,17 @@ export default async function Onboarding({ searchParams }: PageProps) {
 const Container = ({ children }: { children: React.ReactNode }) => {
   return (
     <PointerEventsGuard>
-      <BackgroundWrapper className={'size-full'}>
-        <div className='grid min-h-[100dvh] grid-rows-[auto_1fr_auto]'>
-          <header className='invisible'>a</header>
-          <main className='container mx-auto grid place-items-center bg-cover bg-center relative z-20'>
+      <BackgroundWrapper className={"size-full"}>
+        <div className="grid min-h-[100dvh] grid-rows-[auto_1fr_auto]">
+          <header className="invisible">a</header>
+          <main className="container mx-auto grid place-items-center bg-cover bg-center relative z-20">
             {children}
           </main>
-          <footer className='invisible'>a</footer>
+          <footer className="invisible">a</footer>
         </div>
       </BackgroundWrapper>
     </PointerEventsGuard>
   );
 };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";

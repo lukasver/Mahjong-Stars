@@ -1,8 +1,8 @@
-import Image from 'next/image';
-import type { FC } from 'react';
-import Banner from '@/public/static/images/banner.png';
-import { cn } from '@mjs/ui/lib/utils';
-import { isAbsoluteUrl } from '@/lib/utils';
+import { cn } from "@mjs/ui/lib/utils";
+import Image from "next/image";
+import type { FC } from "react";
+import { isAbsoluteUrl } from "@/lib/utils";
+import Banner from "@/public/static/images/banner.webp";
 
 /**
  * SaleCoverImageProps component displays a responsive cover image using Next.js Image optimization.
@@ -23,7 +23,7 @@ type SaleCoverImageProps = {
 
 export const SaleCoverImage: FC<SaleCoverImageProps> = ({
   src,
-  alt = 'Cover image',
+  alt = "Cover image",
   width = 1200,
   height = 400,
   className,
@@ -33,8 +33,8 @@ export const SaleCoverImage: FC<SaleCoverImageProps> = ({
       alt={alt}
       width={width}
       height={height}
-      style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
-      className={cn('w-full h-full object-cover', className)}
+      style={{ width: "100%", height: "auto", objectFit: "cover" }}
+      className={cn("w-full h-full object-cover", className)}
       priority
       {...(src && isAbsoluteUrl(src) ? { src } : { ...Banner })}
     />

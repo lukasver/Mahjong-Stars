@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
+import MahjongStarsIconXl from '@/public/static/images/logos/isologo.webp';
 
 export function PulseLoader({
   children,

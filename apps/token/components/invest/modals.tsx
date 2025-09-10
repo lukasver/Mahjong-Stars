@@ -1,7 +1,17 @@
-import { TransactionModalTypes } from '@/common/types';
-import { SaleWithToken } from '@/common/types/sales';
-import { usePendingTransactionsForSale } from '@/lib/services/api';
-import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
+import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
+import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@mjs/ui/primitives/alert-dialog";
+import { Button } from "@mjs/ui/primitives/button";
 
 import {
   Dialog,
@@ -10,31 +20,21 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@mjs/ui/primitives/dialog';
-import { PurchaseSummaryCard } from './summary';
-import { Alert, AlertDescription } from '@mjs/ui/primitives/alert';
-import { AlertCircle } from 'lucide-react';
-import { useLocale } from 'next-intl';
-import { Button } from '@mjs/ui/primitives/button';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogTrigger,
-} from '@mjs/ui/primitives/alert-dialog';
-import { useRouter } from 'next/navigation';
-import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
-import { useAction } from 'next-safe-action/hooks';
-import { deleteOwnTransaction } from '@/lib/actions';
-import { useEffect, useRef } from 'react';
-import { getQueryClient } from '@/app/providers';
-import Image from 'next/image';
-import { TransactionStatus } from '@prisma/client';
+} from "@mjs/ui/primitives/dialog";
+import { TransactionStatus } from "@prisma/client";
+import { AlertCircle } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { useAction } from "next-safe-action/hooks";
+import { useEffect, useRef } from "react";
+import { TransactionModalTypes } from "@/common/types";
+import { SaleWithToken } from "@/common/types/sales";
+import { deleteOwnTransaction } from "@/lib/actions";
+import { usePendingTransactionsForSale } from "@/lib/services/api";
+import { getQueryClient } from "@/lib/services/query";
+import MahjongStarsIconXl from "@/public/static/images/logos/isologo.webp";
+import { PurchaseSummaryCard } from "./summary";
 
 interface TokenModalProps {
   open: TransactionModalTypes | null;
@@ -44,44 +44,44 @@ interface TokenModalProps {
 
 const titleMapping = {
   [TransactionModalTypes.PendingTx]: {
-    title: 'You have a pending transaction',
-    description: 'Please review the details of your pending transaction.',
+    title: "You have a pending transaction",
+    description: "Please review the details of your pending transaction.",
   },
   [TransactionModalTypes.WalletLogin]: {
-    title: 'Wallet Login',
-    description: 'Please connect your wallet to continue.',
+    title: "Wallet Login",
+    description: "Please connect your wallet to continue.",
   },
   [TransactionModalTypes.Contract]: {
-    title: 'Review Contract',
-    description: 'Please review and sign the contract to continue.',
+    title: "Review Contract",
+    description: "Please review and sign the contract to continue.",
   },
   [TransactionModalTypes.Loading]: {
-    title: 'Processing',
-    description: 'Please wait while we process your request.',
+    title: "Processing",
+    description: "Please wait while we process your request.",
   },
   [TransactionModalTypes.ConfirmPayment]: {
-    title: 'Confirm Payment',
-    description: 'Please confirm your payment details.',
+    title: "Confirm Payment",
+    description: "Please confirm your payment details.",
   },
   [TransactionModalTypes.ManualTransfer]: {
-    title: 'Bank Transfer Details',
-    description: 'Please use these details to complete your bank transfer.',
+    title: "Bank Transfer Details",
+    description: "Please use these details to complete your bank transfer.",
   },
   [TransactionModalTypes.CryptoWarning]: {
-    title: 'Crypto Payment Warning',
-    description: 'Please review important information about crypto payments.',
+    title: "Crypto Payment Warning",
+    description: "Please review important information about crypto payments.",
   },
   [TransactionModalTypes.PendingContract]: {
-    title: 'Pending Contract',
-    description: 'You have a contract waiting to be signed.',
+    title: "Pending Contract",
+    description: "You have a contract waiting to be signed.",
   },
   [TransactionModalTypes.UploadKyc]: {
-    title: 'Upload KYC',
-    description: 'Please upload your KYC documents to continue.',
+    title: "Upload KYC",
+    description: "Please upload your KYC documents to continue.",
   },
   [TransactionModalTypes.VerifyEmail]: {
-    title: 'Verify Email',
-    description: 'Please verify your email address to continue.',
+    title: "Verify Email",
+    description: "Please verify your email address to continue.",
   },
 } satisfies Record<
   TransactionModalTypes,
@@ -141,17 +141,17 @@ export const TokenInvestModals = (props: TokenModalProps) => {
 
 const LoadingModal = () => {
   return (
-    <div className='flex items-center gap-2'>
-      <span className='aspect-square animate-pulse'>
+    <div className="flex items-center gap-2">
+      <span className="aspect-square animate-pulse">
         <Image
           height={80}
           width={80}
           src={MahjongStarsIconXl}
-          alt='Mahjong Stars Logo'
-          className='animate-spin aspect-square'
+          alt="Mahjong Stars Logo"
+          className="animate-spin aspect-square"
         />
       </span>
-      <span className='text-xl font-bold font-head'>Loading...</span>
+      <span className="text-xl font-bold font-head">Loading...</span>
     </div>
   );
 };
@@ -172,17 +172,17 @@ const PendingTransactionModal = ({
     {
       onSuccess: () => {
         getQueryClient().invalidateQueries({
-          queryKey: ['transactions'],
+          queryKey: ["transactions"],
         });
         buttonRef.current?.click();
       },
-    }
+    },
   );
 
   const tx = data?.transactions?.find(
     (t) =>
       t.status === TransactionStatus.PENDING ||
-      t.status === TransactionStatus.AWAITING_PAYMENT
+      t.status === TransactionStatus.AWAITING_PAYMENT,
   );
 
   useEffect(() => {
@@ -193,17 +193,17 @@ const PendingTransactionModal = ({
 
   if (isLoading) {
     return (
-      <div className='flex items-center gap-2'>
-        <span className='aspect-square animate-pulse'>
+      <div className="flex items-center gap-2">
+        <span className="aspect-square animate-pulse">
           <Image
             height={80}
             width={80}
             src={MahjongStarsIconXl}
-            alt='Mahjong Stars Logo'
-            className='animate-spin aspect-square'
+            alt="Mahjong Stars Logo"
+            className="animate-spin aspect-square"
           />
         </span>
-        <span className='text-xl font-bold font-head'>Loading...</span>
+        <span className="text-xl font-bold font-head">Loading...</span>
       </div>
     );
   }
@@ -221,7 +221,7 @@ const PendingTransactionModal = ({
   };
 
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       <PurchaseSummaryCard
         locale={locale}
         purchased={{
@@ -237,24 +237,24 @@ const PendingTransactionModal = ({
         }}
       />
 
-      <Alert className='bg-secondary-800/50 border-secondary'>
-        <AlertCircle className='h-4 w-4 text-secondary' />
-        <AlertDescription className='text-white/90'>
-          <span className='font-bold'>Action required:</span> Only one
+      <Alert className="bg-secondary-800/50 border-secondary">
+        <AlertCircle className="h-4 w-4 text-secondary" />
+        <AlertDescription className="text-white/90">
+          <span className="font-bold">Action required:</span> Only one
           transaction is allowed at a time. Please resolve the current
           transaction to start a new one.
         </AlertDescription>
       </Alert>
-      <div className='flex gap-2'>
-        <div className='flex-1'>
+      <div className="flex gap-2">
+        <div className="flex-1">
           <DialogClose asChild ref={buttonRef}>
-            <Button variant={'outline'}>Cancel</Button>
+            <Button variant={"outline"}>Cancel</Button>
           </DialogClose>
         </div>
-        <div className='flex shrink-0 gap-4'>
+        <div className="flex shrink-0 gap-4">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant={'outlineSecondary'} loading={isPending}>
+              <Button variant={"outlineSecondary"} loading={isPending}>
                 Delete
               </Button>
             </AlertDialogTrigger>
@@ -270,7 +270,7 @@ const PendingTransactionModal = ({
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDeleteTx}
-                  className='bg-destructive text-white'
+                  className="bg-destructive text-white"
                 >
                   Delete
                 </AlertDialogAction>
@@ -278,7 +278,7 @@ const PendingTransactionModal = ({
             </AlertDialogContent>
           </AlertDialog>
           <Button
-            variant={'accent'}
+            variant={"accent"}
             onClick={handleConfirmTx}
             disabled={isPending}
             loading={isPending}

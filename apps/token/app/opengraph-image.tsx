@@ -1,8 +1,8 @@
-import path from "path";
 import { ImageResponse } from "@vercel/og";
 import { readFile } from "fs/promises";
 import sizeOf from "image-size";
 import mime from "mime-types";
+import path from "path";
 import sharp from "sharp";
 import { metadata } from "../common/config/site";
 
@@ -74,7 +74,7 @@ export default async function Image() {
 		process.cwd(),
 		"/public/static/favicons/android-chrome-512x512.png",
 	);
-	const bgPath = path.join(process.cwd(), "/public/static/images/bg2.png");
+	const bgPath = path.join(process.cwd(), "/public/static/images/og-bg.png");
 
 	const title = metadata.title;
 	const description = metadata.description;

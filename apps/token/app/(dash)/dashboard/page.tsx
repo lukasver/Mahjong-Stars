@@ -1,39 +1,39 @@
-import { TokenDetails } from '@/components/token-details';
-import { VisuallyHidden } from '@mjs/ui/primitives/visually-hidden';
-import { QueryClient } from '@tanstack/react-query';
-import { Suspense } from 'react';
-import { FundraisingProgress } from '../../../components/dashboard/fundraising-progress';
-
-import ErrorBoundary from '@mjs/ui/components/error-boundary';
-import { ComingSoonContent } from '../../../components/coming-soon';
-import { FeatureCards } from '@/components/feature-cards';
-import { getActiveSale } from '@/lib/services/fetchers.server';
+import ErrorBoundary from "@mjs/ui/components/error-boundary";
+import { VisuallyHidden } from "@mjs/ui/primitives/visually-hidden";
+import { QueryClient } from "@tanstack/react-query";
+import { Suspense } from "react";
 import {
-  UserTokensCard,
-  UnconfirmedTokensCard,
-  TokenPriceCard,
-  RemainingTokensCard,
   DashboardCardLoading,
-} from '@/components/dashboard/cards';
+  RemainingTokensCard,
+  TokenPriceCard,
+  UnconfirmedTokensCard,
+  UserTokensCard,
+} from "@/components/dashboard/cards";
+import { TokenVolumeCard } from "@/components/dashboard/cards/token-volume-card";
+import { IcoPhasesSSR } from "@/components/dashboard/ico-phases";
 import {
   IcoPhasesLoading,
   RecentTransactionsLoading,
-} from '@/components/dashboard/loading-components';
-import { IcoPhasesSSR } from '@/components/dashboard/ico-phases';
-import { RecentTransactionsSSR } from '@/components/dashboard/recent-transactions';
+} from "@/components/dashboard/loading-components";
+import { RecentTransactionsSSR } from "@/components/dashboard/recent-transactions";
+import { FeatureCards } from "@/components/feature-cards";
+import { TokenDetails } from "@/components/token-details";
+import { getActiveSale } from "@/lib/services/fetchers.server";
+import { ComingSoonContent } from "../../../components/coming-soon";
+import { FundraisingProgress } from "../../../components/dashboard/fundraising-progress";
 
 export default async function DashboardPage(_props: PageProps) {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ['sales', 'active'],
+    queryKey: ["sales", "active"],
     queryFn: () => getActiveSale(),
   });
 
   return (
-    <div className='flex flex-col gap-4 sm:gap-8'>
+    <div className="flex flex-col gap-4 sm:gap-8">
       <VisuallyHidden>
-        <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
           Dashboard
         </h1>
       </VisuallyHidden>
@@ -43,14 +43,14 @@ export default async function DashboardPage(_props: PageProps) {
 
       <ErrorBoundary
         fallback={
-          <div className='py-6'>
+          <div className="py-6">
             <ComingSoonContent to={undefined} />
           </div>
         }
       >
         {/* <Suspense fallback={<FundraisingProgressLoading />}> */}
         <FundraisingProgress>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4'>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
             <Suspense fallback={<DashboardCardLoading />}>
               <UserTokensCard />
             </Suspense>
@@ -62,6 +62,9 @@ export default async function DashboardPage(_props: PageProps) {
             </Suspense>
             <Suspense fallback={<DashboardCardLoading />}>
               <RemainingTokensCard />
+            </Suspense>
+            <Suspense fallback={null}>
+              <TokenVolumeCard />
             </Suspense>
           </div>
         </FundraisingProgress>
@@ -76,7 +79,7 @@ export default async function DashboardPage(_props: PageProps) {
         </div>
       </ErrorBoundary> */}
 
-      <div className='grid gap-4 sm:gap-6 lg:grid-cols-2'>
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* <TokenMetrics /> */}
         <Suspense fallback={<RecentTransactionsLoading />}>
           <RecentTransactionsSSR />
@@ -90,4 +93,4 @@ export default async function DashboardPage(_props: PageProps) {
   );
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";

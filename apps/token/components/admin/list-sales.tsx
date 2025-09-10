@@ -1,33 +1,34 @@
-'use client';
+"use client";
 
-import { useSales } from '@/lib/services/api';
+import { getGlassyCardClassName } from "@mjs/ui/components/cards";
+import ErrorBoundary from "@mjs/ui/components/error-boundary";
+import { motion } from "@mjs/ui/components/motion";
+import { cn } from "@mjs/ui/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@mjs/ui/primitives/alert-dialog";
+import { Badge } from "@mjs/ui/primitives/badge";
+import { Button } from "@mjs/ui/primitives/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@mjs/ui/primitives/card';
-import { Input } from '@mjs/ui/primitives/input';
+} from "@mjs/ui/primitives/card";
 import {
-  AlertCircle,
-  Edit,
-  Eye,
-  MoreHorizontal,
-  Search,
-  Download,
-} from 'lucide-react';
-import { ReactNode, useState } from 'react';
-import { SearchSelect } from '../searchBar/search-select';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@mjs/ui/primitives/table';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@mjs/ui/primitives/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,41 +40,39 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@mjs/ui/primitives/dropdown-menu';
-import { Button } from '@mjs/ui/primitives/button';
-import { cn } from '@mjs/ui/lib/utils';
-import { Badge } from '@mjs/ui/primitives/badge';
-import { SaleDetailsModal } from './sale-details-modal';
-import ErrorBoundary from '@mjs/ui/components/error-boundary';
+} from "@mjs/ui/primitives/dropdown-menu";
+import { Input } from "@mjs/ui/primitives/input";
+import { toast } from "@mjs/ui/primitives/sonner";
 import {
-  Dialog,
-  DialogHeader,
-  DialogContent,
-  DialogTitle,
-} from '@mjs/ui/primitives/dialog';
-import { formatCurrency, formatDate } from '@mjs/utils/client';
-import { useLocale } from 'next-intl';
-import { SaleWithToken } from '@/common/types/sales';
-import { DateTime } from 'luxon';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@mjs/ui/primitives/table";
+import { formatCurrency, formatDate } from "@mjs/utils/client";
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from '@mjs/ui/primitives/alert-dialog';
-import { useAction } from 'next-safe-action/hooks';
-import { updateSaleStatus, exportTransactions } from '@/lib/actions/admin';
-import { toast } from '@mjs/ui/primitives/sonner';
-import { getQueryClient } from '@/app/providers';
-import { SaleStatusType } from '@/common/schemas/generated';
-import { getGlassyCardClassName } from '@mjs/ui/components/cards';
-import { useSensitiveAction } from '../hooks/use-sensitive-action';
-import AppLink from '../link';
-import { motion } from '@mjs/ui/components/motion';
+  AlertCircle,
+  Download,
+  Edit,
+  Eye,
+  MoreHorizontal,
+  Search,
+} from "lucide-react";
+import { DateTime } from "luxon";
+import { useLocale } from "next-intl";
+import { useAction } from "next-safe-action/hooks";
+import { ReactNode, useState } from "react";
+import { SaleStatusType } from "@/common/schemas/generated";
+import { SaleWithToken } from "@/common/types/sales";
+import { exportTransactions, updateSaleStatus } from "@/lib/actions/admin";
+import { useSales } from "@/lib/services/api";
+import { getQueryClient } from "@/lib/services/query";
+import { useSensitiveAction } from "../hooks/use-sensitive-action";
+import AppLink from "../link";
+import { SearchSelect } from "../searchBar/search-select";
+import { SaleDetailsModal } from "./sale-details-modal";
 
 export function ListSales({
   children,
@@ -88,13 +87,13 @@ export function ListSales({
 }) {
   const { data: salesData } = useSales();
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedSale, setSelectedSale] = useState<SaleWithToken | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isOpenDialogOpen, setIsOpenDialogOpen] = useState(false);
   const [pendingOpenSaleId, setPendingOpenSaleId] = useState<string | null>(
-    null
+    null,
   );
 
   const filteredSales =
@@ -111,7 +110,7 @@ export function ListSales({
 
       // Status filtering
       const matchesStatus =
-        statusFilter === 'all' || sale.status === statusFilter;
+        statusFilter === "all" || sale.status === statusFilter;
 
       return matchesSearch && matchesStatus;
     }) || [];
@@ -137,7 +136,7 @@ export function ListSales({
     if (res?.data) {
       const queryClient = getQueryClient();
       await queryClient.invalidateQueries({
-        queryKey: ['sales'],
+        queryKey: ["sales"],
       });
       setIsOpenDialogOpen(false);
       setPendingOpenSaleId(null);
@@ -145,15 +144,15 @@ export function ListSales({
     } else {
       toast.error(
         res?.serverError ||
-          res?.validationErrors?._errors?.join(',') ||
-          'Unknown error ocurred'
+        res?.validationErrors?._errors?.join(",") ||
+        "Unknown error ocurred",
       );
     }
   };
 
   const handleExportTransactions = async (
-    format: 'csv' | 'xlsx',
-    saleId?: string
+    format: "csv" | "xlsx",
+    saleId?: string,
   ) => {
     if (isExporting) return;
 
@@ -168,7 +167,7 @@ export function ListSales({
       // Create blob and download
       const blob = new Blob([data], { type: contentType });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
@@ -177,27 +176,27 @@ export function ListSales({
       window.URL.revokeObjectURL(url);
 
       toast.success(
-        `Transactions exported successfully as ${format.toUpperCase()}`
+        `Transactions exported successfully as ${format.toUpperCase()}`,
       );
     } else {
       toast.error(
         res?.serverError ||
-          res?.validationErrors?._errors?.join(',') ||
-          'Failed to export transactions'
+        res?.validationErrors?._errors?.join(",") ||
+        "Failed to export transactions",
       );
     }
   };
 
   const handleStatusFilterChange = (value: string) => {
-    if (value === 'clear') {
-      setStatusFilter('all');
+    if (value === "clear") {
+      setStatusFilter("all");
     } else {
       setStatusFilter(value);
     }
   };
 
   return (
-    <div className={cn('flex-1 space-y-4 md:p-4', className)}>
+    <div className={cn("flex-1 space-y-4 md:p-4", className)}>
       {children}
 
       {/* Filters and Search */}
@@ -211,12 +210,12 @@ export function ListSales({
       >
         <Card
           className={getGlassyCardClassName(
-            'shadow max-w-[355px] sm:max-w-none w-full'
+            "shadow max-w-[355px] sm:max-w-none w-full",
           )}
         >
-          <CardHeader className='flex flex-col sm:flex-row gap-2 justify-between p-4 md:p-6'>
+          <CardHeader className="flex flex-col sm:flex-row gap-2 justify-between p-4 md:p-6">
             <motion.div
-              className='flex flex-col'
+              className="flex flex-col"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{
@@ -228,7 +227,7 @@ export function ListSales({
               {description && <CardDescription>{description}</CardDescription>}
             </motion.div>
             <motion.div
-              className='flex items-center justify-between space-x-2'
+              className="flex items-center justify-between space-x-2"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{
@@ -236,9 +235,9 @@ export function ListSales({
                 duration: 0.5,
               }}
             >
-              <div className='flex items-center flex-col sm:flex-row gap-2 flex-1'>
+              <div className="flex items-center flex-col sm:flex-row gap-2 flex-1">
                 <motion.div
-                  className='relative w-full'
+                  className="relative w-full"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{
@@ -246,16 +245,16 @@ export function ListSales({
                     duration: 0.4,
                   }}
                 >
-                  <Search className='absolute left-2 top-2.5 h-4 w-4 text-secondary' />
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-secondary" />
                   <Input
-                    placeholder='Search sales...'
+                    placeholder="Search sales..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className='pl-8 w-full md:w-[300px]'
+                    className="pl-8 w-full md:w-[300px]"
                   />
                 </motion.div>
                 <motion.div
-                  className='w-full'
+                  className="w-full"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{
@@ -265,13 +264,13 @@ export function ListSales({
                 >
                   <SearchSelect
                     showAll={false}
-                    placeholder='Filter by status...'
+                    placeholder="Filter by status..."
                     options={[
-                      { label: 'All Status', value: 'all' },
-                      { label: 'Open', value: 'OPEN' },
-                      { label: 'Created', value: 'CREATED' },
-                      { label: 'Closed', value: 'CLOSED' },
-                      { label: 'Finished', value: 'FINISHED' },
+                      { label: "All Status", value: "all" },
+                      { label: "Open", value: "OPEN" },
+                      { label: "Created", value: "CREATED" },
+                      { label: "Closed", value: "CLOSED" },
+                      { label: "Finished", value: "FINISHED" },
                     ]}
                     onSearch={handleStatusFilterChange}
                     isFilter={true}
@@ -280,11 +279,11 @@ export function ListSales({
               </div>
             </motion.div>
           </CardHeader>
-          <CardContent className='p-0 md:p-6'>
+          <CardContent className="p-0 md:p-6">
             {/* Filter Summary */}
-            {(searchTerm || statusFilter !== 'all') && (
+            {(searchTerm || statusFilter !== "all") && (
               <motion.div
-                className='mb-4 flex items-center gap-2 text-sm text-secondary'
+                className="mb-4 flex items-center gap-2 text-sm text-secondary"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -293,21 +292,21 @@ export function ListSales({
                 }}
               >
                 <span>
-                  Showing {filteredSales.length} of{' '}
+                  Showing {filteredSales.length} of{" "}
                   {salesData?.sales.length || 0} sales
                 </span>
                 <span>•</span>
                 <span>
                   {searchTerm && `Search: "${searchTerm}"`}
-                  {searchTerm && statusFilter !== 'all' && ' • '}
-                  {statusFilter !== 'all' && `Status: ${statusFilter}`}
+                  {searchTerm && statusFilter !== "all" && " • "}
+                  {statusFilter !== "all" && `Status: ${statusFilter}`}
                 </span>
               </motion.div>
             )}
 
             {/* Data Table */}
             <motion.div
-              className='rounded-b border bg-primary flex justify-center sm:block sm:max-w-none w-full min-h-[30rem] max-h-screen h-full'
+              className="rounded-b border bg-primary flex justify-center sm:block sm:max-w-none w-full min-h-[30rem] max-h-screen h-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -317,7 +316,7 @@ export function ListSales({
             >
               <Table>
                 <TableHeader>
-                  <TableRow className='text-secondary [&>th]:text-secondary'>
+                  <TableRow className="text-secondary [&>th]:text-secondary">
                     <TableHead>Sale Name</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Token</TableHead>
@@ -326,7 +325,7 @@ export function ListSales({
                     <TableHead>Progress</TableHead>
                     <TableHead>Start Date</TableHead>
                     <TableHead>End Date</TableHead>
-                    <TableHead className='text-right'>Actions</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -346,12 +345,12 @@ export function ListSales({
                           delay: 0.8 + index * 0.05,
                           duration: 0.4,
                         }}
-                        className='border-b'
+                        className="border-b"
                       >
-                        <TableCell className='font-medium'>
+                        <TableCell className="font-medium">
                           <div>
-                            <div className='font-medium'>{sale.name}</div>
-                            <div className='text-sm text-secondary'>
+                            <div className="font-medium">{sale.name}</div>
+                            <div className="text-sm text-secondary">
                               ID: {sale.id}
                             </div>
                           </div>
@@ -359,8 +358,8 @@ export function ListSales({
                         <TableCell>{getStatusBadge(sale.status)}</TableCell>
                         <TableCell>
                           <div>
-                            <div className='font-medium'>{sale.tokenName}</div>
-                            <div className='text-sm text-secondary'>
+                            <div className="font-medium">{sale.tokenName}</div>
+                            <div className="text-sm text-secondary">
                               {sale.tokenSymbol}
                             </div>
                           </div>
@@ -373,13 +372,13 @@ export function ListSales({
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className='font-medium'>
+                            <div className="font-medium">
                               {formatCurrency(sale.availableTokenQuantity, {
                                 locale,
                               })}
                             </div>
-                            <div className='text-sm text-secondary'>
-                              of{' '}
+                            <div className="text-sm text-secondary">
+                              of{" "}
                               {formatCurrency(sale.initialTokenQuantity, {
                                 locale,
                               })}
@@ -387,14 +386,14 @@ export function ListSales({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className='flex items-center space-x-2'>
-                            <div className='w-full bg-secondary rounded-full h-2'>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-full bg-secondary rounded-full h-2">
                               <div
-                                className='bg-primary h-2 rounded-full'
+                                className="bg-primary h-2 rounded-full"
                                 style={{ width: `${progress}%` }}
                               />
                             </div>
-                            <span className='text-sm text-secondary min-w-[3rem]'>
+                            <span className="text-sm text-secondary min-w-[3rem]">
                               {progress.toFixed(1)}%
                             </span>
                           </div>
@@ -411,20 +410,20 @@ export function ListSales({
                             format: DateTime.DATE_MED,
                           })}
                         </TableCell>
-                        <TableCell className='text-right'>
+                        <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant='ghost' className='h-8 w-8 p-0'>
-                                <span className='sr-only'>Open menu</span>
-                                <MoreHorizontal className='h-4 w-4' />
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align='end'>
+                            <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuItem
                                 onClick={() => handleViewDetails(sale)}
                               >
-                                <Eye className='mr-2 h-4 w-4' />
+                                <Eye className="mr-2 h-4 w-4" />
                                 View Details
                               </DropdownMenuItem>
 
@@ -432,7 +431,7 @@ export function ListSales({
                                 <AppLink
                                   href={`/admin/transactions?saleId=${sale.id}`}
                                 >
-                                  <Eye className='mr-2 h-4 w-4' />
+                                  <Eye className="mr-2 h-4 w-4" />
                                   View Transactions
                                 </AppLink>
                               </DropdownMenuItem>
@@ -440,7 +439,7 @@ export function ListSales({
                                 <AppLink
                                   href={`/admin/sales/create?saleId=${sale.id}&step=1`}
                                 >
-                                  <Edit className='mr-2 h-4 w-4' />
+                                  <Edit className="mr-2 h-4 w-4" />
                                   Edit Sale
                                 </AppLink>
                               </DropdownMenuItem>
@@ -452,8 +451,8 @@ export function ListSales({
                                 <DropdownMenuPortal>
                                   <DropdownMenuSubContent>
                                     <DropdownMenuItem
-                                      disabled={sale.status === 'OPEN'}
-                                      className='bg-green-500'
+                                      disabled={sale.status === "OPEN"}
+                                      className="bg-green-500"
                                       onClick={() => {
                                         setPendingOpenSaleId(sale.id);
                                         setIsOpenDialogOpen(true);
@@ -463,10 +462,10 @@ export function ListSales({
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() =>
-                                        handleUpdateStatus(sale.id, 'CLOSED')
+                                        handleUpdateStatus(sale.id, "CLOSED")
                                       }
-                                      disabled={['CLOSED', 'FINISHED'].includes(
-                                        sale.status
+                                      disabled={["CLOSED", "FINISHED"].includes(
+                                        sale.status,
                                       )}
                                     >
                                       Close
@@ -477,14 +476,14 @@ export function ListSales({
                               <DropdownMenuSeparator />
                               <DropdownMenuSub>
                                 <DropdownMenuSubTrigger>
-                                  <Download className='mr-2 h-4 w-4' />
+                                  <Download className="mr-2 h-4 w-4" />
                                   Export Transactions
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                   <DropdownMenuSubContent>
                                     <DropdownMenuItem
                                       onClick={() =>
-                                        handleExportTransactions('csv', sale.id)
+                                        handleExportTransactions("csv", sale.id)
                                       }
                                       disabled={isExporting}
                                     >
@@ -493,8 +492,8 @@ export function ListSales({
                                     <DropdownMenuItem
                                       onClick={() =>
                                         handleExportTransactions(
-                                          'xlsx',
-                                          sale.id
+                                          "xlsx",
+                                          sale.id,
                                         )
                                       }
                                       disabled={isExporting}
@@ -521,7 +520,7 @@ export function ListSales({
 
             {filteredSales.length === 0 && (
               <motion.div
-                className='text-center py-8'
+                className="text-center py-8"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -529,17 +528,17 @@ export function ListSales({
                   duration: 0.4,
                 }}
               >
-                <p className='text-secondary'>
+                <p className="text-secondary">
                   No sales found matching your criteria.
                 </p>
-                {(searchTerm || statusFilter !== 'all') && (
-                  <div className='mt-2'>
+                {(searchTerm || statusFilter !== "all") && (
+                  <div className="mt-2">
                     <Button
-                      variant='outline'
-                      size='sm'
+                      variant="outline"
+                      size="sm"
                       onClick={() => {
-                        setSearchTerm('');
-                        setStatusFilter('all');
+                        setSearchTerm("");
+                        setStatusFilter("all");
                       }}
                     >
                       Clear filters
@@ -559,7 +558,7 @@ export function ListSales({
                 <DialogHeader>
                   <DialogTitle>Error loading sale details</DialogTitle>
                 </DialogHeader>
-                <AlertCircle className='h-16 w-16 text-destructive mx-auto mb-4' />
+                <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
               </DialogContent>
             </Dialog>
           }
@@ -593,9 +592,9 @@ const SaleStatusDialog = ({
   onConfirm: (saleId: string, status: SaleStatusType) => Promise<void>;
 }) => {
   const sensitiveAction = useSensitiveAction({
-    action: 'open_sale',
+    action: "open_sale",
     saleId,
-    data: { saleId, status: 'OPEN' },
+    data: { saleId, status: "OPEN" },
 
     onError: (error) => {
       toast.error(`Authentication failed: ${error}`);
@@ -605,8 +604,8 @@ const SaleStatusDialog = ({
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>Open Sale Confirmation</AlertDialogTitle>
-        <AlertDialogDescription className='text-foreground'>
-          <ul className='list-disc pl-5 space-y-1'>
+        <AlertDialogDescription className="text-foreground">
+          <ul className="list-disc pl-5 space-y-1">
             <li>
               Only <b>one</b> sale can be open at a time. Opening this sale will
               close any currently open sale.
@@ -622,9 +621,9 @@ const SaleStatusDialog = ({
         <AlertDialogCancel>Cancel</AlertDialogCancel>
         <AlertDialogAction
           onClick={() =>
-            sensitiveAction.executeAction(async () => onConfirm(saleId, 'OPEN'))
+            sensitiveAction.executeAction(async () => onConfirm(saleId, "OPEN"))
           }
-          className='bg-accent'
+          className="bg-accent"
         >
           Yes, Open Sale
         </AlertDialogAction>
@@ -635,17 +634,17 @@ const SaleStatusDialog = ({
 
 function getStatusBadge(status: string) {
   const statusConfig = {
-    OPEN: { variant: 'default' as const, color: 'bg-green-500' },
-    CREATED: { variant: 'secondary' as const, color: 'bg-blue-500' },
-    CLOSED: { variant: 'outline' as const, color: 'bg-gray-500' },
-    PAUSED: { variant: 'destructive' as const, color: 'bg-yellow-500' },
+    OPEN: { variant: "default" as const, color: "bg-green-500" },
+    CREATED: { variant: "secondary" as const, color: "bg-blue-500" },
+    CLOSED: { variant: "outline" as const, color: "bg-gray-500" },
+    PAUSED: { variant: "destructive" as const, color: "bg-yellow-500" },
   };
 
   const config =
     statusConfig[status as keyof typeof statusConfig] || statusConfig.CREATED;
 
   return (
-    <Badge variant={config.variant} className='font-medium'>
+    <Badge variant={config.variant} className={`font-medium ${config.color}`}>
       {status}
     </Badge>
   );

@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
 import {
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogCancel,
-} from '@mjs/ui/primitives/alert-dialog';
-import { Button } from '@mjs/ui/primitives/button';
-import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { DocumentSignatureStatus } from '@prisma/client';
+} from "@mjs/ui/primitives/alert-dialog";
+import { Button } from "@mjs/ui/primitives/button";
+import { DocumentSignatureStatus } from "@prisma/client";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import MahjongStarsIconXl from "@/public/static/images/logos/isologo.webp";
 
 interface ContractDialogLoadingProps {
   onCancel?: () => void;
@@ -50,7 +50,7 @@ export function ContractDialogLoading({
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const handleCancel = () => {
@@ -64,31 +64,31 @@ export function ContractDialogLoading({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Loading...</AlertDialogTitle>
-          <AlertDialogDescription className='text-secondary'>
+          <AlertDialogDescription className="text-secondary">
             This process can take up to 2 minutes. Please do not close the
             window.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div className='flex items-center gap-2'>
-          <span className='aspect-square animate-pulse'>
+        <div className="flex items-center gap-2">
+          <span className="aspect-square animate-pulse">
             <Image
               height={80}
               width={80}
               src={MahjongStarsIconXl}
-              alt='Mahjong Stars Logo'
-              className='animate-spin aspect-square'
+              alt="Mahjong Stars Logo"
+              className="animate-spin aspect-square"
             />
           </span>
-          <span className='text-xl font-bold font-head'>
-            {status === 'CREATED'
-              ? 'Sending contract to your email...'
-              : 'Generating contract...'}
+          <span className="text-xl font-bold font-head">
+            {status === "CREATED"
+              ? "Sending contract to your email..."
+              : "Generating contract..."}
           </span>
         </div>
 
         {/* Timer display */}
-        <div className='flex justify-center mt-4'>
-          <div className='text-sm text-secondary'>
+        <div className="flex justify-center mt-4">
+          <div className="text-sm text-secondary">
             Time elapsed: {formatTime(timeElapsed)}
           </div>
         </div>
@@ -97,9 +97,9 @@ export function ContractDialogLoading({
           <AlertDialogFooter>
             <AlertDialogCancel asChild>
               <Button
-                variant='destructive'
+                variant="destructive"
                 onClick={handleCancel}
-                className='w-full'
+                className="w-full"
               >
                 Cancel
               </Button>

@@ -1,17 +1,19 @@
-'use client';
+"use client";
 
-import { TransactionModalTypes } from '@/common/types';
-import { CardContainer } from '@mjs/ui/components/cards';
-import { cn } from '@mjs/ui/lib/utils';
-import { useEffect, useState } from 'react';
-import { TokenInvestModals } from './modals';
-
-import { SaleWithToken } from '@/common/types/sales';
-import { InvestForm } from './form';
-import { DiscountBanner } from './summary';
-import { usePendingTransactionsForSale, useUser } from '@/lib/services/api';
-import { VerifyMandatoryEmail } from '@/components/buy/verify-mandatory-email';
-import { TransactionStatus } from '@prisma/client';
+import { CardContainer } from "@mjs/ui/components/cards";
+import { cn } from "@mjs/ui/lib/utils";
+import { CardHeader, CardTitle } from "@mjs/ui/primitives/card";
+import { TransactionStatus } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { TransactionModalTypes } from "@/common/types";
+import { SaleWithToken } from "@/common/types/sales";
+import { VerifyMandatoryEmail } from "@/components/buy/verify-mandatory-email";
+import { usePendingTransactionsForSale, useUser } from "@/lib/services/api";
+import { getQueryClient } from "@/lib/services/query";
+import { TimerProgress } from "../timer-progress";
+import { InvestForm } from "./form";
+import { TokenInvestModals } from "./modals";
+import { DiscountBanner } from "./summary";
 
 export function Invest({ sale }: { sale: SaleWithToken }) {
   const [open, setOpen] = useState<TransactionModalTypes | null>(null);
@@ -25,7 +27,7 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
       data?.transactions.some(
         (t) =>
           t.status === TransactionStatus.PENDING ||
-          t.status === TransactionStatus.AWAITING_PAYMENT
+          t.status === TransactionStatus.AWAITING_PAYMENT,
       ) &&
       !open
     ) {
@@ -33,11 +35,23 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
     }
   }, [data]);
 
+  const handleTimerReset = () => {
+    const qc = getQueryClient();
+    qc.invalidateQueries({ queryKey: ["sales", sale.id, "invest"] });
+  };
+
   return (
-    <CardContainer title='Invest'>
+    <CardContainer
+      header={
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Invest</CardTitle>
+          <TimerProgress onReset={() => handleTimerReset()} className='text-secondary-500' />
+        </CardHeader>
+      }
+    >
       <div
         className={cn(
-          'mb-6 font-medium grid grid-cols-1 items-center gap-x-4 gap-y-4 text-xs text-foreground'
+          "mb-6 font-medium grid grid-cols-1 items-center gap-x-4 gap-y-4 text-xs text-foreground",
         )}
       >
         <InvestForm sale={sale} openModal={setOpen}>
@@ -46,7 +60,7 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
       </div>
       <TokenInvestModals open={open} handleModal={setOpen} sale={sale} />
       {open && open === TransactionModalTypes.VerifyEmail && (
-        <VerifyMandatoryEmail email={user?.email || ''} />
+        <VerifyMandatoryEmail email={user?.email || ""} />
       )}
     </CardContainer>
   );
