@@ -190,6 +190,10 @@
       "newsletter": {
         "label": "뉴스레터",
         "placeholder": "뉴스레터 구독"
+      },
+      "phone": {
+        "label": "전화번호",
+        "placeholder": "+82 10 1234-5678"
       }
     },
     "captcha": {

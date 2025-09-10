@@ -190,6 +190,10 @@
       "newsletter": {
         "label": "Newsletter",
         "placeholder": "Iscriviti alla nostra newsletter"
+      },
+      "phone": {
+        "label": "Numero di telefono",
+        "placeholder": "+39 06 1234 5678"
       }
     },
     "captcha": {

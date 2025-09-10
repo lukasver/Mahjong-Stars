@@ -190,6 +190,10 @@
       "newsletter": {
         "label": "通讯",
         "placeholder": "订阅我们的通讯"
+      },
+      "phone": {
+        "label": "电话号码",
+        "placeholder": "+86 138 0013 8000"
       }
     },
     "captcha": {

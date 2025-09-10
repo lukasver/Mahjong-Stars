@@ -190,6 +190,10 @@
       "newsletter": {
         "label": "Newsletter",
         "placeholder": "Abonnez-vous à notre newsletter"
+      },
+      "phone": {
+        "label": "Numéro de téléphone",
+        "placeholder": "+33 1 23 45 67 89"
       }
     },
     "captcha": {

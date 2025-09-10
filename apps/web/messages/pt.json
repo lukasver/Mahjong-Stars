@@ -190,6 +190,10 @@
       "newsletter": {
         "label": "Newsletter",
         "placeholder": "Inscreva-se em nossa newsletter"
+      },
+      "phone": {
+        "label": "Número de telefone",
+        "placeholder": "+55 11 99999-9999"
       }
     },
     "captcha": {

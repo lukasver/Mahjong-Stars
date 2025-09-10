@@ -190,6 +190,10 @@
       "newsletter": {
         "label": "Boletín",
         "placeholder": "Suscríbete a nuestro boletín"
+      },
+      "phone": {
+        "label": "Número de teléfono",
+        "placeholder": "+34 600 123 456"
       }
     },
     "captcha": {
