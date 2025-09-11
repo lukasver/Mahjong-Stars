@@ -142,9 +142,11 @@ function VideoPlayer({
           style={{ height: "inherit" }}
           className={cn(
             isMobile ?
-              `absolute w-full object-contain bottom-[${mNumber === 2 ? '30%' : '25%'}] md:bottom-auto md:inset-0` :
+              `absolute w-full object-contain md:bottom-auto md:inset-0` :
               "absolute size-full object-cover 4xl:object-contain hidden md:block",
             isMobile && "hide-play-button",
+            isMobile && mNumber === 2 && "bottom-[30%]",
+            isMobile && mNumber !== 2 && "bottom-[25%]",
             !isPlaying && isMobile && "z-50",
             className,
           )}
