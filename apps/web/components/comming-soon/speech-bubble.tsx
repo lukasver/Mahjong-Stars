@@ -35,7 +35,7 @@ const SpeechBubble = ({
           transition={{ duration: 0.4, ease: 'easeOut' }}
           className={cn(
             'shadow-[3px_4px_20.4px_0px_rgba(74,0,0,1)] rounded-2xl md:rounded-3xl',
-            'z-30 w-full max-w-screen md:max-w-[400px] lg:max-w-[500px] xl:max-w-1xl',
+            'z-30 w-full max-w-screen md:max-w-[325px] lg:max-w-[500px] xl:max-w-1xl',
             className
           )}
         >
