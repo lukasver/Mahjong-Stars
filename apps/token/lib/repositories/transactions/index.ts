@@ -28,12 +28,11 @@ import {
 	Success,
 } from "@/common/schemas/dtos/utils";
 import {
-	Address,
-	DocumentSignatureStatusSchema,
+	Address, DocumentSignatureStatusSchema,
 	Profile,
 	SaftContract,
 	SignableDocumentRoleSchema,
-	User,
+	User
 } from "@/common/schemas/generated";
 import {
 	AdminTransactionsWithRelations,
@@ -883,6 +882,7 @@ class TransactionsController {
 				amountPaid?: string;
 				paymentDate?: Date;
 				paymentEvidenceId?: string;
+				paidCurrency?: string;
 			};
 		},
 		ctx: ActionCtx,
@@ -949,7 +949,7 @@ class TransactionsController {
 				tx.sale.availableTokenQuantity,
 			).equals(tx.quantity);
 
-			const { chainId, paymentEvidenceId, ...rest } = payload || {};
+			const { chainId, paymentEvidenceId, paidCurrency, formOfPayment, ...rest } = payload || {};
 			const [updatedTx] = await prisma.$transaction([
 				prisma.saleTransactions.update({
 					where: { id },
@@ -971,8 +971,11 @@ class TransactionsController {
 								},
 							},
 						}),
+						...(formOfPayment && {formOfPayment}),
+						...(paidCurrency && {amountPaidCurrency: {connect: {symbol: paidCurrency}}}),
 						...rest,
 					},
+			
 				}),
 				prisma.sale.update({
 					where: { id: tx.saleId },

@@ -5,6 +5,7 @@ import { GetSaleDto, GetSalesDto } from '@/common/schemas/dtos/sales';
 import { UpdateTransactionDto } from '@/common/schemas/dtos/transactions';
 import {
   ProfileSchema,
+  SaleTransactionsSchema,
   TransactionStatusSchema,
   UserSchema,
 } from '@/common/schemas/generated';
@@ -639,9 +640,16 @@ export const confirmCryptoTransaction = authActionClient
       chainId: z.number(),
       amountPaid: z.string(),
       paymentDate: z.coerce.date(),
+      extraPayload: SaleTransactionsSchema.pick({
+        formOfPayment: true,
+        paidCurrency: true,
+      }).optional(),
     })
   )
   .action(async ({ ctx, parsedInput }) => {
+
+    console.log("🚀 ~ index.ts:651 ~ parsedInput:", parsedInput);
+
     const result = await transactionsController.confirmTransaction(
       {
         id: parsedInput.txId,
@@ -651,6 +659,7 @@ export const confirmCryptoTransaction = authActionClient
           chainId: parsedInput.chainId,
           amountPaid: parsedInput.amountPaid,
           paymentDate: parsedInput.paymentDate,
+          ...parsedInput.extraPayload,
         },
       },
       ctx

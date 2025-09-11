@@ -26,8 +26,11 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
       data?.transactions.length &&
       data?.transactions.some(
         (t) =>
-          t.status === TransactionStatus.PENDING ||
-          t.status === TransactionStatus.AWAITING_PAYMENT,
+          (t.status === TransactionStatus.PENDING ||
+            t.status === TransactionStatus.AWAITING_PAYMENT) &&
+          // A transaction older than a minute to avoid firing the modal right away after a new transaction is created
+          new Date(t.createdAt).getTime() < Date.now() - 60000
+
       ) &&
       !open
     ) {

@@ -33,14 +33,14 @@ class ErrorBoundary extends Component<Props, State> {
 			return this.props.fallback === null
 				? null
 				: (this.props.fallback ?? (
-						<div className="error-boundary-fallback">
-							<h2>Something went wrong</h2>
-							<details>
-								<summary>Error Details</summary>
-								<pre>{this.state.error?.message}</pre>
-							</details>
-						</div>
-					));
+					<div className="error-boundary-fallback">
+						<h2>Something went wrong</h2>
+						<details>
+							<summary>Error Details</summary>
+							<pre>{this.state.error?.message}</pre>
+						</details>
+					</div>
+				));
 		}
 
 		return this.props.children;

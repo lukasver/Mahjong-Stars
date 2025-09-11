@@ -648,18 +648,6 @@ enum CurrencyType {
   FIAT
 }
 
-// enum Currency {
-//   CHF
-//   GBP
-//   USD
-//   EUR
-//   ETH
-//   USDC
-//   MATIC
-//   LINK
-//   BNB
-// }
-
 enum TransactionStatus {
   PENDING
   AWAITING_PAYMENT

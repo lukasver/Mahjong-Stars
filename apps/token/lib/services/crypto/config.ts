@@ -6,8 +6,6 @@ import { getAddress, NATIVE_TOKEN_ADDRESS } from "thirdweb";
 
 import * as c from "thirdweb/chains";
 
-const NATIVE_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-
 export const ALLOWED_CHAINS =
 	process.env.NODE_ENV === "production"
 		? [c.bsc]
@@ -76,7 +74,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 		},
 		["ETH"]: {
 			symbol: "ETH",
-			contract: NATIVE_ADDRESS,
+			contract: NATIVE_TOKEN_ADDRESS,
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,

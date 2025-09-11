@@ -2,7 +2,7 @@
 
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
-import { OnRampWidget } from "@/components/buy/confirmation-steps/onramp";
+import { OnRampWidget } from "@/components/buy/onramp";
 import AccountProvider from "@/components/thirdweb/account-provider";
 import AutoConnect from "@/components/thirdweb/autoconnect";
 import { useTransactionById } from "@/lib/services/api";
@@ -30,6 +30,8 @@ export default function Page() {
   const { data: tx, isLoading } = useTransactionById(
     "cmfe9bsvz00038o80h9injmnc" as string,
   );
+
+
 
 
   if (isLoading) {

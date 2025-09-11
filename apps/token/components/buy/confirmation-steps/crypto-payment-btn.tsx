@@ -1,6 +1,5 @@
 import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
-import { Button } from "@mjs/ui/primitives/button";
-import { TokensOnBlockchains } from "@prisma/client";
+import { SaleTransactions, TokensOnBlockchains } from "@prisma/client";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import {
@@ -13,7 +12,7 @@ import {
   toUnits,
 } from "thirdweb";
 import { transfer } from "thirdweb/extensions/erc20";
-import { TransactionButton, useSimulateTransaction } from "thirdweb/react";
+import { TransactionButton } from "thirdweb/react";
 import useActiveAccount from "@/components/hooks/use-active-account";
 import { confirmCryptoTransaction } from "@/lib/actions";
 import { client } from "@/lib/auth/thirdweb-client";
@@ -26,6 +25,7 @@ export function CryptoPaymentButton({
   disabled,
   txId,
   onSuccess,
+  ...props
 }: {
   chain:
   | Pick<
@@ -40,11 +40,11 @@ export function CryptoPaymentButton({
   amount: string;
   disabled?: boolean;
   txId: string;
+  extraPayload?: Partial<Pick<SaleTransactions, 'formOfPayment' | 'paidCurrency'>>;
   onSuccess: () => void;
 }) {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
-  const { mutate: simulateTx } = useSimulateTransaction();
   const { activeAccount } = useActiveAccount();
 
   const { execute } = useActionListener(useAction(confirmCryptoTransaction), {
@@ -80,19 +80,20 @@ export function CryptoPaymentButton({
       address: chain.contractAddress!,
     });
 
+    const formattedAmount = toUnits(amount, chain.decimals);
+
+
     // Native token
     if (chain.isNative || chain.contractAddress === NATIVE_TOKEN_ADDRESS) {
       return prepareTransaction({
         chain: defineChain(chain.chainId),
         client: client,
-        value: toUnits(amount, chain.decimals),
+        value: formattedAmount,
         to: toWallet,
       });
     }
     // ERC-20
     if (chain.decimals === 18) {
-      console.log("ENTRE AL transferFrom");
-
       const txs = transfer({
         contract,
         amount,
@@ -108,7 +109,7 @@ export function CryptoPaymentButton({
         params: [
           activeAccount?.address!,
           toWallet,
-          toUnits(amount, chain.decimals),
+          formattedAmount,
         ],
       });
       return txs;
@@ -124,6 +125,8 @@ export function CryptoPaymentButton({
       chainId: chain.chainId,
       amountPaid: amount,
       paymentDate: new Date(),
+      formOfPayment: 'CRYPTO',
+      ...props.extraPayload,
     });
   };
 
@@ -146,7 +149,7 @@ export function CryptoPaymentButton({
       >
         Proceed to pay
       </TransactionButton>
-      {process.env.NODE_ENV === "development" && (
+      {/* {process.env.NODE_ENV === "development" && (
         <Button
           onClick={() =>
             simulateTx({
@@ -157,7 +160,7 @@ export function CryptoPaymentButton({
         >
           Simulate
         </Button>
-      )}
+      )} */}
 
       <DialogLoader
         title="Processing Transaction"

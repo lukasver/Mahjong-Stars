@@ -14,7 +14,7 @@ import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
 import { copyToClipboard, safeFormatCurrency } from "@mjs/utils/client";
 import { TransactionStatus } from "@prisma/client";
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { FIAT_CURRENCIES, ONE_MINUTE } from "@/common/config/constants";
@@ -40,7 +40,7 @@ import {
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
 import { CryptoPaymentButton } from "./crypto-payment-btn";
-import { OnRampWidget } from "./onramp";
+import { OnRampWidget } from "../onramp";
 import { isFileWithPreview } from "./utils";
 
 interface PaymentStepProps {
@@ -96,7 +96,10 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
     );
   }
 
-  if (!tx) return <CardContent>Transaction not found.</CardContent>;
+  if (!tx) {
+    // return <CardContent>Transaction not found.</CardContent>;
+    return notFound();
+  }
 
   // TODO: Confirm the correct path for payment fields and type properly
   const paymentMethod = tx?.transaction?.formOfPayment;
@@ -116,7 +119,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
         </CardHeader>
       </motion.div>
       <CardContent>
-        {paymentMethod === "TRANSFER" ? (
+        {paymentMethod !== "CRYPTO" ? (
           <FiatPayment tx={tx.transaction} onSuccess={onSuccess} />
         ) : (
           <CryptoPayment tx={tx.transaction} onSuccess={onSuccess} />
@@ -310,23 +313,17 @@ const FiatPayment = ({
     }
   };
 
-  if (!isBanksLoading && banks?.banks?.length === 0) {
+  if (!isBanksLoading && banks?.banks?.length === 0 || tx.formOfPayment === 'CARD') {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <OnRampWidget transaction={tx} />
-        {/* <Placeholder
-          icon={BanknoteIcon}
-          title="No config for transfer payment"
-          description="Contact support"
-        >
-          <a href={`mailto:${metadata.supportEmail}`}>
-            {metadata.supportEmail}
-          </a>
-        </Placeholder> */}
+        <OnRampWidget
+          transaction={tx}
+          onSuccessPayment={onSuccess}
+        />
       </motion.div>
     );
   }
@@ -475,7 +472,7 @@ export function PaymentAvailabilityGuard({
   const isAvailable = data?.transaction === true;
 
   if (isLoading) {
-    return <PulseLoader />;
+    return <CardContent className="flex justify-center items-center h-full"><PulseLoader text='Wait for it...' /></CardContent>;
   }
 
   if (!isAvailable) {
