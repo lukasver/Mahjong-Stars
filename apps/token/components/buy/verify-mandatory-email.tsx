@@ -41,7 +41,7 @@ export const VerifyMandatoryEmail = ({ email }: { email: string }) => {
             <VerifyEmailForm
               onSuccess={() => setStep(2)}
               canSkip={false}
-              defaultEmail={email}
+              defaultEmail={email?.startsWith('temp_') ? '' : email}
             />
           )}
           {step === 2 && (

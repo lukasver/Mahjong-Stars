@@ -8,26 +8,8 @@ import * as c from "thirdweb/chains";
 
 export const ALLOWED_CHAINS =
 	process.env.NODE_ENV === "production"
-		? [c.bsc]
-		: [c.bscTestnet, c.sepolia, c.baseSepolia, c.base, c.bsc];
-
-// // type AcceptedTokens =
-// //   (typeof NETWORK_TO_TOKEN_MAPPING)[keyof typeof NETWORK_TO_TOKEN_MAPPING];
-
-// // export type NetworkToken = AcceptedTokens[CryptoCurrency];
-
-// // export function getNetworkToken(
-// //   chain?: Chain,
-// //   currency?: Currency
-// // ): AcceptedTokens[CryptoCurrency] | undefined {
-// //   if (!chain || !currency) return;
-// //   return NETWORK_TO_TOKEN_MAPPING[chain.id][currency];
-// // }
-
-// // export function getNetworkTokenList(chain?: Chain): AcceptedTokens | undefined {
-// //   if (!chain) return;
-// //   return NETWORK_TO_TOKEN_MAPPING[chain.id];
-// // }
+		? [c.bsc, c.base, c.optimism, c.arbitrum, c.ethereum]
+		: [c.bscTestnet, c.sepolia, c.baseSepolia, c.base, c.bsc, c.optimism, c.arbitrum,c.ethereum];
 
 const STABLECOIN_DECIMALS = 6;
 const ERC20_DECIMALS = 18;
@@ -168,62 +150,80 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 		//   decimals: BTC_DECIMALS,
 		// },
 	},
-
-	// [c.polygon.id]: {
-	//   [Currency.USDC]: {
-	//     symbol: Currency.USDC,
-	//     /**
-	//      * Deprecation warning of USDC.e
-	//      * @see https://help.circle.com/s/article-page?articleId=ka0Un00000011rLIAQ
-	//      */
-	//     contract: getAddress('0x3c499c542cef5e3811e1192ce70d8cc03d5c3359'), // USDC native
-	//     // contract: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', USDC.e bridged
-	//     enabled: IS_PRODUCTION ? true : false,
-	//     decimals: STABLECOIN_DECIMALS,
-	//   },
-	//   [Currency.ETH]: {
-	//     symbol: Currency.ETH,
-	//     contract: getAddress('0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'),
-	//     enabled: IS_PRODUCTION ? true : false,
-	//     decimals: ERC20_DECIMALS,
-	//   },
-	//   [Currency.MATIC]: {
-	//     symbol: Currency.MATIC,
-	//     contract: constants.AddressZero,
-	//     enabled: IS_PRODUCTION ? true : false,
-	//     decimals: ERC20_DECIMALS,
-	//   },
-	//   [Currency.LINK]: {
-	//     symbol: Currency.LINK,
-	//     contract: getAddress('0xb0897686c545045aFc77CF20eC7A532E3120E0F1'),
-	//     enabled: false,
-	//     decimals: ERC20_DECIMALS,
-	//   },
-	// },
-	// [polygonMumbai.id]: {
-	//   [Currency.USDC]: {
-	//     symbol: Currency.USDC,
-	//     contract: getAddress('0x9999f7fea5938fd3b1e26a12c3f2fb024e194f97'),
-	//     enabled: true,
-	//     decimals: STABLECOIN_DECIMALS,
-	//   },
-	//   [Currency.ETH]: {
-	//     symbol: Currency.ETH,
-	//     contract: getAddress('0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'),
-	//     enabled: true,
-	//     decimals: ERC20_DECIMALS,
-	//   },
-	//   [Currency.MATIC]: {
-	//     symbol: Currency.MATIC,
-	//     contract: constants.AddressZero,
-	//     enabled: true,
-	//     decimals: ERC20_DECIMALS,
-	//   },
-	//   [Currency.LINK]: {
-	//     symbol: Currency.LINK,
-	//     contract: getAddress('0x326c977e6efc84e512bb9c30f76e30c160ed06fb'),
-	//     enabled: true,
-	//     decimals: ERC20_DECIMALS,
-	//   },
-	// },
-};
+	[c.optimism.id]: {
+		["ETH"]: {
+			symbol: "ETH",
+			contract: NATIVE_TOKEN_ADDRESS,
+			enabled: true,
+			decimals: ERC20_DECIMALS,
+			isNative: true,
+		},
+		["USDC"]: {
+			symbol: "USDC",
+			contract: getAddress("0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"),
+			enabled: true,
+			decimals: STABLECOIN_DECIMALS,
+			isNative: false,
+		},
+		["WBTC"]: {
+			symbol: "WBTC",
+			contract: getAddress("0x68f180fcCe6836688e9084f035309E29Bf0A2095"),
+			enabled: true,
+			decimals: BTC_DECIMALS,
+			isNative: false,
+		},
+	},
+	[c.arbitrum.id]: {
+		["ETH"]: {
+			symbol: "ETH",
+			contract: NATIVE_TOKEN_ADDRESS,
+			enabled: true,
+			decimals: ERC20_DECIMALS,
+			isNative: true,
+		},
+		["USDC"]: {
+			symbol: "USDC",
+			contract: getAddress("0xaf88d065e77c8cC2239327C5EDb3A432268e5831"),
+			enabled: true,
+			decimals: STABLECOIN_DECIMALS,
+			isNative: false,
+		},
+		["WBTC"]: {
+			symbol: "WBTC",
+			contract: getAddress("0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"),
+			enabled: true,
+			decimals: BTC_DECIMALS,
+			isNative: false,
+		},
+	},
+	[c.ethereum.id]: {
+		["ETH"]: {
+			symbol: "ETH",
+			contract: NATIVE_TOKEN_ADDRESS,
+			enabled: true,
+			decimals: ERC20_DECIMALS,
+			isNative: true,
+		},
+		["USDC"]: {
+			symbol: "USDC",
+			contract: getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+			enabled: true,
+			decimals: STABLECOIN_DECIMALS,
+			isNative: false,
+		},
+		["USDT"]: {
+			symbol: "USDC",
+			contract: getAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
+			enabled: true,
+			decimals: STABLECOIN_DECIMALS,
+			isNative: false,
+		},
+		["WBTC"]: {
+			symbol: "WBTC",
+			contract: getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"),
+			enabled: true,
+			decimals: BTC_DECIMALS,
+			isNative: false,
+		},
+		}
+}

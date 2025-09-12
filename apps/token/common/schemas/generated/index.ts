@@ -102,7 +102,7 @@ export const VestingScheduleScalarFieldEnumSchema = z.enum(['id','createdAt','up
 
 export const TokenDistributionScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','amount','distributionDate','txHash','status']);
 
-export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','rawPrice','price','totalAmount','formOfPayment','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidenceId','paymentDate']);
+export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','price','totalAmount','formOfPayment','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidenceId','paymentDate']);
 
 export const BlockchainScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','chainId','rpcUrl','explorerUrl','isTestnet','isEnabled']);
 
@@ -123,6 +123,8 @@ export const TokenScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','
 export const TokensOnBlockchainsScalarFieldEnumSchema = z.enum(['id','tokenId','tokenSymbol','chainId','name','isNative','decimals','contractAddress']);
 
 export const CurrencyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','symbol','type']);
+
+export const ExchangeRatesScalarFieldEnumSchema = z.enum(['id','fromCurrency','toCurrency','rate','createdAt','updatedAt']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -474,10 +476,6 @@ export const SaleTransactionsSchema = z.object({
    */
   quantity: z.instanceof(Prisma.Decimal, { message: "Field 'quantity' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
   /**
-   * Store exact price per unit as string
-   */
-  rawPrice: z.string(),
-  /**
    * Price per unit of the token as Decimal (Optimized for crypto)
    */
   price: z.instanceof(Prisma.Decimal, { message: "Field 'price' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
@@ -676,3 +674,18 @@ export const CurrencySchema = z.object({
 })
 
 export type Currency = z.infer<typeof CurrencySchema>
+
+/////////////////////////////////////////
+// EXCHANGE RATES SCHEMA
+/////////////////////////////////////////
+
+export const ExchangeRatesSchema = z.object({
+  id: z.string().cuid(),
+  fromCurrency: z.string(),
+  toCurrency: z.string(),
+  rate: z.instanceof(Prisma.Decimal, { message: "Field 'rate' must be a Decimal. Location: ['Models', 'ExchangeRates']"}),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+})
+
+export type ExchangeRates = z.infer<typeof ExchangeRatesSchema>

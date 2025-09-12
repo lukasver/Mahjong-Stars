@@ -105,7 +105,6 @@ export const mockTransactions = (data?: Partial<SaleTransactions>) => {
     comment: faker.datatype.boolean() ? faker.lorem.lines(1) : null,
     quantity: q,
     amountPaid: paid.toFixed(decimals),
-    rawPrice: paid.div(q).toFixed(decimals),
     price: paid.div(q),
     paidCurrency: currency,
     approvedBy: null,

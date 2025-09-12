@@ -29,6 +29,7 @@ interface AdminTransactionNotificationProps {
   transactionId?: string;
   transactionUrl?: string;
   supportEmail?: string;
+  paidCurrency?: string;
 }
 
 export const AdminTransactionNotification = ({
@@ -47,6 +48,7 @@ export const AdminTransactionNotification = ({
   dashboardUrl = '#',
   transactionUrl = '#',
   supportEmail = 'support@company.com',
+  paidCurrency,
 }: {
   adminName?: string;
   userName: string;
@@ -63,6 +65,7 @@ export const AdminTransactionNotification = ({
   transactionId?: string;
   transactionUrl?: string;
   supportEmail?: string;
+  paidCurrency?: string;
 }) => (
   <Html>
     <Head />
@@ -102,7 +105,7 @@ export const AdminTransactionNotification = ({
             </Text>
 
             <Text style={styles.detailItem}>
-              <strong>Purchase Amount:</strong> {purchaseAmount}
+              <strong>Purchase Amount:</strong> {purchaseAmount} {paidCurrency}
             </Text>
 
             <Text style={styles.detailItem}>

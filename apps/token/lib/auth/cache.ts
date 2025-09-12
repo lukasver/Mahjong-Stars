@@ -3,6 +3,8 @@ import { ONE_MINUTE, ROLES } from '@/common/config/constants';
 import { Prisma } from '@prisma/client';
 import { Cacheable } from 'cacheable';
 import { prisma } from '../db/prisma';
+import { deleteSessionCookie } from './cookies';
+import { redirect } from 'next/navigation';
 
 const UserWithRoles = Prisma.validator<Prisma.UserDefaultArgs>()({
   select: {
@@ -64,7 +66,8 @@ export const getUserFromCache = async (address: string) => {
         },
       })) || undefined;
     if (!_user) {
-      throw new Error('User not found');
+      deleteSessionCookie();
+      redirect('/in?error=invalid_session');
     }
     const { userRole, ...rest } = _user;
     const roles = userRole.reduce(

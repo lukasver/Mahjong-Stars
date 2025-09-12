@@ -15,6 +15,7 @@ import { wallets } from "@/lib/auth/wallets";
 import { useBlockchains } from "@/lib/services/api";
 import { metadata } from "../common/config/site";
 import useActiveAccount from "./hooks/use-active-account";
+import { defineChain } from 'thirdweb';
 
 const localeMapping = {
   en: "en_US",
@@ -76,7 +77,7 @@ export const ConnectWallet = ({
       }}
       locale={mappedLocale}
       onConnect={onConnect}
-      // chains={props.chains.map((chain) => defineChain(chain.chainId))}
+      chains={props.chains.map((chain) => defineChain(chain.chainId))}
       // For SIWE
       auth={{
         // The following methods run on the server (not client)!

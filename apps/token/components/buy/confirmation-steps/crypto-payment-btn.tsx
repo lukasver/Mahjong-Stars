@@ -41,6 +41,7 @@ export function CryptoPaymentButton({
   disabled?: boolean;
   txId: string;
   extraPayload?: Partial<Pick<SaleTransactions, 'formOfPayment' | 'paidCurrency'>>;
+
   onSuccess: () => void;
 }) {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
@@ -93,7 +94,8 @@ export function CryptoPaymentButton({
       });
     }
     // ERC-20
-    if (chain.decimals === 18) {
+    if (chain.decimals) {
+      console.log('ENTRANDO A ERC20', contract, amount)
       const txs = transfer({
         contract,
         amount,
@@ -101,8 +103,9 @@ export function CryptoPaymentButton({
       });
 
       return txs;
-      // ERC-20 with different decimals (USDC or BTC for example)
+      // Native BTC for example? :think
     } else {
+      throw new Error('NOT IMPLEMENTED')
       const txs = prepareContractCall({
         contract,
         method: resolveMethod("transfer"),
@@ -119,15 +122,16 @@ export function CryptoPaymentButton({
   const handleTxConfirmed: React.ComponentProps<
     typeof TransactionButton
   >["onTransactionConfirmed"] = (receipt) => {
-    execute({
+    const payload = {
       txId,
       receipt: receipt.transactionHash,
       chainId: chain.chainId,
       amountPaid: amount,
       paymentDate: new Date(),
-      formOfPayment: 'CRYPTO',
-      ...props.extraPayload,
-    });
+      ...(props.extraPayload && { extraPayload: props.extraPayload }),
+
+    } as Parameters<typeof execute>[0];
+    execute(payload);
   };
 
   return (
@@ -137,7 +141,6 @@ export function CryptoPaymentButton({
         disabled={disabled}
         transaction={handleTransaction}
         onTransactionSent={(result) => {
-          console.log("Transaction submitted", result.transactionHash);
           setTransactionHash(result.transactionHash);
           setIsTransactionDialogOpen(true);
         }}

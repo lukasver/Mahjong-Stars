@@ -131,7 +131,6 @@ describe('TransactionsController', () => {
           paidCurrency: 'ETH',
           saleId: testSale.id,
           userId: regularUser.id,
-          rawPrice: '150',
           price: 1.5,
           totalAmount: 150,
         },
@@ -145,7 +144,6 @@ describe('TransactionsController', () => {
           paidCurrency: 'USD',
           saleId: testSale.id,
           userId: regularUser.id,
-          rawPrice: '300',
           price: 1.5,
           totalAmount: 300,
           approvedBy: adminUser.id,
@@ -265,7 +263,6 @@ describe('TransactionsController', () => {
 
       const result = await TransactionsController.createTransaction(dto, ctx);
 
-      console.log('🚀 ~ transactions.test.ts:250 ~ result:', result);
 
       if (result.success) {
         expect(result.data.transaction).toBeDefined();

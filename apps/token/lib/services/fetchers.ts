@@ -6,7 +6,7 @@ import {
 	Token,
 	TokensOnBlockchains,
 } from "@prisma/client";
-import { ONE_DAY, ROLES } from "@/common/config/constants";
+import { ONE_DAY, ONE_MINUTE, ROLES } from "@/common/config/constants";
 import { GetExchangeRate } from "@/common/schemas/dtos/rates";
 import { Failure, Success } from "@/common/schemas/dtos/utils";
 import {
@@ -227,6 +227,11 @@ export const getExchangeRate = async (from: string, to: string) => {
 	try {
 		const data = await fetcher<GetExchangeRate>(
 			`/feeds/rates?from=${from}&to=${to}`,
+			{
+				next: {
+					revalidate: ONE_MINUTE,
+				}
+			}
 		);
 		return { data, error: null };
 	} catch (e) {
@@ -263,7 +268,6 @@ export const getUserPendingTransactionsForSale = async (saleId: string) => {
 				| "receivingWallet"
 				| "comment"
 				| "status"
-				| "rawPrice"
 				| "price"
 				| "totalAmount"
 				| "createdAt"
@@ -404,13 +408,23 @@ export const getAllTransactions = async (params: { saleId?: string }) => {
 	}
 };
 
-export const getCryptoTransaction = async (txId: string) => {
+export const getCryptoTransaction = async (txId: string,params: Record<string, string | number>) => {
+	const search = new URLSearchParams();
+
+	Object.entries(params || {}).forEach(([key, value]) => {
+		if (value) {
+			search.set(key, String(value));
+		}
+	});
+
+	const queryParams = search.size > 0 ? `?${search.toString()}` : "";
+
 	try {
 		const data = await fetcher<{
 			// amend
 			transaction: TransactionByIdWithRelations;
 			token: Token;
-			blockchain: TokensOnBlockchains;
+			blockchain: Pick<Blockchain, "explorerUrl" | "name" | "chainId" | "isTestnet" | "isEnabled"> | null;
 			paymentToken: Pick<
 				TokensOnBlockchains,
 				| "contractAddress"
@@ -420,8 +434,8 @@ export const getCryptoTransaction = async (txId: string) => {
 				| "tokenSymbol"
 				| "id"
 				| "chainId"
-			>;
-		}>(`/transactions/${txId}/crypto`);
+			> | null;
+		}>(`/transactions/${txId}/crypto${queryParams}`);
 		return { data, error: null };
 	} catch (e) {
 		return { data: null, error: e };

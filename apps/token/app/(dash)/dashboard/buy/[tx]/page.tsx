@@ -79,14 +79,10 @@ export default async function TransactionConfiramationPage({
 }: PageProps<{ tx: string }>) {
   const queryClient = new QueryClient();
   const [p, user] = await Promise.all([params, getCurrentUser()]);
-  const tx = await getTransactionById({ id: p.tx });
 
-  // Needs a suspense wrapper (loading.tsx here)
-  await queryClient.prefetchQuery({
+  const tx = await queryClient.fetchQuery({
     queryKey: ['transactions', p.tx],
-    queryFn: () => {
-      return tx;
-    },
+    queryFn: () => getTransactionById({ id: p.tx })
   });
 
   if (!tx?.data) {

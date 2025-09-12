@@ -34,5 +34,5 @@ export function AuthRedirect() {
       </PulseLoader>
     );
   }
-  return <PulseLoader text={error ? 'Redirecting...' : 'Loading...'} />;
+  return <PulseLoader text={error ? 'Redirecting...' : 'Getting stuff ready...'} />;
 }

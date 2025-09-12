@@ -39,11 +39,13 @@ interface UseBalanceCheckerReturn {
  * @param isNativeToken - Whether the token is native (like ETH, BNB)
  * @returns object containing isSufficient flag and actual balance
  */
-export function useBalanceChecker({
-  requiredAmount,
-  tokenAddress,
-  isNativeToken = false,
-}: UseBalanceCheckerProps): UseBalanceCheckerReturn {
+export function useBalanceChecker(props: UseBalanceCheckerProps): UseBalanceCheckerReturn {
+
+  const {
+    requiredAmount,
+    tokenAddress,
+    isNativeToken = false,
+  } = props;
   const { activeAccount: account, chain } = useActiveAccount();
 
   const { data: balance } = useWalletBalance({

@@ -9,7 +9,6 @@ import {
   UnconfirmedTokensCard,
   UserTokensCard,
 } from "@/components/dashboard/cards";
-import { TokenVolumeCard } from "@/components/dashboard/cards/token-volume-card";
 import { IcoPhasesSSR } from "@/components/dashboard/ico-phases";
 import {
   IcoPhasesLoading,
@@ -63,9 +62,9 @@ export default async function DashboardPage(_props: PageProps) {
             <Suspense fallback={<DashboardCardLoading />}>
               <RemainingTokensCard />
             </Suspense>
-            <Suspense fallback={null}>
+            {/* <Suspense fallback={null}>
               <TokenVolumeCard />
-            </Suspense>
+            </Suspense> */}
           </div>
         </FundraisingProgress>
         {/* </Suspense> */}

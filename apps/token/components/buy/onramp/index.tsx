@@ -20,6 +20,9 @@ import { CryptoPaymentButton } from "../confirmation-steps/crypto-payment-btn";
 import { PaymentStatusIndicator } from "../confirmation-steps/payment-status-indicator";
 import { PaymentInstructions } from './instructions';
 import { OnRampSkeleton } from './skeletons';
+import { shortenAddress } from 'thirdweb/utils';
+import { useRouter } from 'next/navigation';
+import { Banner } from '@mjs/ui/primitives/banner';
 
 const WithErrorHandler = <P extends object>(
   Component: React.ComponentType<P>,
@@ -64,6 +67,10 @@ const OnRampWidgetComponent = ({
   const [blockError, setBlockError] = useState<string | null>(null);
   const locale = useLocale();
   const { activeAccount, chainId } = useActiveAccount();
+  const prevChainId = usePrevious(chainId);
+  const router = useRouter();
+
+
   const activeWallet = useActiveWallet();
 
   const { data, isLoading, error } = useBlockchains(!!activeAccount);
@@ -76,7 +83,9 @@ const OnRampWidgetComponent = ({
   const paymentToken = supportedTokens.find((token) => token.isNative);
 
   useEffect(() => {
-    if (!isLoading && !amount.amount && chain) {
+    // Refetch prices if user changes chain (which will change the payment token)
+    const shouldFetch = (prevChainId && chainId && prevChainId !== chainId);
+    if ((!isLoading && !amount?.amount && chain) || shouldFetch) {
       async function getEquivalentAmountInCrypto() {
         const newPaidCurrency = paymentToken?.symbol;
         // We should not add fee here but probably add an extra for the gas??
@@ -136,17 +145,20 @@ const OnRampWidgetComponent = ({
     return <div>Error</div>;
   }
 
+  if (!chain || !data?.chains?.length) {
+    throw new Error("Chain not supported or not found");
+  }
+
+
   if (isLoading || !amount.amount || totalAmountToPay === "0") {
     return <OnRampSkeleton />;
   }
 
-  if (!chain || !data?.chains?.length) {
-    throw new Error("Chain not found");
-  }
 
   const handleSuccessPurcharse = () => {
     toast.success("Purchase successful", { description: "Please proceed with payment" });
     setDisabled(false);
+    router.refresh();
   };
 
   const handleSuccessPayment = () => {
@@ -156,8 +168,6 @@ const OnRampWidgetComponent = ({
   const handleReadyToPay = () => {
     setDisabled(false);
   };
-
-  const receivingWallet = process.env.NODE_ENV === "development" ? "0x65Dc6524318b31dF425c57C02e2A1630FA330c24" : tx.sale.toWalletsAddress;
 
   return (
     <div className="space-y-4">
@@ -180,6 +190,7 @@ const OnRampWidgetComponent = ({
             isVisible={mounted}
           >
             <BuyWidget
+              currency={tx.paidCurrency}
               client={client}
               title="Get Funds"
               chain={defineChain(chain.chainId)}
@@ -195,15 +206,9 @@ const OnRampWidgetComponent = ({
               onError={(error) => {
                 toast.error(error.message);
               }}
-            // supportedTokens={{ [chain.chainId]: getSupportedTokens(chain.chainId) }}
+              supportedTokens={{ [chain.chainId]: getSupportedTokens(chain.chainId) }}
             />
-            {/* {mounted ? (
-            
-          ) : (
-            <div className="flex justify-center items-center h-full min-w-[400px]">
-              <PulseLoader text="Calculating..." />
-            </div>
-          )} */}
+
           </StaggeredRevealAnimation>
         </div>
         <motion.div
@@ -215,7 +220,6 @@ const OnRampWidgetComponent = ({
           <PaymentInstructions />
         </motion.div>
       </div>
-      {/* <div className="space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600"> */}
       <StaggeredRevealAnimation
         isVisible={Boolean(amount.amount && paymentToken)}
       >
@@ -233,27 +237,12 @@ const OnRampWidgetComponent = ({
           />
         )}
       </StaggeredRevealAnimation>
-      {/* <StaggeredRevealAnimation>
-            <div className="flex items-center gap-2 text-secondary-500">
-              <AnimatedIcon>
-                <CheckCircle className="w-5 h-5 self-start mt-1" />
-              </AnimatedIcon>
-              <div>
-                <AnimatedText className="font-medium text-foreground">
-                  Sufficient Funds
-                </AnimatedText>
-                <AnimatedText delay={0.3} className="text-sm text-secondary-500">
-                  You have enough balance to complete this payment
-                </AnimatedText>
-              </div>
-            </div>
-          </StaggeredRevealAnimation> */}
-      {/* {fundsDifference && fundsDifference.greaterThan(0) ? `${fundsDifference.toString()} ${paymentToken?.symbol} extra` : "exactly enough"}{" "} */}
-      {/* </div> */}
+
 
       <StaggeredRevealAnimation
         isVisible={!!paymentToken}
       >
+        <Banner message={`Always ensure you are sending funds to the sale owner wallet: ${shortenAddress(tx.sale.toWalletsAddress)}`} />
         <div className="flex flex-col [&>*]:flex-1 [&>*]:w-full gap-2">
           {paymentToken && (
             <CryptoPaymentButton

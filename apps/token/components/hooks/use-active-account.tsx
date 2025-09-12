@@ -3,6 +3,7 @@ import { useCallback, useTransition } from "react";
 import {
   useActiveAccount as useActiveAccountThirdweb,
   useActiveWallet,
+  useActiveWalletChain,
   useActiveWalletConnectionStatus,
   useDisconnect,
 } from "thirdweb/react";
@@ -13,6 +14,7 @@ function useActiveAccount() {
   const ac = useActiveAccountThirdweb();
   const status = useActiveWalletConnectionStatus();
   const wallet = useActiveWallet();
+  const activeChain = useActiveWalletChain();
 
   // const { data: profiles } = useProfiles({
   //   client,
@@ -41,7 +43,7 @@ function useActiveAccount() {
     [!!ac, !!wallet],
   );
 
-  const chain = wallet?.getChain();
+  const chain = activeChain || wallet?.getChain();
   return {
     activeAccount: ac,
     status,

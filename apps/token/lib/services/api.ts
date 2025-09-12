@@ -329,12 +329,12 @@ export const useSaftForTransactionDetails = (
 	return { data: data?.data, error: e, isLoading, refetch };
 };
 
-export const useCryptoTransaction = (txId: string) => {
+export const useCryptoTransaction = (txId: string, params: { chainId: number }) => {
 	const { data, isLoading, refetch, error } = useQuery({
-		queryKey: ["transactions", txId, "crypto"],
-		queryFn: () => getCryptoTransaction(txId),
+		queryKey: ["transactions", txId, "crypto", params.chainId],
+		queryFn: () => getCryptoTransaction(txId, params),
 		staleTime: DEFAULT_STALE_TIME,
-		enabled: !!txId,
+		enabled: !!txId && !!params.chainId,
 	});
 	const e = getError(data, error);
 	return { data: data?.data, error: e, isLoading, refetch };

@@ -7,10 +7,11 @@ import { StaggeredRevealAnimation, AnimatedIcon, AnimatedText, FadeAnimation } f
 import Decimal from "decimal.js";
 import { AlertCircle, CheckCircle, Info } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useEstimateGasCost } from "thirdweb/react";
 import { useBalanceChecker } from "@/components/hooks/use-balance-checker";
 import { usePrepareTransaction } from '@/components/hooks/use-prepare-transaction';
 import { NATIVE_TOKEN_ADDRESS } from 'thirdweb';
+import useActiveAccount from '@/components/hooks/use-active-account';
+import { useGasEstimation } from '@/components/hooks/use-gas-estimation';
 
 
 type PaymentStatusIndicatorProps = {
@@ -33,15 +34,21 @@ export function PaymentStatusIndicator({
   onReadyToPay,
   onToggleGasFunds,
 }: PaymentStatusIndicatorProps) {
+  const { activeAccount: account } = useActiveAccount();
   const [includeGasFunds, setIncludeGasFunds] = useState(false);
+
 
 
   const preparedTx = usePrepareTransaction({
     address: tokenAddress,
     value: amountToPay,
     // To simulate the cost of a transfer tx
-    to: NATIVE_TOKEN_ADDRESS,
+    to: account?.address || NATIVE_TOKEN_ADDRESS,
+
   });
+
+
+
 
 
   const { balance } = useBalanceChecker({
@@ -50,8 +57,12 @@ export function PaymentStatusIndicator({
     isNativeToken: isNative || false,
   });
 
-  // const { mutate: getGasCost, data: gasEstimate } = useEstimateGas();
-  const { mutate: getGasCost, data: gasEstimate } = useEstimateGasCost();
+  const { gasPrice, gasCost } = useGasEstimation(amount, '0x9Eed102fB3B872A584663195612062729e6Dc497');
+
+
+
+
+  // TODO!: NEed to refactor this logic since we cannot get the estimate gas cost if the user has not enough balance...
 
   const isSufficient = useMemo(() => {
     return balance?.greaterThanOrEqualTo(amountToPay);
@@ -67,17 +78,18 @@ export function PaymentStatusIndicator({
     }
   }, [isSufficient, onReadyToPay]);
 
-  useEffect(() => {
-    if (!!preparedTx && getGasCost && !gasEstimate) {
-      getGasCost(preparedTx);
-    }
-    // if (gasEstimate && !estimatedGasFee) {
-    //   setEstimatedGasFee(toTokens(gasEstimate, 18));
-    // }
+  // useEffect(() => {
+  //   console.log('USEEFFECT')
+  //   if (!!preparedTx && getGasCost && !gasEstimate) {
+  //     console.log('GETTING GAS COST', preparedTx)
+  //     getGasCost(preparedTx);
+  //   }
 
-  }, [!!preparedTx, getGasCost, gasEstimate])
+  // }, [!!preparedTx, getGasCost, gasEstimate])
 
-  const estimatedGasFee = gasEstimate ? gasEstimate.ether : "0";
+  const estimatedGasFee = gasCost || '0';
+
+
 
   const handleCheckGasFunds = (checked: boolean) => {
     setIncludeGasFunds(checked);
@@ -167,7 +179,7 @@ export function PaymentStatusIndicator({
           </div>
 
           {/* Gas Funds Toggle */}
-          <FadeAnimation delay={0.6}>
+          {estimatedGasFee !== "0" && <FadeAnimation delay={0.6}>
             <div className="flex items-center space-x-2 mt-4 pt-4 border-t">
               <Switch
                 id="gas-funds"
@@ -178,7 +190,7 @@ export function PaymentStatusIndicator({
                 Purchase extra funds for gas fees? (~{estimatedGasFee} {tokenSymbol})
               </Label>
             </div>
-          </FadeAnimation>
+          </FadeAnimation>}
         </div>
       </Card>
     </FadeAnimation>

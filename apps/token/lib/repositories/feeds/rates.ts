@@ -233,7 +233,6 @@ export class RatesController {
 			}
 			const data = await response.json();
 
-			console.log("🚀 ~ rates.ts:236 ~ data:", data);
 
 			return GetExchangeRate.parse(data);
 		} catch (e) {

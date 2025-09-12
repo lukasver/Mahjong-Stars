@@ -90,8 +90,6 @@ export const GET = withAuth(async (req, context, auth) => {
 						toArray?.length > 1 ? toArray : to,
 					);
 
-					console.log("🚀 ~ route.ts:93 ~ data:", data);
-
 					return NextResponse.json(data);
 				}
 				return NextResponse.json({ error: "Bad request" }, { status: 404 });
@@ -121,9 +119,13 @@ export const GET = withAuth(async (req, context, auth) => {
 						return NextResponse.json(data);
 					}
 					if (subIdentifier === "crypto") {
+						if (!qParamsObject.chainId) {
+							return NextResponse.json({ error: "Chain ID not found" }, { status: 404 });
+						}
 						const data = await transactions.getCryptoTransaction(
 							{
 								id: identifier,
+								chainId: Number(qParamsObject.chainId),
 							},
 							{ address: auth.address },
 						);

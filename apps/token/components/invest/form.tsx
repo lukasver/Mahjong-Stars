@@ -205,7 +205,6 @@ export const InvestForm = ({
           addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
           // tokenDecimals: decimals,
         });
-        console.log("🚀 ~ form.tsx:200 ~ fees:", pricePerUnit, amount, fees);
         // form.reset({})
         form.setFieldValue("paid.amount", amount);
         form.setFieldValue("paid.ppu", pricePerUnit);
