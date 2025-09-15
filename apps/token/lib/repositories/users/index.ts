@@ -244,6 +244,17 @@ class UsersController {
       });
 
       const changedEmail = !!dto.user.email && dto.user.email !== _user.email;
+      const updatedFirstname = dto?.profile?.firstName;
+      const updatedLastName = dto?.profile?.lastName;
+
+      // update the fullname in the user record if amended
+      let fullName: string | undefined;
+      if (updatedFirstname) {
+        fullName = updatedFirstname;
+      }
+      if (updatedLastName) {
+        fullName = fullName ? `${fullName} ${updatedLastName}` : updatedLastName;
+      }
 
       const promises = [];
       if (dto.profile) {
@@ -265,6 +276,7 @@ class UsersController {
           where: { id: _user.id },
           data: {
             ...dto.user,
+            ...(fullName && { name: fullName }),
             ...(changedEmail
               ? { email: dto.user.email, emailVerified: false }
               : {}),

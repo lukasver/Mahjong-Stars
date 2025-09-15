@@ -1,19 +1,17 @@
-'use client';
-import { UseAppForm, useFormContext } from '@mjs/ui/primitives/form';
-import { useStore } from '@mjs/ui/primitives/form';
-import { Separator } from '@mjs/ui/primitives/separator';
-import { safeFormatCurrency } from '@mjs/utils/client';
-
-import { SaleWithToken } from '@/common/types/sales';
-import { Prisma } from '@prisma/client';
-import Decimal from 'decimal.js';
-import { useLocale } from 'next-intl';
-import { FIAT_CURRENCIES } from '@/common/config/constants';
+"use client";
+import { UseAppForm, useFormContext, useStore } from "@mjs/ui/primitives/form";
+import { Separator } from "@mjs/ui/primitives/separator";
+import { safeFormatCurrency } from "@mjs/utils/client";
+import { Prisma } from "@prisma/client";
+import Decimal from "decimal.js";
+import { useLocale } from "next-intl";
+import { FIAT_CURRENCIES } from "@/common/config/constants";
+import { SaleWithToken } from "@/common/types/sales";
 
 export const PurchaseSummary = ({
   sale,
 }: {
-  sale: Pick<SaleWithToken, 'tokenPricePerUnit' | 'comparisonPricePerUnit'>;
+  sale: Pick<SaleWithToken, "tokenPricePerUnit" | "comparisonPricePerUnit">;
 }) => {
   const form = useFormContext() as unknown as UseAppForm;
   const paidAmount = useStore(form.store, (state) => {
@@ -33,10 +31,10 @@ export const PurchaseSummary = ({
 
   const { base, bonus, total } = sale?.comparisonPricePerUnit
     ? calculateTokens(
-        tokenBought.quantity,
-        sale.tokenPricePerUnit,
-        sale?.comparisonPricePerUnit
-      )
+      tokenBought.quantity,
+      sale.tokenPricePerUnit,
+      sale?.comparisonPricePerUnit,
+    )
     : {};
   const locale = useLocale();
 
@@ -68,46 +66,63 @@ export const PurchaseSummaryCard = ({
   locale: string;
 }) => {
   return (
-    <div className='space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600'>
-      <h4 className='text-white font-medium'>Summary</h4>
-      <div className='space-y-2 text-sm'>
+    <div className="space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600">
+      <h4 className="text-white font-medium">Summary</h4>
+      <div className="space-y-2 text-sm">
         {base && bonus && (
-          <div className='flex justify-between'>
-            <span className='text-gray-400'>
+          <div className="flex justify-between">
+            <span className="text-gray-400">
               {purchased.tokenSymbol} Tokens
             </span>
-            <span className='text-white'>{base?.toLocaleString()}</span>
+            <span className="text-white">{base?.toLocaleString()}</span>
           </div>
         )}
         {bonus && (
           <>
-            <div className='flex justify-between'>
-              <span className='text-gray-400'>Bonus Tokens</span>
-              <span className='text-green-400'>+{bonus?.toLocaleString()}</span>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Bonus Tokens</span>
+              <span className="text-green-400">+{bonus?.toLocaleString()}</span>
             </div>
-            <Separator className='bg-slate-600' />
+            <Separator className="bg-slate-600" />
           </>
         )}
-        <div className='flex justify-between font-medium'>
-          <span className='text-white'>Total Tokens</span>
-          <span className='text-white'>
+        <div className="flex justify-between font-medium">
+          <span className="text-white">Total Tokens</span>
+          <span className="text-white">
             {total?.toLocaleString()} {purchased.tokenSymbol}
           </span>
         </div>
-        <div className='flex justify-between'>
-          <span className='text-secondary font-bold'>Total amount to pay</span>
-          <span className='text-white font-bold'>
-            {safeFormatCurrency(paid, {
+        <div className="flex justify-between">
+          <span className="text-secondary font-bold">Total amount to pay</span>
+          <span className="text-white font-bold">
+            {gettotalAmountToPay({
+              ...paid,
               locale,
-              precision: FIAT_CURRENCIES.includes(paid.currency)
-                ? 'FIAT'
-                : 'CRYPTO',
             })}
           </span>
         </div>
       </div>
     </div>
   );
+};
+
+const gettotalAmountToPay = (paid: {
+  totalAmount: string;
+  currency: string;
+  locale: string;
+}) => {
+  const isPayingWithCrypto = !FIAT_CURRENCIES.includes(paid.currency);
+
+  if (isPayingWithCrypto) {
+    return Decimal(paid.totalAmount).toSignificantDigits().toString() + " " + paid.currency;
+  }
+  return safeFormatCurrency({
+    currency: paid.currency,
+    totalAmount: paid.totalAmount,
+  }, {
+    locale: paid.locale,
+    precision: "FIAT",
+  });
 };
 
 /**
@@ -119,15 +134,15 @@ export const PurchaseSummaryCard = ({
  */
 const calculateTokens = (
   quantity: string,
-  currentPrice: string | Decimal = '0.012',
-  publicPrice: string | Decimal
+  currentPrice: string | Decimal = "0.012",
+  publicPrice: string | Decimal,
 ) => {
   try {
     const PUBLIC_PRICE_PER_TOKEN = new Prisma.Decimal(publicPrice);
     const CURRENT_PRICE_PER_TOKEN = new Prisma.Decimal(currentPrice);
 
     const tokenQuantity = new Prisma.Decimal(
-      Number.isInteger(Number(quantity)) ? quantity : '0'
+      Number.isInteger(Number(quantity)) ? quantity : "0",
     );
 
     // Total tokens is what we actually bought
@@ -156,7 +171,7 @@ const calculateTokens = (
 export const DiscountBanner = ({
   sale,
 }: {
-  sale: Pick<SaleWithToken, 'comparisonPricePerUnit'>;
+  sale: Pick<SaleWithToken, "comparisonPricePerUnit">;
 }) => {
   const comparisonPricePerUnit = sale?.comparisonPricePerUnit;
   const form = useFormContext() as unknown as UseAppForm;
@@ -180,15 +195,15 @@ export const DiscountBanner = ({
   const { base, bonus, total } = calculateTokens(
     quantity,
     basePPU,
-    comparisonPricePerUnit
+    comparisonPricePerUnit,
   );
 
   const percentage = calculateBonusPercentage(base, total);
   return (
-    <div className='p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg'>
-      <div className='flex justify-between text-sm'>
-        <span className='text-blue-400'>Early Bird Bonus ({percentage}%)</span>
-        <span className='text-blue-400'>
+    <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+      <div className="flex justify-between text-sm">
+        <span className="text-blue-400">Early Bird Bonus ({percentage}%)</span>
+        <span className="text-blue-400">
           +{bonus.toString()} {symbol}
         </span>
       </div>

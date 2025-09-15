@@ -387,13 +387,13 @@ model SaleTransactions {
   tokenSymbol String
 
   /// Number of tokens purchased in the transaction
-  quantity    Decimal @db.Decimal(36, 18)
-  /// Store exact price per unit as string
-  rawPrice    String
+  quantity            Decimal @db.Decimal(36, 18)
   /// Price per unit of the token as Decimal (Optimized for crypto)
-  price       Decimal @db.Decimal(36, 18)
-  /// Total amount to be paid by the user
-  totalAmount Decimal @db.Decimal(36, 18)
+  price               Decimal @db.Decimal(36, 18)
+  /// Total amount to be paid by the user (Is derived from the price * quantity)
+  totalAmount         Decimal @db.Decimal(36, 18)
+  /// Currency of the total amount (For historical uses only, to be able to know which currency was used for calculating the total amount)
+  totalAmountCurrency String
 
   formOfPayment   FOP
   // confirmationId  String?
@@ -411,6 +411,7 @@ model SaleTransactions {
   /// actual amount transfered by the user after confirmation
   amountPaid         String?
   amountPaidCurrency Currency @relation(fields: [paidCurrency], references: [symbol])
+  /// actual currency being used for payment
   paidCurrency       String
 
   txHash     String?
@@ -592,6 +593,40 @@ model TokensOnBlockchains {
   @@map("tokens_on_blockchains")
 }
 
+model Currency {
+  id        String    @id @default(cuid()) @db.Text
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+
+  name   String
+  symbol String       @unique
+  type   CurrencyType
+  image  String?
+
+  Sale             Sale[]
+  SaleTransactions SaleTransactions[]
+  banks            BankDetails[]
+  ratesFrom        ExchangeRates[]    @relation("from")
+  ratesTo          ExchangeRates[]    @relation("to")
+
+  @@map("currencies")
+}
+
+//TODO pending implement logic for storing
+model ExchangeRates {
+  id           String   @id @default(cuid()) @db.Text
+  from         Currency @relation(fields: [fromCurrency], references: [symbol], name: "from")
+  fromCurrency String
+  to           Currency @relation(fields: [toCurrency], references: [symbol], name: "to")
+  toCurrency   String
+  rate         Decimal  @db.Decimal(36, 18)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("exchange_rates")
+}
+
 enum RegistrationStep {
   REGISTRATION_NEW_ACCOUNT
   REGISTRATION_PERSONAL_DETAIL
@@ -612,37 +647,10 @@ enum SaleStatus {
   FINISHED
 }
 
-model Currency {
-  id        String    @id @default(cuid()) @db.Text
-  createdAt DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
-  deletedAt DateTime? @db.Timestamptz(6)
-
-  name   String
-  symbol String       @unique
-  type   CurrencyType
-
-  Sale             Sale[]
-  SaleTransactions SaleTransactions[]
-  banks            BankDetails[]
-}
-
 enum CurrencyType {
   CRYPTO
   FIAT
 }
-
-// enum Currency {
-//   CHF
-//   GBP
-//   USD
-//   EUR
-//   ETH
-//   USDC
-//   MATIC
-//   LINK
-//   BNB
-// }
 
 enum TransactionStatus {
   PENDING

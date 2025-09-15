@@ -1,7 +1,5 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Textarea } from '@mjs/ui/primitives/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,13 +9,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@mjs/ui/primitives/alert-dialog';
-import { XCircle } from 'lucide-react';
-import { rejectAdminTransaction } from '@/lib/actions/admin';
-import { toast } from '@mjs/ui/primitives/sonner';
-import { AdminTransactionsWithRelations } from '@/common/types/transactions';
-import { Label } from '@mjs/ui/primitives/label';
-import { getQueryClient } from '@/app/providers';
+} from "@mjs/ui/primitives/alert-dialog";
+import { Label } from "@mjs/ui/primitives/label";
+import { toast } from "@mjs/ui/primitives/sonner";
+import { Textarea } from "@mjs/ui/primitives/textarea";
+import { XCircle } from "lucide-react";
+import { useState } from "react";
+import { AdminTransactionsWithRelations } from "@/common/types/transactions";
+import { rejectAdminTransaction } from "@/lib/actions/admin";
+import { getQueryClient } from "@/lib/services/query";
 
 interface RejectTransactionDialogProps {
   open: boolean;
@@ -35,7 +35,7 @@ export function RejectTransactionDialog({
   transaction,
 }: RejectTransactionDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
 
   const handleReject = async () => {
     setIsLoading(true);
@@ -44,32 +44,32 @@ export function RejectTransactionDialog({
         id: transaction.id,
         comment: comment.trim() || undefined,
       });
-      toast.success('Transaction rejected successfully');
+      toast.success("Transaction rejected successfully");
       const queryClient = getQueryClient();
       await queryClient.invalidateQueries({
-        queryKey: ['transactions'],
+        queryKey: ["transactions"],
       });
       onOpenChange(false);
-      setComment('');
+      setComment("");
     } catch (error) {
-      console.error('Error rejecting transaction:', error);
-      toast.error('Failed to reject transaction');
+      console.error("Error rejecting transaction:", error);
+      toast.error("Failed to reject transaction");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setComment('');
+    setComment("");
     onOpenChange(false);
   };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className='max-w-lg'>
+      <AlertDialogContent className="max-w-lg">
         <AlertDialogHeader>
-          <AlertDialogTitle className='flex items-center gap-2'>
-            <XCircle className='h-5 w-5 text-red-600' />
+          <AlertDialogTitle className="flex items-center gap-2">
+            <XCircle className="h-5 w-5 text-red-600" />
             Reject Transaction
           </AlertDialogTitle>
           <AlertDialogDescription>
@@ -78,31 +78,31 @@ export function RejectTransactionDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className='space-y-4'>
+        <div className="space-y-4">
           {/* Transaction Info */}
-          <div className='bg-muted/50 rounded-lg p-4 space-y-2'>
-            <div className='flex justify-between text-sm'>
-              <span className='font-medium text-muted-foreground'>ID:</span>
-              <span className='font-mono'>{transaction.id}</span>
+          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="font-medium text-muted-foreground">ID:</span>
+              <span className="font-mono">{transaction.id}</span>
             </div>
-            <div className='flex justify-between text-sm'>
-              <span className='font-medium text-muted-foreground'>User:</span>
+            <div className="flex justify-between text-sm">
+              <span className="font-medium text-muted-foreground">User:</span>
               <span>
-                {transaction.user.profile?.firstName}{' '}
+                {transaction.user.profile?.firstName}{" "}
                 {transaction.user.profile?.lastName}
               </span>
             </div>
-            <div className='flex justify-between text-sm'>
-              <span className='font-medium text-muted-foreground'>Email:</span>
+            <div className="flex justify-between text-sm">
+              <span className="font-medium text-muted-foreground">Email:</span>
               <a
                 href={`mailto:${transaction.user.email}`}
-                className='text-primary hover:underline'
+                className="text-primary hover:underline"
               >
                 {transaction.user.email}
               </a>
             </div>
-            <div className='flex justify-between text-sm'>
-              <span className='font-medium text-muted-foreground'>Amount:</span>
+            <div className="flex justify-between text-sm">
+              <span className="font-medium text-muted-foreground">Amount:</span>
               <span>
                 {transaction.quantity.toString()} {transaction.tokenSymbol}
               </span>
@@ -110,18 +110,18 @@ export function RejectTransactionDialog({
           </div>
 
           {/* Comment Input */}
-          <div className='space-y-2'>
-            <Label htmlFor='rejection-comment'>
+          <div className="space-y-2">
+            <Label htmlFor="rejection-comment">
               Rejection Comment (Optional)
             </Label>
             <Textarea
-              id='rejection-comment'
-              placeholder='Enter a reason for rejection...'
+              id="rejection-comment"
+              placeholder="Enter a reason for rejection..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className='min-h-[100px]'
+              className="min-h-[100px]"
             />
-            <p className='text-xs text-muted-foreground'>
+            <p className="text-xs text-muted-foreground">
               This comment will be visible to the user and stored with the
               transaction.
             </p>
@@ -135,9 +135,9 @@ export function RejectTransactionDialog({
           <AlertDialogAction
             onClick={handleReject}
             disabled={isLoading}
-            className='bg-red-600 hover:bg-red-700'
+            className="bg-red-600 hover:bg-red-700"
           >
-            {isLoading ? 'Rejecting...' : 'Reject Transaction'}
+            {isLoading ? "Rejecting..." : "Reject Transaction"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

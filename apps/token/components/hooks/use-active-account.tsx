@@ -1,18 +1,20 @@
-'use client';
-import { getQueryClient } from '@/app/providers';
-import { logout } from '@/lib/actions';
-import { useCallback, useTransition } from 'react';
+"use client";
+import { useCallback, useTransition } from "react";
 import {
   useActiveAccount as useActiveAccountThirdweb,
   useActiveWallet,
+  useActiveWalletChain,
   useActiveWalletConnectionStatus,
   useDisconnect,
-} from 'thirdweb/react';
+} from "thirdweb/react";
+import { logout } from "@/lib/actions";
+import { getQueryClient } from "@/lib/services/query";
 
 function useActiveAccount() {
   const ac = useActiveAccountThirdweb();
   const status = useActiveWalletConnectionStatus();
   const wallet = useActiveWallet();
+  const activeChain = useActiveWalletChain();
 
   // const { data: profiles } = useProfiles({
   //   client,
@@ -27,26 +29,26 @@ function useActiveAccount() {
         disconnect(wallet);
         getQueryClient().clear();
       }
-      await logout({ redirectTo: '/', redirect: true });
+      await logout({ redirectTo: "/", redirect: true });
     });
   }, [wallet, disconnect]);
 
   const signMessage = useCallback(
     async (message: string) => {
       if (!ac) {
-        throw new Error('No wallet connected');
+        throw new Error("No wallet connected");
       }
       return ac.signMessage({ message, chainId: wallet?.getChain()?.id });
     },
-    [!!ac, !!wallet]
+    [!!ac, !!wallet],
   );
 
-  const chain = wallet?.getChain();
+  const chain = activeChain || wallet?.getChain();
   return {
     activeAccount: ac,
     status,
-    isLoading: isPending || status === 'connecting',
-    isConnected: status === 'connected',
+    isLoading: isPending || status === "connecting",
+    isConnected: status === "connected",
     signout,
     signMessage,
     chainId: chain?.id,

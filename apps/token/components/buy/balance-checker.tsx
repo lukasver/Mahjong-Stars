@@ -7,7 +7,7 @@ import { Button } from '@mjs/ui/primitives/button';
 
 import { Badge } from '@mjs/ui/primitives/badge';
 import { Skeleton } from '@mjs/ui/primitives/skeleton';
-import { useWalletBalance } from 'thirdweb/react';
+import { useActiveWalletChain, useWalletBalance } from 'thirdweb/react';
 import { client } from '@/lib/auth/thirdweb-client';
 import useActiveAccount from '@/components/hooks/use-active-account';
 import { useLocale } from 'next-intl';
@@ -60,6 +60,7 @@ export function BalanceChecker({
   onBalanceCheck,
 }: BalanceCheckerProps) {
   const { activeAccount: account, chain } = useActiveAccount();
+  const activeChain = useActiveWalletChain();
   const locale = useLocale();
 
   const { data: balance, isLoading } = useWalletBalance({
@@ -73,6 +74,8 @@ export function BalanceChecker({
     if (!balance) return '0';
     return balance.displayValue;
   }, [balance]);
+
+
 
   const hasInsufficientFunds = useMemo(() => {
     if (!balance || !requiredAmount) return false;
@@ -104,25 +107,6 @@ export function BalanceChecker({
     );
 
     return instructions;
-  };
-
-  const getNetworkName = () => {
-    switch (chainId) {
-      case 1:
-        return 'Ethereum Mainnet';
-      case 56:
-        return 'Binance Smart Chain';
-      case 8453:
-        return 'Base';
-      case 11155111:
-        return 'Sepolia Testnet';
-      case 84532:
-        return 'Base Sepolia Testnet';
-      case 97:
-        return 'BSC Testnet';
-      default:
-        return `Chain ID ${chainId}`;
-    }
   };
 
   if (isLoading) {
@@ -206,9 +190,9 @@ export function BalanceChecker({
             </span>
           </div>
 
-          <div className='text-xs text-secondary text-right'>
-            Network: {getNetworkName()}
-          </div>
+          {activeChain && <div className='text-xs text-secondary text-right'>
+            Network: {activeChain?.name || getNetworkName(activeChain?.id)}
+          </div>}
         </div>
       </div>
 
@@ -262,24 +246,26 @@ export function BalanceChecker({
         </Alert>
       )}
 
-      {/* Sufficient Funds Success */}
-      {
-        !hasInsufficientFunds && balance && null
-        // <Alert className='bg-white/10 border-green-500'>
-        //   <CheckCircle
-        //     className='h-4 w-4'
-        //     style={{ color: 'var(--color-green-500)' }}
-        //   />
-        //   <AlertDescription className='text-foreground'>
-        //     <h4 className='text-sm font-medium text-green-500'>
-        //       Sufficient Balance
-        //     </h4>
-        //     <p className='text-xs text-foreground'>
-        //       Your wallet has enough {tokenSymbol} to complete this transaction.
-        //     </p>
-        //   </AlertDescription>
-        // </Alert>
-      }
+
     </div>
   );
 }
+
+const getNetworkName = (chainId: number) => {
+  switch (chainId) {
+    case 1:
+      return 'Ethereum Mainnet';
+    case 56:
+      return 'Binance Smart Chain';
+    case 8453:
+      return 'Base';
+    case 11155111:
+      return 'Sepolia Testnet';
+    case 84532:
+      return 'Base Sepolia Testnet';
+    case 97:
+      return 'BSC Testnet';
+    default:
+      return `Chain ID ${chainId}`;
+  }
+};

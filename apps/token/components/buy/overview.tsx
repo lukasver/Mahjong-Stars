@@ -1,18 +1,17 @@
-import { PercentBar } from '@/components/percent-bar';
-
-import { percentCalculator } from '@/utils/percentCalculator';
+import { getGlassyCardClassName } from "@mjs/ui/components/cards";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from '@mjs/ui/primitives/card';
-import { Separator } from '@mjs/ui/primitives/separator';
-import { formatCurrency } from '@mjs/utils/client';
-import { DateTime } from 'luxon';
-import { useLocale } from 'next-intl';
-import { SaleWithToken } from '@/common/types/sales';
-import { getGlassyCardClassName } from '@mjs/ui/components/cards';
+} from "@mjs/ui/primitives/card";
+import { Separator } from "@mjs/ui/primitives/separator";
+import { formatCurrency, formatDate } from "@mjs/utils/client";
+import { DateTime } from "luxon";
+import { useLocale } from "next-intl";
+import { SaleWithToken } from "@/common/types/sales";
+import { PercentBar } from "@/components/percent-bar";
+import { percentCalculator } from "@/utils/percentCalculator";
 
 export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
   const {
@@ -28,27 +27,28 @@ export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
   const availableTokenQuantity = sale?.availableTokenQuantity || 0;
   const locale = useLocale();
   return (
-    <Card className={getGlassyCardClassName('w-full shadow-lg rounded-xl p-6')}>
-      <CardHeader className='pb-2 gap-4 p-0 mb-4'>
-        <CardTitle className='text-secondary'>Overview</CardTitle>
-        <Separator className='bg-secondary' orientation='horizontal' />
+    <Card className={getGlassyCardClassName("w-full shadow-lg rounded-xl p-6")}>
+      <CardHeader className="pb-2 gap-4 p-0 mb-4">
+        <CardTitle className="text-secondary">Overview</CardTitle>
+        <Separator className="bg-secondary" orientation="horizontal" />
       </CardHeader>
-      <CardContent className='flex flex-col gap-4 p-0'>
+      <CardContent className="flex flex-col gap-4 p-0">
         <Row
-          title='Tokens available'
+          title="Tokens available"
           value={formatCurrency(availableTokenQuantity, { locale })}
         />
-        <div className='mt-2'>
+        <div className="mt-2">
           <Row
             render={!!initialTokenQuantity}
-            title={' '}
+            title={" "}
             value={`${formatCurrency(sale && percentCalculator(sale), {
               locale,
+              precision: "FIAT",
             })}% Sold`}
           />
-          <div className='w-full mt-1'>
+          <div className="w-full mt-1">
             <PercentBar
-              caption={'Total Tokens'}
+              caption={"Total Tokens"}
               value={sale && percentCalculator(sale)}
               textValue={formatCurrency(initialTokenQuantity, {
                 locale,
@@ -56,18 +56,18 @@ export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
             />
           </div>
         </div>
-        <Separator className='my-4' />
-        <Row title='Name' value={tokenName} render={!!tokenName} />
-        <Row title='Symbol' value={tokenSymbol} render={!!tokenSymbol} />
+        <Separator className="my-4" />
+        <Row title="Name" value={tokenName} render={!!tokenName} />
+        <Row title="Symbol" value={tokenSymbol} render={!!tokenSymbol} />
         <Row
-          title='Total supply'
+          title="Total supply"
           value={formatCurrency(initialTokenQuantity, {
             locale,
           })}
           render={!!initialTokenQuantity}
         />
         <Row
-          title='Price per token'
+          title="Price per token"
           value={formatCurrency(tokenPricePerUnit, {
             currency,
             locale,
@@ -77,25 +77,13 @@ export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
           render={!!tokenPricePerUnit && !!currency}
         />
         <Row
-          title='Sale starts'
-          value={
-            saleStartDate
-              ? DateTime.fromISO(String(saleStartDate)).toLocaleString(
-                  DateTime.DATE_MED
-                )
-              : ''
-          }
+          title="Sale starts"
+          value={formatDate(saleStartDate, { format: DateTime.DATE_MED }) || ''}
           render={!!saleStartDate}
         />
         <Row
-          title='Sale ends'
-          value={
-            saleClosingDate
-              ? DateTime.fromISO(String(saleClosingDate)).toLocaleString(
-                  DateTime.DATE_MED
-                )
-              : ''
-          }
+          title="Sale ends"
+          value={formatDate(saleClosingDate, { format: DateTime.DATE_MED }) || ''}
           render={!!saleClosingDate}
         />
       </CardContent>
@@ -113,12 +101,12 @@ const Row = ({
   render?: boolean;
 }) =>
   render ? (
-    <div className='flex justify-between items-center w-full gap-2'>
-      <span className='text-sm sm:text-base font-medium text-secondary break-words'>
+    <div className="flex justify-between items-center w-full gap-2">
+      <span className="text-sm sm:text-base font-medium text-secondary break-words">
         {title}
       </span>
       {value && (
-        <span className='text-xs sm:text-sm text-foreground font-semibold break-words text-right'>
+        <span className="text-xs sm:text-sm text-foreground font-semibold break-words text-right">
           {value}
         </span>
       )}

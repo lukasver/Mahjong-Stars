@@ -1,6 +1,7 @@
 import Image from 'next/image';
 
-import MahjongStarsIconXl from '@/public/static/favicons/android-chrome-512x512.png';
+import MahjongStarsIconXl from '@/public/static/images/logos/isologo.webp';
+import { AnimatedText } from '@mjs/ui/components/motion';
 
 export function PulseLoader({
   children,
@@ -21,7 +22,7 @@ export function PulseLoader({
         />
       </span>
       {children || (
-        <span className='text-lg sm:text-xl font-bold font-head'>{text}</span>
+        <AnimatedText className="text-lg sm:text-xl font-bold font-head">{text}</AnimatedText>
       )}
     </div>
   );

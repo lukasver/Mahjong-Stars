@@ -1,30 +1,27 @@
-'use client';
+"use client";
 
-import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
-
-import MahjongStarsIcon from '@/public/static/favicons/favicon-48x48.png';
-import { Avatar, AvatarFallback, AvatarImage } from '@mjs/ui/primitives/avatar';
+import ErrorBoundary from "@mjs/ui/components/error-boundary";
+import { Avatar, AvatarFallback, AvatarImage } from "@mjs/ui/primitives/avatar";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
+  DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@mjs/ui/primitives/dropdown-menu';
+  DropdownMenuTrigger
+} from "@mjs/ui/primitives/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@mjs/ui/primitives/sidebar';
-import { Skeleton } from '@mjs/ui/primitives/skeleton';
-import { AccountAddress, AccountAvatar } from 'thirdweb/react';
-import { shortenAddress } from 'thirdweb/utils';
-import useActiveAccount from '../hooks/use-active-account';
-import { useUser } from '@/lib/services/api';
-import ErrorBoundary from '@mjs/ui/components/error-boundary';
+} from "@mjs/ui/primitives/sidebar";
+import { Skeleton } from "@mjs/ui/primitives/skeleton";
+import { ChevronsUpDown, LogOut } from "lucide-react";
+import { AccountAddress, AccountAvatar } from "thirdweb/react";
+import { shortenAddress } from "thirdweb/utils";
+import { useUser } from "@/lib/services/api";
+import MahjongStarsIcon from "@/public/static/images/logos/isologo-min.webp";
+import useActiveAccount from "../hooks/use-active-account";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -37,24 +34,24 @@ export function NavUser() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              size='lg'
-              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold'>{user?.name}</span>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">{user?.name}</span>
                 <EmailIndicator isSiwe={!!user?.isSiwe} email={user?.email} />
               </div>
-              <ChevronsUpDown className='ml-auto size-4' />
+              <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className='w-[--radix-dropdown-menu-trigger-width] min-w-48 sm:min-w-56 rounded-lg'
-            side={isMobile ? 'bottom' : 'right'}
-            align='end'
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-48 sm:min-w-56 rounded-lg"
+            side={isMobile ? "bottom" : "right"}
+            align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className='p-0 font-normal'>
-              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <ErrorBoundary fallback={null}>
                   <AvatarIndicator
                     image={user?.image || undefined}
@@ -62,16 +59,16 @@ export function NavUser() {
                     isSiwe={!!user?.isSiwe}
                   />
                 </ErrorBoundary>
-                <div className='grid flex-1 text-left text-xs sm:text-sm leading-tight gap-1 min-w-0'>
+                <div className="grid flex-1 text-left text-xs sm:text-sm leading-tight gap-1 min-w-0">
                   {isLoading ? (
-                    <Skeleton className='w-20 sm:w-24 h-3 sm:h-4' />
+                    <Skeleton className="w-20 sm:w-24 h-3 sm:h-4" />
                   ) : (
-                    <span className='truncate font-semibold'>
-                      {user?.name || 'Anonymous'}
+                    <span className="truncate font-semibold">
+                      {user?.name || "Anonymous"}
                     </span>
                   )}
                   {isLoading ? (
-                    <Skeleton className='w-28 sm:w-36 h-2 sm:h-3' />
+                    <Skeleton className="w-28 sm:w-36 h-2 sm:h-3" />
                   ) : user?.email ? (
                     <EmailIndicator
                       isSiwe={!!user?.isSiwe}
@@ -89,20 +86,20 @@ export function NavUser() {
 							</DropdownMenuItem>
 						</DropdownMenuGroup> */}
             {/* <DropdownMenuSeparator /> */}
-            <DropdownMenuGroup>
+            {/* <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              {/* 	<DropdownMenuItem>
+              <DropdownMenuItem>
 								<CreditCard />
 								Billing
 							</DropdownMenuItem>
 							<DropdownMenuItem>
 								<Bell />
 								Notifications
-							</DropdownMenuItem> */}
-            </DropdownMenuGroup>
+							</DropdownMenuItem>
+            </DropdownMenuGroup> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={async () => {
@@ -138,7 +135,7 @@ const EmailIndicator = (props: EmailIndicatorProps) => {
   if (!email) {
     return null;
   }
-  return <span className='truncate text-xs max-w-full'>{email}</span>;
+  return <span className="truncate text-xs max-w-full">{email}</span>;
 };
 
 type AvatarIndicatorProps = {
@@ -153,9 +150,9 @@ const AvatarIndicator = (props: AvatarIndicatorProps) => {
   }
 
   return (
-    <Avatar className='h-7 w-7 sm:h-8 sm:w-8 rounded-lg'>
-      <AvatarImage src={image || MahjongStarsIcon.src} alt={name || 'Avatar'} />
-      <AvatarFallback className='rounded-lg'>CN</AvatarFallback>
+    <Avatar className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg">
+      <AvatarImage src={image || MahjongStarsIcon.src} alt={name || "Avatar"} />
+      <AvatarFallback className="rounded-lg">CN</AvatarFallback>
     </Avatar>
   );
 };

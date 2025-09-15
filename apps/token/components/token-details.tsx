@@ -1,14 +1,18 @@
-'use client';
+"use client";
 
-import { client } from '@/lib/auth/thirdweb-client';
-import { useActiveSale } from '@/lib/services/api';
-import ErrorBoundary from '@mjs/ui/components/error-boundary';
-import { cn } from '@mjs/ui/lib/utils';
-import { Separator } from '@mjs/ui/primitives/separator';
-import { defineChain } from 'thirdweb';
-import { bscTestnet } from 'thirdweb/chains';
-import { TokenProvider as TokenProviderThirdweb } from 'thirdweb/react';
-import { TokenIcon, TokenName, TokenSymbol } from 'thirdweb/react';
+import ErrorBoundary from "@mjs/ui/components/error-boundary";
+import { cn } from "@mjs/ui/lib/utils";
+import { Separator } from "@mjs/ui/primitives/separator";
+import { defineChain } from "thirdweb";
+import { bscTestnet } from "thirdweb/chains";
+import {
+  TokenIcon,
+  TokenName,
+  TokenProvider as TokenProviderThirdweb,
+  TokenSymbol,
+} from "thirdweb/react";
+import { client } from "@/lib/auth/thirdweb-client";
+import { useActiveSale } from "@/lib/services/api";
 
 interface TokenDetailsProps {
   classes?: {
@@ -31,17 +35,17 @@ export function TokenDetails({ classes }: TokenDetailsProps) {
         client={client}
         chain={defineChain(chainId)}
       >
-        <div className={cn('flex items-center gap-1 sm:gap-2', classes?.root)}>
-          <TokenIcon className='size-5 sm:size-6' />
+        <div className={cn("flex items-center gap-1 sm:gap-2", classes?.root)}>
+          <TokenIcon className="size-5 sm:size-6" />
           <div
             className={cn(
               classes?.container,
-              'flex items-center gap-1 sm:gap-2'
+              "flex items-center gap-1 sm:gap-2",
             )}
           >
-            <TokenSymbol className='text-xs sm:text-sm font-head font-bold' />
-            <Separator orientation='vertical' className='h-3 sm:h-4' />
-            <TokenName className='text-xs sm:text-sm font-head' />
+            <TokenSymbol className="text-xs sm:text-sm font-head font-bold" />
+            <Separator orientation="vertical" className="h-3 sm:h-4" />
+            <TokenName className="text-xs sm:text-sm font-head" />
           </div>
         </div>
       </TokenProviderThirdweb>

@@ -100,6 +100,146 @@ export function LoadingAnimation({
   );
 }
 
+export function RevealAnimation({
+  children,
+  isVisible,
+  className,
+  duration = 0.4,
+  staggerDelay = 0.1,
+  iconScaleDelay = 0.2,
+  textSlideDelay = 0.25,
+}: {
+  children: React.ReactNode;
+  isVisible: boolean;
+  className?: string;
+  duration?: number;
+  staggerDelay?: number;
+  iconScaleDelay?: number;
+  textSlideDelay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={isVisible ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
+      transition={{
+        duration,
+        ease: [0.4, 0, 0.2, 1],
+        opacity: { duration: duration * 0.75 }
+      }}
+      className={`overflow-hidden ${className || ""}`}
+    >
+      {isVisible && (
+        <motion.div
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{
+            delay: staggerDelay,
+            duration: duration * 0.75,
+            ease: [0.4, 0, 0.2, 1]
+          }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+export function StaggeredRevealAnimation({
+  children,
+  isVisible,
+  className,
+  duration = 0.4,
+  staggerDelay = 0.1,
+}: {
+  children: React.ReactNode;
+  isVisible: boolean;
+  className?: string;
+  duration?: number;
+  staggerDelay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={isVisible ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
+      transition={{
+        duration,
+        ease: [0.4, 0, 0.2, 1],
+        opacity: { duration: duration * 0.75 }
+      }}
+      className={`overflow-hidden ${className || ""}`}
+    >
+      {isVisible && (
+        <motion.div
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{
+            delay: staggerDelay,
+            duration: duration * 0.75,
+            ease: [0.4, 0, 0.2, 1]
+          }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+export function AnimatedIcon({
+  children,
+  delay = 0.2,
+  duration = 0.3,
+  className,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  duration?: number;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{
+        delay,
+        duration,
+        ease: [0.34, 1.56, 0.64, 1]
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function AnimatedText({
+  children,
+  delay = 0.25,
+  duration = 0.3,
+  className,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  duration?: number;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ x: -10, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{
+        delay,
+        duration,
+        ease: [0.4, 0, 0.2, 1]
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export {
   motion,
   AnimatePresence,

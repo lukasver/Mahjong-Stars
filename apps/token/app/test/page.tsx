@@ -1,74 +1,70 @@
-'use client';
+"use client";
 
-import { useAppForm } from '@mjs/ui/primitives/form/index';
-import { InputOptionsProvider } from '@/components/hooks/use-input-options';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
-import { FormInput } from '@mjs/ui/primitives/form-input';
-import { Button } from '@mjs/ui/primitives/button';
-import { useCallback } from 'react';
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { useState } from "react";
+import { OnRampWidget } from "@/components/buy/onramp";
+import AccountProvider from "@/components/thirdweb/account-provider";
+import AutoConnect from "@/components/thirdweb/autoconnect";
+import { useTransactionById } from "@/lib/services/api";
 
 export default function Page() {
-  const form = useAppForm({
-    // validators: { onSubmit: FormSchema },
-    defaultValues: {
-      test: true,
-    },
-    onSubmit: async ({ value }) => {
-      console.debug('SOY ONSUBMIT', value);
-    },
-  });
+  const [selectedValue, setSelectedValue] = useState<string>("");
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      form.handleSubmit();
+  // Example options with grouping
+  const groupedOptions = [
+    { id: "1", value: "apple", label: "Apple", meta: { category: "Fruits" } },
+    { id: "2", value: "banana", label: "Banana", meta: { category: "Fruits" } },
+    { id: "3", value: "orange", label: "Orange", meta: { category: "Fruits" } },
+    {
+      id: "4",
+      value: "carrot",
+      label: "Carrot",
+      meta: { category: "Vegetables" },
     },
-    [form]
+    {
+      id: "5",
+      value: "broccoli",
+      label: "Broccoli",
+      meta: { category: "Vegetables" },
+    },
+    {
+      id: "6",
+      value: "spinach",
+      label: "Spinach",
+      meta: { category: "Vegetables" },
+    },
+    { id: "7", value: "milk", label: "Milk", meta: { category: "Dairy" } },
+    { id: "8", value: "cheese", label: "Cheese", meta: { category: "Dairy" } },
+  ];
+
+  const { data: tx, isLoading } = useTransactionById(
+    "cmfe9bsvz00038o80h9injmnc" as string,
   );
+
+  if (isLoading) {
+    return <div>Loading testpage...</div>;
+  }
+
+  if (!tx?.transaction) {
+    return <div>Transaction not found</div>;
+  }
+
   return (
     <NuqsAdapter>
-      <InputOptionsProvider>
-        <form.AppForm>
-          <form className='container mx-auto' onSubmit={handleSubmit}>
-            <FormInput
-              type='select'
-              name='test'
-              label='Test'
-              inputProps={{
-                options: [
-                  {
-                    id: 'cmdzywql7000f8o6px7ftqpkz',
-                    value: 97,
-                    label: 'BNB Smart Chain Testnet',
-                  },
-                  {
-                    id: 'cmdzywql7000g8o6p2803uo3p',
-                    value: 11155111,
-                    label: 'Sepolia',
-                  },
-                  {
-                    id: 'cmdzywql7000h8o6prb5pp38j',
-                    value: 84532,
-                    label: 'Base Sepolia',
-                  },
-                  {
-                    id: 'cmdzywql7000i8o6pb5te11sa',
-                    value: 8453,
-                    label: 'Base',
-                  },
-                  {
-                    id: 'cmdzywql7000j8o6p5z8d2kww',
-                    value: 56,
-                    label: 'BNB Smart Chain Mainnet',
-                  },
-                ],
+      <AutoConnect />
+      <AccountProvider>
+        <div className="h-screen w-screen grid place-items-center">
+          <div className="max-w-4xl w-full flex flex-col gap-8 justify-center">
+
+            <OnRampWidget
+              transaction={tx?.transaction}
+              onSuccessPayment={() => {
+                //
               }}
             />
-            <Button type='submit'>Submit</Button>
-          </form>
-        </form.AppForm>
-      </InputOptionsProvider>
+          </div>
+        </div>
+      </AccountProvider>
     </NuqsAdapter>
   );
 }

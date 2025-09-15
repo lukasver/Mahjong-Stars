@@ -4,9 +4,9 @@ import { CreateContractStatusDto } from '@/common/schemas/dtos/contracts';
 import { GetSaleDto, GetSalesDto } from '@/common/schemas/dtos/sales';
 import { UpdateTransactionDto } from '@/common/schemas/dtos/transactions';
 import {
-  ProfileSchema,
-  TransactionStatusSchema,
-  UserSchema,
+  FOPSchema,
+  ProfileSchema, TransactionStatusSchema,
+  UserSchema
 } from '@/common/schemas/generated';
 import { prisma } from '@/db';
 import contractController from '@/lib/repositories/contract';
@@ -639,6 +639,10 @@ export const confirmCryptoTransaction = authActionClient
       chainId: z.number(),
       amountPaid: z.string(),
       paymentDate: z.coerce.date(),
+      extraPayload: z.object({
+        formOfPayment: FOPSchema,
+        paidCurrency: z.string(),
+      }).partial().optional(),
     })
   )
   .action(async ({ ctx, parsedInput }) => {
@@ -651,6 +655,7 @@ export const confirmCryptoTransaction = authActionClient
           chainId: parsedInput.chainId,
           amountPaid: parsedInput.amountPaid,
           paymentDate: parsedInput.paymentDate,
+          ...parsedInput.extraPayload,
         },
       },
       ctx

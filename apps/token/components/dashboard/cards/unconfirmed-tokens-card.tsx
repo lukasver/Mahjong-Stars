@@ -1,7 +1,7 @@
-import { TransactionStatus } from '@prisma/client';
-import { DashboardCard } from './dashboard-card';
-import { DashboardCardError } from './dashboard-card-error';
-import { getUserTransactions } from '@/lib/services/fetchers.server';
+import { TransactionStatus } from "@prisma/client";
+import { getUserTransactions } from "@/lib/services/fetchers.server";
+import { DashboardCard } from "./dashboard-card";
+import { DashboardCardError } from "./dashboard-card-error";
 
 /**
  * Server component that fetches and displays the total number of token holders
@@ -12,7 +12,7 @@ export async function UnconfirmedTokensCard() {
       await getUserTransactions();
 
     if (transactionsError || !transactions) {
-      return <DashboardCardError title='Your tokens' />;
+      return <DashboardCardError title="Your tokens" />;
     }
 
     // Calculate total tokens purchased from confirmed transactions
@@ -25,21 +25,21 @@ export async function UnconfirmedTokensCard() {
             TransactionStatus.PENDING,
           ].includes(transaction.status)
         ) {
-          return total + parseFloat(transaction.quantity.toString() || '0');
+          return total + parseFloat(transaction.quantity.toString() || "0");
         }
         return total;
       },
-      0
+      0,
     );
 
     return (
       <DashboardCard
-        title='Your unconfirmed tokens'
+        title="Tokens pending confirmation"
         value={userTokens.toLocaleString()}
       />
     );
   } catch (error) {
-    console.error('Error fetching user tokens:', error);
-    return <DashboardCardError title='Your tokens' />;
+    console.error("Error fetching user tokens:", error);
+    return <DashboardCardError title="Your tokens" />;
   }
 }

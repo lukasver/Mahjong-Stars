@@ -1,12 +1,12 @@
-import type { Metadata } from 'next';
-import { fontClash, fontTeachers } from './fonts';
-import './styles.css';
-import { Toaster } from '@mjs/ui/primitives/sonner';
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { getLocale } from 'next-intl/server';
-import { metadata as siteConfig } from '@/common/config/site';
-import { Providers } from './providers';
+import type { Metadata } from "next";
+import { fontClash, fontTeachers } from "./fonts";
+import "./styles.css";
+import { Toaster } from "@mjs/ui/primitives/sonner";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
+import { metadata as siteConfig } from "@/common/config/site";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
@@ -18,17 +18,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteConfig.title,
     description: siteConfig.description,
-    url: './',
+    url: "./",
     siteName: siteConfig.title,
     // Commented to use opengraph-image.tsx static gen instead of api/og
     // images: [siteConfig.socialBanner],
-    locale: 'en',
-    type: 'website',
+    locale: "en",
+    type: "website",
   },
   alternates: {
-    canonical: './',
+    canonical: "./",
     types: {
-      'application/rss+xml': `${siteConfig.siteUrl}/feed.xml`,
+      "application/rss+xml": `${siteConfig.siteUrl}/feed.xml`,
     },
     // languages: {
     //   en: '/',
@@ -40,14 +40,14 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   twitter: {
     title: siteConfig.title,
-    card: 'summary_large_image',
+    card: "summary_large_image",
     // Commented to use opengraph-image.tsx static gen instead of api/og
     // images: [siteConfig.socialBanner],
   },
@@ -68,6 +68,7 @@ export default async function RootLayout({
           <Providers>
             {children}
             <Toaster />
+            {process.env.NODE_ENV === "production" && <VercelAnalytics />}
           </Providers>
         </NextIntlClientProvider>
       </body>

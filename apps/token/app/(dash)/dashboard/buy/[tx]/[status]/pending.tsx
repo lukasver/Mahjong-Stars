@@ -31,10 +31,6 @@ const Pending = () => {
   const { data, isLoading } = useTransactionById(tx as string);
 
   useEffect(() => {
-    console.log(
-      '🚀 ~ pending.tsx:35 ~ data?.transaction?.status:',
-      data?.transaction?.status
-    );
 
     if (
       !isLoading &&

@@ -8,7 +8,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --system-ui: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
+  --system-ui:
+    system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 
   --font-common: Teachers;
@@ -63,6 +64,7 @@
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --radius: 0.5rem;
+  --ring: oklch(0.2787 0.0168 275.39);
 }
 
 /* TODO! */
@@ -107,6 +109,7 @@
   --destructive-foreground: 0 85.7% 97.3%;
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
+  --ring: oklch(0.2787 0.0168 275.39);
 
   /* --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0); */
