@@ -1,6 +1,5 @@
 "use client";
 
-import { SelectInput } from "@mjs/ui";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { useState } from "react";
 import { OnRampWidget } from "@/components/buy/onramp";
@@ -56,38 +55,6 @@ export default function Page() {
       <AccountProvider>
         <div className="h-screen w-screen grid place-items-center">
           <div className="max-w-4xl w-full flex flex-col gap-8 justify-center">
-            {/* Example 1: Without grouping */}
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">
-                Select without grouping:
-              </h3>
-              <SelectInput
-                options={groupedOptions}
-                value={selectedValue}
-                onChange={setSelectedValue}
-                placeholder="Select an item..."
-                className="w-64"
-              />
-            </div>
-
-            {/* Example 2: With grouping */}
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">
-                Select with grouping by category:
-              </h3>
-              <SelectInput
-                options={groupedOptions}
-                value={selectedValue}
-                onChange={setSelectedValue}
-                placeholder="Select an item..."
-                groupBy="category"
-                className="w-64"
-              />
-            </div>
-
-            <div className="text-sm text-gray-600">
-              Selected value: {selectedValue || "None"}
-            </div>
 
             <OnRampWidget
               transaction={tx?.transaction}

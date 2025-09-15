@@ -21,7 +21,7 @@ import {
 	User,
 } from "@/common/schemas/generated";
 import { SaleWithToken } from "@/common/types/sales";
-import { tokenWithRelations } from "@/common/types/tokens";
+import { TokenWithRelations } from "@/common/types/tokens";
 import {
 	TransactionByIdWithRelations,
 	TransactionWithRelations,
@@ -520,7 +520,7 @@ export const getTokens = cache(
 		const queryParams = search.size > 0 ? `?${search.toString()}` : "";
 
 		try {
-			const data = await fetcher<{ tokens: tokenWithRelations[] }>(
+			const data = await fetcher<{ tokens: TokenWithRelations[] }>(
 				`/blockchains/tokens${queryParams}`,
 			);
 			return { data, error: null };
