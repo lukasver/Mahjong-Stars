@@ -28,6 +28,7 @@ import {
 	getSaleSaft,
 	getSaleSaftForTransaction,
 	getSales,
+	getTokens,
 	getUserPendingTransactionsForSale,
 	getUserTransactions,
 } from "./fetchers";
@@ -329,7 +330,10 @@ export const useSaftForTransactionDetails = (
 	return { data: data?.data, error: e, isLoading, refetch };
 };
 
-export const useCryptoTransaction = (txId: string, params: { chainId: number }) => {
+export const useCryptoTransaction = (
+	txId: string,
+	params: { chainId: number },
+) => {
 	const { data, isLoading, refetch, error } = useQuery({
 		queryKey: ["transactions", txId, "crypto", params.chainId],
 		queryFn: () => getCryptoTransaction(txId, params),
@@ -346,6 +350,20 @@ export const useBlockchains = (enabled: boolean = true) => {
 		queryFn: () => getBlockchains(),
 		staleTime: DEFAULT_STALE_TIME,
 		enabled,
+	});
+	const e = getError(data, error);
+	return { data: data?.data, error: e, isLoading, refetch };
+};
+
+export const useTokens = (
+	qParams: { symbol?: string; chainId?: number },
+	enabled: boolean = true,
+) => {
+	const { data, isLoading, refetch, error } = useQuery({
+		queryKey: ["tokens", JSON.stringify(qParams || {})],
+		queryFn: () => getTokens(qParams),
+		staleTime: DEFAULT_STALE_TIME,
+		enabled: Boolean(enabled && qParams.symbol && qParams.chainId),
 	});
 	const e = getError(data, error);
 	return { data: data?.data, error: e, isLoading, refetch };

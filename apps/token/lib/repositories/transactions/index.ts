@@ -28,11 +28,12 @@ import {
 	Success,
 } from "@/common/schemas/dtos/utils";
 import {
-	Address, DocumentSignatureStatusSchema,
+	Address,
+	DocumentSignatureStatusSchema,
 	Profile,
 	SaftContract,
 	SignableDocumentRoleSchema,
-	User
+	User,
 } from "@/common/schemas/generated";
 import {
 	AdminTransactionsWithRelations,
@@ -350,20 +351,16 @@ class TransactionsController {
 							explorerUrl: true,
 							chainId: true,
 						},
-					}
+					},
 				},
 			});
 
 			invariant(transaction, "Transaction not found");
 
-
-			const {blockchain, ...tx} = transaction;
-
+			const { blockchain, ...tx } = transaction;
 
 			return Success({
-				transaction: decimalsToString(
-					tx,
-				) as TransactionByIdWithRelations,
+				transaction: decimalsToString(tx) as TransactionByIdWithRelations,
 				requiresKYC: tx.sale.requiresKYC,
 				requiresSAFT: tx.sale.saftCheckbox,
 				explorerUrl: tx.txHash
@@ -428,6 +425,7 @@ class TransactionsController {
 						receivingWallet,
 						comment,
 						status: TransactionStatus.PENDING,
+						totalAmountCurrency: paidCurrency,
 						paidCurrency,
 						saleId,
 						userId,
@@ -957,7 +955,13 @@ class TransactionsController {
 				tx.sale.availableTokenQuantity,
 			).equals(tx.quantity);
 
-			const { chainId, paymentEvidenceId, paidCurrency, formOfPayment, ...rest } = payload || {};
+			const {
+				chainId,
+				paymentEvidenceId,
+				paidCurrency,
+				formOfPayment,
+				...rest
+			} = payload || {};
 			const [updatedTx] = await prisma.$transaction([
 				prisma.saleTransactions.update({
 					where: { id },
@@ -979,16 +983,18 @@ class TransactionsController {
 								},
 							},
 						}),
-						...(formOfPayment && {formOfPayment}),
-						...(paidCurrency && {amountPaidCurrency: {connect: {symbol: paidCurrency}}}),
+						...(formOfPayment && { formOfPayment }),
+						...(paidCurrency && {
+							amountPaidCurrency: { connect: { symbol: paidCurrency } },
+						}),
 						...rest,
 					},
 					include: {
 						blockchain: {
 							select: {
 								explorerUrl: true,
-							}
-						}
+							},
+						},
 					},
 				}),
 				prisma.sale.update({
@@ -1122,10 +1128,15 @@ class TransactionsController {
 		}
 	}
 
-	async getCryptoTransaction(dto: { id: string,
-		// Current logged in chain of the user requesting payment
-		chainId: number }, ctx: ActionCtx) {
-			invariant(dto.chainId, "Chain ID not found");
+	async getCryptoTransaction(
+		dto: {
+			id: string;
+			// Current logged in chain of the user requesting payment
+			chainId: number;
+		},
+		ctx: ActionCtx,
+	) {
+		invariant(dto.chainId, "Chain ID not found");
 		try {
 			const tx = await prisma.saleTransactions.findUnique({
 				where: {
@@ -1151,10 +1162,13 @@ class TransactionsController {
 
 			invariant(tx, "Transaction not found");
 
-			const tokenSymbol = dto.chainId === 97 && tx.paidCurrency === "BNB"
-			? "tBNB"
-			: tx.paidCurrency === 'BTC' ? 'WBTC' : tx.paidCurrency;
-			console.log('tokenSymbol', tokenSymbol, tx.paidCurrency, dto.chainId)
+			const tokenSymbol =
+				dto.chainId === 97 && tx.paidCurrency === "BNB"
+					? "tBNB"
+					: tx.paidCurrency === "BTC"
+						? "WBTC"
+						: tx.paidCurrency;
+			console.log("tokenSymbol", tokenSymbol, tx.paidCurrency, dto.chainId);
 			const paymentToken = await prisma.tokensOnBlockchains.findUnique({
 				where: {
 					tokenSymbol_chainId: {
@@ -1172,7 +1186,7 @@ class TransactionsController {
 					chainId: true,
 					blockchain: {
 						select: {
-							id:true,
+							id: true,
 							explorerUrl: true,
 							name: true,
 							chainId: true,
@@ -1183,8 +1197,7 @@ class TransactionsController {
 				},
 			});
 
-
-			const {blockchain = null, ...paymentTokenData } = paymentToken || {};
+			const { blockchain = null, ...paymentTokenData } = paymentToken || {};
 
 			return Success({
 				transaction: decimalsToString(tx),

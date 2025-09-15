@@ -120,7 +120,10 @@ export const GET = withAuth(async (req, context, auth) => {
 					}
 					if (subIdentifier === "crypto") {
 						if (!qParamsObject.chainId) {
-							return NextResponse.json({ error: "Chain ID not found" }, { status: 404 });
+							return NextResponse.json(
+								{ error: "Chain ID not found" },
+								{ status: 404 },
+							);
 						}
 						const data = await transactions.getCryptoTransaction(
 							{
@@ -161,6 +164,10 @@ export const GET = withAuth(async (req, context, auth) => {
 			}
 
 			case "blockchains": {
+				if (identifier === "tokens") {
+					const res = await blockchains.getTokens(qParamsObject);
+					return NextResponse.json(res);
+				}
 				const res = await blockchains.getAll();
 				return NextResponse.json(res);
 			}

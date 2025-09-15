@@ -98,9 +98,8 @@ const formatChipMessage = (status: TransactionStatus) => {
   }
 };
 
-export const getColumns = (
-  isAdmin = false,
-): ColumnDef<TransactionWithRelations | AdminTransactionsWithRelations>[] => [
+export const getColumns = (isAdmin = false) => {
+  const columns = [
     {
       accessorKey: "id",
       header: "ID",
@@ -108,7 +107,9 @@ export const getColumns = (
       cell: ({ row }) => {
         const id = row.getValue("id") as string;
         return (
-          <span className="font-mono text-xs text-secondary">{id.slice(-8)}</span>
+          <span className="font-mono text-xs text-secondary">
+            {id.slice(-8)}
+          </span>
         );
       },
     },
@@ -135,7 +136,7 @@ export const getColumns = (
         );
       },
     },
-    {
+    isAdmin ? {
       accessorKey: "user",
       header: "User",
       cell: ({ row }) => {
@@ -156,7 +157,7 @@ export const getColumns = (
           </div>
         );
       },
-    },
+    } : { accessorKey: "PLACEHOLDER" },
     {
       accessorKey: "sale",
       header: "Sale",
@@ -271,7 +272,12 @@ export const getColumns = (
       header: "Actions",
       cell: ({ row }) => <ActionButtons row={row.original} isAdmin={isAdmin} />,
     },
-  ];
+  ] satisfies ColumnDef<
+    TransactionWithRelations | AdminTransactionsWithRelations
+  >[];
+
+  return columns.filter((column) => column.accessorKey !== "PLACEHOLDER");
+};
 
 const ActionButtons = ({
   row,
@@ -282,7 +288,7 @@ const ActionButtons = ({
 }) => {
   const status = row.status;
   const [showDetails, setShowDetails] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState<
     "approve" | "reject" | undefined
   >(undefined);

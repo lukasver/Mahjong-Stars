@@ -1,10 +1,18 @@
 "use client";
 
-import { type VariantProps, cva } from "class-variance-authority";
-import { motion, AnimatePresence } from "motion/react";
-import { type LucideIcon, X, CheckCircle, AlertTriangle, Info, AlertCircle } from "lucide-react";
 import { cn } from "@mjs/ui/lib/utils";
 import { Button } from "@mjs/ui/primitives/button";
+import { cva, type VariantProps } from "class-variance-authority";
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  type LucideIcon,
+  X,
+} from "lucide-react";
+import { AnimatePresence, type HTMLMotionProps, motion } from "motion/react";
+import React from "react";
 
 /**
  * Banner component variants using class-variance-authority
@@ -14,10 +22,14 @@ const bannerVariants = cva(
   {
     variants: {
       variant: {
-        default: "space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600",
-        success: "bg-green-50 text-green-900 border-green-200 dark:bg-green-950 dark:text-green-100 dark:border-green-800",
-        warning: "bg-yellow-50 text-yellow-900 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-100 dark:border-yellow-800",
-        error: "bg-red-50 text-red-900 border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800",
+        default:
+          "space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600",
+        success:
+          "bg-green-50 text-green-900 border-green-200 dark:bg-green-950 dark:text-green-100 dark:border-green-800",
+        warning:
+          "bg-yellow-50 text-yellow-900 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-100 dark:border-yellow-800",
+        error:
+          "bg-red-50 text-red-900 border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800",
         info: "bg-blue-50 text-blue-900 border-blue-200 dark:bg-blue-950 dark:text-blue-100 dark:border-blue-800",
       },
       size: {
@@ -30,7 +42,7 @@ const bannerVariants = cva(
       variant: "default",
       size: "md",
     },
-  }
+  },
 );
 
 /**
@@ -69,7 +81,7 @@ const defaultIcons: Record<string, LucideIcon> = {
 };
 
 export interface BannerProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends HTMLMotionProps<"div">,
   VariantProps<typeof bannerVariants> {
   /**
    * Banner message content
@@ -105,7 +117,13 @@ export interface BannerProps
   action?: {
     label: string;
     onClick: () => void;
-    variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
+    variant?:
+    | "default"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link"
+    | "destructive";
   };
   /**
    * Secondary action button configuration
@@ -113,13 +131,19 @@ export interface BannerProps
   secondaryAction?: {
     label: string;
     onClick: () => void;
-    variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
+    variant?:
+    | "default"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link"
+    | "destructive";
   };
 }
 
 /**
  * Reusable Banner component with Shadcn UI styling and Motion animations
- * 
+ *
  * @example
  * ```tsx
  * <Banner
@@ -175,7 +199,7 @@ export const Banner = ({
               }}
               className={cn(iconVariants({ variant, size }))}
             >
-              <DefaultIcon />
+              {DefaultIcon && <DefaultIcon />}
             </motion.div>
 
             {/* Content */}
@@ -189,9 +213,7 @@ export const Banner = ({
                 }}
               >
                 {title && (
-                  <h4 className="font-semibold leading-tight mb-1">
-                    {title}
-                  </h4>
+                  <h4 className="font-semibold leading-tight mb-1">{title}</h4>
                 )}
                 <p className="leading-relaxed">{message}</p>
               </motion.div>
@@ -294,7 +316,7 @@ export const PulsingBanner = ({
     >
       <div className="flex items-start gap-3">
         <div className={cn(iconVariants({ variant, size }))}>
-          <DefaultIcon />
+          {DefaultIcon && <DefaultIcon />}
         </div>
         <div className="flex-1 min-w-0">
           {title && (
@@ -347,7 +369,7 @@ export const SlideInBanner = ({
           }}
           className={cn(iconVariants({ variant, size }))}
         >
-          <DefaultIcon />
+          {DefaultIcon && <DefaultIcon />}
         </motion.div>
         <div className="flex-1 min-w-0">
           {title && (

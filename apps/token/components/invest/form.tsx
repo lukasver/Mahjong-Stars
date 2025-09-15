@@ -345,6 +345,8 @@ export const InvestForm = ({
                   ...(options?.data?.fiatCurrencies || []),
                   ...(options?.data?.cryptoCurrencies || []),
                 ],
+                groupBy: "type",
+                withImage: true,
               }}
             />
           </div>

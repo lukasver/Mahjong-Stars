@@ -6,6 +6,7 @@ import {
 	Token,
 	TokensOnBlockchains,
 } from "@prisma/client";
+import { cache } from "react";
 import { ONE_DAY, ONE_MINUTE, ROLES } from "@/common/config/constants";
 import { GetExchangeRate } from "@/common/schemas/dtos/rates";
 import { Failure, Success } from "@/common/schemas/dtos/utils";
@@ -20,6 +21,7 @@ import {
 	User,
 } from "@/common/schemas/generated";
 import { SaleWithToken } from "@/common/types/sales";
+import { tokenWithRelations } from "@/common/types/tokens";
 import {
 	TransactionByIdWithRelations,
 	TransactionWithRelations,
@@ -230,8 +232,8 @@ export const getExchangeRate = async (from: string, to: string) => {
 			{
 				next: {
 					revalidate: ONE_MINUTE,
-				}
-			}
+				},
+			},
 		);
 		return { data, error: null };
 	} catch (e) {
@@ -408,7 +410,10 @@ export const getAllTransactions = async (params: { saleId?: string }) => {
 	}
 };
 
-export const getCryptoTransaction = async (txId: string,params: Record<string, string | number>) => {
+export const getCryptoTransaction = async (
+	txId: string,
+	params: Record<string, string | number>,
+) => {
 	const search = new URLSearchParams();
 
 	Object.entries(params || {}).forEach(([key, value]) => {
@@ -424,7 +429,10 @@ export const getCryptoTransaction = async (txId: string,params: Record<string, s
 			// amend
 			transaction: TransactionByIdWithRelations;
 			token: Token;
-			blockchain: Pick<Blockchain, "explorerUrl" | "name" | "chainId" | "isTestnet" | "isEnabled"> | null;
+			blockchain: Pick<
+				Blockchain,
+				"explorerUrl" | "name" | "chainId" | "isTestnet" | "isEnabled"
+			> | null;
 			paymentToken: Pick<
 				TokensOnBlockchains,
 				| "contractAddress"
@@ -499,3 +507,25 @@ export const getBlockchains = async () => {
 		return { data: null, error: e };
 	}
 };
+
+export const getTokens = cache(
+	async (qParams: Record<string, string | number>) => {
+		const search = new URLSearchParams();
+
+		Object.entries(qParams || {}).forEach(([key, value]) => {
+			if (value) {
+				search.set(key, String(value));
+			}
+		});
+		const queryParams = search.size > 0 ? `?${search.toString()}` : "";
+
+		try {
+			const data = await fetcher<{ tokens: tokenWithRelations[] }>(
+				`/blockchains/tokens${queryParams}`,
+			);
+			return { data, error: null };
+		} catch (e) {
+			return { data: null, error: e };
+		}
+	},
+);

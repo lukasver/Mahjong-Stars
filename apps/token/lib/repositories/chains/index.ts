@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Failure, Success } from "@/common/schemas/dtos/utils";
+import { TokenWithRelations } from "@/common/types/tokens";
 import { prisma } from "@/db";
 import logger from "@/lib/services/logger.server";
 
@@ -35,6 +36,48 @@ export class BlockchainController {
 
 			return Success({
 				chains,
+			});
+		} catch (e) {
+			logger(e);
+			return Failure(e);
+		}
+	}
+
+	/**
+	 * Get all tokens
+	 */
+	async getTokens({ symbol }: { symbol?: string } = {}) {
+		try {
+			const tokens = await prisma.token.findMany({
+				where: symbol ? { symbol } : undefined,
+				select: {
+					symbol: true,
+					image: true,
+					id: true,
+					TokensOnBlockchains: {
+						select: {
+							chainId: true,
+							contractAddress: true,
+							name: true,
+							decimals: true,
+							isNative: true,
+						},
+					},
+				},
+			});
+
+			const result: TokenWithRelations[] = tokens.map(
+				({ TokensOnBlockchains, ...token }) => {
+					const blockchainData = TokensOnBlockchains[0]!;
+					return {
+						...token,
+						...blockchainData,
+					};
+				},
+			);
+
+			return Success({
+				tokens: result,
 			});
 		} catch (e) {
 			logger(e);

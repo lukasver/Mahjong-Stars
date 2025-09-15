@@ -3,6 +3,7 @@
 import { invariant } from "@epic-web/invariant";
 import { FileUpload } from "@mjs/ui/components/file-upload";
 import { motion } from "@mjs/ui/components/motion";
+import { Banner } from "@mjs/ui/primitives/banner";
 import { Button } from "@mjs/ui/primitives/button";
 import {
   CardContent,
@@ -12,12 +13,18 @@ import {
 } from "@mjs/ui/primitives/card";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@mjs/ui/primitives/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@mjs/ui/primitives/tabs";
 import { copyToClipboard, safeFormatCurrency } from "@mjs/utils/client";
 import { TransactionStatus } from "@prisma/client";
 import { notFound, useParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
+import { shortenAddress } from "thirdweb/utils";
 import { FIAT_CURRENCIES, ONE_MINUTE } from "@/common/config/constants";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import {
@@ -25,6 +32,8 @@ import {
   BankDetailsSkeleton,
 } from "@/components/bank-details";
 import { BalanceChecker } from "@/components/buy/balance-checker";
+import { FormError } from "@/components/form-error";
+import useActiveAccount from "@/components/hooks/use-active-account";
 import { PurchaseSummaryCard } from "@/components/invest/summary";
 import { PulseLoader } from "@/components/pulse-loader";
 import {
@@ -40,13 +49,9 @@ import {
 } from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
-import { CryptoPaymentButton } from "./crypto-payment-btn";
 import { OnRampWidget } from "../onramp";
+import { CryptoPaymentButton } from "./crypto-payment-btn";
 import { isFileWithPreview } from "./utils";
-import useActiveAccount from '@/components/hooks/use-active-account';
-import { FormError } from '@/components/form-error';
-import { Banner } from '@mjs/ui/primitives/banner';
-import { shortenAddress } from 'thirdweb/utils';
 
 interface PaymentStepProps {
   onSuccess: () => void;
@@ -133,8 +138,6 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
   );
 }
 
-
-
 const CryptoPayment = ({
   tx,
   onSuccess,
@@ -144,8 +147,11 @@ const CryptoPayment = ({
 }) => {
   const locale = useLocale();
   const { chainId } = useActiveAccount();
-  const { data: cryptoTransaction, isLoading, error } = useCryptoTransaction(tx.id, { chainId: chainId || 0 });
-
+  const {
+    data: cryptoTransaction,
+    isLoading,
+    error,
+  } = useCryptoTransaction(tx.id, { chainId: chainId || 0 });
 
   const [isBalanceSufficient, setIsBalanceSufficient] = useState(false);
 
@@ -153,7 +159,6 @@ const CryptoPayment = ({
   //   client,
   //   address: ac?.address,
   // });
-
 
   return (
     <div className="py-2 text-center space-y-4">
@@ -178,34 +183,40 @@ const CryptoPayment = ({
       </motion.div>
 
       {/* Balance Checker */}
-      {error ?
-        <FormError type='custom' title='Error' message={error} />
-        : (!cryptoTransaction?.paymentToken || !cryptoTransaction?.blockchain) ?
-          <FormError type='custom' title='Error' message='Payment with this token not supported on this network, please try a different network' />
-          : !isLoading && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.4 }}
-            >
-              <BalanceChecker
-                onBalanceCheck={(result) => {
-                  setIsBalanceSufficient(result);
-                }}
-                requiredAmount={tx.totalAmount.toString()}
-                tokenAddress={
-                  cryptoTransaction.paymentToken.contractAddress || undefined
-                }
-                tokenSymbol={cryptoTransaction.paymentToken.tokenSymbol}
-                isNativeToken={cryptoTransaction.paymentToken.isNative}
-                chainId={cryptoTransaction.blockchain.chainId}
-                onAddFunds={() => {
-                  // Open external link to add funds
-                  window.open("https://binance.com", "_blank");
-                }}
-              />
-            </motion.div>
-          )}
+      {error ? (
+        <FormError type="custom" title="Error" message={error} />
+      ) : !cryptoTransaction?.paymentToken || !cryptoTransaction?.blockchain ? (
+        <FormError
+          type="custom"
+          title="Error"
+          message="Payment with this token not supported on this network, please try a different network"
+        />
+      ) : (
+        !isLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.4 }}
+          >
+            <BalanceChecker
+              onBalanceCheck={(result) => {
+                setIsBalanceSufficient(result);
+              }}
+              requiredAmount={tx.totalAmount.toString()}
+              tokenAddress={
+                cryptoTransaction.paymentToken.contractAddress || undefined
+              }
+              tokenSymbol={cryptoTransaction.paymentToken.tokenSymbol}
+              isNativeToken={cryptoTransaction.paymentToken.isNative}
+              chainId={cryptoTransaction.blockchain.chainId}
+              onAddFunds={() => {
+                // Open external link to add funds
+                window.open("https://binance.com", "_blank");
+              }}
+            />
+          </motion.div>
+        )
+      )}
       {/* <div className='mb-2'>
         <span className='font-medium'>Crypto payment</span> (coming soon)
       </div> */}
@@ -214,7 +225,17 @@ const CryptoPayment = ({
       </div> */}
       {!isLoading && cryptoTransaction?.paymentToken && (
         <>
-          <Banner size={'sm'} message={<>Always ensure you are sending funds to the sale owner wallet: <span className='font-medium text-secondary-500'>{shortenAddress(tx.sale.toWalletsAddress)}</span></>} />
+          <Banner
+            size={"sm"}
+            message={
+              <>
+                Always ensure you are sending funds to the sale owner wallet:{" "}
+                <span className="font-medium text-secondary-500">
+                  {shortenAddress(tx.sale.toWalletsAddress)}
+                </span>
+              </>
+            }
+          />
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -251,7 +272,9 @@ const FiatPayment = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"CARD" | "TRANSFER">("CARD");
+  const [paymentMethod, setPaymentMethod] = useState<"CARD" | "TRANSFER">(
+    "CARD",
+  );
 
   /**
    * Handles the upload of the bank slip file.
@@ -328,17 +351,17 @@ const FiatPayment = ({
   };
 
   // If no banks available or form of payment is CARD, show only card payment
-  if (!isBanksLoading && banks?.banks?.length === 0 || tx.formOfPayment === 'CARD') {
+  if (
+    (!isBanksLoading && banks?.banks?.length === 0) ||
+    tx.formOfPayment === "CARD"
+  ) {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <OnRampWidget
-          transaction={tx}
-          onSuccessPayment={onSuccess}
-        />
+        <OnRampWidget transaction={tx} onSuccessPayment={onSuccess} />
       </motion.div>
     );
   }
@@ -348,10 +371,13 @@ const FiatPayment = ({
 
   return (
     <div className="space-y-4">
-
-
       {hasBanks ? (
-        <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "CARD" | "TRANSFER")}>
+        <Tabs
+          value={paymentMethod}
+          onValueChange={(value) =>
+            setPaymentMethod(value as "CARD" | "TRANSFER")
+          }
+        >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="CARD">Card Payment</TabsTrigger>
             <TabsTrigger value="TRANSFER">Bank Transfer</TabsTrigger>
@@ -363,10 +389,7 @@ const FiatPayment = ({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              <OnRampWidget
-                transaction={tx}
-                onSuccessPayment={onSuccess}
-              />
+              <OnRampWidget transaction={tx} onSuccessPayment={onSuccess} />
             </motion.div>
           </TabsContent>
 
@@ -411,7 +434,8 @@ const FiatPayment = ({
                     },
                   )}
                 </span>{" "}
-                to one of the following bank accounts & upload a proof of payment:
+                to one of the following bank accounts & upload a proof of
+                payment:
               </motion.p>
               <motion.h3
                 initial={{ opacity: 0, y: 10 }}
@@ -464,7 +488,9 @@ const FiatPayment = ({
                 onSubmit={handleSubmit}
               >
                 <div>
-                  <label className="font-medium">Upload Bank Transfer Receipt</label>
+                  <label className="font-medium">
+                    Upload Bank Transfer Receipt
+                  </label>
                   <FileUpload
                     type="all"
                     maxSizeMB={5}
@@ -486,7 +512,9 @@ const FiatPayment = ({
                   variant="accent"
                   loading={isSubmitting}
                 >
-                  {isSubmitting ? "Submitting..." : "Submit Payment Confirmation"}
+                  {isSubmitting
+                    ? "Submitting..."
+                    : "Submit Payment Confirmation"}
                 </Button>
               </motion.form>
             </div>
@@ -499,10 +527,7 @@ const FiatPayment = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <OnRampWidget
-            transaction={tx}
-            onSuccessPayment={onSuccess}
-          />
+          <OnRampWidget transaction={tx} onSuccessPayment={onSuccess} />
         </motion.div>
       )}
     </div>
@@ -530,7 +555,11 @@ export function PaymentAvailabilityGuard({
   const isAvailable = data?.transaction === true;
 
   if (isLoading) {
-    return <CardContent className="flex justify-center items-center h-full"><PulseLoader text='Wait for it...' /></CardContent>;
+    return (
+      <CardContent className="flex justify-center items-center h-full">
+        <PulseLoader text="Wait for it..." />
+      </CardContent>
+    );
   }
 
   if (!isAvailable) {

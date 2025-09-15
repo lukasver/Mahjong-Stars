@@ -2,12 +2,15 @@
 import ErrorBoundary from "@mjs/ui/components/error-boundary";
 import { motion, StaggeredRevealAnimation } from "@mjs/ui/components/motion";
 import { usePrevious } from "@mjs/ui/hooks";
+import { Banner } from "@mjs/ui/primitives/banner";
 import { toast } from "@mjs/ui/primitives/sonner";
 import Decimal from "decimal.js";
+import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { defineChain, NATIVE_TOKEN_ADDRESS } from "thirdweb";
 import { BuyWidget, useActiveWallet } from "thirdweb/react";
+import { shortenAddress } from "thirdweb/utils";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { FormError } from "@/components/form-error";
 import useActiveAccount from "@/components/hooks/use-active-account";
@@ -18,11 +21,8 @@ import { NETWORK_TO_TOKEN_MAPPING } from "@/lib/services/crypto/config";
 import calculator from "@/lib/services/pricefeeds";
 import { CryptoPaymentButton } from "../confirmation-steps/crypto-payment-btn";
 import { PaymentStatusIndicator } from "../confirmation-steps/payment-status-indicator";
-import { PaymentInstructions } from './instructions';
-import { OnRampSkeleton } from './skeletons';
-import { shortenAddress } from 'thirdweb/utils';
-import { useRouter } from 'next/navigation';
-import { Banner } from '@mjs/ui/primitives/banner';
+import { PaymentInstructions } from "./instructions";
+import { OnRampSkeleton } from "./skeletons";
 
 const WithErrorHandler = <P extends object>(
   Component: React.ComponentType<P>,
@@ -70,7 +70,6 @@ const OnRampWidgetComponent = ({
   const prevChainId = usePrevious(chainId);
   const router = useRouter();
 
-
   const activeWallet = useActiveWallet();
 
   const { data, isLoading, error } = useBlockchains(!!activeAccount);
@@ -84,7 +83,7 @@ const OnRampWidgetComponent = ({
 
   useEffect(() => {
     // Refetch prices if user changes chain (which will change the payment token)
-    const shouldFetch = (prevChainId && chainId && prevChainId !== chainId);
+    const shouldFetch = prevChainId && chainId && prevChainId !== chainId;
     if ((!isLoading && !amount?.amount && chain) || shouldFetch) {
       async function getEquivalentAmountInCrypto() {
         const newPaidCurrency = paymentToken?.symbol;
@@ -149,14 +148,14 @@ const OnRampWidgetComponent = ({
     throw new Error("Chain not supported or not found");
   }
 
-
   if (isLoading || !amount.amount || totalAmountToPay === "0") {
     return <OnRampSkeleton />;
   }
 
-
   const handleSuccessPurcharse = () => {
-    toast.success("Purchase successful", { description: "Please proceed with payment" });
+    toast.success("Purchase successful", {
+      description: "Please proceed with payment",
+    });
     setDisabled(false);
     router.refresh();
   };
@@ -186,9 +185,7 @@ const OnRampWidgetComponent = ({
       />
       <div className="w-full flex flex-col-reverse md:flex-row-reverse justify-between gap-4">
         <div className="shrink-0">
-          <StaggeredRevealAnimation
-            isVisible={mounted}
-          >
+          <StaggeredRevealAnimation isVisible={mounted}>
             <BuyWidget
               currency={tx.paidCurrency}
               client={client}
@@ -206,9 +203,10 @@ const OnRampWidgetComponent = ({
               onError={(error) => {
                 toast.error(error.message);
               }}
-              supportedTokens={{ [chain.chainId]: getSupportedTokens(chain.chainId) }}
+              supportedTokens={{
+                [chain.chainId]: getSupportedTokens(chain.chainId),
+              }}
             />
-
           </StaggeredRevealAnimation>
         </div>
         <motion.div
@@ -238,12 +236,19 @@ const OnRampWidgetComponent = ({
         )}
       </StaggeredRevealAnimation>
 
-
-      <StaggeredRevealAnimation
-        isVisible={!!paymentToken}
-      >
-        <Banner message={`Always ensure you are sending funds to the sale owner wallet: ${shortenAddress(tx.sale.toWalletsAddress)}`} />
-        <div className="flex flex-col [&>*]:flex-1 [&>*]:w-full gap-2">
+      <StaggeredRevealAnimation isVisible={!!paymentToken}>
+        <Banner
+          size={"sm"}
+          message={
+            <>
+              Always ensure you are sending funds to the sale owner wallet:{" "}
+              <span className="font-medium text-secondary-500">
+                {shortenAddress(tx.sale.toWalletsAddress)}
+              </span>
+            </>
+          }
+        />
+        <div className="flex flex-col [&>*]:flex-1 [&>*]:w-full gap-2 mt-2">
           {paymentToken && (
             <CryptoPaymentButton
               chain={{
@@ -259,17 +264,16 @@ const OnRampWidgetComponent = ({
               txId={tx.id}
               onSuccess={handleSuccessPayment}
               extraPayload={{
-                formOfPayment: 'CRYPTO',
+                formOfPayment: "CRYPTO",
                 paidCurrency: paymentToken.symbol,
               }}
             />
           )}
         </div>
       </StaggeredRevealAnimation>
-    </div >
+    </div>
   );
 };
-
 
 export const OnRampWidget = WithErrorHandler(OnRampWidgetComponent);
 
@@ -283,4 +287,3 @@ function getSupportedTokens(chainId: number | undefined) {
     decimals: t.decimals,
   }));
 }
-

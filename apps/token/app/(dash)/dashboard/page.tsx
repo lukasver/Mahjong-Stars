@@ -16,7 +16,6 @@ import {
 } from "@/components/dashboard/loading-components";
 import { RecentTransactionsSSR } from "@/components/dashboard/recent-transactions";
 import { FeatureCards } from "@/components/feature-cards";
-import { TokenDetails } from "@/components/token-details";
 import { getActiveSale } from "@/lib/services/fetchers.server";
 import { ComingSoonContent } from "../../../components/coming-soon";
 import { FundraisingProgress } from "../../../components/dashboard/fundraising-progress";
@@ -36,9 +35,9 @@ export default async function DashboardPage(_props: PageProps) {
           Dashboard
         </h1>
       </VisuallyHidden>
-      <Suspense fallback={null}>
+      {/* <Suspense fallback={null}>
         <TokenDetails />
-      </Suspense>
+      </Suspense> */}
 
       <ErrorBoundary
         fallback={

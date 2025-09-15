@@ -12,9 +12,13 @@ import { Progress } from "@mjs/ui/primitives/progress";
 import { CheckCircle, Trophy } from "lucide-react";
 import { DateTime } from "luxon";
 import { useTranslations } from "next-intl";
+import { defineChain } from "thirdweb";
+import { TokenProvider as TokenProviderThirdweb } from "thirdweb/react";
 import { Sale, SaleStatusSchema } from "@/common/schemas/generated";
+import { client } from "@/lib/auth/thirdweb-client";
 import { useActiveSale } from "@/lib/services/api";
 import { PulseLoader } from "../pulse-loader";
+import { TokenIcon, TokenName } from '../token-components';
 
 const FinishedCard = ({
   sale,
@@ -206,14 +210,22 @@ export function FundraisingProgress({
 }: {
   children?: React.ReactNode;
 }) {
-  const { data: activeSale, isLoading } = useActiveSale();
   const t = useTranslations("dashboard.fundraisingProgress");
+  const { data: sale, isLoading } = useActiveSale();
+
+
+  const address = sale?.tokenContractAddress!;
+  const chainId = sale?.tokenContractChainId || sale?.token?.chainId;
 
   // In a real app, these would come from your API or blockchain data
-  const available = activeSale?.availableTokenQuantity || 0;
-  const total = activeSale?.initialTokenQuantity || 0;
+  const available = sale?.availableTokenQuantity || 0;
+  const total = sale?.initialTokenQuantity || 0;
   const sold = total - available;
   const percentage = Math.round((sold / total) * 100);
+
+  if (!sale) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -223,22 +235,18 @@ export function FundraisingProgress({
     );
   }
 
-  if (!activeSale) {
-    return null;
-  }
-
   const daysRemaining = Math.floor(
-    DateTime.fromISO(activeSale.saleClosingDate as unknown as string).diffNow(
+    DateTime.fromISO(sale.saleClosingDate as unknown as string).diffNow(
       "days",
     ).days,
   );
 
   const isFinished =
-    activeSale?.availableTokenQuantity === 0 ||
-    DateTime.fromISO(activeSale.saleClosingDate as unknown as string).diffNow(
+    sale?.availableTokenQuantity === 0 ||
+    DateTime.fromISO(sale.saleClosingDate as unknown as string).diffNow(
       "days",
     ).days <= 0 ||
-    activeSale?.status === SaleStatusSchema.enum.FINISHED;
+    sale?.status === SaleStatusSchema.enum.FINISHED;
 
   // Show finished card when sale is completed
   if (isFinished) {
@@ -251,74 +259,100 @@ export function FundraisingProgress({
           scale: { type: "spring", visualDuration: 0.6, bounce: 0.2 },
         }}
       >
-        <FinishedCard sale={activeSale}>{children}</FinishedCard>
+        <FinishedCard sale={sale}>{children}</FinishedCard>
       </motion.div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{
-        duration: 0.6,
-        scale: { type: "spring", visualDuration: 0.6, bounce: 0.2 },
-      }}
+    <TokenProvider
+      address={address}
+      chainId={chainId}
     >
-      <Card className="border-zinc-800 bg-zinc-900/50">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-        >
-          <CardHeader>
-            <CardTitle>{activeSale.name}</CardTitle>
-            {daysRemaining > 0 ? (
-              <CardDescription>
-                {t("description", { days: daysRemaining })}
-              </CardDescription>
-            ) : null}
-          </CardHeader>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
-        >
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div>
-                  <span className="text-xl font-bold text-secondary-500">
-                    {t("tokensSold", {
-                      sold: sold.toLocaleString(),
-                      total: total.toLocaleString(),
-                      tokenSymbol: activeSale.tokenSymbol,
-                    })}
-                  </span>
-                </div>
-                <div className="text-right font-medium">
-                  {t("percentage", { percentage })}
-                </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{
+          duration: 0.6,
+          scale: { type: "spring", visualDuration: 0.6, bounce: 0.2 },
+        }}
+      >
+        <Card className="border-zinc-800 bg-zinc-900/50">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+          >
+            <CardHeader>
+              <div className='flex items-center gap-2'>
+                <CardTitle className='flex items-center gap-2 flex-1'>
+                  {chainId && <TokenIcon symbol={sale.tokenSymbol} chainId={chainId} />}
+                  {sale.name}
+                </CardTitle>
+                <span className='text-xs sm:text-sm font-head font-bold' >
+                  {chainId && <TokenName symbol={sale.tokenSymbol} chainId={chainId} />}
+                  {/* {chainId && <TokenSymbol symbol={sale.tokenSymbol} chainId={chainId} />} */}
+                </span>
               </div>
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                style={{ transformOrigin: "left" }}
-              >
-                <Progress
-                  value={percentage}
-                  className="h-2 bg-zinc-800"
-                  indicatorClassName="bg-secondary-500"
-                />
-              </motion.div>
-            </div>
+              {daysRemaining > 0 ? (
+                <CardDescription>
+                  {t("description", { days: daysRemaining })}
+                </CardDescription>
+              ) : null}
+            </CardHeader>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+          >
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <span className="text-xl font-bold text-secondary-500">
+                      {t("tokensSold", {
+                        sold: sold.toLocaleString(),
+                        total: total.toLocaleString(),
+                        tokenSymbol: sale.tokenSymbol,
+                      })}
+                    </span>
+                  </div>
+                  <div className="text-right font-medium">
+                    {t("percentage", { percentage })}
+                  </div>
+                </div>
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+                  style={{ transformOrigin: "left" }}
+                >
+                  <Progress
+                    value={percentage}
+                    className="h-2 bg-zinc-800"
+                    indicatorClassName="bg-secondary-500"
+                  />
+                </motion.div>
+              </div>
 
-            {children}
-          </CardContent>
-        </motion.div>
-      </Card>
-    </motion.div>
+              {children}
+            </CardContent>
+          </motion.div>
+        </Card>
+      </motion.div>
+    </TokenProvider>
+  );
+}
+
+
+const TokenProvider = ({ children, address, chainId }: { children: React.ReactNode, address?: string, chainId?: number | null }) => {
+  if (!address || !chainId) {
+    return <>{children}</>;
+  }
+  return (
+    <TokenProviderThirdweb address={address} client={client} chain={defineChain(chainId)}>
+      {children}
+    </TokenProviderThirdweb>
   );
 }

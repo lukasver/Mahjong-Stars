@@ -713,6 +713,7 @@ class SalesController {
 						name: true,
 						type: true,
 						id: true,
+						image: true,
 					},
 				}),
 				prisma.blockchain.findMany({
@@ -726,6 +727,7 @@ class SalesController {
 					select: {
 						symbol: true,
 						id: true,
+						image: true,
 						TokensOnBlockchains: {
 							select: {
 								name: true,
@@ -766,6 +768,7 @@ class SalesController {
 						agg[recipient].push({
 							meta: {
 								type: c.type,
+								image: c.image,
 							},
 							id: c.symbol,
 							value: c.symbol,
@@ -783,9 +786,10 @@ class SalesController {
 					value: chainId,
 					label: name,
 				})),
-				token: tokens.map(({ symbol, TokensOnBlockchains, id }) => ({
+				token: tokens.map(({ symbol, TokensOnBlockchains, id, image }) => ({
 					meta: {
 						chainId: TokensOnBlockchains[0]?.chainId,
+						image,
 					},
 					id: id,
 					value: symbol,

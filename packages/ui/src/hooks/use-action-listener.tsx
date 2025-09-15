@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 type OptProps = {
   onSuccess?: (data: unknown) => void;
   onError?: (err: string) => void;
-  renderToast?: boolean;
   successMessage?: string;
   errorMessage?: string;
 };
@@ -21,17 +20,15 @@ type OptProps = {
 export function useActionListener<T>(
   action: T,
   opts: OptProps = {
-    renderToast: true,
-    successMessage: 'Success',
-    errorMessage: 'Failed to update',
+    successMessage: '',
+    errorMessage: 'Failed to execute',
   }
 ) {
   // biome-ignore lint/suspicious/noExplicitAny: Need to better type SafeActionFn<T>
   const { result, status } = action as any;
   const {
-    renderToast = true,
-    successMessage = 'Success',
-    errorMessage = 'Failed to update',
+    successMessage = '',
+    errorMessage = 'Failed to execute',
   } = opts;
 
   useEffect(() => {
@@ -43,7 +40,7 @@ export function useActionListener<T>(
           if ('_errors' in error) {
             // @ts-expect-error fixme
             const errMsg = `${field}: ${error._errors?.join(', ') ?? ''}`;
-            if (renderToast) {
+            if (errorMessage) {
               toast.error(errMsg);
             }
             err += errMsg + '\n';
@@ -55,7 +52,7 @@ export function useActionListener<T>(
 
       err = result?.serverError ?? errorMessage ?? 'Unknown error ocurred';
 
-      if (renderToast) {
+      if (errorMessage) {
         toast.error(err);
       }
       opts.onError?.(err);
@@ -63,7 +60,7 @@ export function useActionListener<T>(
     }
 
     if (status === 'hasSucceeded') {
-      if (renderToast) {
+      if (successMessage) {
         toast.success(successMessage);
       }
       opts.onSuccess?.(result?.data);
