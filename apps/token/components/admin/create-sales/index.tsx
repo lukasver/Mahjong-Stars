@@ -274,17 +274,19 @@ export const CreateSaleForm = () => {
   return (
     <form.AppForm>
       <form onSubmit={handleSubmit}>
-        <FadeAnimation delay={0.1} duration={0.5}>
-          <SectionContainer
-            title={saleId ? "Edit Sale" : "Create a new sale"}
-            className="col-span-2"
-          >
-            <FormStepper steps={steps} />
-            <SectionForm />
+        <AnimatePresence mode="wait">
+          <FadeAnimation delay={0.1} duration={0.5}>
+            <SectionContainer
+              title={saleId ? "Edit Sale" : "Create a new sale"}
+              className="col-span-2"
+            >
+              <FormStepper steps={steps} />
+              <SectionForm />
 
-            <FormFooter steps={steps} />
-          </SectionContainer>
-        </FadeAnimation>
+              <FormFooter steps={steps} />
+            </SectionContainer>
+          </FadeAnimation>
+        </AnimatePresence>
         {process.env.NODE_ENV === "development" && (
           <>
             <Button onClick={() => console.debug(form.state.values)}>
