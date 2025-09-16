@@ -18,16 +18,17 @@ const WALLETS_CSP = `wss://*.walletconnect.org wss://*.walletconnect.com https:/
 const EXTERNAL_PROVIDERS = `min-api.cryptocompare.com`;
 const ANALYTICS_PROVIDERS = `eu.posthog.com`;
 const GOOGLE_CSP = `https://fonts.googleapis.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha https://www.google.com/recaptcha/enterprise.js https://www.gstatic.com/recaptcha/releases/`;
+const PDF_SERVICE_CSP = `https://*.mahjongstars.com https://pdf-gen-428634732640.europe-west3.run.app https://mahjongstars-pdf-gen-428634732640.europe-west1.run.app`;
 const STORAGE_CSP = `https://storage.googleapis.com`;
 const MAIN_DOMAIN =
 	process.env.NODE_ENV === "production"
 		? `https://*.mahjongstars.com ${publicUrl}`
-		: `https://*.mahjongstars.com https://*.vercel.app http://localhost:3000`;
+		: `https://*.mahjongstars.com https://*.vercel.app http://localhost:3000 http://localhost:8080`;
 const E_SIGN_DOMAIN = `https://*.documenso.com/`;
 
 const cspHeader = `
     default-src 'self' ${MAIN_DOMAIN};
-    connect-src 'self' ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP};
+    connect-src 'self' ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} ${PDF_SERVICE_CSP};
     frame-src 'self' https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.adobesign.com https://*.thirdweb.com/;
     script-src 'self' 'unsafe-eval' 'unsafe-inline' ${ANALYTICS_PROVIDERS} ${GOOGLE_CSP} ${E_SIGN_DOMAIN};
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;

@@ -22,6 +22,7 @@ import { ContractDialogConfirmSignature } from "@/components/buy/contract/dialog
 import { ContractDialogFailed } from "@/components/buy/contract/dialog-failed";
 import { ContractDialogLoading } from "@/components/buy/contract/dialog-loading";
 import { useBeforeUnload } from "@/components/hooks/use-before-unload";
+import { PulseLoader } from "@/components/pulse-loader";
 import { generateContractForTransaction } from "@/lib/actions";
 import {
   useRecipientForCurrentTransactionSaft,
@@ -110,7 +111,12 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
     }
   }, [isRecipientLoading, recipient]);
 
-  if (isLoading) return <CardContent>Loading SAFT...</CardContent>;
+  if (isLoading)
+    return (
+      <CardContent>
+        <PulseLoader text="Loading document..." />
+      </CardContent>
+    );
 
   if (error)
     return (

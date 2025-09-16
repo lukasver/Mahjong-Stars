@@ -1,5 +1,10 @@
-'use client';
+"use client";
 
+import { getGlassyCardClassName } from "@mjs/ui/components/cards";
+import { AnimatePresence, motion } from "@mjs/ui/components/motion";
+import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
+import { cn } from "@mjs/ui/lib/utils";
+import { Button } from "@mjs/ui/primitives/button";
 import {
   Card,
   CardContent,
@@ -7,49 +12,44 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@mjs/ui/primitives/card';
-import { FormInput } from '@mjs/ui/primitives/form-input';
-import { useAppForm } from '@mjs/ui/primitives/form';
-import { useRouter } from 'next/navigation';
-import { useCallback, useState, useTransition } from 'react';
-import { z } from 'zod';
-import { useAction } from 'next-safe-action/hooks';
+} from "@mjs/ui/primitives/card";
+import { useAppForm } from "@mjs/ui/primitives/form";
+import { FormInput } from "@mjs/ui/primitives/form-input";
+import { useRouter } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
+import { useCallback, useState, useTransition } from "react";
+import { useLocalStorage } from "usehooks-ts";
+import { z } from "zod";
+import { MW_KEY } from "@/common/config/constants";
 import {
   createEmailVerification,
   validateMagicWord,
   verifyEmail,
-} from '@/lib/actions';
-import { AnimatePresence, motion } from '@mjs/ui/components/motion';
-import { Button } from '@mjs/ui/primitives/button';
-import { useActionListener } from '@mjs/ui/hooks/use-action-listener';
-import useActiveAccount from './hooks/use-active-account';
-import { useLocalStorage } from 'usehooks-ts';
-import { cn } from '@mjs/ui/lib/utils';
-import { getGlassyCardClassName } from '@mjs/ui/components/cards';
-import { MW_KEY } from '@/common/config/constants';
+} from "@/lib/actions";
+import useActiveAccount from "./hooks/use-active-account";
 
 const titleMapping = {
   1: {
-    title: 'Magic word',
-    description: 'Please enter your invitation code if you have one',
+    title: "Magic word",
+    description: "Please enter your invitation code if you have one",
   },
   2: {
-    title: 'Verify your email',
-    description: 'Please enter your email to continue.',
+    title: "Verify your email",
+    description: "Please enter your email to continue.",
   },
   3: {
-    title: 'Verify code',
-    description: 'Please enter the code sent to your email.',
+    title: "Verify code",
+    description: "Please enter the code sent to your email.",
   },
 };
 
 export function VerifyEmail({ token }: { token: string }) {
-  const [magicWord] = useLocalStorage(MW_KEY, '');
+  const [magicWord] = useLocalStorage(MW_KEY, "");
   const [step, setStep] = useState<1 | 2 | 3>(token ? 3 : magicWord ? 2 : 1);
   const router = useRouter();
 
   const handleCancel = async () => {
-    router.push('/dashboard');
+    router.push("/dashboard");
   };
 
   const handleNextStep = (step: 1 | 2 | 3) => {
@@ -57,17 +57,17 @@ export function VerifyEmail({ token }: { token: string }) {
   };
 
   return (
-    <Card className={getGlassyCardClassName('shadow-2xl')}>
-      <CardHeader className='pb-3'>
-        <CardTitle className='text-lg sm:text-xl'>
+    <Card className={getGlassyCardClassName("shadow-2xl")}>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg sm:text-xl">
           {titleMapping[step]?.title}
         </CardTitle>
-        <CardDescription className='text-sm'>
+        <CardDescription className="text-sm">
           {titleMapping[step]?.description}
         </CardDescription>
       </CardHeader>
 
-      <CardContent className='space-y-3 sm:space-y-4'>
+      <CardContent className="space-y-3 sm:space-y-4">
         <AnimatePresence>
           {step === 1 && (
             <MagicWordForm
@@ -97,7 +97,7 @@ export function VerifyEmail({ token }: { token: string }) {
 }
 
 const ValidateEmailSchema = z.object({
-  email: z.string().min(1, { message: 'Email is required' }).trim(),
+  email: z.string().min(1, { message: "Email is required" }).trim(),
   firstName: z.string().trim(),
   lastName: z.string().trim(),
 });
@@ -113,7 +113,7 @@ const MagicWordForm = ({
   onCancel: () => void;
   onSuccess: () => void;
 }) => {
-  const [_, setMagicWord] = useLocalStorage(MW_KEY, '');
+  const [_, setMagicWord] = useLocalStorage(MW_KEY, "");
   const { signout, isConnected } = useActiveAccount();
 
   const action = useActionListener(useAction(validateMagicWord), {
@@ -129,12 +129,12 @@ const MagicWordForm = ({
       onSubmit: z.object({
         invitationCode: z
           .string()
-          .min(1, { message: 'Invitation code is required' })
+          .min(1, { message: "Invitation code is required" })
           .trim(),
       }),
     },
     defaultValues: {
-      invitationCode: '',
+      invitationCode: "",
     },
     onSubmit: ({ value }) =>
       action.execute({ invitationCode: value.invitationCode }),
@@ -152,28 +152,28 @@ const MagicWordForm = ({
       e.stopPropagation();
       form.handleSubmit();
     },
-    [form]
+    [form],
   );
 
   return (
     <motion.div {...animation}>
       <form.AppForm>
-        <form onSubmit={handleSubmit} className='space-y-4'>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <FormInput
-            name='invitationCode'
-            type='text'
-            label='Invitation code'
+            name="invitationCode"
+            type="text"
+            label="Invitation code"
             inputProps={{
-              placeholder: 'Enter your invitation code',
-              autoComplete: 'off',
+              placeholder: "Enter your invitation code",
+              autoComplete: "off",
               required: true,
             }}
           />
-          <CardFooter className='flex gap-2 justify-between p-0'>
+          <CardFooter className="flex gap-2 justify-between p-0">
             <Button
-              variant='outline'
-              className='flex-1'
-              type='button'
+              variant="outline"
+              className="flex-1"
+              type="button"
               onClick={handleCancel}
               loading={isLoading}
               disabled={action.isExecuting}
@@ -181,9 +181,9 @@ const MagicWordForm = ({
               Cancel
             </Button>
             <Button
-              variant='accent'
-              className='flex-1'
-              type='submit'
+              variant="accent"
+              className="flex-1"
+              type="submit"
               disabled={isLoading}
               loading={action.isExecuting}
             >
@@ -211,8 +211,8 @@ export const VerifyEmailForm = ({
     useAction(createEmailVerification),
     {
       onSuccess,
-      successMessage: 'Verification code sent to your email address',
-    }
+      successMessage: "Verification code sent to your email address",
+    },
   );
 
   const onSubmit = (values: z.infer<typeof ValidateEmailSchema>) => {
@@ -227,9 +227,9 @@ export const VerifyEmailForm = ({
       onSubmit: ValidateEmailSchema,
     },
     defaultValues: {
-      email: defaultEmail ?? '',
-      firstName: '',
-      lastName: '',
+      email: defaultEmail ?? "",
+      firstName: "",
+      lastName: "",
     },
     onSubmit: ({ value }) => onSubmit(value),
   });
@@ -240,64 +240,76 @@ export const VerifyEmailForm = ({
       e.stopPropagation();
       form.handleSubmit();
     },
-    [form]
+    [form],
   );
 
   const isLoading = isExecuting;
 
   return (
     <motion.div {...animation}>
+      <button
+        onClick={async () => {
+          const url = "http://localhost:8080"
+          //"https://pdf-gen-428634732640.europe-west3.run.app",
+          const res = await fetch(
+            url,
+          );
+          console.log('acaa', res.ok, await res.json());
+        }}
+      >
+        TEST FETCH
+      </button>
       <form.AppForm>
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          <div className='grid grid-cols-2 gap-4'>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <FormInput
-              name='firstName'
-              type='text'
-              label='First name (optional)'
+              name="firstName"
+              type="text"
+              label="First name (optional)"
               inputProps={{
-                placeholder: 'Tony',
+                placeholder: "Tony",
                 required: false,
               }}
             />
             <FormInput
-              name='lastName'
-              type='text'
-              label='Last name (optional)'
+              name="lastName"
+              type="text"
+              label="Last name (optional)"
               inputProps={{
-                placeholder: 'Kong',
+                placeholder: "Kong",
                 required: false,
               }}
             />
           </div>
           <FormInput
-            name='email'
-            type='email'
-            label='Enter email'
+            name="email"
+            type="email"
+            label="Enter email"
             inputProps={{
-              placeholder: 'tony@mahjongstars.com',
-              autoComplete: 'off',
+              placeholder: "tony@mahjongstars.com",
+              autoComplete: "off",
             }}
           />
 
-          <CardFooter className='flex gap-2 justify-between p-0'>
+          <CardFooter className="flex gap-2 justify-between p-0">
             {canSkip && (
               <Button
-                variant='outline'
-                className='flex-1'
+                variant="outline"
+                className="flex-1"
                 disabled={isLoading}
-                type='button'
+                type="button"
                 onClick={onCancel}
               >
                 Skip
               </Button>
             )}
             <Button
-              variant='accent'
-              className={cn('flex-1')}
-              type='submit'
+              variant="accent"
+              className={cn("flex-1")}
+              type="submit"
               loading={isLoading}
             >
-              {canSkip ? 'Continue' : 'Send code'}
+              {canSkip ? "Continue" : "Send code"}
             </Button>
           </CardFooter>
         </form>
@@ -322,13 +334,13 @@ export const VerifyTokenForm = ({
   const { execute, isExecuting } = useActionListener(useAction(verifyEmail), {
     successMessage: noMessage
       ? undefined
-      : 'Email verified, redirecting to dashboard...',
+      : "Email verified, redirecting to dashboard...",
     onSuccess: () => {
       if (onSuccess) {
         setDisabled(true);
         onSuccess();
       } else {
-        router.push('/dashboard');
+        router.push("/dashboard");
       }
     },
   });
@@ -336,12 +348,12 @@ export const VerifyTokenForm = ({
     validators: {
       // @ts-expect-error - zod types are not compatible with useAppForm
       onSubmit: z.object({
-        token: z.string().min(1, { message: 'Token is required' }).trim(),
+        token: z.string().min(1, { message: "Token is required" }).trim(),
         subscribe: z.boolean().optional().default(false),
       }),
     },
     defaultValues: {
-      token: token ?? '',
+      token: token ?? "",
       subscribe: false,
     },
     onSubmit: ({ value }) => execute(value),
@@ -353,43 +365,43 @@ export const VerifyTokenForm = ({
       e.stopPropagation();
       form.handleSubmit();
     },
-    [form]
+    [form],
   );
 
   return (
     <motion.div {...animation}>
       <form.AppForm>
-        <form onSubmit={handleSubmit} className='space-y-4'>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <FormInput
-            name='token'
-            type='text'
-            label='Enter code'
+            name="token"
+            type="text"
+            label="Enter code"
             inputProps={{
-              autoComplete: 'off',
+              autoComplete: "off",
             }}
           />
           <FormInput
-            type='checkbox'
-            name='subscribe'
-            label='Want to receive news & updates?'
+            type="checkbox"
+            name="subscribe"
+            label="Want to receive news & updates?"
             inputProps={{
               required: false,
             }}
           />
-          <CardFooter className='flex gap-2 justify-between p-0'>
+          <CardFooter className="flex gap-2 justify-between p-0">
             <Button
-              variant='outline'
-              className='flex-1'
+              variant="outline"
+              className="flex-1"
               disabled={isExecuting || disabled}
-              type='button'
+              type="button"
               onClick={onCancel}
             >
               back
             </Button>
             <Button
-              variant='accent'
-              className='flex-1'
-              type='submit'
+              variant="accent"
+              className="flex-1"
+              type="submit"
               loading={isExecuting}
               disabled={disabled}
             >
