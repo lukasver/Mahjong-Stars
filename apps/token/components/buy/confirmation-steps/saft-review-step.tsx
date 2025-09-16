@@ -63,6 +63,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
 
   const form = useAppForm({
     validators: {
+      // @ts-expect-error Complex form validation schema
       onSubmit: saftFormSchema,
     },
     defaultValues: {
