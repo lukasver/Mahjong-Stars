@@ -2,6 +2,7 @@
 import "server-only";
 import { invariant } from "@epic-web/invariant";
 import { FOP, Prisma } from "@prisma/client";
+import { waitUntil } from "@vercel/functions";
 import Decimal from "decimal.js";
 import { cookies } from "next/headers";
 import { RedirectType, redirect } from "next/navigation";
@@ -163,24 +164,26 @@ export const logout = loginActionClient
 			const verified = await verifyJwt(data);
 			if (verified.valid) {
 				const hashedJwt = hashJwt(data);
-				void Promise.allSettled([
-					authCache.delete(verified.parsedJWT.sub),
-					prisma.session
-						.delete({
-							where: {
-								token: hashedJwt,
-							},
-						})
-						.catch((e) => {
-							if (e instanceof Prisma.PrismaClientKnownRequestError) {
-								return;
-							}
-							console.error(
-								"Logout error: ",
-								e instanceof Error ? e.message : e,
-							);
-						}),
-				]);
+				waitUntil(
+					Promise.allSettled([
+						authCache.delete(verified.parsedJWT.sub),
+						prisma.session
+							.delete({
+								where: {
+									token: hashedJwt,
+								},
+							})
+							.catch((e) => {
+								if (e instanceof Prisma.PrismaClientKnownRequestError) {
+									return;
+								}
+								console.error(
+									"Logout error: ",
+									e instanceof Error ? e.message : e,
+								);
+							}),
+					]),
+				);
 			}
 		}
 		if (_redirect) {

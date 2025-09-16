@@ -9,6 +9,7 @@ import {
 	SaleTransactions,
 	TransactionStatus,
 } from "@prisma/client";
+import { waitUntil } from "@vercel/functions";
 import Handlebars from "handlebars";
 import { DateTime } from "luxon";
 import {
@@ -747,22 +748,25 @@ class TransactionsController {
 				},
 			});
 
-			void this.documents
-				.generatePDF({
-					content,
-					title: `Token SAFT | tx:${dto.transactionId} | ${user.id}:${user.email}`,
-					recipients: [{ email: user.email, name: fullname }],
-					reference: recipient.id,
-				})
-				.catch(async (e) => {
-					await prisma.documentRecipient.update({
-						where: { id: recipient.id },
-						data: {
-							status: DocumentSignatureStatusSchema.enum.ERROR,
-						},
-					});
-					logger(e);
-				});
+			// This needs to be here for this to work in Vercel Functions
+			waitUntil(
+				this.documents
+					.generatePDF({
+						content,
+						title: `Token SAFT | tx:${dto.transactionId} | ${user.id}:${user.email}`,
+						recipients: [{ email: user.email, name: fullname }],
+						reference: recipient.id,
+					})
+					.catch(async (e) => {
+						await prisma.documentRecipient.update({
+							where: { id: recipient.id },
+							data: {
+								status: DocumentSignatureStatusSchema.enum.ERROR,
+							},
+						});
+						logger(e);
+					}),
+			);
 
 			console.log("SIGUE?", recipient.id);
 
