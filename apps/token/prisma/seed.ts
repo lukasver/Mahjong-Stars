@@ -9,6 +9,24 @@ import { seedRoles, seedUserRoles } from "./scripts/roles";
 import { seedOpenSale } from "./scripts/sales";
 import { seedUsers } from "./scripts/users";
 
+const truncateTables = async (prisma: PrismaClient, _tables?: string[]) => {
+	const tables = _tables || [
+		"users",
+		"sales",
+		"tokens",
+		"blockchain",
+		"sales_transactions",
+	];
+	await Promise.all(
+		tables.map((table) =>
+			prisma.$executeRawUnsafe(`TRUNCATE TABLE ${table} CASCADE;`),
+		),
+	);
+	await prisma.$executeRawUnsafe(
+		`TRUNCATE TABLE ${tables.join(", ")} CASCADE;`,
+	);
+};
+
 const TEST_ADMIN_WALLET = "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70";
 
 const options = {
@@ -17,7 +35,6 @@ const options = {
 
 async function main() {
 	const prisma = new PrismaClient();
-	// .$extends(withAccelerate());
 
 	const {
 		values: { environment },
@@ -27,21 +44,13 @@ async function main() {
 		log(`Not implemented: ${environment}`);
 		switch (environment) {
 			case "development": {
-				const tables = [
+				await truncateTables(prisma, [
 					"users",
 					"sales",
 					"tokens",
 					"blockchain",
 					"sales_transactions",
-				];
-				await Promise.all(
-					tables.map((table) =>
-						prisma.$executeRawUnsafe(`TRUNCATE TABLE ${table} CASCADE;`),
-					),
-				);
-				await prisma.$executeRawUnsafe(
-					`TRUNCATE TABLE ${tables.join(", ")} CASCADE;`,
-				);
+				]);
 				await seedCurrencies(prisma);
 				await seedRoles(prisma);
 				await seedUsers(
@@ -72,6 +81,39 @@ async function main() {
 
 			case "test":
 				/** data for your test environment */
+				break;
+
+			case "stage":
+				if (process.env.NODE_ENV === "production") {
+					throw new Error(
+						"This script is only for STAGE environments, check env vars",
+					);
+				}
+				console.log("Seeding stage data");
+				console.time("truncateTables");
+				await truncateTables(prisma);
+				console.timeEnd("truncateTables");
+				console.time("seedCurrencies");
+				await seedCurrencies(prisma);
+				console.timeEnd("seedCurrencies");
+				console.time("seedRoles");
+				await seedRoles(prisma);
+				console.timeEnd("seedRoles");
+				console.time("seedUsers");
+				await seedUsers(
+					[
+						{
+							walletAddress: TEST_ADMIN_WALLET,
+							name: "Admin MJS",
+							email: "lucas@smat.io",
+						},
+					],
+					prisma,
+				);
+				console.timeEnd("seedUsers");
+				console.time("seedBlockchains");
+				await seedBlockchains(prisma);
+				console.timeEnd("seedBlockchains");
 				break;
 			case "production":
 				if (process.env.NODE_ENV !== "production") {

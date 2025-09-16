@@ -35,10 +35,10 @@
 		"vercel-build": "npx prisma generate && turbo run build",
 		"_vercel-build:prod": "npx prisma generate && npx prisma migrate deploy && next build",
 		"db:seed": "dotenv -e .env.local -- npx prisma db seed -- --environment development",
-		"db:seed:stage": "dotenv -e .env.stage.local -- npx prisma db seed -- --environment development",
+		"db:seed:stage": "dotenv -e .env.stage.local -- npx prisma db seed -- --environment stage",
 		"db:seed:prod": "dotenv -e .env.production.local -- npx prisma db seed -- --environment production",
 		"db:reset": "pnpm run db:push --force-reset && pnpm run db:seed && pnpm run db:generate",
-		"db:reset:stage": "dotenv -e .env.stage.local -- npx prisma db push && pnpm run db:seed:stage && pnpm run db:generate",
+		"db:reset:stage": "dotenv -e .env.stage.local -- npx prisma migrate deploy && pnpm run db:seed:stage && pnpm run db:generate",
 		"db:reset:test": "dotenv -e .env.test -- npx prisma db push && pnpm run db:generate",
 		"check-types": "tsc -p tsconfig.json --noEmit"
 	},
