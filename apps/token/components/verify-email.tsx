@@ -247,18 +247,6 @@ export const VerifyEmailForm = ({
 
   return (
     <motion.div {...animation}>
-      <button
-        onClick={async () => {
-          const url = "http://localhost:8080"
-          //"https://pdf-gen-428634732640.europe-west3.run.app",
-          const res = await fetch(
-            url,
-          );
-          console.log('acaa', res.ok, await res.json());
-        }}
-      >
-        TEST FETCH
-      </button>
       <form.AppForm>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
