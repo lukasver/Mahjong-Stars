@@ -9,9 +9,7 @@ import {
   CardTitle,
 } from "@mjs/ui/primitives/card";
 import { Separator } from "@mjs/ui/primitives/separator";
-import { toast } from "@mjs/ui/primitives/sonner";
 import { Tooltip } from "@mjs/ui/primitives/tooltip";
-import { copyToClipboard } from "@mjs/utils/client";
 import {
   Calendar,
   Coins,
@@ -36,7 +34,7 @@ interface VariableCategory {
   variables: Variable[];
 }
 
-export default function VariablesPanel({ className }: { className?: string }) {
+export default function VariablesPanel({ className, onClickVariable }: { className?: string, onClickVariable: (variable: string) => void }) {
   return (
     <Card className={cn("w-80 h-fit", className)}>
       <CardHeader className="pb-3">
@@ -81,7 +79,7 @@ export default function VariablesPanel({ className }: { className?: string }) {
               </div>
               <div className="space-y-1 ml-6">
                 {category.variables.map((variable, variableIndex) => (
-                  <VariableItem key={variableIndex} variable={variable} />
+                  <VariableItem key={variableIndex} variable={variable} onClickVariable={onClickVariable} />
                 ))}
               </div>
             </div>
@@ -104,7 +102,7 @@ export default function VariablesPanel({ className }: { className?: string }) {
   );
 }
 
-const VariableItem = ({ variable }: { variable: Variable }) => (
+const VariableItem = ({ variable, onClickVariable }: { variable: Variable, onClickVariable: (variable: string) => void }) => (
   <Tooltip
     content={
       <div className="space-y-1">
@@ -120,11 +118,7 @@ const VariableItem = ({ variable }: { variable: Variable }) => (
   >
     <div
       role="button"
-      onClick={() => {
-        const v = `{{${variable.name.trim()}}}`;
-        copyToClipboard(v);
-        toast.success(`${v} Copied to clipboard`);
-      }}
+      onClick={() => onClickVariable?.(variable.name)}
       className="flex items-center justify-between p-2 rounded-md hover:bg-secondary-800/50 cursor-help group"
     >
       <code className="text-sm font-mono bg-secondary px-2 py-1 rounded text-foreground">

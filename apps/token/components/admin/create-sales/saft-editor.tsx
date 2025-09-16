@@ -1,37 +1,37 @@
-'use client';
+"use client";
 import {
+  EditorInstance,
+  JSONContent,
+} from "@mjs/ui/components/editor/advanced-editor";
+import { Time } from "@mjs/ui/components/time";
+import {
+  type AnyFieldApi,
   UseAppForm,
   useFormContext,
-  type AnyFieldApi,
-} from '@mjs/ui/primitives/form';
-import { Label } from '@mjs/ui/primitives/label';
+} from "@mjs/ui/primitives/form";
+import { Label } from "@mjs/ui/primitives/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@mjs/ui/primitives/select';
-import { Time } from '@mjs/ui/components/time';
-import { DateTime } from 'luxon';
-import { useSaleSaft } from '@/lib/services/api';
-import { useEffect, useState } from 'react';
-import {
-  EditorInstance,
-  JSONContent,
-} from '@mjs/ui/components/editor/advanced-editor';
-import Editor from '../../Editor';
-import { SaftContract } from '@/common/schemas/generated';
-import { safeJsonParse } from '@mjs/utils/client';
-import VariablesPanel from './variables-panel';
+} from "@mjs/ui/primitives/select";
+import { safeJsonParse } from "@mjs/utils/client";
+import { DateTime } from "luxon";
+import { useEffect, useState } from "react";
+import { SaftContract } from "@/common/schemas/generated";
+import { useSaleSaft } from "@/lib/services/api";
+import Editor from "../../Editor";
+import VariablesPanel from "./variables-panel";
 
 function FieldInfo({ field }: { field: AnyFieldApi }) {
   return (
     <>
       {field.state.meta.isTouched && !field.state.meta.isValid ? (
-        <em>{field.state.meta.errors.join(', ')}</em>
+        <em>{field.state.meta.errors.join(", ")}</em>
       ) : null}
-      {field.state.meta.isValidating ? 'Validating...' : null}
+      {field.state.meta.isValidating ? "Validating..." : null}
     </>
   );
 }
@@ -45,11 +45,11 @@ interface SaftEditorProps {
 const getVersions = (
   arg:
     | {
-        saft: SaftContract | null;
-        versions: SaftContract[];
-      }
+      saft: SaftContract | null;
+      versions: SaftContract[];
+    }
     | null
-    | undefined
+    | undefined,
 ) => {
   if (arg?.saft) {
     return arg?.versions || [];
@@ -73,15 +73,21 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
     if (!v) return;
     if (v && v.content) {
       const content =
-        typeof v.content === 'string'
+        typeof v.content === "string"
           ? safeJsonParse(v.content)
           : (v.content as JSONContent[]);
       const final =
         Object.keys(content).length > 0 ? content : v.content || placeholder;
-      form.setFieldValue('content', final);
+      form.setFieldValue("content", final);
       editor?.commands.setContent(final);
     }
     setSelectValue(v.id);
+  };
+
+  const handleVariableClick = (variable: string) => {
+    const v = `{{${variable.trim()}}}`;
+    editor?.commands.insertContent(v);
+
   };
 
   useEffect(() => {
@@ -89,7 +95,7 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
     if (editor && data && !isLoading) {
       if (data?.saft?.content) {
         editor.commands.setContent(data.saft.content as string | JSONContent);
-        form.setFieldValue('content', data.saft.content);
+        form.setFieldValue("content", data.saft.content);
       }
     }
   }, [!!editor, !!data, isLoading]);
@@ -104,19 +110,19 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
   return (
     <>
       {versions?.length > 0 ? (
-        <div className='space-y-2'>
-          <Label htmlFor='version-config'>Select active version</Label>
+        <div className="space-y-2">
+          <Label htmlFor="version-config">Select active version</Label>
           <Select value={selectValue} onValueChange={handleVersionChange}>
-            <SelectTrigger id='version-config' className='bg-background'>
-              <SelectValue placeholder='Create a new version' />
+            <SelectTrigger id="version-config" className="bg-background">
+              <SelectValue placeholder="Create a new version" />
             </SelectTrigger>
             <SelectContent>
               {getVersions(data).map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  <p className='flex items-center justify-between gap-2'>
-                    <span className='text-sm'>{c.name}</span>
+                  <p className="flex items-center justify-between gap-2">
+                    <span className="text-sm">{c.name}</span>
                     <Time
-                      className='text-xs text-muted-foreground'
+                      className="text-xs text-muted-foreground"
                       date={c.createdAt}
                       format={DateTime.DATETIME_MED}
                     />
@@ -129,34 +135,34 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
       ) : null}
 
       <div>
-        <p className='mb-1'>Create new version</p>
-        <div className='grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4'>
-          <div className='col-span-1 sm:col-span-2'>
+        <p className="mb-1">Create new version</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+          <div className="col-span-1 sm:col-span-2">
             <form.Field
-              name='content'
+              name="content"
               // biome-ignore lint/correctness/noChildrenProp: <explanation>
               children={(field) => {
                 return (
                   <>
-                    <div className='relative min-h-[500px] w-full h-full bg-white sm:rounded-lg sm:shadow-lg border-2 border-black'>
+                    <div className="relative min-h-[500px] w-full h-full bg-white sm:rounded-lg sm:shadow-lg border-2 border-black">
                       <Editor
                         setEditor={setEditor}
-                        className='bg-white text-black h-full border-none! overflow-y-auto'
-                        output='html'
+                        className="bg-white text-black h-full border-none! overflow-y-auto"
+                        output="html"
                         classes={{
-                          editor: 'max-w-full!',
+                          editor: "max-w-full!",
                         }}
                         onChange={(value) => {
                           field.handleChange(value as string);
                         }}
                         initialValue={{
-                          type: 'doc',
+                          type: "doc",
                           content: [
                             {
-                              type: 'paragraph',
+                              type: "paragraph",
                               content: [
                                 {
-                                  type: 'text',
+                                  type: "text",
                                   text: placeholder,
                                 },
                               ],
@@ -171,8 +177,11 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
               }}
             />
           </div>
-          <div className='col-span-1'>
-            <VariablesPanel className='w-full' />
+          <div className="col-span-1">
+            <VariablesPanel
+              className="w-full"
+              onClickVariable={handleVariableClick}
+            />
           </div>
         </div>
       </div>

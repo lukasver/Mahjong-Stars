@@ -3,6 +3,14 @@ import { DEFAULT_STALE_TIME } from "@/common/config/constants";
 
 let browserQueryClient: QueryClient | undefined = undefined;
 
+// This code is only for TypeScriptdeclare global {
+declare global {
+	interface Window {
+		__TANSTACK_QUERY_CLIENT__: // @ts-expect-error wontfix
+		import("@tanstack/query-core").QueryClient;
+	}
+}
+
 export function getQueryClient() {
 	if (isServer) {
 		// Server: always make a new query client
@@ -13,6 +21,9 @@ export function getQueryClient() {
 		// suspends during the initial render. This may not be needed if we
 		// have a suspense boundary BELOW the creation of the query client
 		if (!browserQueryClient) browserQueryClient = makeQueryClient();
+		if (process.env.NODE_ENV === "development") {
+			window.__TANSTACK_QUERY_CLIENT__ = browserQueryClient;
+		}
 		return browserQueryClient;
 	}
 }

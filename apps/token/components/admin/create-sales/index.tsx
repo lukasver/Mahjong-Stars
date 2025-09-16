@@ -17,6 +17,7 @@ import { useAction } from "next-safe-action/hooks";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback } from "react";
 import { InformationSchemaAsStrings } from "@/common/schemas/dtos/sales/information";
+import { FormError } from "@/components/form-error";
 import { useSensitiveAction } from "@/components/hooks/use-sensitive-action";
 import { Stepper } from "@/components/stepper";
 import { getFileUploadPublicPresignedUrl } from "@/lib/actions";
@@ -95,8 +96,6 @@ export const CreateSaleForm = () => {
     },
 
     onSubmit: async ({ value, formApi }) => {
-
-
       const queryClient = getQueryClient();
 
       try {
@@ -104,7 +103,6 @@ export const CreateSaleForm = () => {
         const success = await sensitiveAction.executeAction(async () => {
           if (step === 1) {
             const vals = SaleSchemas[1].parse(value);
-
 
             if (saleId) {
               vals.id = saleId;
@@ -200,31 +198,47 @@ export const CreateSaleForm = () => {
             const nonFileValues = values.information.filter(
               (item) => item.type !== "file",
             );
+
+
             if (fileValues.length > 0) {
               const uploads = await Promise.all(
                 fileValues.map(async ({ value }) => {
+                  // For already existing files we don't need to upload them again
+
+                  if (!(value instanceof File)) {
+                    return Promise.resolve(null);
+                  }
                   const fileName = `sale/${saleId}/${(value as File).name}`;
-                  return getFileUploadPublicPresignedUrl({
-                    key: fileName,
-                  }).then(async (url) => {
-                    if (url?.data) {
-                      return uploadFile(
-                        { file: value as File, name: fileName },
-                        url.data.url,
-                      );
-                    } else {
-                      throw new Error("Error getting presigned url");
-                    }
-                  });
+                  const presignedResponse =
+                    await getFileUploadPublicPresignedUrl({
+                      key: fileName,
+                    });
+
+                  if (presignedResponse?.data) {
+                    const uploadResult = await uploadFile(
+                      { file: value as File, name: fileName },
+                      presignedResponse.data.url,
+                    );
+                    return {
+                      ...uploadResult,
+                      prefix: presignedResponse.data.prefix,
+                    };
+                  } else {
+                    throw new Error("Error getting presigned url");
+                  }
                 }),
               );
+
 
               uploadedFiles = fileValues.map((file, i) => ({
                 type: "file",
                 label: file.label,
-                value: uploads[i]?.fileName!,
+                value:
+                  uploads[i]?.url?.split("?")[0] ||
+                  (uploads[i]?.prefix || "") + uploads[i]?.fileName,
                 props: file.props,
               }));
+
             }
 
             const result = await informationAction.executeAsync({
@@ -334,7 +348,11 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
 
   if (!step) return null;
   return (
-    <ErrorBoundary fallback={<div>Error with creating sale section</div>}>
+    <ErrorBoundary
+      fallback={
+        <FormError type="custom" message="Error with creating sale section" />
+      }
+    >
       <div className="flex flex-col gap-4 min-h-[300px] h-full">
         <AnimatePresence mode="wait">
           {step === 1 && (

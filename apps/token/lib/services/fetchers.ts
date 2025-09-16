@@ -9,6 +9,7 @@ import {
 import { cache } from "react";
 import { ONE_DAY, ONE_MINUTE, ROLES } from "@/common/config/constants";
 import { GetExchangeRate } from "@/common/schemas/dtos/rates";
+import { SaleInformationItem } from "@/common/schemas/dtos/sales/information";
 import { Failure, Success } from "@/common/schemas/dtos/utils";
 import {
 	Blockchain,
@@ -187,6 +188,17 @@ export const getSaleDocuments = async (id: string) => {
 			images: Document[];
 			documents: Document[];
 		}>(`/sales/${id}/documents`);
+		return { data: data, error: null };
+	} catch (e) {
+		return { data: null, error: e };
+	}
+};
+
+export const getSaleInformation = async (id: string) => {
+	try {
+		const data = await fetcher<SaleInformationItem[]>(
+			`/sales/${id}/information`,
+		);
 		return { data: data, error: null };
 	} catch (e) {
 		return { data: null, error: e };

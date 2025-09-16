@@ -140,23 +140,28 @@ class DocumentsController {
 	) {
 		try {
 			let url: string = "";
+			let bucketName: string = "";
 			if (type === "read") {
-				url = await this.s3.generateReadSignedUrl(bucket, key, {
+				const res = await this.s3.generateReadSignedUrl(bucket, key, {
 					expires: expiresIn,
 				});
+				url = res.url;
+				bucketName = res.bucket;
 			}
 
 			if (type === "write") {
-				url =
-					(
-						await this.s3.getPresignedUrlForUpload({
-							bucket,
-							fileName: key,
-							expiresInMinutes: expiresIn / 60,
-						})
-					)?.url || "";
+				const res = await this.s3.getPresignedUrlForUpload({
+					bucket,
+					fileName: key,
+					expiresInMinutes: expiresIn / 60,
+				});
+				url = res.url;
+				bucketName = res.bucket;
 			}
-			return Success({ url });
+			return Success({
+				url,
+				prefix: `https://storage.googleapis.com/${bucketName}/`,
+			});
 		} catch (e) {
 			logger(e);
 			return Failure(e);
@@ -212,6 +217,8 @@ class DocumentsController {
 			body: JSON.stringify(args),
 		});
 
+		console.log("🚀 ~ index.ts:215 ~ res:", res.ok);
+		console.log("🚀 ~ index.ts:215 ~ res:", res.statusText);
 		console.log("🚀 ~ index.ts:215 ~ res:", res);
 
 		if (!res.ok) {

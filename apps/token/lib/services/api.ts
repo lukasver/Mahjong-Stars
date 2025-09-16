@@ -24,6 +24,7 @@ import {
 	getSale,
 	getSaleBanks,
 	getSaleDocuments,
+	getSaleInformation,
 	getSaleInvestInfo,
 	getSaleSaft,
 	getSaleSaftForTransaction,
@@ -282,6 +283,17 @@ export const useSaleDocuments = (id: string | undefined) => {
 	const { data, isLoading, refetch, error } = useQuery({
 		queryKey: ["sales", id, "documents"],
 		queryFn: ({ queryKey }) => getSaleDocuments(queryKey[1] as string),
+		staleTime: DEFAULT_STALE_TIME,
+		enabled: !!id,
+	});
+	const e = getError(data, error);
+	return { data: data?.data, error: e, isLoading, refetch };
+};
+
+export const useSaleInformation = (id: string | undefined) => {
+	const { data, isLoading, refetch, error } = useQuery({
+		queryKey: ["sales", id, "information"],
+		queryFn: ({ queryKey }) => getSaleInformation(queryKey[1] as string),
 		staleTime: DEFAULT_STALE_TIME,
 		enabled: !!id,
 	});

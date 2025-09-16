@@ -39,11 +39,20 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SaleInformationItem } from "@/common/schemas/dtos/sales/information";
+import { Document } from "@/common/schemas/generated";
 import { BankDetailsCard } from "@/components/bank-details";
+import { Banner } from "@/components/banner";
 import { useInputOptionsContext } from "@/components/hooks/use-input-options";
 import { Placeholder } from "@/components/placeholder";
+import { PulseLoader } from "@/components/pulse-loader";
 import { disassociateBankDetailsFromSale } from "@/lib/actions/admin";
-import { useSale, useSaleBanks } from "@/lib/services/api";
+import {
+  useSale,
+  useSaleBanks,
+  useSaleDocuments,
+  useSaleInformation,
+} from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
 import { SaftEditor } from "../saft-editor";
 import {
@@ -212,6 +221,8 @@ export const ProjectInformation = ({
   saleId?: string;
   className?: string;
 }) => {
+  const { data: info, isLoading: isInfoLoading } = useSaleInformation(saleId);
+  const { data: existing, isLoading: isDocsLoading } = useSaleDocuments(saleId);
   const form = useFormContext() as unknown as UseAppForm;
   const stepValue = form.getFieldValue("information");
   useEffect(() => {
@@ -235,18 +246,27 @@ export const ProjectInformation = ({
     );
   };
 
+
+  const isLoading = isInfoLoading || isDocsLoading;
+
+
   useEffect(() => {
-    if (!stepValue) {
-      const value = form.getFieldValue("information") as unknown[];
-      if (!value?.length) {
-        handleAddField(initialFields);
+
+    if (!isLoading) {
+      const value =
+        getInformationDefaultValues(info, existing)
+      const stepValue = form.getFieldValue("information");
+      // Load default information values
+      if (!stepValue) {
+        handleAddField(value);
       }
     }
-  }, [stepValue]);
+  }, [stepValue, isLoading, info, existing]);
 
   if (!saleId) {
     return <div>No saleId</div>;
   }
+
 
   return (
     <motion.div {...animation}>
@@ -272,32 +292,37 @@ export const ProjectInformation = ({
         }
       >
         <div className="flex flex-col gap-4">
-          <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <form.Field name="information" mode="array">
-              {(field) => {
-                return (
-                  <>
-                    {(field.state.value as unknown[])?.map((_, index) => (
-                      <form.Field key={index} name={`information[${index}]`}>
-                        {(itemField) => (
-                          <EditableFormField
-                            field={itemField}
-                            index={index}
-                            onRemove={(idx) => field.removeValue(idx)}
-                          />
-                        )}
-                      </form.Field>
-                    ))}
-                    {(field.state.value as unknown[])?.length === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
-                        No fields yet. Click the + sign to.
-                      </div>
-                    )}
-                  </>
-                );
-              }}
-            </form.Field>
-          </ul>
+          {isLoading && <PulseLoader text="Loading information..." />}
+          {!isLoading && (
+            <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <form.Field name="information" mode="array">
+                {(field) => {
+                  return (
+                    <>
+                      {(field.state.value as unknown[])?.map((_, index) => (
+                        <form.Field key={index} name={`information[${index}]`}>
+                          {(itemField) => (
+                            <EditableFormField
+                              field={itemField}
+                              index={index}
+                              onRemove={(idx) => field.removeValue(idx)}
+                            />
+                          )}
+                        </form.Field>
+                      ))}
+                      {(field.state.value as unknown[])?.length === 0 && (
+                        <Placeholder
+                          title="No fields yet"
+                          description="Click the + sign to add a new field"
+                          className='col-span-2'
+                        />
+                      )}
+                    </>
+                  );
+                }}
+              </form.Field>
+            </ul>
+          )}
         </div>
       </CardContainer>
     </motion.div>
@@ -433,7 +458,14 @@ export const PaymentInformation = ({
                       title="No bank accounts found"
                       description="Add a new bank account to get started"
                       icon={Banknote}
-                    />
+                    >
+                      <Banner
+                        className="max-w-[370px] mt-4"
+                        size={"sm"}
+                        variant={"info"}
+                        message="User will only be able to pay using ON-RAMP provider if no bank account details are added"
+                      />
+                    </Placeholder>
                   );
                 }
                 return (
@@ -462,9 +494,10 @@ export const PaymentInformation = ({
                       </form.Field>
                     ))}
                     {(field.state.value as unknown[])?.length === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
-                        No fields yet. Click the + sign to.
-                      </div>
+                      <Placeholder
+                        title="No fields yet"
+                        description="Click the + sign to add a new field"
+                      />
                     )}
                   </>
                 );
@@ -738,10 +771,13 @@ const animation = {
   exit: { opacity: 0, y: 40 },
 };
 
+
+
+
 const initialFields = [
   {
     label: "Banner image",
-    type: "file",
+    type: "file" as const,
     value: "",
     props: {
       required: true,
@@ -752,7 +788,7 @@ const initialFields = [
   },
   {
     label: "Token image",
-    type: "file",
+    type: "file" as const,
     value: "",
     props: {
       required: true,
@@ -767,3 +803,61 @@ const initialFields = [
     value: "",
   },
 ] satisfies ProjectInfoField[];
+
+const getInformationDefaultValues = (
+  info: SaleInformationItem[] | undefined,
+  docs: { images: Document[]; documents: Document[] },
+): ProjectInfoField[] => {
+  const data = (info ? (SaleInformationItem.array().safeParse(info)?.data) : [...initialFields]) as ProjectInfoField[];
+  docs.documents.forEach((doc) => {
+    const isBanner = doc.name === 'Banner image';
+    const isTokenImage = doc.name === 'Token image';
+    data.push({
+      type: "file",
+      value: doc.url,
+      label: doc.name,
+      props: {
+        maxSizeMB: 10,
+        ...isBanner && { isBanner, required: true, type: 'image' },
+        ...isTokenImage && { isTokenImage, required: true, type: 'image' },
+      }
+    });
+  });
+  docs.images.forEach((img) => {
+    const isBanner = img.name === 'Banner image';
+    const isTokenImage = img.name === 'Token image';
+    data.push({
+      type: "file",
+      value: img.url,
+      label: img.name,
+      props: {
+        ...isBanner && { isBanner, required: true, type: 'image', },
+        ...isTokenImage && { isTokenImage, required: true, type: 'image' },
+        maxSizeMB: 10,
+      }
+    });
+  });
+  if (data.length === 0) {
+    return initialFields;
+  }
+
+  // Here we need to ensure that if data does not have at this point at least one Banner image or Token image in the array, we need to add the default options
+  const hasBannerImage = data.some(item =>
+    item.label === 'Banner image' && (item.props?.isBanner || item.props?.type === 'image' || item.props?.type === 'document')
+  );
+  const hasTokenImage = data.some(item =>
+    item.label === 'Token image' && (item.props?.isTokenImage || item.props?.type === 'image' || item.props?.type === 'document')
+  );
+
+  // Add default Banner image if missing
+  if (!hasBannerImage) {
+    data.push(initialFields[0]!);
+  }
+
+  // Add default Token image if missing
+  if (!hasTokenImage) {
+    data.push(initialFields[1]!);
+  }
+
+  return data;
+};

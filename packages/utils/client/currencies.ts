@@ -5,7 +5,7 @@ export const formatCurrency = (
 	value: string | number | Decimal,
 	options: Intl.NumberFormatOptions & {
 		locale: string;
-		precision?: "CRYPTO" | "FIAT";
+		precision?: "CRYPTO" | "FIAT" | number;
 	} = { locale: "en-US", precision: "FIAT" },
 ) => {
 	if (value === undefined || value === null) return value;
@@ -36,7 +36,8 @@ export const formatCurrency = (
 						}
 					: {
 							minimumFractionDigits: 0,
-							maximumFractionDigits: 4,
+							maximumFractionDigits:
+								typeof options.precision === "number" ? options.precision : 4,
 						}),
 				...options,
 			}).format(toFormat);
@@ -56,7 +57,10 @@ export const formatCurrency = (
 
 export const safeFormatCurrency = (
 	paidAmount: { totalAmount: string; currency: string },
-	{ locale, precision }: { locale: string; precision?: "CRYPTO" | "FIAT" } = {
+	{
+		locale,
+		precision,
+	}: { locale: string; precision?: "CRYPTO" | "FIAT" | number } = {
 		locale: "en-US",
 		precision: "FIAT",
 	},
@@ -72,11 +76,19 @@ export const safeFormatCurrency = (
 	}
 };
 
-const formatToDigits = (v: string | number, precision?: "CRYPTO" | "FIAT") => {
+const formatToDigits = (
+	v: string | number,
+	_precision: "CRYPTO" | "FIAT" | number = 0,
+) => {
+	const precision =
+		{
+			CRYPTO: 8,
+			FIAT: 4,
+		}[_precision] || (_precision as number);
 	if (!precision) {
 		return Decimal(v).toSignificantDigits().toString();
 	} else {
-		return Decimal(v).toFixed(precision === "CRYPTO" ? 8 : 4);
+		return Decimal(v).toFixed(precision);
 	}
 };
 

@@ -559,6 +559,18 @@ class SalesController {
 				}, docs);
 			}
 
+			const docIdsToDelete = await prisma.document.findMany({
+				where: {
+					saleId: sale.id,
+					kycVerificationId: null,
+					userId: null,
+					SaleTransactions: null,
+				},
+				select: {
+					id: true,
+				},
+			});
+
 			const updatedSale = await prisma.$transaction(async (tx) => {
 				// handle banner and token image creation individually
 				let individualPromises: Promise<unknown>[] = [];
@@ -650,6 +662,14 @@ class SalesController {
 							: Promise.resolve(),
 					]),
 				);
+
+				if (docIdsToDelete?.length) {
+					await tx.document.deleteMany({
+						where: {
+							id: { in: docIdsToDelete.map((doc) => doc.id) },
+						},
+					});
+				}
 
 				return tx.sale.update({
 					where: { id: sale.id },
@@ -858,6 +878,23 @@ class SalesController {
 		}
 	}
 
+	async getSaleInformation(id: string) {
+		try {
+			invariant(id, "Sale id is required");
+			const data = await prisma.sale.findUniqueOrThrow({
+				where: { id },
+				select: {
+					information: true,
+				},
+			});
+
+			return Success(SaleInformationItem.array().parse(data.information));
+		} catch (e) {
+			logger(e);
+			return Failure(e);
+		}
+	}
+
 	async getSaleDocuments(id: string) {
 		try {
 			invariant(id, "Sale id is required");
@@ -868,7 +905,16 @@ class SalesController {
 				},
 			});
 
-			const documents = data.documents.reduce(
+			// Filter to get only the newest version of documents with the same name
+			const latestDocuments = data.documents.reduce((acc, doc) => {
+				const existingDoc = acc.get(doc.name);
+				if (!existingDoc || doc.updatedAt > existingDoc.updatedAt) {
+					acc.set(doc.name, doc);
+				}
+				return acc;
+			}, new Map<string, Document>());
+
+			const documents = Array.from(latestDocuments.values()).reduce(
 				(acc: { images: Document[]; documents: Document[] }, doc) => {
 					if (doc.type.startsWith("image/")) {
 						acc.images.push({
