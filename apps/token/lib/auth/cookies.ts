@@ -55,8 +55,6 @@ export const setSessionCookie = async (
 	const c = await cookies();
 	// Extract hostname from publicUrl
 	const domain = getCookieDomain(publicUrl);
-	console.log("🚀 ~ cookies.ts:35 ~ domain:", domain);
-	console.log("🚀 ~ cookies.ts:35 ~ publicUrl:", publicUrl);
 
 	c.set(cookieName, jwt, {
 		domain,

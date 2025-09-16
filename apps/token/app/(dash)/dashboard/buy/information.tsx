@@ -151,9 +151,6 @@ const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
 const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
   const { data, isLoading } = useSaleDocuments(sale.id);
 
-  console.log("🚀 ~ information.tsx:154 ~ data:", data);
-
-
   if (isLoading) return <div>Loading...</div>;
   if (!data?.documents?.length)
     return (

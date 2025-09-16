@@ -463,7 +463,7 @@ export const PaymentInformation = ({
                         className="max-w-[370px] mt-4"
                         size={"sm"}
                         variant={"info"}
-                        message="User will only be able to pay using ON-RAMP provider if no bank account details are added"
+                        message="User will still be able to pay using ON-RAMP provider if no bank account details are added"
                       />
                     </Placeholder>
                   );

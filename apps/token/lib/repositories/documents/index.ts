@@ -46,36 +46,39 @@ class DocumentsController {
 		},
 		_ctx: ActionCtx,
 	) {
-		console.group("content");
-		console.log(JSON.stringify(dto.content));
-		console.groupEnd();
-
 		try {
 			invariant(dto.saleId, "Sale ID is required");
 			invariant(dto.content, "Content is required");
-			const newSaft = await prisma.$transaction(async (tx) => {
-				// Check if sale already has a saft
-				const sale = await tx.sale.findUnique({
-					where: {
-						id: dto.saleId,
-					},
-					select: {
-						name: true,
-						saftContract: {
-							select: {
-								id: true,
-								version: true,
-								parentId: true,
-								isCurrent: true,
-							},
+			// Check if sale already has a saft
+			const sale = await prisma.sale.findUnique({
+				where: {
+					id: dto.saleId,
+				},
+				select: {
+					name: true,
+					saftContract: {
+						select: {
+							id: true,
+							version: true,
+							parentId: true,
+							isCurrent: true,
 						},
 					},
-				});
-				const existingSaft = sale?.saftContract;
-				// Create saft in Database
+				},
+			});
+			const existingSaft = sale?.saftContract;
+			// Create saft in Database
 
-				const newVersion = (existingSaft?.version || 0) + 1;
-				const variables = this.extractHandlebarsVariables(dto.content);
+			const newVersion = (existingSaft?.version || 0) + 1;
+			const variables = this.extractHandlebarsVariables(dto.content);
+
+			if (variables.some((v) => (v.match(/\./g) || []).length >= 2)) {
+				throw new Error(
+					"Variables can only be nested up to 1 level, example: {{recipient.email}}.",
+				);
+			}
+
+			const newSaft = await prisma.$transaction(async (tx) => {
 				const newSaft = await prisma.saftContract.create({
 					data: {
 						name:
@@ -216,10 +219,6 @@ class DocumentsController {
 			},
 			body: JSON.stringify(args),
 		});
-
-		console.log("🚀 ~ index.ts:215 ~ res:", res.ok);
-		console.log("🚀 ~ index.ts:215 ~ res:", res.statusText);
-		console.log("🚀 ~ index.ts:215 ~ res:", res);
 
 		if (!res.ok) {
 			throw new Error(`Failed to generate PDF: ${res.statusText}`);

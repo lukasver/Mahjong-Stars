@@ -43,7 +43,7 @@ export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
             title={" "}
             value={`${formatCurrency(sale && percentCalculator(sale), {
               locale,
-              precision: "FIAT",
+              precision: 1,
             })}% Sold`}
           />
           <div className="w-full mt-1">

@@ -34,13 +34,13 @@ export const labelMapping = {
 export function getLabel(v: string): string {
 	const label = labelMapping[v as keyof typeof labelMapping];
 	if (!label) {
+		if (v.includes(".")) {
+			return v
+				.split(".")
+				.map((l) => l.charAt(0).toUpperCase() + l.slice(1))
+				.join(" ");
+		}
 		return v.charAt(0).toUpperCase() + v.slice(1);
-	}
-	if (label.includes(".")) {
-		return label
-			.split(".")
-			.map((l) => l.charAt(0).toUpperCase() + l.slice(1))
-			.join(" ");
 	}
 	return label;
 }

@@ -84,9 +84,15 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
       };
       action.execute(formData);
     },
+    onSubmitInvalid(_props) {
+      toast.error("Invalid form")
+    },
   });
 
   const variables = data?.missingVariables || [];
+
+
+
   const template = data?.content as string;
 
   const handleSubmit = useCallback(
@@ -97,6 +103,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
     },
     [form],
   );
+
 
   useEffect(() => {
     if (isRecipientLoading) return;
@@ -164,7 +171,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
           <CardTitle>SAFT Review</CardTitle>
           <CardDescription>
             Please review the contract and fill in the required information
-            below. This is a preview; signature will be handled separately.
+            below. This is a preview; signature document will be send to your email.
           </CardDescription>
         </CardHeader>
       </motion.div>
@@ -177,20 +184,22 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
               transition={{ delay: 0.3, duration: 0.4 }}
               className="grid grid-cols-2 gap-4"
             >
-              {variables.map((v, index) => (
-                <motion.div
-                  key={v}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
-                >
-                  <FormInput
-                    name={`variables.${v}`}
-                    type="text"
-                    label={getLabel(v)}
-                  />
-                </motion.div>
-              ))}
+              {variables.map((v, index) => {
+                return (
+                  <motion.div
+                    key={v}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
+                  >
+                    <FormInput
+                      name={`variables.${v}`}
+                      type="text"
+                      label={getLabel(v)}
+                    />
+                  </motion.div>
+                )
+              })}
             </motion.div>
 
             <motion.div
@@ -225,7 +234,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
                 className="w-full"
                 loading={action.isExecuting}
               >
-                Sign Contract
+                Sign Document
               </Button>
             </motion.div>
             {process.env.NODE_ENV === "development" && (

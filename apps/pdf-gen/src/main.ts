@@ -41,7 +41,7 @@ async function main(req: IncomingMessage, res: ServerResponse) {
 	}
 
 	if (req.method === "GET") {
-		res.writeHead(200, { "Content-Type": "text/plain" });
+		res.writeHead(200, { "Content-Type": "application/json" });
 		res.end(JSON.stringify({ success: true }));
 		return;
 	}

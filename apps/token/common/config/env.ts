@@ -35,6 +35,7 @@ const getPublicUrl = () => {
 
 export const env = createEnv({
 	server: {
+		DOCUMENSO_WEBHOOK_API_KEY: z.string().min(1),
 		DATABASE_URL: z.string().min(1),
 		IS_PRODUCTION: z.boolean(),
 		IS_DEV: z.boolean(),
@@ -78,6 +79,7 @@ export const env = createEnv({
 		NEXT_PUBLIC_BUCKET_PUBLIC_URL: z.string().url().min(1),
 	},
 	runtimeEnv: {
+		DOCUMENSO_WEBHOOK_API_KEY: process.env.DOCUMENSO_WEBHOOK_API_KEY,
 		DATABASE_URL: process.env.DATABASE_URL,
 		NEXT_PUBLIC_DOMAIN: getPublicUrl(),
 		NEXT_PUBLIC_LANGUAGE: process.env.NEXT_PUBLIC_LANGUAGE,

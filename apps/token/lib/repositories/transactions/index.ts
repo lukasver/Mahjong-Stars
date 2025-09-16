@@ -836,6 +836,8 @@ class TransactionsController {
 				contractVariables.variables,
 			);
 
+			console.log("🚀 ~ index.ts:839 ~ missingVariables:", missingVariables);
+
 			return Success({
 				id: saftContract.id,
 				content: contractVariables.contract,
