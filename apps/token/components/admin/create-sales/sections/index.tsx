@@ -805,11 +805,11 @@ const initialFields = [
 ] satisfies ProjectInfoField[];
 
 const getInformationDefaultValues = (
-  info: SaleInformationItem[] | undefined,
-  docs: { images: Document[]; documents: Document[] },
+  info: SaleInformationItem[] | undefined | null,
+  docs: { images: Document[]; documents: Document[] } | null | undefined,
 ): ProjectInfoField[] => {
   const data = (info ? (SaleInformationItem.array().safeParse(info)?.data) : [...initialFields]) as ProjectInfoField[];
-  docs.documents.forEach((doc) => {
+  docs?.documents.forEach((doc) => {
     const isBanner = doc.name === 'Banner image';
     const isTokenImage = doc.name === 'Token image';
     data.push({
@@ -823,7 +823,7 @@ const getInformationDefaultValues = (
       }
     });
   });
-  docs.images.forEach((img) => {
+  docs?.images.forEach((img) => {
     const isBanner = img.name === 'Banner image';
     const isTokenImage = img.name === 'Token image';
     data.push({
