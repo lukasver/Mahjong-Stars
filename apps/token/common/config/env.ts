@@ -35,6 +35,7 @@ const getPublicUrl = () => {
 
 export const env = createEnv({
 	server: {
+		DATABASE_URL: z.string().min(1),
 		IS_PRODUCTION: z.boolean(),
 		IS_DEV: z.boolean(),
 		IS_TEST: z.boolean(),
@@ -77,6 +78,7 @@ export const env = createEnv({
 		NEXT_PUBLIC_BUCKET_PUBLIC_URL: z.string().url().min(1),
 	},
 	runtimeEnv: {
+		DATABASE_URL: process.env.DATABASE_URL,
 		NEXT_PUBLIC_DOMAIN: getPublicUrl(),
 		NEXT_PUBLIC_LANGUAGE: process.env.NEXT_PUBLIC_LANGUAGE,
 		NEXT_PUBLIC_DEBUG: process.env.DEBUG, // Same as DEBUG

@@ -80,6 +80,7 @@ describe("Amount Calculator service", () => {
 			const spy = sandbox.spy(service, "getPricePerUnit");
 			const iterable = Object.values(mockExchangeRates)
 				.reduce(
+					// @ts-ignore fixme
 					(agg, el) => agg.concat(Object.values(el)).filter((e) => e !== 1),
 					[] as number[],
 				)

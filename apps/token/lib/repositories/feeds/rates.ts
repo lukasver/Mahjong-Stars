@@ -233,7 +233,6 @@ export class RatesController {
 			}
 			const data = await response.json();
 
-
 			return GetExchangeRate.parse(data);
 		} catch (e) {
 			// if fetcher or parsing fails, then response is unexpected. We need to try calling the backup service.

@@ -100,7 +100,6 @@ export const upsertSale = adminClient
 		if (parsedInput.id) {
 			const { id, ...rest } = parsedInput;
 
-
 			sale = await salesController.updateSale(
 				{
 					id,

@@ -2,9 +2,9 @@ packages:
   - apps/*
   - packages/*
 ignoredBuiltDependencies:
-  - '@parcel/watcher'
-  - '@prisma/engines'
-  - '@tailwindcss/oxide'
+  - "@parcel/watcher"
+  - "@prisma/engines"
+  - "@tailwindcss/oxide"
   - bufferutil
   - es5-ext
   - esbuild
@@ -14,8 +14,11 @@ ignoredBuiltDependencies:
   - unrs-resolver
   - utf-8-validate
 onlyBuiltDependencies:
-  - '@biomejs/biome'
-  - '@prisma/client'
+  - "@biomejs/biome"
+  - "@prisma/client"
   - contentlayer2
   - core-js
   - protobufjs
+overrides:
+  "prisma": "6.8.2"
+  "@prisma/client": "6.8.2"

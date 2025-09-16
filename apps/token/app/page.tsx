@@ -2,6 +2,7 @@ import { invariant } from "@epic-web/invariant";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import Image from "next/image";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { ConnectWallet } from "@/components/connect-wallet";
 import { Logo, LogoAnimate } from "@/components/logo";
@@ -68,6 +69,7 @@ export default async function Login() {
 }
 
 const LoginComponent = async () => {
+  connection();
   const qc = getQueryClient();
 
   const { data } = await qc.fetchQuery({
@@ -76,7 +78,6 @@ const LoginComponent = async () => {
   });
 
   invariant(data?.chains, "Chains not configured");
-
 
   return (
     <HydrationBoundary state={dehydrate(qc)}>

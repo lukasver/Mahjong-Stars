@@ -38,6 +38,7 @@ export async function seedBlockchains(prisma: PrismaClient) {
 		chainId: id,
 		name: nativeCurrency?.name,
 		contractAddress: NATIVE_TOKEN_ADDRESS,
+		image: `https://storage.googleapis.com/mjs-public/branding/curs/${nativeCurrency?.symbol}.webp`,
 	})).filter(Boolean);
 
 	await Promise.all([
@@ -68,6 +69,10 @@ export async function seedBlockchains(prisma: PrismaClient) {
 				Object.entries(tokens).map(async ([tokenSymbol, token]) => {
 					if (token.isNative) {
 						// Native token creation is handled in the previous step
+						return Promise.resolve();
+					}
+					if (!ALLOWED_CHAINS.some((c) => c.id === Number(chainId))) {
+						// Do not create tokens from blockchains that are not allowed
 						return Promise.resolve();
 					}
 					return prisma.token.create({
