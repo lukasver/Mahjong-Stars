@@ -124,7 +124,8 @@
 				"EMAIL_FROM",
 				"MAGIC_WORD",
 				"CRON_SECRET",
-				"JWT_SECRET"
+				"JWT_SECRET",
+				"DOCUMENSO_WEBHOOK_API_KEY"
 			]
 		},
 		"@mjs/i18n#build": {
