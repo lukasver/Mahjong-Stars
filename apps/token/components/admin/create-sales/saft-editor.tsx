@@ -87,6 +87,8 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
   const handleVariableClick = (variable: string) => {
     const v = `{{${variable.trim()}}}`;
     editor?.commands.insertContent(v);
+    // Move the focus to the end of the editor
+    editor?.commands.focus();
 
   };
 

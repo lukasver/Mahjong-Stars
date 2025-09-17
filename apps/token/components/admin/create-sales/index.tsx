@@ -347,6 +347,7 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
   const [saleId] = useQueryState("saleId", parseAsString.withDefault(""));
 
   if (!step) return null;
+
   return (
     <ErrorBoundary
       fallback={
@@ -357,7 +358,7 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
-              key={1}
+              key="step-1"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -368,7 +369,7 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
           )}
           {step === 2 && (
             <motion.div
-              key={2}
+              key="step-2"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -379,7 +380,7 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
           )}
           {step === 3 && (
             <motion.div
-              key={3}
+              key="step-3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -390,7 +391,7 @@ const SectionForm = ({ children }: { children?: React.ReactNode }) => {
           )}
           {step === 4 && (
             <motion.div
-              key={4}
+              key="step-4"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
