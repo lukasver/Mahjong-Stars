@@ -1,10 +1,7 @@
 "use client";
 
 import { getGlassyCardClassName } from "@mjs/ui/components/cards";
-import {
-  AnimatePresence,
-  FadeAnimation
-} from "@mjs/ui/components/motion";
+import { AnimatePresence, FadeAnimation } from "@mjs/ui/components/motion";
 import { Button } from "@mjs/ui/primitives/button";
 import { Card } from "@mjs/ui/primitives/card";
 import { useAppForm } from "@mjs/ui/primitives/form/index";
@@ -14,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { Dispatch, SetStateAction, useCallback, useTransition } from "react";
+import { Dispatch, SetStateAction, useCallback } from "react";
 import { InformationSchemaAsStrings } from "@/common/schemas/dtos/sales/information";
 import { useSensitiveAction } from "@/components/hooks/use-sensitive-action";
 import { Stepper } from "@/components/stepper";
@@ -26,24 +23,22 @@ import {
   upsertSale,
 } from "@/lib/actions/admin";
 import { useSale } from "@/lib/services/api";
+import { getSale } from "@/lib/services/fetchers";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
-import {
-  SectionContainer
-} from "./sections";
+import { SectionContainer } from "./sections";
 import { FormFooter } from "./sections/footer";
 import { FileType, getSteps, SaleFormSchema, SaleSchemas } from "./utils";
 
 export const CreateSaleForm = () => {
   const router = useRouter();
-  const [isTransitioning, startTransition] = useTransition();
   const [step, setStep] = useQueryState(
     "step",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true, }),
+    parseAsInteger.withDefault(1).withOptions({ shallow: true }),
   );
   const [saleId, setSaleId] = useQueryState(
     "saleId",
-    parseAsString.withDefault("").withOptions({ startTransition }),
+    parseAsString.withDefault("").withOptions({ shallow: true }),
   );
   const t = useTranslations("admin.sales.create");
   const { data } = useSale(saleId);
@@ -106,12 +101,15 @@ export const CreateSaleForm = () => {
             const res = await saleAction.executeAsync(vals);
 
             if (res?.data) {
-              startTransition(() => {
-                setStep((pv) => pv + 1);
-              });
-              setSaleId(res.data.sale.id);
+              const id = res.data.sale.id;
+              setSaleId(id);
               // Go to next step
+              setStep((pv) => pv + 1);
               queryClient.invalidateQueries({ queryKey: ["sales"] });
+              queryClient.prefetchQuery({
+                queryKey: ["sales", id],
+                queryFn: ({ queryKey }) => getSale(queryKey[1] || id),
+              });
             } else {
               throw new Error(
                 res?.serverError ||
@@ -279,7 +277,6 @@ export const CreateSaleForm = () => {
     [form],
   );
 
-
   return (
     <form.AppForm>
       <form onSubmit={handleSubmit}>
@@ -290,7 +287,7 @@ export const CreateSaleForm = () => {
               className="col-span-2"
             >
               <FormStepper steps={steps} step={step} setStep={setStep} />
-              {isTransitioning ? <div className="animate-pulse bg-gray-200 rounded h-64" /> : <StepContent />}
+              <StepContent />
               <FormFooter steps={steps} />
             </SectionContainer>
           </FadeAnimation>
@@ -310,7 +307,11 @@ export const CreateSaleForm = () => {
   );
 };
 
-const FormStepper = ({ step, className, ...props }: {
+const FormStepper = ({
+  step,
+  className,
+  ...props
+}: {
   className?: string;
   steps: { id: number; name: string; description: string }[];
   step: number;
@@ -318,16 +319,16 @@ const FormStepper = ({ step, className, ...props }: {
 }) => {
   return (
     <Card className={getGlassyCardClassName(className)}>
-      <Stepper
-        currentStep={step}
-        {...props}
-      />
+      <Stepper currentStep={step} {...props} />
     </Card>
   );
 };
 
 const StepContent = dynamic(
-  () => import("./sections/step-content").then((mod) => ({ default: mod.StepContent })),
+  () =>
+    import("./sections/step-content").then((mod) => ({
+      default: mod.StepContent,
+    })),
   {
     ssr: false,
     loading: () => (
