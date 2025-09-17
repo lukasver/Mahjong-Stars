@@ -1,23 +1,21 @@
 "use client";
 
 import { getGlassyCardClassName } from "@mjs/ui/components/cards";
-import ErrorBoundary from "@mjs/ui/components/error-boundary";
 import {
   AnimatePresence,
-  FadeAnimation,
-  motion,
+  FadeAnimation
 } from "@mjs/ui/components/motion";
 import { Button } from "@mjs/ui/primitives/button";
 import { Card } from "@mjs/ui/primitives/card";
 import { useAppForm } from "@mjs/ui/primitives/form/index";
 import { toast } from "@mjs/ui/primitives/sonner";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { useCallback } from "react";
+import { Dispatch, SetStateAction, useCallback } from "react";
 import { InformationSchemaAsStrings } from "@/common/schemas/dtos/sales/information";
-import { FormError } from "@/components/form-error";
 import { useSensitiveAction } from "@/components/hooks/use-sensitive-action";
 import { Stepper } from "@/components/stepper";
 import { getFileUploadPublicPresignedUrl } from "@/lib/actions";
@@ -31,11 +29,7 @@ import { useSale } from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
 import {
-  PaymentInformation,
-  ProjectInformation,
-  SaftInformation,
-  SectionContainer,
-  TokenInformation,
+  SectionContainer
 } from "./sections";
 import { FormFooter } from "./sections/footer";
 import { FileType, getSteps, SaleFormSchema, SaleSchemas } from "./utils";
@@ -44,7 +38,7 @@ export const CreateSaleForm = () => {
   const router = useRouter();
   const [step, setStep] = useQueryState(
     "step",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true }),
+    parseAsInteger.withDefault(1).withOptions({ shallow: true, }),
   );
   const [saleId, setSaleId] = useQueryState(
     "saleId",
@@ -199,7 +193,6 @@ export const CreateSaleForm = () => {
               (item) => item.type !== "file",
             );
 
-
             if (fileValues.length > 0) {
               const uploads = await Promise.all(
                 fileValues.map(async ({ value }) => {
@@ -229,7 +222,6 @@ export const CreateSaleForm = () => {
                 }),
               );
 
-
               uploadedFiles = fileValues.map((file, i) => ({
                 type: "file",
                 label: file.label,
@@ -238,7 +230,6 @@ export const CreateSaleForm = () => {
                   (uploads[i]?.prefix || "") + uploads[i]?.fileName,
                 props: file.props,
               }));
-
             }
 
             const result = await informationAction.executeAsync({
@@ -294,9 +285,8 @@ export const CreateSaleForm = () => {
               title={saleId ? "Edit Sale" : "Create a new sale"}
               className="col-span-2"
             >
-              <FormStepper steps={steps} />
-              <SectionForm />
-
+              <FormStepper steps={steps} step={step} setStep={setStep} />
+              <StepContent />
               <FormFooter steps={steps} />
             </SectionContainer>
           </FadeAnimation>
@@ -316,93 +306,30 @@ export const CreateSaleForm = () => {
   );
 };
 
-const FormStepper = ({
-  className,
-  steps,
-}: {
+const FormStepper = ({ step, className, ...props }: {
   className?: string;
   steps: { id: number; name: string; description: string }[];
+  step: number;
+  setStep: Dispatch<SetStateAction<number>>;
 }) => {
-  const [step, setStep] = useQueryState(
-    "step",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true }),
-  );
   return (
     <Card className={getGlassyCardClassName(className)}>
       <Stepper
         currentStep={step}
-        steps={steps}
-        className={className}
-        onStepClick={setStep}
+        {...props}
       />
     </Card>
   );
 };
 
-const SectionForm = ({ children }: { children?: React.ReactNode }) => {
-  const [step] = useQueryState(
-    "step",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true }),
-  );
-  const [saleId] = useQueryState("saleId", parseAsString.withDefault(""));
-
-  if (!step) return null;
-
-  return (
-    <ErrorBoundary
-      fallback={
-        <FormError type="custom" message="Error with creating sale section" />
-      }
-    >
+const StepContent = dynamic(
+  () => import("./sections/step-content").then((mod) => ({ default: mod.StepContent })),
+  {
+    ssr: false,
+    loading: () => (
       <div className="flex flex-col gap-4 min-h-[300px] h-full">
-        <AnimatePresence mode="wait">
-          {step === 1 && (
-            <motion.div
-              key="step-1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <TokenInformation saleId={saleId} step={step} />
-            </motion.div>
-          )}
-          {step === 2 && (
-            <motion.div
-              key="step-2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <SaftInformation saleId={saleId} />
-            </motion.div>
-          )}
-          {step === 3 && (
-            <motion.div
-              key="step-3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <PaymentInformation saleId={saleId} />
-            </motion.div>
-          )}
-          {step === 4 && (
-            <motion.div
-              key="step-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <ProjectInformation saleId={saleId} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-        {children}
+        <div className="animate-pulse bg-gray-200 rounded h-64" />
       </div>
-    </ErrorBoundary>
-  );
-};
+    ),
+  },
+);
