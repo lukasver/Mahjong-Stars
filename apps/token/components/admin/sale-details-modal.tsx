@@ -1,24 +1,23 @@
-'use client';
+"use client";
 
-import type React from 'react';
-
-import { Badge } from '@mjs/ui/primitives/badge';
-import { Button } from '@mjs/ui/primitives/button';
+import { Badge } from "@mjs/ui/primitives/badge";
+import { Button } from "@mjs/ui/primitives/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@mjs/ui/primitives/dialog';
-import { Separator } from '@mjs/ui/primitives/separator';
-import { Copy, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
-import { copyToClipboard, formatCurrency, formatDate } from '@mjs/utils/client';
-import { useSale } from '@/lib/services/api';
-import { Prisma } from '@prisma/client';
-import { Skeleton } from '@mjs/ui/primitives/skeleton';
-import { useLocale } from 'next-intl';
-import { DateTime } from 'luxon';
+} from "@mjs/ui/primitives/dialog";
+import { Separator } from "@mjs/ui/primitives/separator";
+import { Skeleton } from "@mjs/ui/primitives/skeleton";
+import { copyToClipboard, formatCurrency, formatDate } from "@mjs/utils/client";
+import { Prisma } from "@prisma/client";
+import { CheckCircle, Copy, ExternalLink, XCircle } from "lucide-react";
+import { DateTime } from "luxon";
+import { useLocale } from "next-intl";
+import type React from "react";
+import { useSale } from "@/lib/services/api";
 
 interface SaleDetailsModalProps {
   open: boolean;
@@ -29,20 +28,20 @@ interface SaleDetailsModalProps {
 function getStatusBadge(status: string) {
   const statusConfig = {
     OPEN: {
-      variant: 'default' as const,
-      color: 'text-green-600 bg-green-50 border-green-200',
+      variant: "default" as const,
+      color: "text-green-600 bg-green-50 border-green-200",
     },
     CREATED: {
-      variant: 'secondary' as const,
-      color: 'text-blue-600 bg-blue-50 border-blue-200',
+      variant: "secondary" as const,
+      color: "text-blue-600 bg-blue-50 border-blue-200",
     },
     CLOSED: {
-      variant: 'outline' as const,
-      color: 'text-gray-600 bg-gray-50 border-gray-200',
+      variant: "outline" as const,
+      color: "text-gray-600 bg-gray-50 border-gray-200",
     },
     PAUSED: {
-      variant: 'destructive' as const,
-      color: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+      variant: "destructive" as const,
+      color: "text-yellow-600 bg-yellow-50 border-yellow-200",
     },
   };
 
@@ -56,16 +55,16 @@ function getStatusBadge(status: string) {
   );
 }
 
-function formatNumber(num?: number | string | null, locale: string = 'en-US') {
-  if (!num) return 'N/A';
+function formatNumber(num?: number | string | null, locale: string = "en-US") {
+  if (!num) return "N/A";
   const decimal = new Prisma.Decimal(num);
   const asNum = decimal.toNumber();
-  if (isNaN(asNum)) return 'N/A';
+  if (isNaN(asNum)) return "N/A";
   return new Intl.NumberFormat(locale).format(asNum);
 }
 
 function formatAddress(address: string) {
-  if (!address) return 'N/A';
+  if (!address) return "N/A";
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
@@ -79,20 +78,20 @@ function DetailRow({
   copyable?: boolean;
 }) {
   return (
-    <div className='flex justify-between items-start py-2'>
-      <span className='text-sm font-medium text-secondary min-w-[140px]'>
+    <div className="flex justify-between items-start py-2">
+      <span className="text-sm font-medium text-secondary min-w-[140px]">
         {label}:
       </span>
-      <div className='flex items-center gap-2 flex-1 justify-end'>
-        <span className='text-sm text-right'>{value}</span>
-        {copyable && typeof value === 'string' && (
+      <div className="flex items-center gap-2 flex-1 justify-end">
+        <span className="text-sm text-right">{value}</span>
+        {copyable && typeof value === "string" && (
           <Button
-            variant='ghost'
-            size='sm'
-            className='h-6 w-6 p-0'
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
             onClick={() => copyToClipboard(value)}
           >
-            <Copy className='h-3 w-3' />
+            <Copy className="h-3 w-3" />
           </Button>
         )}
       </div>
@@ -116,7 +115,7 @@ export function SaleDetailsModal({
   }
   // If we are not loading and sale is null, throw error
   if (!sale && !isLoading) {
-    throw new Error('Sale not found');
+    throw new Error("Sale not found");
   }
 
   if (!sale) return null;
@@ -130,18 +129,18 @@ export function SaleDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-4xl max-h-[90vh] overflow-y-auto'>
+      <DialogContent className="md:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className='flex items-start justify-between'>
+          <div className="flex items-start justify-between">
             <div>
-              <DialogTitle className='text-xl font-semibold'>
-                {isLoading ? <Skeleton className='w-40 h-6' /> : sale.name}
+              <DialogTitle className="text-xl font-semibold">
+                {isLoading ? <Skeleton className="w-40 h-6" /> : sale.name}
               </DialogTitle>
-              <DialogDescription className='mt-1'>
+              <DialogDescription className="mt-1">
                 {isLoading ? (
-                  <Skeleton className='w-52 h-4' />
+                  <Skeleton className="w-52 h-4" />
                 ) : (
-                  'Detailed information about this token sale'
+                  "Detailed information about this token sale"
                 )}
               </DialogDescription>
             </div>
@@ -149,16 +148,16 @@ export function SaleDetailsModal({
           </div>
         </DialogHeader>
 
-        <div className='grid gap-6 py-4'>
+        <div className="grid gap-6 py-4">
           {/* Basic Information */}
           <div>
-            <h3 className='text-lg font-semibold mb-3'>Basic Information</h3>
-            <div className='space-y-1'>
-              <DetailRow label='Sale ID' value={sale.id} copyable />
-              <DetailRow label='Sale Name' value={sale.name} />
-              <DetailRow label='Status' value={getStatusBadge(sale.status)} />
-              <DetailRow label='Created By' value={sale.createdBy} />
-              <DetailRow label='Currency' value={sale.currency} />
+            <h3 className="text-lg font-semibold mb-3">Basic Information</h3>
+            <div className="space-y-1">
+              <DetailRow label="Sale ID" value={sale.id} copyable />
+              <DetailRow label="Sale Name" value={sale.name} />
+              <DetailRow label="Status" value={getStatusBadge(sale.status)} />
+              <DetailRow label="Created By" value={sale.createdBy} />
+              <DetailRow label="Currency" value={sale.currency} />
             </div>
           </div>
 
@@ -166,8 +165,8 @@ export function SaleDetailsModal({
 
           {/* Token Information */}
           <div>
-            <h3 className='text-lg font-semibold mb-3'>Token Information</h3>
-            <div className='space-y-1'>
+            <h3 className="text-lg font-semibold mb-3">Token Information</h3>
+            <div className="space-y-1">
               {sale.information &&
                 Array.isArray(sale.information) &&
                 sale.information.map((item) => {
@@ -184,44 +183,44 @@ export function SaleDetailsModal({
                     />
                   );
                 })}
-              <DetailRow label='Token Name' value={sale.tokenName} />
-              <DetailRow label='Token Symbol' value={sale.tokenSymbol} />
-              <DetailRow label='Token ID' value={sale.tokenId} />
+              <DetailRow label="Token Name" value={sale.tokenName} />
+              <DetailRow label="Token Symbol" value={sale.tokenSymbol} />
+              <DetailRow label="Token ID" value={sale.tokenId} />
               <DetailRow
-                label='Total Supply'
+                label="Total Supply"
                 value={formatNumber(sale.tokenTotalSupply)}
               />
               <DetailRow
-                label='Price per Unit'
+                label="Price per Unit"
                 value={formatCurrency(sale.tokenPricePerUnit, {
                   locale,
                   currency: sale.currency,
                 })}
               />
               <DetailRow
-                label='Contract Address'
+                label="Contract Address"
                 value={
-                  <div className='flex items-center gap-2'>
-                    <span className='font-mono text-xs'>
-                      {formatAddress(sale.tokenContractAddress || '')}
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs">
+                      {formatAddress(sale.tokenContractAddress || "")}
                     </span>
                     <Button
-                      variant='ghost'
-                      size='sm'
-                      className='h-6 w-6 p-0'
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
                       onClick={() =>
-                        copyToClipboard(sale.tokenContractAddress || '')
+                        copyToClipboard(sale.tokenContractAddress || "")
                       }
                     >
-                      <Copy className='h-3 w-3' />
+                      <Copy className="h-3 w-3" />
                     </Button>
-                    <Button variant='ghost' size='sm' className='h-6 w-6 p-0'>
-                      <ExternalLink className='h-3 w-3' />
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      <ExternalLink className="h-3 w-3" />
                     </Button>
                   </div>
                 }
               />
-              <DetailRow label='Chain ID' value={sale.tokenContractChainId} />
+              <DetailRow label="Chain ID" value={sale.tokenContractChainId} />
             </div>
           </div>
 
@@ -229,42 +228,42 @@ export function SaleDetailsModal({
 
           {/* Sale Parameters */}
           <div>
-            <h3 className='text-lg font-semibold mb-3'>Sale Parameters</h3>
-            <div className='space-y-1'>
+            <h3 className="text-lg font-semibold mb-3">Sale Parameters</h3>
+            <div className="space-y-1">
               <DetailRow
-                label='Initial Quantity'
+                label="Initial Quantity"
                 value={formatNumber(sale.initialTokenQuantity)}
               />
               <DetailRow
-                label='Available Quantity'
+                label="Available Quantity"
                 value={formatNumber(sale.availableTokenQuantity)}
               />
               <DetailRow
-                label='Sold Quantity'
+                label="Sold Quantity"
                 value={formatNumber(soldTokens)}
               />
               <DetailRow
-                label='Progress'
+                label="Progress"
                 value={
-                  <div className='flex items-center gap-2 min-w-[120px]'>
-                    <div className='flex-1 bg-secondary rounded-full h-2'>
+                  <div className="flex items-center gap-2 min-w-[120px]">
+                    <div className="flex-1 bg-secondary rounded-full h-2">
                       <div
-                        className='bg-primary h-2 rounded-full transition-all'
+                        className="bg-primary h-2 rounded-full transition-all"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
-                    <span className='text-xs font-medium min-w-[3rem]'>
+                    <span className="text-xs font-medium min-w-[3rem]">
                       {progress.toFixed(1)}%
                     </span>
                   </div>
                 }
               />
               <DetailRow
-                label='Min Buy per User'
+                label="Min Buy per User"
                 value={formatNumber(sale.minimumTokenBuyPerUser)}
               />
               <DetailRow
-                label='Max Buy per User'
+                label="Max Buy per User"
                 value={formatNumber(sale.maximumTokenBuyPerUser)}
               />
             </div>
@@ -274,25 +273,25 @@ export function SaleDetailsModal({
 
           {/* Dates */}
           <div>
-            <h3 className='text-lg font-semibold mb-3'>Timeline</h3>
-            <div className='space-y-1'>
+            <h3 className="text-lg font-semibold mb-3">Timeline</h3>
+            <div className="space-y-1">
               <DetailRow
-                label='Start Date'
+                label="Start Date"
                 value={formatDate(sale.saleStartDate, {
                   locale,
                   format: DateTime.DATE_MED,
                 })}
               />
               <DetailRow
-                label='End Date'
+                label="End Date"
                 value={formatDate(sale.saleClosingDate)}
               />
               <DetailRow
-                label='Duration'
+                label="Duration"
                 value={`${Math.ceil(
                   (new Date(sale.saleClosingDate).getTime() -
                     new Date(sale.saleStartDate).getTime()) /
-                    (1000 * 60 * 60 * 24)
+                  (1000 * 60 * 60 * 24),
                 )} days`}
               />
             </div>
@@ -302,54 +301,54 @@ export function SaleDetailsModal({
 
           {/* Wallet & Contract Information */}
           <div>
-            <h3 className='text-lg font-semibold mb-3'>
+            <h3 className="text-lg font-semibold mb-3">
               Wallet & Contract Information
             </h3>
-            <div className='space-y-1'>
+            <div className="space-y-1">
               <DetailRow
-                label='Wallet Address'
+                label="Wallet Address"
                 value={
-                  <div className='flex items-center gap-2'>
-                    <span className='font-mono text-xs'>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs">
                       {formatAddress(sale.toWalletsAddress)}
                     </span>
                     <Button
-                      variant='ghost'
-                      size='sm'
-                      className='h-6 w-6 p-0'
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
                       onClick={() => copyToClipboard(sale.toWalletsAddress)}
                     >
-                      <Copy className='h-3 w-3' />
+                      <Copy className="h-3 w-3" />
                     </Button>
-                    <Button variant='ghost' size='sm' className='h-6 w-6 p-0'>
-                      <ExternalLink className='h-3 w-3' />
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      <ExternalLink className="h-3 w-3" />
                     </Button>
                   </div>
                 }
               />
               <DetailRow
-                label='SAFT Agreement'
+                label="SAFT Agreement"
                 value={
-                  <div className='flex items-center gap-2'>
+                  <div className="flex items-center gap-2">
                     {sale.saftCheckbox ? (
-                      <CheckCircle className='h-4 w-4 text-green-500' />
+                      <CheckCircle className="h-4 w-4 text-green-500" />
                     ) : (
-                      <XCircle className='h-4 w-4 text-red-500' />
+                      <XCircle className="h-4 w-4 text-red-500" />
                     )}
-                    <span>{sale.saftCheckbox ? 'Enabled' : 'Disabled'}</span>
+                    <span>{sale.saftCheckbox ? "Enabled" : "Disabled"}</span>
                   </div>
                 }
               />
               <DetailRow
-                label='KYC Required'
+                label="KYC Required"
                 value={
-                  <div className='flex items-center gap-2'>
+                  <div className="flex items-center gap-2">
                     {sale.requiresKYC ? (
-                      <CheckCircle className='h-4 w-4 text-green-500' />
+                      <CheckCircle className="h-4 w-4 text-green-500" />
                     ) : (
-                      <XCircle className='h-4 w-4 text-red-500' />
+                      <XCircle className="h-4 w-4 text-red-500" />
                     )}
-                    <span>{sale.requiresKYC ? 'Enabled' : 'Disabled'}</span>
+                    <span>{sale.requiresKYC ? "Enabled" : "Disabled"}</span>
                   </div>
                 }
               />
@@ -384,11 +383,11 @@ export function SaleDetailsModal({
 
           {/* Financial Summary */}
           <div>
-            <h3 className='text-lg font-semibold mb-3'>Financial Summary</h3>
-            <div className='grid grid-cols-2 gap-4'>
-              <div className='bg-muted/50 p-4 rounded-lg'>
-                <div className='text-sm text-muted-foreground'>Total Value</div>
-                <div className='text-2xl font-bold'>
+            <h3 className="text-lg font-semibold mb-3">Financial Summary</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <div className="text-sm text-muted-foreground">Total Value</div>
+                <div className="text-2xl font-bold">
                   {formatCurrency(
                     new Prisma.Decimal(sale.initialTokenQuantity)
                       .mul(sale.tokenPricePerUnit)
@@ -396,15 +395,15 @@ export function SaleDetailsModal({
                     {
                       locale,
                       currency: sale.currency,
-                    }
+                    },
                   )}
                 </div>
               </div>
-              <div className='bg-muted/50 p-4 rounded-lg'>
-                <div className='text-sm text-muted-foreground'>
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <div className="text-sm text-muted-foreground">
                   Raised So Far
                 </div>
-                <div className='text-2xl font-bold'>
+                <div className="text-2xl font-bold">
                   {formatCurrency(
                     new Prisma.Decimal(soldTokens)
                       .mul(sale.tokenPricePerUnit)
@@ -412,7 +411,7 @@ export function SaleDetailsModal({
                     {
                       locale,
                       currency: sale.currency,
-                    }
+                    },
                   )}
                 </div>
               </div>
@@ -420,8 +419,8 @@ export function SaleDetailsModal({
           </div>
         </div>
 
-        <div className='flex justify-end gap-2 pt-4 border-t'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
           <Button>Edit Sale</Button>
