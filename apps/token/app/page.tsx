@@ -69,7 +69,8 @@ export default async function Login() {
 }
 
 const LoginComponent = async () => {
-  connection();
+  // https://nextjs.org/docs/app/api-reference/functions/connection
+  await connection();
   const qc = getQueryClient();
 
   const { data } = await qc.fetchQuery({
