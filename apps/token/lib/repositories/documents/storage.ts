@@ -131,7 +131,7 @@ export class StorageService {
 
 		const [exists] = await file.exists();
 		if (!exists) {
-			logger(`File not found: ${bucket}/${fileName}`, {
+			logger(`File not found: ${bucket}/${fileName}`, undefined, {
 				bucket,
 				fileName,
 				opt,
