@@ -1,7 +1,10 @@
 "use client";
 
 import { getGlassyCardClassName } from "@mjs/ui/components/cards";
-import { AnimatePresence, FadeAnimation } from "@mjs/ui/components/motion";
+import {
+  AnimatePresence,
+  FadeAnimation
+} from "@mjs/ui/components/motion";
 import { Button } from "@mjs/ui/primitives/button";
 import { Card } from "@mjs/ui/primitives/card";
 import { useAppForm } from "@mjs/ui/primitives/form/index";
@@ -23,10 +26,11 @@ import {
   upsertSale,
 } from "@/lib/actions/admin";
 import { useSale } from "@/lib/services/api";
-import { getSale } from "@/lib/services/fetchers";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
-import { SectionContainer } from "./sections";
+import {
+  SectionContainer
+} from "./sections";
 import { FormFooter } from "./sections/footer";
 import { FileType, getSteps, SaleFormSchema, SaleSchemas } from "./utils";
 
@@ -34,11 +38,11 @@ export const CreateSaleForm = () => {
   const router = useRouter();
   const [step, setStep] = useQueryState(
     "step",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true }),
+    parseAsInteger.withDefault(1).withOptions({ shallow: true, }),
   );
   const [saleId, setSaleId] = useQueryState(
     "saleId",
-    parseAsString.withDefault("").withOptions({ shallow: true }),
+    parseAsString.withDefault(""),
   );
   const t = useTranslations("admin.sales.create");
   const { data } = useSale(saleId);
@@ -101,15 +105,10 @@ export const CreateSaleForm = () => {
             const res = await saleAction.executeAsync(vals);
 
             if (res?.data) {
-              const id = res.data.sale.id;
-              setSaleId(id);
+              setSaleId(res.data.sale.id);
               // Go to next step
               setStep((pv) => pv + 1);
               queryClient.invalidateQueries({ queryKey: ["sales"] });
-              queryClient.prefetchQuery({
-                queryKey: ["sales", id],
-                queryFn: ({ queryKey }) => getSale(queryKey[1] || id),
-              });
             } else {
               throw new Error(
                 res?.serverError ||
@@ -307,11 +306,7 @@ export const CreateSaleForm = () => {
   );
 };
 
-const FormStepper = ({
-  step,
-  className,
-  ...props
-}: {
+const FormStepper = ({ step, className, ...props }: {
   className?: string;
   steps: { id: number; name: string; description: string }[];
   step: number;
@@ -319,16 +314,16 @@ const FormStepper = ({
 }) => {
   return (
     <Card className={getGlassyCardClassName(className)}>
-      <Stepper currentStep={step} {...props} />
+      <Stepper
+        currentStep={step}
+        {...props}
+      />
     </Card>
   );
 };
 
 const StepContent = dynamic(
-  () =>
-    import("./sections/step-content").then((mod) => ({
-      default: mod.StepContent,
-    })),
+  () => import("./sections/step-content").then((mod) => ({ default: mod.StepContent })),
   {
     ssr: false,
     loading: () => (

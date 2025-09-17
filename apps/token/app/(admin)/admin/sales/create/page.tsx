@@ -1,10 +1,10 @@
-import { CreateSaleForm } from '@/components/admin/create-sales';
-import { getSale } from '@/lib/actions';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
-} from '@tanstack/react-query';
+} from "@tanstack/react-query";
+import { CreateSaleForm } from "@/components/admin/create-sales";
+import { getSale } from "@/lib/actions";
 
 export default async function AdminPage({ params, searchParams }: PageProps) {
   const [_, { saleId }] = await Promise.all([params, searchParams]);
@@ -13,7 +13,7 @@ export default async function AdminPage({ params, searchParams }: PageProps) {
   if (saleId) {
     // If we have info about the sale in the params, prefetch it
     await queryClient.prefetchQuery({
-      queryKey: ['sales', saleId],
+      queryKey: ["sales", saleId],
       queryFn: ({ queryKey }) => getSale({ id: queryKey[1] as string }),
     });
   }
