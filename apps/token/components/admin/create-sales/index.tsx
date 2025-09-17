@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { Dispatch, SetStateAction, useCallback } from "react";
+import { Dispatch, SetStateAction, useCallback, useTransition } from "react";
 import { InformationSchemaAsStrings } from "@/common/schemas/dtos/sales/information";
 import { useSensitiveAction } from "@/components/hooks/use-sensitive-action";
 import { Stepper } from "@/components/stepper";
@@ -36,13 +36,14 @@ import { FileType, getSteps, SaleFormSchema, SaleSchemas } from "./utils";
 
 export const CreateSaleForm = () => {
   const router = useRouter();
+  const [isTransitioning, startTransition] = useTransition();
   const [step, setStep] = useQueryState(
     "step",
     parseAsInteger.withDefault(1).withOptions({ shallow: true, }),
   );
   const [saleId, setSaleId] = useQueryState(
     "saleId",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("").withOptions({ startTransition }),
   );
   const t = useTranslations("admin.sales.create");
   const { data } = useSale(saleId);
@@ -105,9 +106,11 @@ export const CreateSaleForm = () => {
             const res = await saleAction.executeAsync(vals);
 
             if (res?.data) {
+              startTransition(() => {
+                setStep((pv) => pv + 1);
+              });
               setSaleId(res.data.sale.id);
               // Go to next step
-              setStep((pv) => pv + 1);
               queryClient.invalidateQueries({ queryKey: ["sales"] });
             } else {
               throw new Error(
@@ -276,6 +279,7 @@ export const CreateSaleForm = () => {
     [form],
   );
 
+
   return (
     <form.AppForm>
       <form onSubmit={handleSubmit}>
@@ -286,7 +290,7 @@ export const CreateSaleForm = () => {
               className="col-span-2"
             >
               <FormStepper steps={steps} step={step} setStep={setStep} />
-              <StepContent />
+              {isTransitioning ? <div className="animate-pulse bg-gray-200 rounded h-64" /> : <StepContent />}
               <FormFooter steps={steps} />
             </SectionContainer>
           </FadeAnimation>
