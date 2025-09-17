@@ -1,130 +1,106 @@
 import { env } from "../../common/config/env";
 
-// type LogObject =
-// 	| {
-// 			level: LogSeverity;
-// 			time: string;
-// 			pid: number;
-// 			pathname: string;
-// 			hostname: string;
-// 			msg: string;
-// 			user_id?: string | number;
-// 	  }
-// 	| {
-// 			msg: string;
-// 			error: Error["message"];
-// 			stack: Error["stack"];
-// 	  };
+interface LogContext {
+	level: "debug" | "info" | "warn" | "error";
+	message: string;
+	metadata?: Record<string, unknown>;
+	timestamp?: string;
+	error?: {
+		name?: string;
+		message?: string;
+		stack?: string;
+		code?: string | number;
+	};
+}
 
-// const logging = new Logging({
-// 	projectId: IS_PRODUCTION ? "token-production-smat" : "token-dashboard-364022",
-// 	keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-// });
+const createLogEntry = (
+	level: LogContext["level"],
+	message: string,
+	metadata?: Record<string, unknown>,
+	error?: Error | unknown,
+): LogContext => {
+	const logEntry: LogContext = {
+		level,
+		message,
+		metadata,
+		timestamp: new Date().toISOString(),
+	};
 
-// const reportServer = logging.log("nextjs-server", { removeCircular: true });
+	// If an error is provided, extract structured error information
+	if (error) {
+		if (error instanceof Error) {
+			logEntry.error = {
+				name: error.name,
+				message: error.message,
+				stack: error.stack,
+				code: (error as any).code,
+			};
+		} else {
+			// Handle non-Error objects (like API responses, custom error objects, etc.)
+			logEntry.error = {
+				message: String(error),
+				name: error?.constructor?.name || "Unknown",
+			};
+		}
+	}
 
-// type ServerLoggerConfig = {
-// 	labels?: { [k: string]: string };
-// 	jsonPayload?: Record<string, string>;
-// 	textPayload?: string;
-// 	req?: NextRequestWithAuth;
-// 	status?: number;
-// };
+	return logEntry;
+};
 
-// export const serverLogger = async (
-// 	message: LoggerArgs[0],
-// 	severity?: LogSeverity,
-// 	config: ServerLoggerConfig = {},
-// ) => {
-// 	console.debug(
-// 		`[${severity}]: ${
-// 			typeof message === "string" ? message : JSON.stringify(message)
-// 		}`,
-// 	);
-// 	const { req, status, ...logEntry } = config;
-// 	const entry = reportServer.entry(
-// 		{
-// 			resource: { type: "api", labels: { name: "nextjs-server" } },
-// 			severity: severity || LogSeverity.DEFAULT,
-// 			...(!!req && {
-// 				httpRequest: {
-// 					requestMethod: req.method,
-// 					requestUrl: req.nextUrl.href,
-// 					referer:
-// 						req.headers.get("referer") || req.headers.get("x-forwarded-host"),
-// 					userAgent: req.headers.get("user-agent"),
-// 					status,
-// 					remoteIp: getIp(req),
-// 				},
-// 			}),
-// 			...logEntry,
-// 		},
-// 		message,
-// 	);
-// 	const logLevel =
-// 		severity === LogSeverity.DEFAULT
-// 			? "write"
-// 			: (severity?.toLowerCase() ?? "write");
-// 	await reportServer[logLevel](entry).catch(console.error);
-// };
-
-// export const getIp = (req: ServerLoggerConfig["req"]) => {
-// 	return (
-// 		req?.headers?.["x-forwarded-for"] ||
-// 		req?.headers["x-real-ip"] ||
-// 		req?.headers.get("x-forwarded-for") ||
-// 		req?.headers.get("x-real-ip")
-// 	);
-// };
-
-// type LoggerArgs = [
-// 	string | LogObject | Error | ReturnType<typeof getError>,
-// 	LogSeverity?,
-// 	ServerLoggerConfig?,
-// ];
-
-// const logger = (...args: LoggerArgs) => {
-// 	const [m, severity, config] = args;
-
-// 	let messageToSend: LoggerArgs[0] = m;
-
-// 	if (typeof m === "string") {
-// 		messageToSend = m;
-// 	}
-// 	if (m instanceof Error) {
-// 		messageToSend = {
-// 			msg: m.name,
-// 			error: m.message,
-// 			stack: m.stack,
-// 		};
-// 	}
-// 	if (m instanceof AxiosError) {
-// 		const body = m?.response?.data;
-// 		messageToSend = {
-// 			msg: m.name,
-// 			error:
-// 				body?.error || body?.message || body ? JSON.stringify(body) : m.message,
-// 			stack: m?.stack,
-// 		};
-// 	}
-// 	if (m instanceof ZodError) {
-// 		messageToSend = {
-// 			msg: m.name,
-// 			error: m.message || GET_UNHANDLED_ERROR,
-// 			stack: JSON.stringify(m.flatten()) || m.stack,
-// 		};
-// 	}
-
-// 	if (IS_DEVELOPMENT || IS_TEST) {
-// 		return console.debug(`[${severity}] ${JSON.stringify(messageToSend)}`);
-// 	}
-// 	return serverLogger(messageToSend, severity, config);
-// };
-
-const log = (...args: unknown[]) => {
+const log = (
+	level: LogContext["level"],
+	message: string,
+	metadata?: Record<string, unknown>,
+	error?: Error | unknown,
+) => {
 	if (env.IS_DEV || env.DEBUG) {
-		console.debug("\x1b[31m%s\x1b[0m", ...args);
+		const logEntry = createLogEntry(level, message, metadata, error);
+		console[level](JSON.stringify(logEntry, null, 2));
+	} else {
+		// In production, this will be captured by Vercel's log drain
+		const logEntry = createLogEntry(level, message, metadata, error);
+		console[level](JSON.stringify(logEntry));
 	}
 };
 
-export default log;
+// Main logger function that can handle both simple error logging and structured logging
+const logger = (
+	error: Error | unknown,
+	message?: string,
+	metadata?: Record<string, unknown>,
+) => {
+	if (error instanceof Error) {
+		log("error", message || error.message, metadata, error);
+	} else if (typeof error === "string") {
+		log("info", error, metadata);
+	} else {
+		log("error", message || "Unknown error occurred", metadata, error);
+	}
+};
+
+// Structured logging methods
+logger.debug = (
+	message: string,
+	metadata?: Record<string, unknown>,
+	error?: Error | unknown,
+) => log("debug", message, metadata, error);
+
+logger.info = (
+	message: string,
+	metadata?: Record<string, unknown>,
+	error?: Error | unknown,
+) => log("info", message, metadata, error);
+
+logger.warn = (
+	message: string,
+	metadata?: Record<string, unknown>,
+	error?: Error | unknown,
+) => log("warn", message, metadata, error);
+
+logger.error = (
+	message: string,
+	metadata?: Record<string, unknown>,
+	error?: Error | unknown,
+) => log("error", message, metadata, error);
+
+export default logger;

@@ -104,8 +104,6 @@ class ContractController {
 			},
 		});
 
-		console.debug("🚀 ~ index.ts:107 ~ recipient:", recipient);
-
 		let status = recipient.status;
 
 		if (
@@ -114,18 +112,24 @@ class ContractController {
 				status === "CREATED") &&
 			recipient.externalId
 		) {
-			console.debug("calling documenso");
 			// Check status on provider in case webhook failed
 			const document = await this.documenso.documents
-				.get({
-					documentId: recipient.externalId,
-				})
+				.get(
+					{
+						documentId: recipient.externalId,
+					},
+					{
+						// To avoid this to be cached
+						cache: "no-store",
+						next: {
+							revalidate: 0,
+						},
+					},
+				)
 				.catch((e) => {
 					logger(e);
 					return null;
 				});
-
-			console.debug("🚀 ~ index.ts:128 ~ document:", document);
 
 			if (document) {
 				let mapped = DocumensoStatusToContractStatusMapping[document.status];

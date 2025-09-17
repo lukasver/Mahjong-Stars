@@ -27,13 +27,22 @@ export async function POST(req: NextRequest) {
 
 	try {
 		const isCompleted = body.payload.id && body.payload.status === "COMPLETED";
+
+		console.debug("🚀 ~ route.ts:31 ~ isCompleted:", isCompleted);
+
 		const isFailed = body.payload.id && body.event === "DOCUMENT_REJECTED";
+
+		console.debug("🚀 ~ route.ts:35 ~ isFailed:", isFailed);
+
 		const found = await prisma.documentRecipient.findFirst({
 			where: { externalId: body.payload.id },
 			select: {
 				id: true,
 			},
 		});
+
+		console.debug("🚀 ~ route.ts:44 ~ found:", found);
+
 		if (!found) {
 			console.error("Document recipient not found", body.payload);
 			return NextResponse.json(
