@@ -1,6 +1,19 @@
+import { cn } from "@mjs/ui/lib/utils";
+import { getTranslations } from "next-intl/server";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import { cn } from "@mjs/ui/lib/utils";
+
+export async function generateMetadata({ params }: PageProps) {
+	const { locale } = await params;
+	const t = await getTranslations({
+		locale: locale || "en",
+		namespace: "Metadata.Privacy",
+	});
+	return {
+		title: t("title"),
+		description: t("description"),
+	};
+}
 
 export default function TermsLayout({
 	children,

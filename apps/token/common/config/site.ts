@@ -11,7 +11,7 @@ const metadata = {
 	siteRepo: "",
 	socialBanner: "/api/og",
 	tokenSymbol: "TILE",
-	tokenName: "Mahjong Stars Token",
+	tokenName: "TILES",
 	supportEmail:
 		process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@mahjongstars.com",
 	twitter: process.env.NEXT_PUBLIC_TWITTER_HANDLE || "",

@@ -59,7 +59,7 @@ importers:
         version: 2.1.35
       next:
         specifier: 15.4.5
-        version: 15.4.5(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 15.4.5(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       nextra:
         specifier: ^4.2.17
         version: 4.2.17(acorn@8.14.1)(next@15.4.5(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)
@@ -546,9 +546,6 @@ importers:
       rtl-detect:
         specifier: ^1.1.2
         version: 1.1.2
-      schema-dts:
-        specifier: ^1.1.5
-        version: 1.1.5
       sharp:
         specifier: ^0.34.2
         version: 0.34.3
@@ -604,6 +601,9 @@ importers:
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
+      schema-dts:
+        specifier: ^1.1.5
+        version: 1.1.5
       typescript:
         specifier: 5.8.3
         version: 5.8.3
@@ -975,7 +975,7 @@ importers:
         version: 8.6.0
       next:
         specifier: 15.4.5
-        version: 15.4.5(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 15.4.5(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -10066,6 +10066,7 @@ packages:
   puppeteer@24.3.0:
     resolution: {integrity: sha512-wYEx+NnEM1T6ncHB+IsTovUgx+JlZ0pv0sRGTb8IzoTeOILvyUcdU2h34bYEQ1iG5maz1VQA5eI4kzIyAVh90A==}
     engines: {node: '>=18'}
+    deprecated: < 24.10.2 is no longer supported
     hasBin: true
 
   qrcode@1.5.3:
@@ -22186,7 +22187,7 @@ snapshots:
       postcss: 8.4.31
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
-      styled-jsx: 5.1.6(@babel/core@7.27.1)(react@19.1.0)
+      styled-jsx: 5.1.6(@babel/core@7.28.0)(react@19.1.0)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.4.5
       '@next/swc-darwin-x64': 15.4.5

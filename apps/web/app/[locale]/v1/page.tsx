@@ -22,7 +22,7 @@ export default async function Home({
 }) {
 	const [{ locale }, t] = await Promise.all([params, getTranslations()]);
 	if (process.env.NODE_ENV === "production") {
-		// Should not be accesi
+		// Should not be accesible in prod
 		notFound();
 	}
 	return (

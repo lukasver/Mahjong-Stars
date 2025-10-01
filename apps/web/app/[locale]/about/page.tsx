@@ -1,12 +1,24 @@
-import Background from "@/public/static/images/bg.webp";
-import Characters from "@/public/static/images/chars1.webp";
 import { cn } from "@mjs/ui/lib/utils";
 import { Button } from "@mjs/ui/primitives/button";
-import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import Background from "@/public/static/images/bg.webp";
+import Characters from "@/public/static/images/chars1.webp";
 import AboutSection from "./about";
+
+export async function generateMetadata({ params }: PageProps) {
+	const { locale } = await params;
+	const t = await getTranslations({
+		locale: locale || "en",
+		namespace: "Metadata.About",
+	});
+	return {
+		title: t("title"),
+		description: t("description"),
+	};
+}
 
 export default async function About({
 	params,
@@ -61,10 +73,10 @@ export default async function About({
 									"w-full h-full object-contain lg:object-cover z-1 col-start-1 col-end-2 md:col-start-1 md:col-end-7 row-start-1 row-end-4 -mt-20 animate-fade-in-down-slow 2xl:scale-75",
 									"md:scale-125",
 								)}
-								// style={{
-								//   maskImage:
-								//     'linear-gradient(to bottom, black 80%, transparent 100%)',
-								// }}
+							// style={{
+							//   maskImage:
+							//     'linear-gradient(to bottom, black 80%, transparent 100%)',
+							// }}
 							/>
 						</div>
 					</div>

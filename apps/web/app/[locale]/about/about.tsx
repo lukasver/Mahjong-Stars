@@ -1,7 +1,8 @@
-import { IngameFeatures } from "@/components/IngameFeatures";
 import { cn } from "@mjs/ui/lib/utils";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { IngameFeatures } from "@/components/IngameFeatures";
+import { createOrganizationJsonLd, JsonLd } from "@/components/JsonLd";
 
 async function AboutSection() {
 	const [t] = await Promise.all([getTranslations()]);
@@ -26,6 +27,7 @@ async function AboutSection() {
 			<Suspense fallback={null}>
 				<IngameFeatures />
 			</Suspense>
+			<JsonLd jsonLd={createOrganizationJsonLd(t)} />
 		</section>
 	);
 }

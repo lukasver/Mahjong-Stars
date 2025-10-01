@@ -1,18 +1,22 @@
 "use client";
-import { cn } from "@mjs/ui/lib/utils";
-import { useState } from "react";
 
 import { Icons } from "@mjs/ui/components/icons";
+import { cn } from "@mjs/ui/lib/utils";
 import { Button } from "@mjs/ui/primitives/button";
 import { Label } from "@mjs/ui/primitives/label";
 import { RadioGroup, RadioGroupItem } from "@mjs/ui/primitives/radio-group";
-
+import { notFound } from "next/navigation";
+import { useState } from "react";
 import {
 	pricingFrequencies as frequencies,
 	pricingTiers as tiers,
 } from "@/data/config/pricingData";
 
 export default function PricingPage() {
+	if (process.env.NODE_ENV === "production") {
+		// Should not be accesible in prod
+		notFound();
+	}
 	const [frequency, setFrequency] = useState(frequencies[0]);
 
 	const tier = tiers[0];

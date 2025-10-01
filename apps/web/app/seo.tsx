@@ -1,46 +1,26 @@
-import { siteConfig } from "@/data/config/site.settings";
+import { deepmerge } from "deepmerge-ts";
 import { Metadata } from "next";
+import { siteConfig } from "@/data/config/site.settings";
 
-interface PageSEOProps {
-	title: string;
-	description?: string;
-	image?: string;
-	canonical?: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	[key: string]: any;
-}
+const defaults = {
+	title: siteConfig.title,
+	description: siteConfig.description,
+	openGraph: {
+		title: `${siteConfig.title}`,
+		description: siteConfig.description,
+		url: "./",
+		siteName: siteConfig.title,
+		images: undefined,
+		locale: "en_US",
+		type: "website",
+	},
+	twitter: {
+		title: `${siteConfig.title}`,
+		card: "summary_large_image",
+		images: undefined,
+	},
+};
 
-export function genPageMetadata({
-	title,
-	description,
-	image,
-	canonical,
-	...rest
-}: PageSEOProps): Metadata {
-	return {
-		title,
-		description,
-		openGraph: {
-			title: `${title} | ${siteConfig.title}`,
-			description: description || siteConfig.description,
-			url: "./",
-			siteName: siteConfig.title,
-			images: image ? [image] : undefined,
-			locale: "en_US",
-			type: "website",
-		},
-		twitter: {
-			title: `${title} | ${siteConfig.title}`,
-			card: "summary_large_image",
-			images: image ? [image] : undefined,
-		},
-		...(canonical
-			? {
-					alternates: {
-						canonical,
-					},
-				}
-			: {}),
-		...rest,
-	};
+export function genPageMetadata(overrides: Partial<Metadata>): Metadata {
+	return deepmerge(defaults, overrides) as Metadata;
 }
