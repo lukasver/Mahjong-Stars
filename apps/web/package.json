@@ -11,7 +11,7 @@
 	"scripts": {
 		"dev": "pnpm run build-deps && cross-env PORT=6006 NODE_OPTIONS='--no-warnings' next dev",
 		"build": "pnpm run build-deps && next build",
-		"serve": "next start",
+		"start": "next start",
 		"build-deps": "turbo run build --filter @mjs/i18n && pnpm run copy-messages && pnpm run appinfo",
 		"analyze": "cross-env ANALYZE=true next build",
 		"lint": "next lint --fix --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",

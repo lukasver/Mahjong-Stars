@@ -154,16 +154,23 @@ export async function generateMetadata({ params }: PageProps) {
 			template: `%s | ${t("title")}`,
 		},
 		description: t("description"),
-		openGraph: {
-			title: t("title"),
-			description: t("description"),
-			url: "/",
-			siteName: t("title"),
-			// Commented to use opengraph-image.tsx static gen instead of api/og
-			// images: siteConfig.socialBanner,
-			locale: "en",
-			type: "website",
-		},
+		// openGraph: {
+		// 	title: t("title"),
+		// 	description: t("description"),
+		// 	url: "/",
+		// 	siteName: t("title"),
+		// 	// Commented to use opengraph-image.tsx static gen instead of api/og
+		// 	// images: siteConfig.socialBanner,
+		// 	locale: "en",
+		// 	type: "website",
+		// },
+		// twitter: {
+		// 	title: t("title"),
+		// 	description: t("description"),
+		// 	card: "summary_large_image",
+		// 	// Commented to use opengraph-image.tsx static gen instead of api/og
+		// 	// images: siteConfig.socialBanner,
+		// },
 		alternates: {
 			canonical: "/",
 			types: {
@@ -182,12 +189,6 @@ export async function generateMetadata({ params }: PageProps) {
 				"max-snippet": -1,
 			},
 		},
-		twitter: {
-			title: t("title"),
-			description: t("description"),
-			card: "summary_large_image",
-			// Commented to use opengraph-image.tsx static gen instead of api/og
-			// images: siteConfig.socialBanner,
-		},
+
 	})
 };

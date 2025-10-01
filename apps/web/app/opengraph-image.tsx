@@ -76,10 +76,10 @@ export default async function Image({ params }: PageProps) {
 	);
 	const bgPath = path.join(process.cwd(), "/public/static/images/bg2.png");
 
-	const { locale } = await params;
+	const { locale } = await params || { locale: "en" };
 
 	const t = await getTranslations({
-		locale: locale || "en",
+		locale: locale || 'en',
 		namespace: "Metadata",
 	});
 

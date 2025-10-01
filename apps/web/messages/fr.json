@@ -336,9 +336,9 @@
     "links": {
       "home": "Accueil",
       "docs": "Docs",
-      "whoWeAre": "Qui sommes-nous ?",
-      "termsAndConditions": "Conditions générales d'utilisation",
-      "privacyPolicy": "Politique de confidentialité",
+      "whoWeAre": "Qui sommes-nous",
+      "termsAndConditions": "Conditions Générales",
+      "privacyPolicy": "Politique de Confidentialité",
       "contact": "Contact"
     },
     "copyright": "©{year} WASABI GAMES DMCC"
@@ -350,7 +350,39 @@
     "subscribePlaceholder": "Entrez votre email",
     "contact": "Contactez-nous",
     "banner": {
-      "title": "Le jeton $TILE arrive bientôt 🚀"
+      "title": "Le token $TILE arrive bientôt 🚀"
+    }
+  },
+  "Metadata": {
+    "title": "Mahjong Stars",
+    "description": "Mahjong Web3 avec des personnages IA et des récompenses NFT. Jouez et entraînez des avatars IA, collectionnez des personnages uniques et gagnez des $TILE. Plateforme mondiale multijoueur avec des tournois",
+    "Privacy": {
+      "title": "Politique de Confidentialité",
+      "description": "Votre vie privée compte ! Découvrez comment Mahjong Stars protège vos données personnelles, vos informations de jeu et les détails de votre portefeuille. Nous vous assurons une sécurité maximale pour que vous puissiez vous concentrer sur la victoire et vous exprimer dans notre monde de mahjong Web3 ! ✨"
+    },
+    "Terms": {
+      "title": "Conditions d'Utilisation",
+      "description": "Règles et directives du jeu Mahjong Stars ! Des politiques de jeu équitable à la gestion des comptes et à la protection des données, découvrez comment faire partie de notre communauté de mahjong Web3. Jouez intelligemment, jouez honnêtement, et gardons ce jeu amusant pour tout le monde ! 💯"
+    },
+    "Faq": {
+      "title": "Foire Aux Questions (FAQ)",
+      "description": "Des questions? Nous avons des réponses ! 🧋✨. Tout ce que vous devez savoir sur Mahjong Stars ! Des avatars IA aux tokens $TILE en passant par les conseils de jeu et les récompenses NFT - obtenez toutes vos réponses sur le mahjong Web3 avec style 💅."
+    },
+    "Contact": {
+      "title": "Contactez-nous",
+      "description": "Contactez-nous, ma belle ! 💬 Vous avez des questions sur Mahjong Stars ? Envie de collaborer ? Juste envie de discuter ? On est là pour ça ! Envoyez-nous un message et nous vous répondrons plus vite que vous ne pourrez dire 'thé aux perles' ! Sans mentir, nous lisons tous les messages (et jugeons probablement votre utilisation des emojis). ✨"
+    },
+    "Claim": {
+      "title": "Réclamez Vos Récompenses",
+      "description": "C'est l'heure de faire valoir ces codes, ma belle ! 💰 Vous avez trouvé un code secret sur nos réseaux ? Entrez-le ici et transformons cet or numérique en vraies récompenses ! Des tokens $TILE à des objets exclusifs - nous donnons littéralement des trucs gratuits parce que nous sommes si généreux ! Sans mentir, juste de bonnes vibrations et des cadeaux ! ✨"
+    },
+    "About": {
+      "title": "À Propos",
+      "description": "Découvrez Mahjong Stars - la plateforme Web3 où le mahjong ancestral rencontre le jeu moderne ! Défiez des joueurs du monde entier, collectionnez des personnages NFT uniques et gagnez des tokens $TILE dans notre monde en ligne dynamique. Connectez-vous mondialement grâce à la technologie blockchain pour une expérience de jeu révolutionnaire, à la fois amusante et gratifiante ! 🎮"
+    },
+    "Docs": {
+      "title": "Docs",
+      "description": "Explorez les fonctionnalités uniques et les innovations de Mahjong Stars ! Découvrez les avatars basés sur l'IA, l'intégration blockchain, la collection de personnages NFT et les mécaniques de jeu Web3. Apprenez comment notre plateforme combine le mahjong traditionnel avec une technologie de pointe pour une expérience de jeu révolutionnaire ! 🤖"
     }
   }
 }

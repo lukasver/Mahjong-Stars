@@ -1,14 +1,14 @@
 import fs from "node:fs/promises";
 import {
-	type GoogleGenerativeAIProvider,
 	createGoogleGenerativeAI,
+	type GoogleGenerativeAIProvider,
 } from "@ai-sdk/google";
 import {
 	type CoreMessage,
 	type FilePart,
+	generateText,
 	type ImagePart,
 	type TextPart,
-	generateText,
 } from "ai";
 import { saveFile } from "./files.js";
 
@@ -46,7 +46,7 @@ export async function translateAndSave(
 				content.push({
 					type: "file",
 					data: file,
-					mimeType: mimeType || `text/plain`,
+					mediaType: mimeType || `text/plain`,
 				});
 			}
 		}
@@ -54,7 +54,7 @@ export async function translateAndSave(
 		const result = await generateText({
 			model: createGoogleGenerativeAI({
 				apiKey: process.env.GOOGLE_AI_API_KEY,
-			})("gemini-1.5-flash"),
+			})("gemini-2.5-flash-lite"),
 			// output: 'no-schema',
 			system: prompt,
 			messages,
@@ -69,8 +69,8 @@ export async function translateAndSave(
 			const end = performance.now();
 			console.group(`========= ${sourceFile} performance =========`);
 			console.info(`Translation took ${Math.round((end - start) / 1000)}s`);
-			console.info(`Prompt used ${result.usage?.promptTokens} tokens`);
-			console.info(`Completion used ${result.usage?.completionTokens} tokens`);
+			console.info(`Prompt used ${result.usage?.inputTokens} tokens`);
+			console.info(`Completion used ${result.usage?.outputTokens} tokens`);
 			console.info(`Total used ${result.usage?.totalTokens} tokens`);
 			console.groupEnd();
 		}
@@ -123,13 +123,13 @@ export class Translator {
 					content.push({
 						type: "file",
 						data: file,
-						mimeType: mimeType || `text/plain`,
+						mediaType: mimeType || `text/plain`,
 					});
 				}
 			}
 			const start = performance.now();
 			const result = await generateText({
-				model: this.google("gemini-1.5-flash"),
+				model: this.google("gemini-2.5-flash-lite"),
 				// output: 'no-schema',
 				system: prompt,
 				messages,
@@ -147,10 +147,8 @@ export class Translator {
 				const end = performance.now();
 				console.group(`========= ${sourceFile} performance =========`);
 				console.info(`Translation took ${Math.round((end - start) / 1000)}s`);
-				console.info(`Prompt used ${result.usage?.promptTokens} tokens`);
-				console.info(
-					`Completion used ${result.usage?.completionTokens} tokens`,
-				);
+				console.info(`Prompt used ${result.usage?.inputTokens} tokens`);
+				console.info(`Completion used ${result.usage?.outputTokens} tokens`);
 				console.info(`Total used ${result.usage?.totalTokens} tokens`);
 				console.groupEnd();
 			}
