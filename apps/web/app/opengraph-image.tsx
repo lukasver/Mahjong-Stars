@@ -1,9 +1,9 @@
-import path from "path";
-import { metadata } from "@/data/config/metadata";
 import { ImageResponse } from "@vercel/og";
 import { readFile } from "fs/promises";
 import sizeOf from "image-size";
 import mime from "mime-types";
+import { getTranslations } from "next-intl/server";
+import path from "path";
 import sharp from "sharp";
 
 export const alt = "Mahjong Stars";
@@ -69,15 +69,22 @@ async function loadGoogleFont(font: string, text: string) {
 	throw new Error("failed to load font data");
 }
 
-export default async function Image() {
+export default async function Image({ params }: PageProps) {
 	const imagePath = path.join(
 		process.cwd(),
 		"/public/static/favicons/android-chrome-512x512.png",
 	);
 	const bgPath = path.join(process.cwd(), "/public/static/images/bg2.png");
 
-	const title = metadata.title;
-	const description = metadata.description;
+	const { locale } = await params || { locale: "en" };
+
+	const t = await getTranslations({
+		locale: locale || 'en',
+		namespace: "Metadata",
+	});
+
+	const title = t("title");
+	const description = t("description");
 
 	const [logo, bg, teachersTitle, teachersDescription] = await Promise.all([
 		readFile(imagePath),

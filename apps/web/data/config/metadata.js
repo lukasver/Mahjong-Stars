@@ -6,13 +6,12 @@ const domain =
   process.env.NEXT_PUBLIC_DOMAIN?.split('://')?.[1] ||
   'mahjongstars.com';
 
-const siteUrl = `http${
-  process.env.NODE_ENV === 'development' ? '' : 's'
-}://${domain}`;
+const siteUrl = `http${process.env.NODE_ENV === 'development' ? '' : 's'
+  }://${domain}`;
 
 const metadata = {
   title: 'Mahjong Stars',
-  description: 'Join the Web3 Mahjong Game',
+  description: 'Web3 Mahjong with AI Characters & NFT Rewards. Play & train AI avatars, collect unique characters, and earn $TILE. Multiplayer global platform with tournaments',
   domain,
   logoTitle: 'Mahjong Stars',
   businessName: 'Mahjong Stars',
@@ -20,7 +19,7 @@ const metadata = {
   siteRepo: '',
   socialBanner: '/api/og',
   tokenSymbol: 'TILE',
-  tokenName: 'Mahjong Stars Token',
+  tokenName: 'TILES',
   supportEmail:
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'hello@mahjongstars.com',
   twitter: process.env.NEXT_PUBLIC_TWITTER_HANDLE || '',

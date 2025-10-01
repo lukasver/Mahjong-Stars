@@ -165,7 +165,7 @@ function VideoPlayer({
             "absolute inset-0 z-1 h-[75%] sm:hidden",
             isMobile &&
             mobileSrc && mNumber !== 1 &&
-            "bg-gradient-to-t from-[#920B0A] from-8% via-[#920B0A] via-5% to-transparent to-10%",
+            "bg-gradient-to-t from-[#770205] from-8% via-[#770205] via-5% to-transparent to-10%",
             mobileSrc && mNumber === 1 && "bg-gradient-to-t from-[#710408] from-2% via-[#710408] via-5% to-transparent to-10%",
             !isPlaying && "z-50",
           )}

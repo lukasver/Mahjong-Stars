@@ -1,5 +1,5 @@
-import createMiddleware from "next-intl/middleware";
 import { NextRequest } from "next/server";
+import createMiddleware from "next-intl/middleware";
 import { routing } from "./lib/i18n/routing";
 
 export default (req: NextRequest) => {
@@ -13,5 +13,6 @@ export const config = {
 	// Match all pathnames except for
 	// - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
 	// - … the ones containing a dot (e.g. `favicon.ico`)
-	matcher: "/((?!api|trpc|ingest|_next|_vercel|opengraph-image|.*\\..*).*)",
+	matcher:
+		"/((?!api|static|sitemap|ingest|_next|_vercel|opengraph-image|robots|manifest.webmanifest|.*\\..*).*)",
 };

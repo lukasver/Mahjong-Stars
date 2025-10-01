@@ -1,10 +1,12 @@
-import { Banner } from "@/components/banner";
-import { Layout } from "nextra-theme-docs";
 import { Search } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
+import { Layout } from "nextra-theme-docs";
 import { type ReactNode } from "react";
+import { Banner } from "@/components/banner";
 // import 'nextra-theme-docs/style.css';
 import "@/app/styles.css";
+import { getLocaleNames } from "@mjs/i18n";
+import { PageMapItem } from "nextra";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/header";
 import remotePageMap from "@/data/remote-page-map.json";
@@ -16,8 +18,6 @@ import {
 } from "@/lib/i18n/get-dictionaries";
 import { TranslationsProvider } from "@/lib/i18n/provider";
 import normalizePageMap from "@/lib/normalize-page-map";
-import { getLocaleNames } from "@mjs/i18n";
-import { PageMapItem } from "nextra";
 
 async function layout({
 	children,
@@ -26,7 +26,9 @@ async function layout({
 	children: ReactNode;
 	params: { lang: string };
 }) {
-	const lang = (await params)?.lang || "en";
+	const aParams = await params;
+
+	const lang = aParams?.lang || "en";
 
 	const [pageMap, t, dictionary] = await Promise.all([
 		getPageMap(lang ? `/${lang}` : "/en")
