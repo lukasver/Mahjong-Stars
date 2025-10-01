@@ -1,13 +1,13 @@
 import { Head } from "nextra/components";
 // import 'nextra-theme-docs/style.css';
 import "@/app/styles.css";
-import { PostHogProvider } from "@/components/posthog-provider";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { Metadata } from "next";
-import { fontClash, fontTeachers } from "./fonts";
+import { unstable_ViewTransition as ViewTransition } from "react";
+import { PostHogProvider } from "@/components/posthog-provider";
 
 import { metadata as siteConfig } from "@/lib/site-config";
-import { unstable_ViewTransition as ViewTransition } from "react";
+import { fontClash, fontTeachers } from "./fonts";
 import { genPageMetadata } from "./seo";
 
 export const metadata: Metadata = genPageMetadata({

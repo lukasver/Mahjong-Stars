@@ -1,6 +1,19 @@
 import { cn } from "@mjs/ui/lib/utils";
+import { getTranslations } from 'next-intl/server';
 
-export default function ContactLayout({
+export async function generateMetadata({ params }: PageProps) {
+	const { locale } = await params;
+	const t = await getTranslations({
+		locale: locale || "en",
+		namespace: "Metadata.Contact",
+	});
+	return {
+		title: t("title"),
+		description: t("description"),
+	};
+}
+
+export default async function ContactLayout({
 	children,
 }: {
 	children: React.ReactNode;

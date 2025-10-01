@@ -1,10 +1,8 @@
 import { generateStaticParamsFor, importPage } from "nextra/pages";
 import "@/app/styles.css";
 
-import { useMDXComponents as getMDXComponents } from "@/mdx-components";
 import { ScrollProgress } from "@mjs/ui/components/scroll-progress";
-import type { FC } from "react";
-
+import { useMDXComponents as getMDXComponents } from "@/mdx-components";
 export const generateStaticParams = generateStaticParamsFor("mdxPath");
 
 const importMdx = async (params: { mdxPath: string[]; lang: string }) => {
@@ -13,8 +11,7 @@ const importMdx = async (params: { mdxPath: string[]; lang: string }) => {
 		result = await importPage(params.mdxPath, params.lang);
 	} catch (e) {
 		console.debug(
-			`[ERROR]: ${params.lang} ${params.mdxPath}: ${
-				e instanceof Error ? e.message : e
+			`[ERROR]: ${params.lang} ${params.mdxPath}: ${e instanceof Error ? e.message : e
 			}`,
 		);
 		return null;
@@ -23,7 +20,11 @@ const importMdx = async (params: { mdxPath: string[]; lang: string }) => {
 };
 
 export async function generateMetadata(props: PageProps) {
+
+
 	const params = await props.params;
+
+
 	if (params.lang?.length > 2) {
 		return null;
 	}
@@ -43,16 +44,22 @@ type PageProps = Readonly<{
 
 const Wrapper = getMDXComponents().wrapper!;
 
-const Page: FC<PageProps> = async (props) => {
+
+
+export default async function Page(props: PageProps) {
 	const params = await props.params;
+
+
 	if (params.lang.length > 2) {
 		return null;
 	}
 
+
 	const result = await importMdx({
 		mdxPath: params.mdxPath,
 		lang: params.lang,
-	});
+	})
+
 
 	if (!result) {
 		return null;
@@ -68,7 +75,6 @@ const Page: FC<PageProps> = async (props) => {
 	);
 };
 
-export default Page;
 
 export const dynamicParams = false;
 export const dynamic = "force-static";

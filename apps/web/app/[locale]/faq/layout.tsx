@@ -1,5 +1,18 @@
+import { getTranslations } from "next-intl/server";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+
+export async function generateMetadata({ params }: PageProps) {
+	const { locale } = await params;
+	const t = await getTranslations({
+		locale: locale || "en",
+		namespace: "Metadata.Faq",
+	});
+	return {
+		title: t("title"),
+		description: t("description"),
+	};
+}
 
 export default function FaqLayout({ children }: { children: React.ReactNode }) {
 	return (

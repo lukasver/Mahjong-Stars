@@ -1,9 +1,8 @@
-import { readdir } from "node:fs/promises";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import {
-	type GoogleGenerativeAIProvider,
 	createGoogleGenerativeAI,
+	type GoogleGenerativeAIProvider,
 } from "@ai-sdk/google";
 import { type CoreMessage, generateText } from "ai";
 import Handlebars from "handlebars";
@@ -73,7 +72,7 @@ export class Generator {
 		}
 
 		const result = await generateText({
-			model: this.google("gemini-1.5-flash"),
+			model: this.google("gemini-2.5-flash-lite"),
 			// output: 'no-schema',
 			messages,
 			...(args.systemPrompt && {

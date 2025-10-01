@@ -2,7 +2,7 @@ import type { CoreMessage } from "ai";
 
 type BaseArgs = {
 	systemPrompt?: string | { text: string; variables: Record<string, string> };
-	model: "gemini-1.5-flash" | (string & {});
+	model: "gemini-2.5-flash-lite" | (string & {});
 	documents?: {
 		src: string;
 	}[];

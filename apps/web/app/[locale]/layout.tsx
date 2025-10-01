@@ -1,18 +1,18 @@
+import { notFound } from "next/navigation";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { routing } from "@/lib/i18n/routing";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { notFound } from "next/navigation";
 import "@/css/styles.css";
-import { siteConfig } from "@/data/config/site.settings";
-import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
-import { Metadata } from "next";
-import { ThemeProviders } from "../theme-providers";
-
-import Footer from "@/components/Footer";
 import { Toaster } from "@mjs/ui/primitives/sonner";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { getTranslations } from "next-intl/server";
 import { getLangDir } from "rtl-detect";
+import Footer from "@/components/Footer";
+import { siteConfig } from "@/data/config/site.settings";
 import { fontClash, fontTeachers } from "../fonts";
+import { genPageMetadata } from "../seo";
+import { ThemeProviders } from "../theme-providers";
 
 /**
  * Generate language alternates for SEO metadata
@@ -40,6 +40,10 @@ export default async function RootLayout({
 	// Ensure that the incoming `locale` is valid
 	const { locale } = await params;
 	const direction = getLangDir(locale);
+	const t = await getTranslations({
+		locale: locale || "en",
+		namespace: "Metadata",
+	});
 	if (!hasLocale(routing.locales, locale)) {
 		notFound();
 	}
@@ -87,6 +91,23 @@ export default async function RootLayout({
 					media="(prefers-color-scheme: dark)"
 					content="#000"
 				/>
+				{/* Video Game Microdata */}
+				<meta itemProp="name" content={t("title")} />
+				<meta itemProp="description" content={t("description")} />
+
+				<meta itemProp="genre" content="Strategy Game" />
+				<meta itemProp="gamePlatform" content="Web Browser" />
+				<meta itemProp="gamePlatform" content="Mobile" />
+				<meta itemProp="playMode" content="MultiPlayer" />
+				<meta itemProp="playMode" content="SinglePlayer" />
+				<meta itemProp="gameLocation" content="Online" />
+				<meta itemProp="softwareVersion" content="Coming Soon" />
+				<meta itemProp="datePublished" content="2025-12-31" />
+				<meta itemProp="author" content={siteConfig.author} />
+				<meta itemProp="publisher" content={siteConfig.author} />
+				<meta itemProp="url" content={siteConfig.siteUrl} />
+				<meta itemProp="image" content={`${siteConfig.siteUrl}/api/og`} />
+
 				<link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 			</head>
 			<body className="flex flex-col bg-white text-black antialiased dark:bg-gray-950 dark:text-white min-h-screen">
@@ -120,45 +141,54 @@ export function generateStaticParams() {
 	return locales;
 }
 
-export const metadata: Metadata = {
-	metadataBase: new URL(siteConfig.siteUrl),
-	title: {
-		default: siteConfig.title,
-		template: `%s | ${siteConfig.title}`,
-	},
-	description: siteConfig.description,
-	openGraph: {
-		title: siteConfig.title,
-		description: siteConfig.description,
-		url: "./",
-		siteName: siteConfig.title,
-		// Commented to use opengraph-image.tsx static gen instead of api/og
-		// images: [siteConfig.socialBanner],
-		locale: "en",
-		type: "website",
-	},
-	alternates: {
-		canonical: "./",
-		types: {
-			"application/rss+xml": `${siteConfig.siteUrl}/feed.xml`,
+export async function generateMetadata({ params }: PageProps) {
+	const { locale } = await params;
+	const t = await getTranslations({
+		locale: locale || "en",
+		namespace: "Metadata",
+	});
+	return genPageMetadata({
+		metadataBase: new URL(siteConfig.siteUrl),
+		title: {
+			default: t("title"),
+			template: `%s | ${t("title")}`,
 		},
-		languages: generateLanguageAlternates(),
-	},
-	robots: {
-		index: true,
-		follow: true,
-		googleBot: {
+		description: t("description"),
+		// openGraph: {
+		// 	title: t("title"),
+		// 	description: t("description"),
+		// 	url: "/",
+		// 	siteName: t("title"),
+		// 	// Commented to use opengraph-image.tsx static gen instead of api/og
+		// 	// images: siteConfig.socialBanner,
+		// 	locale: "en",
+		// 	type: "website",
+		// },
+		// twitter: {
+		// 	title: t("title"),
+		// 	description: t("description"),
+		// 	card: "summary_large_image",
+		// 	// Commented to use opengraph-image.tsx static gen instead of api/og
+		// 	// images: siteConfig.socialBanner,
+		// },
+		alternates: {
+			canonical: "/",
+			types: {
+				"application/rss+xml": `${siteConfig.siteUrl}/feed.xml`,
+			},
+			languages: generateLanguageAlternates(),
+		},
+		robots: {
 			index: true,
 			follow: true,
-			"max-video-preview": -1,
-			"max-image-preview": "large",
-			"max-snippet": -1,
+			googleBot: {
+				index: true,
+				follow: true,
+				"max-video-preview": -1,
+				"max-image-preview": "large",
+				"max-snippet": -1,
+			},
 		},
-	},
-	twitter: {
-		title: siteConfig.title,
-		card: "summary_large_image",
-		// Commented to use opengraph-image.tsx static gen instead of api/og
-		// images: [siteConfig.socialBanner],
-	},
+
+	})
 };
