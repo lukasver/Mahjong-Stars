@@ -64,11 +64,11 @@ export default async function CommingSoon() {
       <VideoPlayerProvider>
         <WebMSupportDetector
           webmBackgroundColor={cn(
-            "bg-[#770205]",
-            // (mNumber == 2 || mNumber == 3) && "bg-[#970706]",
+            "bg-[#700609]",
+            (mNumber == 2 || mNumber == 3) && "bg-[#8d0d0a]",
           )}
           fallbackBackgroundColor={cn(
-            "bg-[#830409]",
+            "bg-[#700609]",
             // (mNumber == 2 || mNumber == 3) && "bg-[#970706]",
           )}
         >

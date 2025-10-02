@@ -65,61 +65,6 @@ function VideoPlayer({
     };
   }, [isMobile, mobileSrc, _src]);
 
-  // if (isMobile) {
-  //   if (!mobileSrc) {
-  //     return null;
-  //   }
-
-  //   return (
-  //     <AnimatePresence>
-  //       <motion.div
-  //         initial={{ opacity: 0 }}
-  //         animate={{ opacity: 1 }}
-  //         transition={{
-  //           duration: 0.4,
-  //           scale: { type: "tween", visualDuration: 0.4, bounce: 0.5 },
-  //         }}
-  //         className="contents"
-
-  //       >
-  //         <video
-  //           id="video"
-  //           ref={videoRef}
-  //           autoPlay
-  //           muted
-  //           loop
-  //           playsInline
-  //           className={cn(
-  //             "absolute w-full object-contain bottom-[25%] md:bottom-auto md:inset-0",
-  //             "hide-play-button",
-  //             mNumber !== 1 && "h-full",
-  //             className,
-  //           )}
-  //           {...(poster ? { poster } : {})}
-  //         >
-  //           {Array.isArray(mobileSrc) ? (
-  //             mobileSrc.map((props) => <source key={props.src} {...props} />)
-  //           ) : (
-  //             <source {...mobileSrc} />
-  //           )}
-  //           Your browser does not support the video tag.
-  //         </video>
-  //         <div
-  //           onClick={!isPlaying ? handlePlayVideo : undefined}
-  //           className={cn(
-  //             "absolute inset-0 z-1 h-[75%] sm:hidden",
-  //             isMobile &&
-  //             mobileSrc &&
-  //             "bg-gradient-to-t from-[#920B0A] from-8% via-[#920B0A] via-5% to-transparent to-10%",
-  //             !isPlaying && "z-50",
-  //           )}
-  //         />
-  //         {/* Optionally, show a custom play button if !isPlaying */}
-  //       </motion.div>
-  //     </AnimatePresence>
-  //   );
-  // }
-
   const src = (isMobile && mobileSrc) ? mobileSrc : _src;
 
   return (
@@ -165,8 +110,8 @@ function VideoPlayer({
             "absolute inset-0 z-1 h-[75%] sm:hidden",
             isMobile &&
             mobileSrc && mNumber !== 1 &&
-            "bg-gradient-to-t from-[#770205] from-8% via-[#770205] via-5% to-transparent to-10%",
-            mobileSrc && mNumber === 1 && "bg-gradient-to-t from-[#710408] from-2% via-[#710408] via-5% to-transparent to-10%",
+            "bg-gradient-to-t from-[#8d0d0a] from-8% via-[#8d0d0a] via-5% to-transparent to-10%",
+            mobileSrc && mNumber === 1 && "bg-gradient-to-t from-[#700609] from-0% via-[#700609] via-2% to-transparent to-10%",
             !isPlaying && "z-50",
           )}
         />}
