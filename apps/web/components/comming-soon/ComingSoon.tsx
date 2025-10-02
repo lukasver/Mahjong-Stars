@@ -13,7 +13,6 @@ import poster2 from "@/public/static/images/poster2.webp";
 import mobilePoster2 from "@/public/static/images/poster2-mobile.webp";
 import poster3 from "@/public/static/images/poster3.webp";
 import mobilePoster3 from "@/public/static/images/poster3-mobile.webp";
-import { createVideoGameJsonLd, JsonLd } from "../JsonLd";
 import { VideoPlayerProvider } from "../use-video-player";
 import { WebMSupportDetector } from "../web-support-detector";
 import HeroContent from "./HeroContent";
@@ -62,7 +61,6 @@ export default async function CommingSoon() {
 
   return (
     <>
-      <JsonLd jsonLd={createVideoGameJsonLd(t)} />
       <VideoPlayerProvider>
         <WebMSupportDetector
           webmBackgroundColor={cn(
