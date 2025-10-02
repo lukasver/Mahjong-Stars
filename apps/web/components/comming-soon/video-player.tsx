@@ -85,6 +85,7 @@ function VideoPlayer({
           loop
           playsInline
           style={{ height: "inherit" }}
+
           className={cn(
             isMobile ?
               `absolute w-full object-contain md:bottom-auto md:inset-0` :

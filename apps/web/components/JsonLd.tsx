@@ -50,13 +50,13 @@ export const createOrganizationJsonLd = (
 			{
 				"@type": "ImageObject",
 				url: "https://storage.googleapis.com/mjs-public/branding/isologo.webp",
-				width: 512,
-				height: 512,
+				width: "512",
+				height: "512",
 			},
 			{
 				"@type": "ImageObject",
-				width: 120,
-				height: 120,
+				width: "120",
+				height: "120",
 				url: "https://storage.googleapis.com/mjs-public/branding/icon-120x120.png",
 			},
 		],

@@ -204,35 +204,39 @@ const DynamicVideo = async () => {
     2: agent?.device?.type === "mobile" ? mobilePoster2.src : poster2.src,
     3: agent?.device?.type === "mobile" ? mobilePoster3.src : poster3.src,
   };
+  const posterSrc = mMapping[mNumber];
 
   return (
-    <VideoPlayer
-      mNumber={mNumber}
-      src={[
-        {
-          src: `/static/videos/comingsoon-${mNumber}.webm`,
-          type: "video/webm",
-        },
-        {
-          src: `/static/videos/comingsoon-${mNumber}.mp4`,
-          type: "video/mp4",
-        },
-      ]}
-      mobileSrc={
-        MOBILE_OPTIMIZED
-          ? null
-          : [
-            {
-              src: `/static/videos/comingsoon-mobile-${mNumber}.webm`,
-              type: "video/webm",
-            },
-            {
-              src: `/static/videos/comingsoon-mobile-${mNumber}.mp4`,
-              type: "video/mp4",
-            },
-          ]
-      }
-      poster={mMapping[mNumber]}
-    />
+    <>
+      {posterSrc && <link rel="preload" as="image" href={posterSrc} fetchPriority="high" />}
+      <VideoPlayer
+        mNumber={mNumber}
+        src={[
+          {
+            src: `/static/videos/comingsoon-${mNumber}.webm`,
+            type: "video/webm",
+          },
+          {
+            src: `/static/videos/comingsoon-${mNumber}.mp4`,
+            type: "video/mp4",
+          },
+        ]}
+        mobileSrc={
+          MOBILE_OPTIMIZED
+            ? null
+            : [
+              {
+                src: `/static/videos/comingsoon-mobile-${mNumber}.webm`,
+                type: "video/webm",
+              },
+              {
+                src: `/static/videos/comingsoon-mobile-${mNumber}.mp4`,
+                type: "video/mp4",
+              },
+            ]
+        }
+        poster={posterSrc}
+      />
+    </>
   );
 };
