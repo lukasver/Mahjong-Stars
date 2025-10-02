@@ -14,5 +14,179 @@
 		"soon": "Em breve",
 		"search": "Pesquisar...",
 		"subscribe": "Inscreva-se agora"
+	},
+	"FAQ": {
+		"title": "Perguntas Frequentes",
+		"description": "FAQ abrangente cobrindo recursos da plataforma, treinamento de IA, tokens, segurança e tópicos de suporte",
+		"sections": [
+			{
+				"id": "general-platform",
+				"title": "Perguntas Gerais sobre a Plataforma",
+				"questions": [
+					{
+						"id": "what-is-mahjong-stars",
+						"question": "O que é Mahjong Stars?",
+						"answer": "Mahjong Stars é a primeira plataforma de jogos de mahjong social Web3 com tecnologia de IA do mundo. Combinamos a jogabilidade tradicional de mahjong com tecnologia de IA de ponta e recursos Web3, permitindo que os jogadores treinem avatares de IA que podem jogar 24 horas por dia, 7 dias por semana, mesmo quando estão offline."
+					},
+					{
+						"id": "how-different-from-other-platforms",
+						"question": "Como o Mahjong Stars difere de outras plataformas de mahjong?",
+						"answer": "Diferenciais Chave: Treinamento de IA - Crie e treine avatares de IA que aprendem seu estilo de jogo; Jogabilidade 24/7 - Sua IA continua jogando e ganhando enquanto você está ausente; Integração Web3 - Mercado NFT, integração de carteira criptográfica e utilidade do token $TILE; Recursos Sociais - Recursos avançados de comunidade e sistemas de amigos; Expertise Comprovada - Construído por uma equipe com mais de 10 anos de experiência em jogos de mahjong"
+					},
+					{
+						"id": "available-worldwide",
+						"question": "O Mahjong Stars está disponível em todo o mundo?",
+						"answer": "Estamos lançando globalmente com suporte multiplataforma em iOS, Android e Web. Nossa plataforma baseada em Unity garante uma experiência de jogo consistente em todos os dispositivos e regiões."
+					}
+				]
+			},
+			{
+				"id": "getting-started",
+				"title": "Começando",
+				"questions": [
+					{
+						"id": "what-need-to-start",
+						"question": "O que preciso para começar a jogar?",
+						"answer": "Dispositivo - Qualquer smartphone, tablet ou computador moderno; Internet - Conexão de internet estável; StarsPoints - Moeda do jogo comprada com dinheiro fiduciário ou criptomoedas; Conta - Configuração simples de login social"
+					},
+					{
+						"id": "cost-to-start",
+						"question": "Quanto custa começar a jogar?",
+						"answer": "Não há custo para baixar e criar uma conta. Você precisará comprar StarsPoints para participar de jogos. As taxas de entrada variam de acordo com as apostas da mesa, começando com pequenas quantias adequadas para iniciantes."
+					}
+				]
+			},
+			{
+				"id": "ai-gameplay",
+				"title": "IA e Jogabilidade",
+				"questions": [
+					{
+						"id": "how-ai-training-works",
+						"question": "Como funciona o treinamento de IA?",
+						"answer": "Processo de Treinamento: 1. Jogue Manualmente - Seus jogos iniciais fornecem dados de treinamento; 2. Aprendizagem de Padrões - A IA analisa seus padrões de tomada de decisão; 3. Replicação de Estratégia - A IA aprende a imitar seu estilo de jogo; 4. Melhoria Contínua - A IA aprimora sua abordagem com base na jogabilidade contínua"
+					},
+					{
+						"id": "ai-play-offline",
+						"question": "Minha IA pode jogar enquanto estou offline?",
+						"answer": "Sim! Este é um dos nossos recursos principais. Sua IA pode: Jogar Continuamente - Participar de jogos 24 horas por dia, 7 dias por semana; Ganhar StarsPoints - Gerar renda enquanto você está ausente; Respeitar Limites - Respeitar seus limites predefinidos de gastos e ganhos; Fornecer Atualizações - Enviar notificações sobre desempenho e resultados"
+					},
+					{
+						"id": "ai-accuracy",
+						"question": "Quão precisa é a IA na replicação do meu estilo de jogo?",
+						"answer": "Nossa IA usa algoritmos avançados de aprendizado de máquina para analisar milhares de pontos de decisão. Quanto mais você joga, melhor sua IA fica em replicar suas estratégias. A maioria dos jogadores observa precisão significativa em 20 a 30 jogos de treinamento."
+					},
+					{
+						"id": "take-control-from-ai",
+						"question": "Posso assumir o controle da minha IA durante um jogo?",
+						"answer": "Absolutamente! Nosso Modo de Jogo Híbrido permite que você: Mudança Sem Problemas - Assuma o controle a qualquer momento durante a jogabilidade da IA; Substituição Manual - Tome decisões cruciais você mesmo; Integração de Aprendizagem - Suas jogadas manuais treinam ainda mais sua IA; Jogo Flexível - Equilíbrio perfeito entre automação e controle pessoal"
+					}
+				]
+			},
+			{
+				"id": "economy-tokens",
+				"title": "Economia e Tokens",
+				"questions": [
+					{
+						"id": "what-are-starspoints",
+						"question": "O que são StarsPoints?",
+						"answer": "StarsPoints são a moeda principal do jogo usada para: Taxas de entrada para mesas e torneios; Acesso ao serviço de IA e recursos premium; Compras no jogo (avatares, itens, decorações); Taxas de transação para atividades da plataforma. Importante: StarsPoints não têm valor fora do jogo e são apenas para uso no jogo."
+					},
+					{
+						"id": "what-is-tile-token",
+						"question": "O que é o token $TILE?",
+						"answer": "$TILE é nosso token de utilidade com múltiplos usos: Direitos de Governança - Vote em atualizações e recursos da plataforma; Recompensas de Staking - Ganhe tokens adicionais por meio de staking; Recursos Premium - Acesse torneios exclusivos e capacidades de IA; Mercado NFT - Moeda principal para negociação de ativos no jogo; Compartilhamento de Receita - Participe da distribuição de receita da plataforma"
+					},
+					{
+						"id": "withdrawal-rewards",
+						"question": "Como funcionam as Recompensas de Saque?",
+						"answer": "Recompensas de Saque são um recurso premium opcional: Compra Necessária - Compre a capacidade de saque como um complemento opcional; Negociação de Terceiros - Permite a venda de ativos no jogo em plataformas externas; Taxa 1:1 - Converta ganhos virtuais em valor real; Receita Adicional - A plataforma ganha comissão nas compras de recompensas de saque"
+					},
+					{
+						"id": "tile-token-launch",
+						"question": "Quando o token $TILE será lançado?",
+						"answer": "O token $TILE está programado para ser lançado no 4º trimestre de 2025, após o lançamento da nossa plataforma e a aquisição inicial de usuários. Isso incluirá: Evento de Geração de Tokens (TGE); Listagens principais em DEX; Parcerias de exchanges; Lançamento do mecanismo de staking"
+					}
+				]
+			},
+			{
+				"id": "security-fair-play",
+				"title": "Segurança e Jogo Justo",
+				"questions": [
+					{
+						"id": "ensure-fair-gameplay",
+						"question": "Como vocês garantem um jogo justo?",
+						"answer": "Sistemas Completos de Jogo Justo: Anti-Trapaça Avançado - Detecção de tentativas de trapaça com tecnologia de IA; Geração de Números Aleatórios - Aleatoriedade criptograficamente segura; Monitoramento em Tempo Real - Análise contínua da jogabilidade; Relatórios da Comunidade - Aplicação de justiça impulsionada pelo jogador; Auditoria de Terceiros - Verificação independente da justiça do jogo"
+					},
+					{
+						"id": "personal-financial-security",
+						"question": "Minhas informações pessoais e financeiras estão seguras?",
+						"answer": "Segurança de Nível Empresarial: Criptografia de Nível Militar - Todos os dados criptografados nos mais altos níveis; Conformidade com o GDPR - Conformidade total com a proteção de dados europeia; Carteiras de Assinatura Múltipla - Segurança aprimorada para todos os fundos; Auditoria Regular - Avaliações de segurança abrangentes de terceiros; Monitoramento 24/7 - Monitoramento contínuo de ameaças de segurança"
+					},
+					{
+						"id": "suspect-cheating",
+						"question": "O que acontece se eu suspeitar de trapaça?",
+						"answer": "Processo de Relatório: 1. Relatório no Jogo - Use as ferramentas de relatório integradas; 2. Investigação Automática - Nossos sistemas de IA analisam o comportamento relatado; 3. Revisão Humana - Casos complexos revisados por moderadores humanos; 4. Ação Tomada - Penalidades apropriadas aplicadas a violações confirmadas; 5. Feedback - Atualizações fornecidas sobre os resultados da investigação"
+					}
+				]
+			},
+			{
+				"id": "technical-support",
+				"title": "Suporte Técnico",
+				"questions": [
+					{
+						"id": "supported-platforms",
+						"question": "Quais plataformas são suportadas?",
+						"answer": "Disponibilidade Multiplataforma: iOS - Aplicativos nativos para iPhone e iPad; Android - Aplicativos nativos para smartphones e tablets Android; Web - Acesso baseado em navegador em desktop e dispositivos móveis; Mecanismo Unity - Experiência consistente em todas as plataformas"
+					},
+					{
+						"id": "technical-issues",
+						"question": "E se eu tiver problemas técnicos?",
+						"answer": "Opções de Suporte: Suporte ao Cliente 24/7 - Ajuda sempre disponível por meio de vários canais; Ajuda no Aplicativo - Ferramentas e tutoriais de suporte integrados; Fóruns da Comunidade - Assistência da comunidade de jogadores; Tutoriais em Vídeo - Guias passo a passo para todos os recursos; Suporte por E-mail - Equipe de suporte técnico dedicada"
+					},
+					{
+						"id": "recover-account",
+						"question": "Como recupero minha conta se perder o acesso?",
+						"answer": "Recuperação de Conta: 1. Contate o Suporte - Entre em contato por meio de nossos canais de suporte; 2. Verificação de Identidade - Forneça informações de verificação da conta; 3. Verificação de Segurança - Conclua o processo de verificação de segurança; 4. Restauração da Conta - Restauração segura do acesso; 5. Revisão de Segurança - Avaliação de segurança opcional para evitar problemas futuros"
+					}
+				]
+			},
+			{
+				"id": "community-social",
+				"title": "Comunidade e Recursos Sociais",
+				"questions": [
+					{
+						"id": "friend-systems",
+						"question": "Como funcionam os sistemas de amigos?",
+						"answer": "Recursos de Jogos Sociais: Convites de Amigos - Envie e aceite solicitações de amizade; Mesas Privadas - Hospede jogos exclusivos com sua rede; Chat Social - Comunicação em tempo real durante o jogo; Eventos da Comunidade - Participe de torneios e competições em grupo"
+					},
+					{
+						"id": "private-tournaments",
+						"question": "Posso criar torneios privados?",
+						"answer": "Sim! Você pode: Hospedar Eventos Privados - Crie torneios para seu grupo de amigos; Regras Personalizadas - Defina suas próprias taxas de entrada e estrutura do torneio; Jogo Social - Convide jogadores específicos para participar; Gerenciamento de Grupo - Gerencie sua comunidade de jogos privada"
+					},
+					{
+						"id": "community-guidelines",
+						"question": "Existem diretrizes da comunidade?",
+						"answer": "Padrões da Comunidade: Comportamento Respeitoso - Trate todos os jogadores com cortesia; Jogo Justo - Sem trapaças, conluio ou comportamento antidesportivo; Comunicação Adequada - Mantenha o bate-papo amigável e apropriado; Relate Problemas - Ajude a manter os padrões da comunidade relatando problemas"
+					}
+				]
+			},
+			{
+				"id": "partnership-business",
+				"title": "Parceria e Negócios",
+				"questions": [
+					{
+						"id": "partnership-opportunities",
+						"question": "Vocês têm oportunidades de parceria?",
+						"answer": "Buscamos ativamente parcerias estratégicas em: Plataformas de Jogos - Oportunidades de integração e promoção cruzada; Serviços Criptográficos - Parcerias de carteiras e exchanges; Criadores de Conteúdo - Colaborações de influenciadores e streamers; Fornecedores de Tecnologia - Parcerias de infraestrutura e serviços. Contato: Para consultas de parceria, entre em contato por meio de nossos canais de desenvolvimento de negócios."
+					},
+					{
+						"id": "stay-updated",
+						"question": "Como posso me manter atualizado sobre os desenvolvimentos?",
+						"answer": "Mantenha-se Conectado: Site Oficial - Atualizações e anúncios regulares; Mídias Sociais - Siga nossos canais oficiais de mídia social; Discord da Comunidade - Junte-se à nossa comunidade ativa; Boletim Informativo - Inscreva-se para receber atualizações de desenvolvimento; Comunicados à Imprensa - Anúncios oficiais da empresa"
+					}
+				]
+			}
+		]
 	}
 }

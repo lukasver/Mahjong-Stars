@@ -14,5 +14,179 @@
 		"soon": "Demnächst verfügbar",
 		"search": "Suchen...",
 		"subscribe": "Jetzt abonnieren"
+	},
+	"FAQ": {
+		"title": "Häufig gestellte Fragen",
+		"description": "Umfassende FAQ zu Plattformfunktionen, KI-Training, Token, Sicherheit und Support-Themen",
+		"sections": [
+			{
+				"id": "general-platform",
+				"title": "Allgemeine Fragen zur Plattform",
+				"questions": [
+					{
+						"id": "what-is-mahjong-stars",
+						"question": "Was ist Mahjong Stars?",
+						"answer": "Mahjong Stars ist die weltweit erste KI-gestützte Web3-Social-Mahjong-Gaming-Plattform. Wir kombinieren traditionelles Mahjong-Gameplay mit modernster KI-Technologie und Web3-Funktionen, sodass Spieler KI-Avatare trainieren können, die rund um die Uhr spielen können, auch wenn sie offline sind."
+					},
+					{
+						"id": "how-different-from-other-platforms",
+						"question": "Was unterscheidet Mahjong Stars von anderen Mahjong-Plattformen?",
+						"answer": "Wichtigste Unterscheidungsmerkmale: KI-Training - Erstellen und trainieren Sie KI-Avatare, die Ihren Spielstil erlernen; 24/7 Gameplay - Ihre KI spielt und verdient weiter, während Sie weg sind; Web3-Integration - NFT-Marktplatz, Krypto-Wallet-Integration und $TILE-Token-Nutzung; Soziale Funktionen - Erweiterte Community-Funktionen und Freundschafts-Systeme; Bewährte Expertise - Entwickelt von einem Team mit über 10 Jahren Erfahrung im Mahjong-Gaming"
+					},
+					{
+						"id": "available-worldwide",
+						"question": "Ist Mahjong Stars weltweit verfügbar?",
+						"answer": "Wir starten weltweit mit Multi-Plattform-Support für iOS, Android und Web. Unsere Unity-basierte Plattform sorgt für ein konsistentes Spielerlebnis auf allen Geräten und in allen Regionen."
+					}
+				]
+			},
+			{
+				"id": "getting-started",
+				"title": "Erste Schritte",
+				"questions": [
+					{
+						"id": "what-need-to-start",
+						"question": "Was benötige ich, um mit dem Spielen zu beginnen?",
+						"answer": "Gerät - Jedes moderne Smartphone, Tablet oder Computer; Internet - Stabile Internetverbindung; StarsPoints - Spielwährung, die mit Fiat-Währung oder Krypto gekauft werden kann; Konto - Einfache Einrichtung der sozialen Anmeldung"
+					},
+					{
+						"id": "cost-to-start",
+						"question": "Was kostet es, mit dem Spielen zu beginnen?",
+						"answer": "Das Herunterladen und Erstellen eines Kontos ist kostenlos. Sie müssen StarsPoints kaufen, um an Spielen teilzunehmen. Die Teilnahmegebühren variieren je nach Tisch-Einsatz und beginnen mit kleinen Beträgen, die für Anfänger geeignet sind."
+					}
+				]
+			},
+			{
+				"id": "ai-gameplay",
+				"title": "KI & Gameplay",
+				"questions": [
+					{
+						"id": "how-ai-training-works",
+						"question": "Wie funktioniert das KI-Training?",
+						"answer": "Trainingsprozess: 1. Manuell spielen - Ihre ersten Spiele liefern Trainingsdaten; 2. Mustererkennung - Die KI analysiert Ihre Entscheidungsfindungsmuster; 3. Strategienachbildung - Die KI lernt, Ihren Spielstil nachzuahmen; 4. Kontinuierliche Verbesserung - Die KI verfeinert ihren Ansatz basierend auf dem laufenden Gameplay"
+					},
+					{
+						"id": "ai-play-offline",
+						"question": "Kann meine KI spielen, während ich offline bin?",
+						"answer": "Ja! Dies ist eine unserer Kernfunktionen. Ihre KI kann: Kontinuierlich spielen - 24/7 an Spielen teilnehmen; StarsPoints verdienen - Während Ihrer Abwesenheit Einkommen generieren; Grenzen einhalten - Ihre voreingestellten Ausgaben- und Einnahmegrenzen einhalten; Updates liefern - Benachrichtigungen über Leistung und Ergebnisse senden"
+					},
+					{
+						"id": "ai-accuracy",
+						"question": "Wie genau ahmt die KI meinen Spielstil nach?",
+						"answer": "Unsere KI verwendet fortschrittliche Machine-Learning-Algorithmen, um Tausende von Entscheidungspunkten zu analysieren. Je mehr Sie spielen, desto besser wird Ihre KI darin, Ihre Strategien nachzubilden. Die meisten Spieler sehen innerhalb von 20-30 Trainingsspielen eine signifikante Genauigkeit."
+					},
+					{
+						"id": "take-control-from-ai",
+						"question": "Kann ich während eines Spiels die Kontrolle von meiner KI übernehmen?",
+						"answer": "Absolut! Unser Hybrid-Spielmodus ermöglicht es Ihnen: Nahtloses Umschalten - Übernehmen Sie jederzeit während des KI-Gameplays die Kontrolle; Manuelles Überschreiben - Treffen Sie selbst wichtige Entscheidungen; Lernintegration - Ihre manuellen Spielzüge trainieren Ihre KI weiter; Flexibles Gaming - Perfekte Balance zwischen Automatisierung und persönlicher Kontrolle"
+					}
+				]
+			},
+			{
+				"id": "economy-tokens",
+				"title": "Wirtschaft & Token",
+				"questions": [
+					{
+						"id": "what-are-starspoints",
+						"question": "Was sind StarsPoints?",
+						"answer": "StarsPoints sind die primäre Spielwährung, die verwendet wird für: Teilnahmegebühren für Tische und Turniere; KI-Service-Zugang und Premium-Funktionen; In-Game-Käufe (Avatare, Gegenstände, Dekorationen); Transaktionsgebühren für Plattform-Aktivitäten. Wichtig: StarsPoints haben keinen Wert außerhalb des Spiels und sind nur für die Verwendung im Spiel bestimmt."
+					},
+					{
+						"id": "what-is-tile-token",
+						"question": "Was ist der $TILE-Token?",
+						"answer": "$TILE ist unser Utility-Token mit mehreren Verwendungsmöglichkeiten: Governance-Rechte - Stimmen Sie über Plattform-Updates und -Funktionen ab; Staking-Belohnungen - Verdienen Sie zusätzliche Token durch Staking; Premium-Funktionen - Zugriff auf exklusive Turniere und KI-Funktionen; NFT-Marktplatz - Hauptwährung für den Handel mit In-Game-Assets; Umsatzbeteiligung - Beteiligen Sie sich an der Umsatzverteilung der Plattform"
+					},
+					{
+						"id": "withdrawal-rewards",
+						"question": "Wie funktionieren Auszahlungsbelohnungen?",
+						"answer": "Auszahlungsbelohnungen sind eine optionale Premium-Funktion: Kauf erforderlich - Kaufen Sie die Auszahlungsfunktion als optionales Add-on; Handel mit Drittanbietern - Ermöglicht den Verkauf von In-Game-Assets auf externen Plattformen; 1:1-Rate - Wandeln Sie virtuelle Gewinne in reale Werte um; Zusätzliche Einnahmen - Die Plattform verdient eine Provision an Käufen von Auszahlungsbelohnungen"
+					},
+					{
+						"id": "tile-token-launch",
+						"question": "Wann wird der $TILE-Token eingeführt?",
+						"answer": "Der $TILE-Token soll im 4. Quartal 2025 nach unserem Plattformstart und der ersten Benutzerakquise eingeführt werden. Dies beinhaltet: Token Generation Event (TGE); Wichtige DEX-Listings; Börsenpartnerschaften; Einführung des Staking-Mechanismus"
+					}
+				]
+			},
+			{
+				"id": "security-fair-play",
+				"title": "Sicherheit & Fair Play",
+				"questions": [
+					{
+						"id": "ensure-fair-gameplay",
+						"question": "Wie stellen Sie ein faires Gameplay sicher?",
+						"answer": "Umfassende Fair-Play-Systeme: Erweiterte Anti-Cheat-Maßnahmen - KI-gestützte Erkennung von Betrugsversuchen; Zufallszahlengenerierung - Kryptografisch sichere Zufälligkeit; Überwachung in Echtzeit - Kontinuierliche Analyse des Gameplays; Community-Meldungen - Spielergesteuerte Durchsetzung der Fairness; Audits durch Dritte - Unabhängige Überprüfung der Fairness des Spiels"
+					},
+					{
+						"id": "personal-financial-security",
+						"question": "Sind meine persönlichen und finanziellen Daten sicher?",
+						"answer": "Sicherheit auf Unternehmensebene: Verschlüsselung nach Militärstandard - Alle Daten werden auf höchstem Niveau verschlüsselt; DSGVO-Konformität - Volle Einhaltung des europäischen Datenschutzes; Multi-Signature-Wallets - Verbesserte Sicherheit für alle Gelder; Regelmäßige Audits - Umfassende Sicherheitsbewertungen durch Dritte; 24/7-Überwachung - Kontinuierliche Überwachung von Sicherheitsbedrohungen"
+					},
+					{
+						"id": "suspect-cheating",
+						"question": "Was passiert, wenn ich Betrug vermute?",
+						"answer": "Meldeprozess: 1. In-Game-Meldung - Verwenden Sie die integrierten Meldetools; 2. Automatische Untersuchung - Unsere KI-Systeme analysieren das gemeldete Verhalten; 3. Prüfung durch Menschen - Komplexe Fälle werden von menschlichen Moderatoren geprüft; 4. Maßnahmen - Angemessene Strafen werden bei bestätigten Verstößen verhängt; 5. Feedback - Updates zu den Untersuchungsergebnissen werden bereitgestellt"
+					}
+				]
+			},
+			{
+				"id": "technical-support",
+				"title": "Technischer Support",
+				"questions": [
+					{
+						"id": "supported-platforms",
+						"question": "Welche Plattformen werden unterstützt?",
+						"answer": "Multi-Plattform-Verfügbarkeit: iOS - Native iPhone- und iPad-Apps; Android - Native Android-Smartphone- und Tablet-Apps; Web - Browserbasierter Zugriff auf Desktop und Mobilgeräten; Unity Engine - Einheitliches Erlebnis auf allen Plattformen"
+					},
+					{
+						"id": "technical-issues",
+						"question": "Was ist, wenn ich technische Probleme habe?",
+						"answer": "Support-Optionen: 24/7-Kundensupport - Immer verfügbare Hilfe über mehrere Kanäle; In-App-Hilfe - Integrierte Support-Tools und Tutorials; Community-Foren - Unterstützung durch die Spieler-Community; Video-Tutorials - Schritt-für-Schritt-Anleitungen für alle Funktionen; E-Mail-Support - Engagiertes technisches Support-Team"
+					},
+					{
+						"id": "recover-account",
+						"question": "Wie kann ich mein Konto wiederherstellen, wenn ich den Zugriff verliere?",
+						"answer": "Kontowiederherstellung: 1. Support kontaktieren - Wenden Sie sich über unsere Support-Kanäle an uns; 2. Identitätsprüfung - Geben Sie Kontoprüfungsinformationen an; 3. Sicherheitsüberprüfung - Schließen Sie den Sicherheitsüberprüfungsprozess ab; 4. Kontowiederherstellung - Sichere Wiederherstellung des Zugriffs; 5. Sicherheitsüberprüfung - Optionale Sicherheitsbewertung zur Verhinderung zukünftiger Probleme"
+					}
+				]
+			},
+			{
+				"id": "community-social",
+				"title": "Community & Soziale Funktionen",
+				"questions": [
+					{
+						"id": "friend-systems",
+						"question": "Wie funktionieren Freundschafts-Systeme?",
+						"answer": "Soziale Gaming-Funktionen: Freunde einladen - Freundschaftsanfragen senden und annehmen; Private Tische - Exklusive Spiele mit Ihrem Netzwerk veranstalten; Social Chat - Kommunikation in Echtzeit während des Gameplays; Community-Events - Teilnahme an Gruppenturnieren und -wettbewerben"
+					},
+					{
+						"id": "private-tournaments",
+						"question": "Kann ich private Turniere erstellen?",
+						"answer": "Ja! Sie können: Private Events veranstalten - Turniere für Ihre Freundesgruppe erstellen; Benutzerdefinierte Regeln - Legen Sie Ihre eigenen Teilnahmegebühren und Turnierstrukturen fest; Social Gaming - Laden Sie bestimmte Spieler ein, teilzunehmen; Gruppenverwaltung - Verwalten Sie Ihre private Gaming-Community"
+					},
+					{
+						"id": "community-guidelines",
+						"question": "Gibt es Community-Richtlinien?",
+						"answer": "Community-Standards: Respektvolles Verhalten - Behandeln Sie alle Spieler höflich; Fair Play - Kein Betrug, keine Absprachen oder unsportliches Verhalten; Angemessene Kommunikation - Halten Sie den Chat freundlich und angemessen; Probleme melden - Helfen Sie, die Community-Standards aufrechtzuerhalten, indem Sie Probleme melden"
+					}
+				]
+			},
+			{
+				"id": "partnership-business",
+				"title": "Partnerschaft & Geschäft",
+				"questions": [
+					{
+						"id": "partnership-opportunities",
+						"question": "Gibt es Partnerschaftsmöglichkeiten?",
+						"answer": "Wir suchen aktiv nach strategischen Partnerschaften in: Gaming-Plattformen - Integrations- und Cross-Promotion-Möglichkeiten; Krypto-Dienste - Wallet- und Börsenpartnerschaften; Content Creators - Influencer- und Streamer-Zusammenarbeiten; Technologieanbieter - Infrastruktur- und Dienstleistungspartnerschaften. Kontakt: Bei Fragen zu Partnerschaften wenden Sie sich bitte über unsere Geschäftsentwicklungskanäle an uns."
+					},
+					{
+						"id": "stay-updated",
+						"question": "Wie kann ich über Entwicklungen auf dem Laufenden bleiben?",
+						"answer": "Verbunden bleiben: Offizielle Website - Regelmäßige Updates und Ankündigungen; Soziale Medien - Folgen Sie unseren offiziellen Social-Media-Kanälen; Community Discord - Treten Sie unserer aktiven Community bei; Newsletter - Abonnieren Sie Entwicklungsaktualisierungen; Pressemitteilungen - Offizielle Unternehmensankündigungen"
+					}
+				]
+			}
+		]
 	}
 }

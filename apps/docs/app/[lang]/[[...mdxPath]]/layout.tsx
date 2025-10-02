@@ -9,6 +9,7 @@ import { getLocaleNames } from "@mjs/i18n";
 import { PageMapItem } from "nextra";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/header";
+import { createBreadcrumbListFromPageMap, createNewsletterSubscribeJsonLd, createOrganizationJsonLd, JsonLd } from "@/components/JsonLd";
 import remotePageMap from "@/data/remote-page-map.json";
 import { Locale } from "@/lib/i18n";
 import {
@@ -69,6 +70,9 @@ async function layout({
 					{children}
 				</Layout>
 			</TranslationsProvider>
+			<JsonLd jsonLd={createBreadcrumbListFromPageMap(lang, pageMap)} />
+			<JsonLd jsonLd={createOrganizationJsonLd(t)} />
+			<JsonLd jsonLd={createNewsletterSubscribeJsonLd(t)} />
 		</html>
 	);
 }

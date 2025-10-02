@@ -13,6 +13,15 @@ import { genPageMetadata } from "./seo";
 export const metadata: Metadata = genPageMetadata({
 	title: siteConfig.title,
 	description: siteConfig.description,
+	verification: {
+		google: "nqa5sg-1E3L1kkp14czB6bPMFch0O0qwUt1OLHme3lo",
+		// yahoo: '',
+		// yandex: '',
+		// other: {
+		// Bing
+		// "msvalidate.01": ['']
+		// }
+	},
 });
 
 export const generateStaticParams = async () => {

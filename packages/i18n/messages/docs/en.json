@@ -14,5 +14,179 @@
 		"soon": "Coming Soon",
 		"search": "Search...",
 		"subscribe": "Subscribe now"
+	},
+	"FAQ": {
+		"title": "Frequently Asked Questions",
+		"description": "Comprehensive FAQ covering platform features, AI training, tokens, security, and support topics",
+		"sections": [
+			{
+				"id": "general-platform",
+				"title": "General Platform Questions",
+				"questions": [
+					{
+						"id": "what-is-mahjong-stars",
+						"question": "What is Mahjong Stars?",
+						"answer": "Mahjong Stars is the world's first AI-powered Web3 social mahjong gaming platform. We combine traditional mahjong gameplay with cutting-edge AI technology and Web3 features, allowing players to train AI avatars that can play 24/7, even when they're offline."
+					},
+					{
+						"id": "how-different-from-other-platforms",
+						"question": "How is Mahjong Stars different from other mahjong platforms?",
+						"answer": "Key Differentiators: AI Training - Create and train AI avatars that learn your playing style; 24/7 Gameplay - Your AI continues playing and earning while you're away; Web3 Integration - NFT marketplace, crypto wallet integration, and $TILE token utility; Social Features - Advanced community features and friend systems; Proven Expertise - Built by a team with 10+ years of mahjong gaming experience"
+					},
+					{
+						"id": "available-worldwide",
+						"question": "Is Mahjong Stars available worldwide?",
+						"answer": "We're launching globally with multi-platform support across iOS, Android, and Web. Our Unity-based platform ensures consistent gameplay experience across all devices and regions."
+					}
+				]
+			},
+			{
+				"id": "getting-started",
+				"title": "Getting Started",
+				"questions": [
+					{
+						"id": "what-need-to-start",
+						"question": "What do I need to start playing?",
+						"answer": "Device - Any modern smartphone, tablet, or computer; Internet - Stable internet connection; StarsPoints - In-game currency purchased with fiat or crypto; Account - Simple social login setup"
+					},
+					{
+						"id": "cost-to-start",
+						"question": "How much does it cost to start playing?",
+						"answer": "There's no cost to download and create an account. You'll need to purchase StarsPoints to participate in games. Entry fees vary by table stakes, starting from small amounts suitable for beginners."
+					}
+				]
+			},
+			{
+				"id": "ai-gameplay",
+				"title": "AI & Gameplay",
+				"questions": [
+					{
+						"id": "how-ai-training-works",
+						"question": "How does AI training work?",
+						"answer": "Training Process: 1. Play Manually - Your initial games provide training data; 2. Pattern Learning - AI analyzes your decision-making patterns; 3. Strategy Replication - AI learns to mimic your playing style; 4. Continuous Improvement - AI refines its approach based on ongoing gameplay"
+					},
+					{
+						"id": "ai-play-offline",
+						"question": "Can my AI play while I'm offline?",
+						"answer": "Yes! This is one of our core features. Your AI can: Play Continuously - Participate in games 24/7; Earn StarsPoints - Generate income while you're away; Follow Limits - Respect your pre-set spending and earning limits; Provide Updates - Send notifications about performance and results"
+					},
+					{
+						"id": "ai-accuracy",
+						"question": "How accurate is the AI in replicating my playing style?",
+						"answer": "Our AI uses advanced machine learning algorithms to analyze thousands of decision points. The more you play, the better your AI becomes at replicating your strategies. Most players see significant accuracy within 20-30 training games."
+					},
+					{
+						"id": "take-control-from-ai",
+						"question": "Can I take control from my AI during a game?",
+						"answer": "Absolutely! Our Hybrid Play Mode allows you to: Seamless Switching - Take control anytime during AI gameplay; Manual Override - Make crucial decisions yourself; Learning Integration - Your manual plays further train your AI; Flexible Gaming - Perfect balance of automation and personal control"
+					}
+				]
+			},
+			{
+				"id": "economy-tokens",
+				"title": "Economy & Tokens",
+				"questions": [
+					{
+						"id": "what-are-starspoints",
+						"question": "What are StarsPoints?",
+						"answer": "StarsPoints are the primary in-game currency used for: Entry fees for tables and tournaments; AI service access and premium features; In-game purchases (avatars, items, decorations); Transaction fees for platform activities. Important: StarsPoints have no value outside the game and are for in-game use only."
+					},
+					{
+						"id": "what-is-tile-token",
+						"question": "What is the $TILE token?",
+						"answer": "$TILE is our utility token with multiple uses: Governance Rights - Vote on platform updates and features; Staking Rewards - Earn additional tokens through staking; Premium Features - Access exclusive tournaments and AI capabilities; NFT Marketplace - Primary currency for trading in-game assets; Revenue Sharing - Participate in platform revenue distribution"
+					},
+					{
+						"id": "withdrawal-rewards",
+						"question": "How do Withdrawal Rewards work?",
+						"answer": "Withdrawal Rewards are an optional premium feature: Purchase Required - Buy withdrawal capability as an optional add-on; Third-Party Trading - Enables selling in-game assets on external platforms; 1:1 Rate - Convert virtual gains to real-world value; Additional Revenue - Platform earns commission on withdrawal reward purchases"
+					},
+					{
+						"id": "tile-token-launch",
+						"question": "When will the $TILE token launch?",
+						"answer": "The $TILE token is scheduled to launch in Q4 2025 following our platform launch and initial user acquisition. This will include: Token Generation Event (TGE); Major DEX listings; Exchange partnerships; Staking mechanism launch"
+					}
+				]
+			},
+			{
+				"id": "security-fair-play",
+				"title": "Security & Fair Play",
+				"questions": [
+					{
+						"id": "ensure-fair-gameplay",
+						"question": "How do you ensure fair gameplay?",
+						"answer": "Comprehensive Fair Play Systems: Advanced Anti-Cheat - AI-powered detection of cheating attempts; Random Number Generation - Cryptographically secure randomness; Real-Time Monitoring - Continuous gameplay analysis; Community Reporting - Player-driven fairness enforcement; Third-Party Audits - Independent verification of game fairness"
+					},
+					{
+						"id": "personal-financial-security",
+						"question": "Is my personal and financial information secure?",
+						"answer": "Enterprise-Grade Security: Military-Grade Encryption - All data encrypted at highest levels; GDPR Compliance - Full European data protection compliance; Multi-Signature Wallets - Enhanced security for all funds; Regular Audits - Comprehensive third-party security assessments; 24/7 Monitoring - Continuous security threat monitoring"
+					},
+					{
+						"id": "suspect-cheating",
+						"question": "What happens if I suspect cheating?",
+						"answer": "Report Process: 1. In-Game Reporting - Use built-in reporting tools; 2. Automatic Investigation - Our AI systems analyze reported behavior; 3. Human Review - Complex cases reviewed by human moderators; 4. Action Taken - Appropriate penalties applied to confirmed violations; 5. Feedback - Updates provided on investigation outcomes"
+					}
+				]
+			},
+			{
+				"id": "technical-support",
+				"title": "Technical Support",
+				"questions": [
+					{
+						"id": "supported-platforms",
+						"question": "What platforms are supported?",
+						"answer": "Multi-Platform Availability: iOS - Native iPhone and iPad apps; Android - Native Android smartphone and tablet apps; Web - Browser-based access on desktop and mobile; Unity Engine - Consistent experience across all platforms"
+					},
+					{
+						"id": "technical-issues",
+						"question": "What if I experience technical issues?",
+						"answer": "Support Options: 24/7 Customer Support - Always-available help via multiple channels; In-App Help - Built-in support tools and tutorials; Community Forums - Player community assistance; Video Tutorials - Step-by-step guides for all features; Email Support - Dedicated technical support team"
+					},
+					{
+						"id": "recover-account",
+						"question": "How do I recover my account if I lose access?",
+						"answer": "Account Recovery: 1. Contact Support - Reach out via our support channels; 2. Identity Verification - Provide account verification information; 3. Security Check - Complete security verification process; 4. Account Restoration - Secure restoration of access; 5. Security Review - Optional security assessment to prevent future issues"
+					}
+				]
+			},
+			{
+				"id": "community-social",
+				"title": "Community & Social Features",
+				"questions": [
+					{
+						"id": "friend-systems",
+						"question": "How do friend systems work?",
+						"answer": "Social Gaming Features: Friend Invites - Send and accept friend requests; Private Tables - Host exclusive games with your network; Social Chat - Real-time communication during gameplay; Community Events - Participate in group tournaments and competitions"
+					},
+					{
+						"id": "private-tournaments",
+						"question": "Can I create private tournaments?",
+						"answer": "Yes! You can: Host Private Events - Create tournaments for your friend group; Custom Rules - Set your own entry fees and tournament structure; Social Gaming - Invite specific players to join; Group Management - Manage your private gaming community"
+					},
+					{
+						"id": "community-guidelines",
+						"question": "Are there community guidelines?",
+						"answer": "Community Standards: Respectful Behavior - Treat all players with courtesy; Fair Play - No cheating, collusion, or unsporting behavior; Appropriate Communication - Keep chat friendly and appropriate; Report Issues - Help maintain community standards by reporting problems"
+					}
+				]
+			},
+			{
+				"id": "partnership-business",
+				"title": "Partnership & Business",
+				"questions": [
+					{
+						"id": "partnership-opportunities",
+						"question": "Do you have partnership opportunities?",
+						"answer": "We actively seek strategic partnerships in: Gaming Platforms - Integration and cross-promotion opportunities; Crypto Services - Wallet and exchange partnerships; Content Creators - Influencer and streamer collaborations; Technology Providers - Infrastructure and service partnerships. Contact: For partnership inquiries, reach out through our business development channels."
+					},
+					{
+						"id": "stay-updated",
+						"question": "How can I stay updated on developments?",
+						"answer": "Stay Connected: Official Website - Regular updates and announcements; Social Media - Follow our official social media channels; Community Discord - Join our active community; Newsletter - Subscribe for development updates; Press Releases - Official company announcements"
+					}
+				]
+			}
+		]
 	}
 }
