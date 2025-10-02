@@ -178,9 +178,6 @@ export async function generateMetadata({ params }: PageProps) {
 			},
 			languages: generateLanguageAlternates(),
 		},
-		verification: {
-			google: "nqa5sg-1E3L1kkp14czB6bPMFch0O0qwUt1OLHme3lo",
-		},
 		robots: {
 			index: true,
 			follow: true,
