@@ -178,6 +178,8 @@ export default () => {
 				},
 			];
 		},
+		// https://github.com/vercel/next.js/issues/79313 fix to avoid meta tags to get placed in body tag instead head
+		htmlLimitedBots: /.*/,
 		webpack: (config, _options) => {
 			config.module.rules.push({
 				test: /\.svg$/,
