@@ -1,6 +1,5 @@
 import { cn } from "@mjs/ui/lib/utils";
 import { getTranslations } from "next-intl/server";
-import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
 export async function generateMetadata({ params }: PageProps) {
@@ -26,7 +25,6 @@ export default function TermsLayout({
 			<main className="mx-auto prose lg:prose-xl mt-20 xs:mt-28 p-4 prose-a:fancy-link prose-h2:text-2xl prose-h1:text-4xl">
 				{children}
 			</main>
-			<Footer />
 		</div>
 	);
 }

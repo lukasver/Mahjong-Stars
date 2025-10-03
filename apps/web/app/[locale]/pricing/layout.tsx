@@ -1,6 +1,5 @@
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 import { notFound } from "next/navigation";
+import Header from "@/components/Header";
 
 export default function PricingLayout({
 	children,
@@ -13,7 +12,6 @@ export default function PricingLayout({
 		<div className="flex flex-col w-full items-center fancy-overlay">
 			<Header />
 			{children}
-			<Footer />
 		</div>
 	);
 }
