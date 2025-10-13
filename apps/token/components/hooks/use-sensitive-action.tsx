@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useAdminWalletAuth } from './use-admin-wallet-auth';
-import { useCallback, useState } from 'react';
-import { toast } from '@mjs/ui/primitives/sonner';
+import { toast } from "@mjs/ui/primitives/sonner";
+import { useCallback, useState } from "react";
+import { useAdminWalletAuth } from "./use-admin-wallet-auth";
 
 interface UseSensitiveActionOptions {
   action: string;
@@ -13,7 +13,7 @@ interface UseSensitiveActionOptions {
 }
 
 interface SensitiveActionState {
-  isAuthenticated: boolean;
+  isAuthenticated: { signature: `0x${string}`; message: string } | false;
   isLoading: boolean;
   error: string | null;
 }
@@ -47,44 +47,45 @@ export const useSensitiveAction = ({
    * Execute a sensitive action with wallet authentication
    */
   const executeAction = useCallback(
-    async (actionFn: () => Promise<void> | void) => {
+    async (actionFn: (signature: `0x${string}`, message: string) => Promise<void> | void) => {
       if (!isWalletConnected) {
-        const error = 'Wallet not connected';
+        const error = "Wallet not connected";
         setState((prev) => ({ ...prev, error }));
         onError?.(error);
         toast.error(error);
         return false;
       }
 
-      if (!authAuthenticated) {
-        setState((prev) => ({ ...prev, isLoading: true }));
+      let signature = authAuthenticated;
+      // if (!signature) {
+      setState((prev) => ({ ...prev, isLoading: true }));
 
-        const success = await requestSignature();
+      signature = await requestSignature();
 
-        if (!success) {
-          const error = authError || 'Authentication failed';
-          setState((prev) => ({
-            ...prev,
-            isLoading: false,
-            error,
-            isAuthenticated: false,
-          }));
-          onError?.(error);
-          return false;
-        }
-
+      if (!signature) {
+        const error = authError || "Authentication failed";
         setState((prev) => ({
           ...prev,
           isLoading: false,
-          isAuthenticated: true,
-          error: null,
+          error,
+          isAuthenticated: false,
         }));
+        onError?.(error);
+        return false;
       }
+
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        isAuthenticated: signature,
+        error: null,
+      }));
+      // }
 
       // Execute the actual action
       try {
         setState((prev) => ({ ...prev, isLoading: true }));
-        await actionFn();
+        await actionFn(signature.signature, signature.message);
 
         setState((prev) => ({
           ...prev,
@@ -96,7 +97,7 @@ export const useSensitiveAction = ({
         return true;
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : 'Action failed';
+          error instanceof Error ? error.message : "Action failed";
         setState((prev) => ({
           ...prev,
           isLoading: false,
@@ -114,7 +115,7 @@ export const useSensitiveAction = ({
       requestSignature,
       onSuccess,
       onError,
-    ]
+    ],
   );
 
   /**

@@ -158,6 +158,11 @@ const variableCategories: VariableCategory[] = [
     color: "bg-green-500",
     variables: [
       {
+        name: "recipient.street",
+        description: "The recipient's address from their address",
+        example: "123 Main St",
+      },
+      {
         name: "recipient.city",
         description: "The recipient's city from their address",
         example: "New York",
@@ -193,6 +198,11 @@ const variableCategories: VariableCategory[] = [
         name: "token.symbol",
         description: "The symbol of the token purchased",
         example: "TILE",
+      },
+      {
+        name: "token.name",
+        description: "The name of the token purchased",
+        example: "TILES",
       },
     ],
   },

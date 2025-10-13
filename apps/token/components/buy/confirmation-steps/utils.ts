@@ -19,6 +19,7 @@ export const labelMapping = {
 	"recipient.firstName": "Your First Name",
 	"recipient.lastName": "Your Last Name",
 	"recipient.address": "Your Address",
+	"recipient.street": "Your Street",
 	"recipient.city": "Your City",
 	"recipient.zipcode": "Your Zipcode",
 	"recipient.country": "Your Country",

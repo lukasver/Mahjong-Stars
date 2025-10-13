@@ -91,18 +91,28 @@ const adminClient = authActionClient.use(adminMiddleware);
 //   });
 
 export const upsertSale = adminClient
-	.schema(CreateSaleDto.extend({ id: z.string().optional() }))
+	.schema(
+		CreateSaleDto.extend({
+			id: z.string().optional(),
+			signature: z.object({
+				signature: z.string(),
+				chainId: z.number(),
+				message: z.string(),
+			}),
+		}),
+	)
 	.action(async ({ ctx, parsedInput }) => {
 		let sale:
 			| Awaited<ReturnType<typeof salesController.updateSale>>
 			| Awaited<ReturnType<typeof salesController.createSale>>
 			| null = null;
 		if (parsedInput.id) {
-			const { id, ...rest } = parsedInput;
+			const { id, signature, ...rest } = parsedInput;
 
 			sale = await salesController.updateSale(
 				{
 					id,
+					signature,
 					data: {
 						...rest,
 						tokenPricePerUnit: new Prisma.Decimal(rest.tokenPricePerUnit),
@@ -123,7 +133,17 @@ export const upsertSale = adminClient
  * @warning ADMIN REQUIRED
  */
 export const updateSale = adminClient
-	.schema(UpdateSaleDto)
+	.schema(
+		UpdateSaleDto.merge(
+			z.object({
+				signature: z.object({
+					signature: z.string(),
+					chainId: z.number(),
+					message: z.string(),
+				}),
+			}),
+		),
+	)
 	.action(async ({ ctx, parsedInput }) => {
 		const sales = await salesController.updateSale(parsedInput, ctx);
 		if (!sales.success) {
@@ -284,7 +304,6 @@ export const createSaftContract = adminClient
 		}),
 	)
 	.action(async ({ ctx, parsedInput }) => {
-		console.log("ENTRE?", parsedInput);
 		const result = await documentsController.createSaft(parsedInput, ctx);
 		if (!result.success) {
 			throw new Error(result.message);

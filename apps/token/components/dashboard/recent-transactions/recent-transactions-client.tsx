@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
+import { motion } from "@mjs/ui/components/motion";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@mjs/ui/primitives/card';
-import { motion } from '@mjs/ui/components/motion';
-import { Prisma } from '@prisma/client';
+} from "@mjs/ui/primitives/card";
+import { Prisma } from "@prisma/client";
 
 const RecentTransactionsPayload =
   Prisma.validator<Prisma.SaleTransactionsDefaultArgs>()({
@@ -46,17 +46,17 @@ export function RecentTransactions({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{
         duration: 0.6,
-        scale: { type: 'spring', visualDuration: 0.6, bounce: 0.2 },
+        scale: { type: "spring", visualDuration: 0.6, bounce: 0.2 },
       }}
-      className='h-full'
+      className="h-full"
     >
-      <Card className='border-zinc-800 bg-zinc-900/50 h-full max-h-[565px]'>
+      <Card className="border-zinc-800 bg-zinc-900/50 h-full max-h-[565px]">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
-          <CardHeader className=''>
+          <CardHeader className="">
             <CardTitle>Recent Transactions</CardTitle>
             <CardDescription>Latest token purchases and sales</CardDescription>
           </CardHeader>
@@ -65,34 +65,34 @@ export function RecentTransactions({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.4 }}
-          className='h-full max-h-[calc(100%-100px)] overflow-y-auto scrollbar-hidden'
+          className="h-full max-h-[calc(100%-100px)] overflow-y-auto scrollbar-hidden"
         >
-          <CardContent className='p-0 sm:p-6'>
-            <div className='space-y-4'>
+          <CardContent className="p-0 sm:p-6">
+            <div className="space-y-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6, duration: 0.5, ease: 'easeOut' }}
-                className='rounded-md border border-zinc-800'
+                transition={{ delay: 0.6, duration: 0.5, ease: "easeOut" }}
+                className="rounded-md border border-zinc-800"
               >
-                <div className='overflow-x-auto'>
-                  <table className='w-full text-sm'>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
                     <motion.thead
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.8, duration: 0.4 }}
                     >
-                      <tr className='border-b border-zinc-800 bg-zinc-950/50'>
-                        <th className='px-4 py-3 text-left font-medium'>
+                      <tr className="border-b border-zinc-800 bg-zinc-950/50">
+                        <th className="px-4 py-3 text-left font-medium">
+                          Tokens
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium">
                           Amount
                         </th>
-                        <th className='px-4 py-3 text-left font-medium'>
-                          Value
-                        </th>
-                        <th className='px-4 py-3 text-left font-medium'>
+                        <th className="px-4 py-3 text-left font-medium">
                           Wallet
                         </th>
-                        <th className='px-4 py-3 text-left font-medium'>
+                        <th className="px-4 py-3 text-left font-medium">
                           Time
                         </th>
                       </tr>
@@ -110,23 +110,23 @@ export function RecentTransactions({
                           transition={{
                             delay: 1.2 + index * 0.05,
                             duration: 0.4,
-                            ease: 'easeOut',
+                            ease: "easeOut",
                           }}
-                          className='border-b border-zinc-800 last:border-0'
+                          className="border-b border-zinc-800 last:border-0"
                         >
-                          <td className='px-4 py-3 font-medium'>
+                          <td className="px-4 py-3 font-medium">
                             {formatAmount(
                               tx.quantity.toString(),
-                              tx.sale.tokenSymbol
+                              tx.sale.tokenSymbol,
                             )}
                           </td>
-                          <td className='px-4 py-3'>
+                          <td className="px-4 py-3">
                             {formatValue(tx.totalAmount.toString())}
                           </td>
-                          <td className='px-4 py-3 font-mono text-xs'>
+                          <td className="px-4 py-3 font-mono text-xs">
                             {formatWalletAddress(tx.user.walletAddress)}
                           </td>
-                          <td className='px-4 py-3 text-zinc-400'>
+                          <td className="px-4 py-3 text-zinc-400">
                             {formatTimeAgo(tx.createdAt)}
                           </td>
                         </motion.tr>
@@ -161,12 +161,12 @@ const formatTimeAgo = (date: Date) => {
   const diffInDays = Math.floor(diffInHours / 24);
 
   if (diffInDays > 0) {
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
   }
   if (diffInHours > 0) {
-    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
   }
-  return 'Just now';
+  return "Just now";
 };
 
 /**

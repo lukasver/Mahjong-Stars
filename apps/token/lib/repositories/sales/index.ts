@@ -3,6 +3,8 @@ import { invariant } from "@epic-web/invariant";
 import { Prisma, SaftContract, Sale, SaleStatus } from "@prisma/client";
 import { DateTime } from "luxon";
 import mime from "mime-types";
+import { defineChain } from "thirdweb";
+import { verifySignature } from "thirdweb/auth";
 import { z } from "zod";
 import { FIAT_CURRENCIES } from "@/common/config/constants";
 import {
@@ -20,6 +22,7 @@ import { Document } from "@/common/schemas/generated";
 import { SaleWithRelations, SaleWithToken } from "@/common/types/sales";
 import { BankDetailsForm } from "@/components/admin/create-sales/utils";
 import { prisma } from "@/db";
+import { serverClient } from "@/lib/auth/thirdweb";
 import logger from "@/lib/services/logger.server";
 import { StorageService } from "../documents/storage";
 import { TransactionValidator as validator } from "../transactions/validator";
@@ -200,9 +203,25 @@ class SalesController {
 	 * Create a new sale.
 	 */
 	async createSale(
-		dto: CreateSaleDto,
+		payload: CreateSaleDto & {
+			signature: { signature: string; chainId: number; message: string };
+		},
 		ctx: ActionCtx,
 	): Promise<Success<{ sale: Sale }> | Failure> {
+		const { signature, ...dto } = payload;
+
+		invariant(signature, "Missing signature");
+
+		const result = await verifySignature({
+			client: serverClient,
+			signature: signature.signature,
+			message: signature.message,
+			address: ctx.address,
+			chain: defineChain(signature.chainId),
+		});
+
+		invariant(result, "Invalid signature");
+
 		try {
 			const {
 				name,
@@ -381,8 +400,14 @@ class SalesController {
 	 * Update a sale.
 	 */
 	async updateSale(
-		{ id, data }: UpdateSaleDto,
-		_ctx: ActionCtx,
+		{
+			id,
+			data,
+			signature,
+		}: UpdateSaleDto & {
+			signature: { signature: string; chainId: number; message: string };
+		},
+		ctx: ActionCtx,
 	): Promise<Success<{ sale: SaleWithToken }> | Failure> {
 		if (!id || !data || data === undefined) {
 			return Failure(
@@ -391,13 +416,24 @@ class SalesController {
 				"Invalid request parameters",
 			);
 		}
+		invariant(signature, "Missing signature");
+
+		const result = await verifySignature({
+			client: serverClient,
+			signature: signature.signature,
+			message: signature.message,
+			address: ctx.address,
+			chain: defineChain(signature.chainId),
+		});
+
+		invariant(result, "Invalid signature");
 
 		const {
 			currency,
 			tokenContractChainId,
-			tokenId,
+			tokenId: _,
 			tokenSymbol,
-			createdBy,
+			createdBy: __,
 			information,
 			...rest
 		} = data;

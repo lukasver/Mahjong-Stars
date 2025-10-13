@@ -1,10 +1,7 @@
 "use client";
 
 import { getGlassyCardClassName } from "@mjs/ui/components/cards";
-import {
-  AnimatePresence,
-  FadeAnimation
-} from "@mjs/ui/components/motion";
+import { AnimatePresence, FadeAnimation } from "@mjs/ui/components/motion";
 import { Button } from "@mjs/ui/primitives/button";
 import { Card } from "@mjs/ui/primitives/card";
 import { useAppForm } from "@mjs/ui/primitives/form/index";
@@ -16,6 +13,7 @@ import { useAction } from "next-safe-action/hooks";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Dispatch, SetStateAction, useCallback } from "react";
 import { InformationSchemaAsStrings } from "@/common/schemas/dtos/sales/information";
+import useActiveAccount from "@/components/hooks/use-active-account";
 import { useSensitiveAction } from "@/components/hooks/use-sensitive-action";
 import { Stepper } from "@/components/stepper";
 import { getFileUploadPublicPresignedUrl } from "@/lib/actions";
@@ -28,9 +26,7 @@ import {
 import { useSale } from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
-import {
-  SectionContainer
-} from "./sections";
+import { SectionContainer } from "./sections";
 import { FormFooter } from "./sections/footer";
 import { FileType, getSteps, SaleFormSchema, SaleSchemas } from "./utils";
 
@@ -38,12 +34,13 @@ export const CreateSaleForm = () => {
   const router = useRouter();
   const [step, setStep] = useQueryState(
     "step",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true, }),
+    parseAsInteger.withDefault(1).withOptions({ shallow: true }),
   );
   const [saleId, setSaleId] = useQueryState(
     "saleId",
     parseAsString.withDefault(""),
   );
+  const { chainId } = useActiveAccount();
   const t = useTranslations("admin.sales.create");
   const { data } = useSale(saleId);
   const steps = getSteps(t);
@@ -60,7 +57,6 @@ export const CreateSaleForm = () => {
     action: "edit_sale",
     saleId,
     data: { step: steps.find((s) => s.id === step)?.name },
-
     onError: (error) => {
       toast.error(`Authentication failed: ${error}`);
     },
@@ -91,168 +87,184 @@ export const CreateSaleForm = () => {
 
     onSubmit: async ({ value, formApi }) => {
       const queryClient = getQueryClient();
+      if (!chainId) {
+        toast.error("No chain ID retrieved from wallet");
+        return;
+      }
 
       try {
         // Execute with wallet authentication for sensitive actions
-        const success = await sensitiveAction.executeAction(async () => {
-          if (step === 1) {
-            const vals = SaleSchemas[1].parse(value);
-
-            if (saleId) {
-              vals.id = saleId;
+        const success = await sensitiveAction.executeAction(
+          async (signature, message) => {
+            // Create object with signature to send to the server for validation
+            const signPayload = {
+              signature,
+              message,
+              chainId,
             }
-            //Create sale and update query params to reflect the current saleId
-            const res = await saleAction.executeAsync(vals);
+            if (step === 1) {
+              const vals = SaleSchemas[1].parse(value);
 
-            if (res?.data) {
-              setSaleId(res.data.sale.id);
-              // Go to next step
-              setStep((pv) => pv + 1);
-              queryClient.invalidateQueries({ queryKey: ["sales"] });
-            } else {
-              throw new Error(
-                res?.serverError ||
-                res?.validationErrors?._errors?.join(", ") ||
-                "Error creating sale",
+              if (saleId) {
+                vals.id = saleId;
+              }
+
+              //Create sale and update query params to reflect the current saleId
+              const res = await saleAction.executeAsync(
+                Object.assign(vals, { signature: signPayload }),
               );
-            }
-          }
-          if (step === 2) {
-            const vals = SaleSchemas[2].parse(value);
-            const f = formApi.getFieldMeta("content");
 
-            if (sale?.saftCheckbox === true && !vals.content) {
-              toast.error("Please fill in the Saft contract");
-              return;
+              if (res?.data) {
+                setSaleId(res.data.sale.id);
+                // Go to next step
+                setStep((pv) => pv + 1);
+                queryClient.invalidateQueries({ queryKey: ["sales"] });
+              } else {
+                throw new Error(
+                  res?.serverError ||
+                  res?.validationErrors?._errors?.join(", ") ||
+                  "Error creating sale",
+                );
+              }
             }
-            if (f?.isPristine) {
-              setStep((pv) => pv + 1);
-              return;
-            }
+            if (step === 2) {
+              const vals = SaleSchemas[2].parse(value);
+              const f = formApi.getFieldMeta("content");
 
-            // Create Saft in DB and move no the next step
-            const res = await saftAction.executeAsync({
-              content: vals.content,
-              name: vals.name,
-              description: vals.description,
-              saleId,
-            });
-            if (res?.data) {
-              setStep((pv) => pv + 1);
-              queryClient.invalidateQueries({
-                queryKey: ["sales", saleId, "saft"],
+              if (sale?.saftCheckbox === true && !vals.content) {
+                toast.error("Please fill in the Saft contract");
+                return;
+              }
+              if (f?.isPristine) {
+                setStep((pv) => pv + 1);
+                return;
+              }
+
+              // Create Saft in DB and move no the next step
+              const res = await saftAction.executeAsync({
+                content: vals.content,
+                name: vals.name,
+                description: vals.description,
+                saleId,
               });
-            } else {
-              throw new Error(
-                res?.serverError ||
-                res?.validationErrors?._errors?.join(", ") ||
-                "Error creating saft",
-              );
-            }
-          }
-          if (step === 3) {
-            const vals = SaleSchemas[3].parse(value);
-
-            //Create sale and update query params to reflect the current saleId
-            const res = await bankDetailsAction.executeAsync({
-              banks: vals.banks,
-              saleId,
-            });
-
-            if (res?.data) {
-              [
-                ["input", "options"],
-                ["sales", saleId, "banks"],
-                ["sales", saleId],
-              ].forEach((key) => {
+              if (res?.data) {
+                setStep((pv) => pv + 1);
                 queryClient.invalidateQueries({
-                  queryKey: key,
+                  queryKey: ["sales", saleId, "saft"],
                 });
+              } else {
+                throw new Error(
+                  res?.serverError ||
+                  res?.validationErrors?._errors?.join(", ") ||
+                  "Error creating saft",
+                );
+              }
+            }
+            if (step === 3) {
+              const vals = SaleSchemas[3].parse(value);
+
+              //Create sale and update query params to reflect the current saleId
+              const res = await bankDetailsAction.executeAsync({
+                banks: vals.banks,
+                saleId,
               });
 
-              setStep((pv) => pv + 1);
-            } else {
-              throw new Error(
-                res?.serverError ||
-                res?.validationErrors?._errors?.join(", ") ||
-                "Error associating bank details",
-              );
+              if (res?.data) {
+                [
+                  ["input", "options"],
+                  ["sales", saleId, "banks"],
+                  ["sales", saleId],
+                ].forEach((key) => {
+                  queryClient.invalidateQueries({
+                    queryKey: key,
+                  });
+                });
+
+                setStep((pv) => pv + 1);
+              } else {
+                throw new Error(
+                  res?.serverError ||
+                  res?.validationErrors?._errors?.join(", ") ||
+                  "Error associating bank details",
+                );
+              }
             }
-          }
-          if (step === 4) {
-            const values = SaleSchemas[4].parse(value);
-            const fileValues = values.information.filter(
-              (item) => item.type === "file",
-            ) as unknown as FileType[];
-            let uploadedFiles: {
-              type: "file";
-              value: string;
-              label: string;
-            }[] = [];
-            const nonFileValues = values.information.filter(
-              (item) => item.type !== "file",
-            );
+            if (step === 4) {
+              const values = SaleSchemas[4].parse(value);
+              const fileValues = values.information.filter(
+                (item) => item.type === "file",
+              ) as unknown as FileType[];
+              let uploadedFiles: {
+                type: "file";
+                value: string;
+                label: string;
+              }[] = [];
+              const nonFileValues = values.information.filter(
+                (item) => item.type !== "file",
+              );
 
-            if (fileValues.length > 0) {
-              const uploads = await Promise.all(
-                fileValues.map(async ({ value }) => {
-                  // For already existing files we don't need to upload them again
+              if (fileValues.length > 0) {
+                const uploads = await Promise.all(
+                  fileValues.map(async ({ value }) => {
+                    // For already existing files we don't need to upload them again
 
-                  if (!(value instanceof File)) {
-                    return Promise.resolve(null);
-                  }
-                  const fileName = `sale/${saleId}/${(value as File).name}`;
-                  const presignedResponse =
-                    await getFileUploadPublicPresignedUrl({
-                      key: fileName,
-                    });
+                    if (!(value instanceof File)) {
+                      return Promise.resolve(null);
+                    }
+                    const fileName = `sale/${saleId}/${(value as File).name}`;
+                    const presignedResponse =
+                      await getFileUploadPublicPresignedUrl({
+                        key: fileName,
+                      });
 
-                  if (presignedResponse?.data) {
-                    const uploadResult = await uploadFile(
-                      { file: value as File, name: fileName },
-                      presignedResponse.data.url,
-                    );
-                    return {
-                      ...uploadResult,
-                      prefix: presignedResponse.data.prefix,
-                    };
-                  } else {
-                    throw new Error("Error getting presigned url");
-                  }
+                    if (presignedResponse?.data) {
+                      const uploadResult = await uploadFile(
+                        { file: value as File, name: fileName },
+                        presignedResponse.data.url,
+                      );
+                      return {
+                        ...uploadResult,
+                        prefix: presignedResponse.data.prefix,
+                      };
+                    } else {
+                      throw new Error("Error getting presigned url");
+                    }
+                  }),
+                );
+
+                uploadedFiles = fileValues.map((file, i) => ({
+                  type: "file",
+                  label: file.label,
+                  value:
+                    uploads[i]?.url?.split("?")[0] ||
+                    (uploads[i]?.prefix || "") + uploads[i]?.fileName,
+                  props: file.props,
+                }));
+              }
+
+              const result = await informationAction.executeAsync({
+                data: InformationSchemaAsStrings.parse({
+                  information: [...nonFileValues, ...uploadedFiles],
                 }),
-              );
-
-              uploadedFiles = fileValues.map((file, i) => ({
-                type: "file",
-                label: file.label,
-                value:
-                  uploads[i]?.url?.split("?")[0] ||
-                  (uploads[i]?.prefix || "") + uploads[i]?.fileName,
-                props: file.props,
-              }));
-            }
-
-            const result = await informationAction.executeAsync({
-              data: InformationSchemaAsStrings.parse({
-                information: [...nonFileValues, ...uploadedFiles],
-              }),
-              id: saleId,
-            });
-            if (result?.data) {
-              queryClient.invalidateQueries({
-                queryKey: ["sales", saleId],
+                signature: signPayload,
+                id: saleId,
               });
-              toast.success("Information submitted successfully");
-              router.push(`/admin/sales`);
-            } else {
-              throw new Error(
-                result?.serverError ||
-                result?.validationErrors?._errors?.join(", ") ||
-                "Error submitting information",
-              );
+              if (result?.data) {
+                queryClient.invalidateQueries({
+                  queryKey: ["sales", saleId],
+                });
+                toast.success("Information submitted successfully");
+                router.push(`/admin/sales`);
+              } else {
+                throw new Error(
+                  result?.serverError ||
+                  result?.validationErrors?._errors?.join(", ") ||
+                  "Error submitting information",
+                );
+              }
             }
-          }
-        });
+          },
+        );
 
         if (!success) {
           // Authentication failed, don't proceed with the action
@@ -306,7 +318,11 @@ export const CreateSaleForm = () => {
   );
 };
 
-const FormStepper = ({ step, className, ...props }: {
+const FormStepper = ({
+  step,
+  className,
+  ...props
+}: {
   className?: string;
   steps: { id: number; name: string; description: string }[];
   step: number;
@@ -314,16 +330,16 @@ const FormStepper = ({ step, className, ...props }: {
 }) => {
   return (
     <Card className={getGlassyCardClassName(className)}>
-      <Stepper
-        currentStep={step}
-        {...props}
-      />
+      <Stepper currentStep={step} {...props} />
     </Card>
   );
 };
 
 const StepContent = dynamic(
-  () => import("./sections/step-content").then((mod) => ({ default: mod.StepContent })),
+  () =>
+    import("./sections/step-content").then((mod) => ({
+      default: mod.StepContent,
+    })),
   {
     ssr: false,
     loading: () => (

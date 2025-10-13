@@ -15,7 +15,7 @@ interface UseAdminWalletAuthOptions {
 
 interface AdminWalletAuthState {
   isLoading: boolean;
-  isAuthenticated: boolean;
+  isAuthenticated: { signature: `0x${string}`; message: string } | false;
   error: string | null;
 }
 
@@ -80,13 +80,13 @@ export const useAdminWalletAuth = ({
       if (result?.data?.valid) {
         setState({
           isLoading: false,
-          isAuthenticated: true,
+          isAuthenticated: { signature, message: messageToSign },
           error: null,
         });
         if (process.env.NODE_ENV === "development") {
           toast.success("Admin authentication successful");
         }
-        return true;
+        return { signature, message: messageToSign };
       } else {
         const error =
           result?.serverError ||

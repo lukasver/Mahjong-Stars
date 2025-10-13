@@ -10,7 +10,7 @@ import type { FieldCreateDocumentFieldsFieldUnion } from "@documenso/sdk-typescr
 
 class DocumensoService {
 	private sdk: Documenso;
-	private APPROVER: string | null = null;
+	private REVIEWER: string | null = null;
 
 	constructor() {
 		if (!process.env.DOCUMENSO_API_KEY) {
@@ -20,7 +20,7 @@ class DocumensoService {
 			apiKey: process.env.DOCUMENSO_API_KEY,
 		});
 		if (process.env.DOCUMENT_APPROVER_EMAIL) {
-			this.APPROVER = process.env.DOCUMENT_APPROVER_EMAIL;
+			this.REVIEWER = process.env.DOCUMENT_APPROVER_EMAIL;
 		}
 	}
 
@@ -34,7 +34,7 @@ class DocumensoService {
 		reference,
 	}: {
 		title: string;
-		recipients: { email: string; name?: string }[];
+		recipients: { email: string; name?: string; role?: DocumentRole }[];
 		meta?: DocumentCreateDocumentTemporaryMeta;
 		file: Buffer;
 		pageSize: number;
@@ -47,13 +47,13 @@ class DocumensoService {
 			>[0]["recipients"] = recipients.map((r, i) => ({
 				name: r.name ?? "",
 				email: r.email,
-				role: DocumentRole.Signer,
+				role: r.role ?? DocumentRole.Signer,
 				signingOrder: signingOrder === "SEQUENTIAL" ? i : 0,
 			}));
-			if (this.APPROVER) {
+			if (this.REVIEWER) {
 				rec.push({
 					name: "Reviewer",
-					email: this.APPROVER,
+					email: this.REVIEWER,
 					role: DocumentRole.Cc,
 					signingOrder:
 						signingOrder === "SEQUENTIAL" ? recipients.length + 1 : 1,
