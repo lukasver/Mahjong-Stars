@@ -4,12 +4,14 @@ import { type JSONContent } from "@mjs/utils/server/tiptap";
 import { Prisma, TransactionStatus, User } from "@prisma/client";
 import { z } from "zod";
 import { ROLES } from "@/common/config/constants";
+import { ApproverSchema } from "@/common/schemas/dtos/contracts";
 import {
 	CreateSaleDto,
 	DeleteSaleDto,
 	UpdateSaleDto,
 	UpdateSaleStatusDto,
 } from "@/common/schemas/dtos/sales";
+import { SignatureSchema } from "@/common/schemas/dtos/signatures";
 import { BankDetailsSchema } from "@/components/admin/create-sales/utils";
 import { prisma } from "@/db";
 import {
@@ -94,11 +96,7 @@ export const upsertSale = adminClient
 	.schema(
 		CreateSaleDto.extend({
 			id: z.string().optional(),
-			signature: z.object({
-				signature: z.string(),
-				chainId: z.number(),
-				message: z.string(),
-			}),
+			signature: SignatureSchema,
 		}),
 	)
 	.action(async ({ ctx, parsedInput }) => {
@@ -136,11 +134,7 @@ export const updateSale = adminClient
 	.schema(
 		UpdateSaleDto.merge(
 			z.object({
-				signature: z.object({
-					signature: z.string(),
-					chainId: z.number(),
-					message: z.string(),
-				}),
+				signature: SignatureSchema,
 			}),
 		),
 	)
@@ -301,10 +295,22 @@ export const createSaftContract = adminClient
 			name: z.string(),
 			description: z.string().optional(),
 			saleId: z.string(),
+			approver: ApproverSchema.partial().optional().nullable(),
 		}),
 	)
 	.action(async ({ ctx, parsedInput }) => {
-		const result = await documentsController.createSaft(parsedInput, ctx);
+		const approver = parsedInput.approver;
+		let parsedApprover: ApproverSchema | null | undefined = null;
+		if (!approver || !approver.email || !approver.fullname || !approver.role) {
+			parsedApprover = ApproverSchema.nullable().parse(null);
+		} else {
+			parsedApprover = ApproverSchema.parse(approver);
+		}
+
+		const result = await documentsController.createSaft(
+			{ ...parsedInput, approver: parsedApprover },
+			ctx,
+		);
 		if (!result.success) {
 			throw new Error(result.message);
 		}
@@ -318,9 +324,9 @@ export const verifyAdminAction = adminClient
 	.schema(
 		z.object({
 			payload: AdminActionPayloadSchema,
-			signature: z.string(),
+			signature: SignatureSchema.shape.signature,
 			address: z.string(),
-			chainId: z.number(),
+			chainId: SignatureSchema.shape.chainId,
 		}),
 	)
 	.action(async ({ parsedInput }) => {

@@ -92,7 +92,7 @@ export const AddressScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt'
 
 export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','catchPhrase','bannerId','status','currency','initialTokenQuantity','availableTokenQuantity','maximumTokenBuyPerUser','minimumTokenBuyPerUser','saleStartDate','tokenContractAddress','tokenContractChainId','tokenId','tokenName','tokenSymbol','tokenTotalSupply','tokenPricePerUnit','comparisonPricePerUnit','toWalletsAddress','saleClosingDate','createdBy','saftCheckbox','requiresKYC','information']);
 
-export const SaftContractScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description','url','content','variables','version','parentId','isCurrent','saleId']);
+export const SaftContractScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description','url','content','variables','approverId','version','parentId','isCurrent','saleId']);
 
 export const DocumentRecipientScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','fullname','email','role','status','signatureUrl','externalId','storageKey','address','saftContractId']);
 
@@ -365,6 +365,7 @@ export const SaftContractSchema = z.object({
    * Variables for TEXT type
    */
   variables: JsonValueSchema.array(),
+  approverId: z.string().nullable(),
   version: z.number().int(),
   parentId: z.string().nullable(),
   isCurrent: z.boolean(),

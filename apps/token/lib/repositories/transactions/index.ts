@@ -748,13 +748,29 @@ class TransactionsController {
 				},
 			});
 
+			const res = await prisma.saftContract.findUnique({
+				where: { id: dto.contractId },
+				select: { approver: { select: { email: true, fullname: true } } },
+			});
+
+			// Purchase recipient
+			const recipients = [{ email: user.email, name: fullname }];
+
+			// Add the approver as recipient if configured
+			if (res && res.approver) {
+				recipients.push({
+					email: res.approver.email,
+					name: res.approver.fullname || "Approver",
+				});
+			}
+
 			// This needs to be here for this to work in Vercel Functions
 			waitUntil(
 				this.documents
 					.generatePDF({
 						content,
-						title: `Token SAFT | tx:${dto.transactionId} | ${user.id}:${user.email}`,
-						recipients: [{ email: user.email, name: fullname }],
+						title: `Token Agreement | tx:${dto.transactionId} | ${user.id}:${user.email}`,
+						recipients,
 						reference: recipient.id,
 					})
 					.catch(async (e) => {
@@ -835,8 +851,6 @@ class TransactionsController {
 				saftContract.variables,
 				contractVariables.variables,
 			);
-
-			console.log("🚀 ~ index.ts:839 ~ missingVariables:", missingVariables);
 
 			return Success({
 				id: saftContract.id,

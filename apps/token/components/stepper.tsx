@@ -24,7 +24,7 @@ export function Stepper({
   className,
   disableClick = false,
 }: StepperProps) {
-  const BtnEl = disableClick ? 'div' : 'button';
+  const BtnEl = (disableClick || !onStepClick) ? 'div' : 'button';
   return (
     <div
       className={cn(

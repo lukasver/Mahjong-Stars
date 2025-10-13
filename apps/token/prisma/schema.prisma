@@ -253,6 +253,9 @@ model SaftContract {
 
   recipients DocumentRecipient[]
 
+  approver   DocumentRecipient? @relation(name: "approver", fields: [approverId], references: [id])
+  approverId String?            @unique
+
   version   Int     @default(1)
   parentId  String? // Points to the original contract (null for v1)
   isCurrent Boolean @default(true)
@@ -287,6 +290,8 @@ model DocumentRecipient {
   saftContractId String?       @db.Text
 
   SaleTransactions SaleTransactions?
+
+  Approver SaftContract? @relation("approver")
 
   @@index([email])
   @@index([address, saftContractId])

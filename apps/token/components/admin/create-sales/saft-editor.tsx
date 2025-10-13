@@ -1,14 +1,19 @@
 "use client";
+import { invariant } from "@epic-web/invariant";
+import { CardContainer } from "@mjs/ui/components/cards";
 import {
   EditorInstance,
   JSONContent,
 } from "@mjs/ui/components/editor/advanced-editor";
+import { Icons } from "@mjs/ui/components/icons";
 import { Time } from "@mjs/ui/components/time";
+import { Button } from "@mjs/ui/primitives/button";
 import {
   type AnyFieldApi,
   UseAppForm,
   useFormContext,
 } from "@mjs/ui/primitives/form";
+import { FormInput } from "@mjs/ui/primitives/form-input";
 import { Label } from "@mjs/ui/primitives/label";
 import {
   Select,
@@ -17,11 +22,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@mjs/ui/primitives/select";
+import { toast } from "@mjs/ui/primitives/sonner";
 import { safeJsonParse } from "@mjs/utils/client";
 import { DateTime } from "luxon";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { SaftContract } from "@/common/schemas/generated";
+import useActiveAccount from "@/components/hooks/use-active-account";
+import { useSensitiveAction } from "@/components/hooks/use-sensitive-action";
+import { removeApproverFromSaft } from "@/lib/actions";
 import { useSaleSaft } from "@/lib/services/api";
+import { getQueryClient } from "@/lib/services/query";
 import Editor from "../../Editor";
 import VariablesPanel from "./variables-panel";
 
@@ -59,11 +69,26 @@ const getVersions = (
 
 export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
   const { data, isLoading } = useSaleSaft(saleId);
+  const [isPending, startTransition] = useTransition();
+  const { chainId } = useActiveAccount();
 
   const versions = data?.versions || [];
   const saft: SaftContract | null = data?.saft || null;
 
+  const approver = data?.approver;
+
+
+
   const form = useFormContext() as unknown as UseAppForm;
+
+  const sensitiveAction = useSensitiveAction({
+    action: "edit_saft",
+    saleId,
+    data: { saftId: saft?.id, timestamp: Date.now() },
+    onError: (error) => {
+      toast.error(`Authentication failed: ${error}`);
+    },
+  });
 
   const [editor, setEditor] = useState<EditorInstance | null>(null);
   const [selectValue, setSelectValue] = useState<string | undefined>(saft?.id);
@@ -89,7 +114,41 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
     editor?.commands.insertContent(v);
     // Move the focus to the end of the editor
     editor?.commands.focus();
+  };
 
+  const handleRemoveApprover = async () => {
+    if (isPending) return;
+    startTransition(async () => {
+      try {
+        invariant(saft?.id, "Saft ID is required");
+        invariant(chainId, "Chain ID is required");
+        const success = await sensitiveAction.executeAction(
+          async (signature, message) => {
+            await removeApproverFromSaft({
+              saftId: saft.id,
+              signature: {
+                signature,
+                message,
+                chainId,
+              },
+            });
+            form.setFieldValue("approver", {
+              email: "",
+              fullname: "",
+              role: "APPROVER",
+            })
+          },
+        );
+        if (success) {
+          const qc = getQueryClient();
+          qc.invalidateQueries({ queryKey: ["sales", saleId, "saft"] });
+        }
+      } catch (error) {
+        toast.error(
+          `Error removing approver: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      }
+    });
   };
 
   useEffect(() => {
@@ -99,13 +158,20 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
         editor.commands.setContent(data.saft.content as string | JSONContent);
         form.setFieldValue("content", data.saft.content);
       }
+      form.setFieldValue("approver.role", "APPROVER");
     }
   }, [!!editor, !!data, isLoading]);
 
   useEffect(() => {
-    // set initial value for seletor
+    // set initial value for selector
     if (data?.saft?.id && !selectValue && versions?.length > 0) {
       setSelectValue(data.saft.id);
+    }
+    // set initial value for approver
+    if (data?.approver) {
+      form.setFieldValue("approver.email", data.approver.email);
+      form.setFieldValue("approver.fullname", data.approver.fullname);
+      form.setFieldValue("approver.role", data.approver.role);
     }
   }, [data?.saft?.id, selectValue, versions]);
 
@@ -136,6 +202,46 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
         </div>
       ) : null}
 
+      {/* Approver */}
+      <div>
+        <CardContainer
+          className="bg-card relative"
+          title="Add approver? (optional)"
+          glassy={false}
+          description="By adding an approver, the document will only be finalized after the approver has signed it"
+        >
+          <>
+            {approver && (
+              <Button
+                variant="ghost"
+                size="icon"
+                loading={isPending}
+                onClick={handleRemoveApprover}
+                className="absolute top-2 right-2"
+              >
+                <Icons.x />
+              </Button>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+              <FormInput name="approver.email" type="email" label="Email" />
+              <FormInput
+                name="approver.fullname"
+                type="text"
+                label="Fullname"
+              />
+              <FormInput
+                name="approver.role"
+                type="text"
+                label="Role"
+                inputProps={{
+                  disabled: true,
+                  autoComplete: "off",
+                }}
+              />
+            </div>
+          </>
+        </CardContainer>
+      </div>
       <div>
         <p className="mb-1">Create new version</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">

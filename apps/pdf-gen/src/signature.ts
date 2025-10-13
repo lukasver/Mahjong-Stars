@@ -44,12 +44,25 @@ class DocumensoService {
 		try {
 			const rec: Parameters<
 				Documenso["documents"]["createV0"]
-			>[0]["recipients"] = recipients.map((r, i) => ({
-				name: r.name ?? "",
-				email: r.email,
-				role: r.role ?? DocumentRole.Signer,
-				signingOrder: signingOrder === "SEQUENTIAL" ? i : 0,
-			}));
+			>[0]["recipients"] = recipients
+				.sort((a, b) => {
+					// Sort Signers first
+					const roleA = a.role ?? DocumentRole.Signer;
+					const roleB = b.role ?? DocumentRole.Signer;
+					if (roleA === DocumentRole.Signer && roleB !== DocumentRole.Signer) {
+						return -1;
+					}
+					if (roleA !== DocumentRole.Signer && roleB === DocumentRole.Signer) {
+						return 1;
+					}
+					return 0;
+				})
+				.map((r, i) => ({
+					name: r.name ?? "",
+					email: r.email,
+					role: r.role ?? DocumentRole.Signer,
+					signingOrder: signingOrder === "SEQUENTIAL" ? i : 0,
+				}));
 			if (this.REVIEWER) {
 				rec.push({
 					name: "Reviewer",
@@ -140,54 +153,41 @@ class DocumensoService {
 		const basePageY = 88; // Base Y position for signatures (bottom of page)
 		const spacing = 2; // Spacing between signature blocks (percentage)
 
-		// Calculate field positions based on number of recipients
-		const recipientCount = recipients.length;
-		if (recipientCount > 5) {
+		// Separate APPROVER from other recipients
+		const approverRecipients = recipients.filter(
+			(rec) => rec.role === DocumentRole.Approver,
+		);
+		const signerRecipients = recipients.filter(
+			(rec) => rec.role === DocumentRole.Signer,
+		);
+
+		// Validate that there's at most one APPROVER
+		if (approverRecipients.length > 1) {
+			throw new Error("Maximum of 1 approver allowed per document");
+		}
+
+		// Calculate field positions based on number of signers (excluding approver)
+		const signerCount = signerRecipients.length;
+		if (signerCount > 5) {
 			throw new Error("Maximum of 5 signers allowed per document");
 		}
 
-		// Calculate total width needed for all signatures
-		const totalWidthNeeded =
-			recipientCount * width + (recipientCount - 1) * spacing;
-
-		// Maximum number of recipients we want to accommodate
-		const maxRecipients = 5;
-
-		// Calculate starting X position:
-		// - If less than 5 recipients, align to right side
-		// - Otherwise, center the signature block
-		let startX = 0;
-		if (recipientCount < maxRecipients) {
-			// Right-align: start from right edge and move left. Substract spacing for proper margin
-			startX = 100 - totalWidthNeeded - spacing;
-		} else {
-			// Center-align
-			startX = (100 - totalWidthNeeded) / 2;
-		}
-
-		// Ensure startX is never negative
-		startX = Math.max(0, startX);
-
 		const fields: FieldCreateDocumentFieldsFieldUnion[] = [];
 
-		// Create signature and email fields for each recipient
-		recipients.forEach((rec, index) => {
-			// Cannot add fields for CC or VIEWER roles
-			if (rec.role === DocumentRole.Viewer || rec.role === DocumentRole.Cc) {
-				return;
-			}
+		// Handle APPROVER positioning (far left side)
+		if (approverRecipients.length > 0) {
+			const approver = approverRecipients[0];
+			// Position APPROVER on the far left side (opposite to signers)
+			const approverX = 12; // Far left position
 
-			// Calculate X position for this recipient's fields
-			const pageX = startX + index * (width + spacing);
-
-			// Add signature fields on each page
+			// Add signature fields for APPROVER on each page
 			for (let page = 1; page <= pageSize; page++) {
 				// Add signature field (on top of email)
 				fields.push({
-					recipientId: rec.id,
+					recipientId: approver.id,
 					type: "SIGNATURE",
 					pageNumber: page,
-					pageX,
+					pageX: approverX,
 					pageY: basePageY,
 					height,
 					width,
@@ -195,16 +195,72 @@ class DocumensoService {
 
 				// Add email field (below signature)
 				fields.push({
-					recipientId: rec.id,
+					recipientId: approver.id,
 					type: "EMAIL",
 					pageNumber: page,
-					pageX,
+					pageX: approverX,
 					pageY: basePageY + height + 1, // 1% spacing between signature and email
 					height,
 					width,
 				});
 			}
-		});
+		}
+
+		// Handle regular signers positioning (right side)
+		if (signerCount > 0) {
+			// Calculate total width needed for all signer signatures
+			const totalWidthNeeded =
+				signerCount * width + (signerCount - 1) * spacing;
+
+			// Maximum number of signers we want to accommodate
+			const maxSigners = 5;
+
+			// Calculate starting X position for signers:
+			// - If less than 5 signers, align to right side
+			// - Otherwise, center the signature block
+			let startX = 0;
+			if (signerCount < maxSigners) {
+				// Right-align: start from right edge and move left. Subtract spacing for proper margin
+				startX = 100 - totalWidthNeeded - spacing;
+			} else {
+				// Center-align
+				startX = (100 - totalWidthNeeded) / 2;
+			}
+
+			// Ensure startX is never negative
+			startX = Math.max(0, startX);
+
+			// Create signature and email fields for each signer
+			signerRecipients.forEach((rec, index) => {
+				// Calculate X position for this signer's fields
+				const pageX = startX + index * (width + spacing);
+
+				// Add signature fields on each page
+				for (let page = 1; page <= pageSize; page++) {
+					// Add signature field (on top of email)
+					fields.push({
+						recipientId: rec.id,
+						type: "SIGNATURE",
+						pageNumber: page,
+						pageX,
+						pageY: basePageY,
+						height,
+						width,
+					});
+
+					// Add email field (below signature)
+					fields.push({
+						recipientId: rec.id,
+						type: "EMAIL",
+						pageNumber: page,
+						pageX,
+						pageY: basePageY + height + 1, // 1% spacing between signature and email
+						height,
+						width,
+					});
+				}
+			});
+		}
 
 		return fields;
 	}

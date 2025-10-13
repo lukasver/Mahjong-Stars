@@ -1,308 +1,317 @@
-import { FIAT_CURRENCIES } from '@/common/config/constants';
-import { Sale } from '@/common/schemas/generated';
-import { FormInputProps } from '@mjs/ui/primitives/form-input';
-import { useTranslations } from 'next-intl';
-import { type JSONContent } from '@mjs/ui/components/editor/advanced-editor';
-import z from 'zod';
+import { type JSONContent } from "@mjs/ui/components/editor/advanced-editor";
+import { FormInputProps } from "@mjs/ui/primitives/form-input";
+import { useTranslations } from "next-intl";
+import z from "zod";
+import { FIAT_CURRENCIES } from "@/common/config/constants";
 import {
-  InformationSchema,
-  SaleInformationItem,
-} from '@/common/schemas/dtos/sales/information';
+	InformationSchema,
+	SaleInformationItem,
+} from "@/common/schemas/dtos/sales/information";
+import { Sale, SignableDocumentRoleSchema } from "@/common/schemas/generated";
 
 type SaleKeys = Partial<
-  keyof Omit<
-    Sale,
-    | 'status'
-    | 'catchPhrase'
-    | 'createdAt'
-    | 'updatedAt'
-    | 'deletedAt'
-    | 'createdBy'
-    | 'tokenId'
-    | 'tokenTotalSupply'
-    | 'information'
-    | 'comparisonPricePerUnit'
-    | 'bannerId'
-  >
+	keyof Omit<
+		Sale,
+		| "status"
+		| "catchPhrase"
+		| "createdAt"
+		| "updatedAt"
+		| "deletedAt"
+		| "createdBy"
+		| "tokenId"
+		| "tokenTotalSupply"
+		| "information"
+		| "comparisonPricePerUnit"
+		| "bannerId"
+	>
 >;
 
 export const formSchemaShape = {
-  id: z.string().optional(),
-  name: z.string().min(1, 'Sale name required'),
-  tokenName: z.string().min(1, 'Token name required'),
-  tokenSymbol: z
-    .string()
-    .max(6, 'Token symbol must be at most 6 characters')
-    .min(1, 'Token symbol required'),
-  tokenContractAddress: z
-    .string()
-    .regex(/^0x[a-fA-F0-9]{40}$/g, 'Invalid token contract address')
-    .min(1, 'Token contract address required')
-    .optional(),
-  tokenContractChainId: z.coerce.number().int().optional(),
-  tokenPricePerUnit: z.coerce
-    .number()
-    .min(0.001, 'Price per unit must be at least 0.001'),
-  currency: z.enum(
-    FIAT_CURRENCIES as unknown as [
-      string,
-      ...(typeof FIAT_CURRENCIES)[number][],
-    ],
-    {
-      required_error: 'Sale currency required',
-      invalid_type_error: 'Invalid currency',
-    }
-  ),
-  toWalletsAddress: z
-    .string()
-    .regex(/^0x[a-fA-F0-9]{40}$/g, 'Invalid wallet address')
-    .min(1, 'Wallet address required'),
-  saleStartDate: z.coerce
-    .date()
-    .min(
-      new Date(new Date().setDate(new Date().getDate() - 1)),
-      'Please choose a future date for the start date'
-    ),
-  saleClosingDate: z.coerce.date(),
-  initialTokenQuantity: z.coerce
-    .number()
-    .int()
-    .min(1, 'Initial token quantity must be at least 1')
-    .min(1, 'Initial token quantity required'),
-  availableTokenQuantity: z.coerce
-    .number()
-    .int()
-    .min(0, 'Available token quantity must be at least 0')
-    .max(
-      Number.MAX_SAFE_INTEGER,
-      'Available quantity cannot safe number quantity'
-    )
-    .min(1, 'Available token quantity required'),
-  minimumTokenBuyPerUser: z.coerce
-    .number()
-    .int()
-    .min(1, 'Minimum buy per user must be at least 1')
-    .max(Number.MAX_SAFE_INTEGER, 'Minimum cannot safe number quantity')
-    .min(1, 'Minimum buy per user required'),
-  maximumTokenBuyPerUser: z.coerce
-    .number()
-    .int()
-    .max(Number.MAX_SAFE_INTEGER, 'Maximum cannot safe number quantity')
-    .nullable()
-    .refine(
-      (val: number | null) => val === null || val > -1,
-      'Maximum buy per user must be 0 or greater'
-    ),
-  saftCheckbox: z.boolean().default(false),
-  requiresKYC: z.boolean().default(false),
+	id: z.string().optional(),
+	name: z.string().min(1, "Sale name required"),
+	tokenName: z.string().min(1, "Token name required"),
+	tokenSymbol: z
+		.string()
+		.max(6, "Token symbol must be at most 6 characters")
+		.min(1, "Token symbol required"),
+	tokenContractAddress: z
+		.string()
+		.regex(/^0x[a-fA-F0-9]{40}$/g, "Invalid token contract address")
+		.min(1, "Token contract address required")
+		.optional(),
+	tokenContractChainId: z.coerce.number().int().optional(),
+	tokenPricePerUnit: z.coerce
+		.number()
+		.min(0.001, "Price per unit must be at least 0.001"),
+	currency: z.enum(
+		FIAT_CURRENCIES as unknown as [
+			string,
+			...(typeof FIAT_CURRENCIES)[number][],
+		],
+		{
+			required_error: "Sale currency required",
+			invalid_type_error: "Invalid currency",
+		},
+	),
+	toWalletsAddress: z
+		.string()
+		.regex(/^0x[a-fA-F0-9]{40}$/g, "Invalid wallet address")
+		.min(1, "Wallet address required"),
+	saleStartDate: z.coerce
+		.date()
+		.min(
+			new Date(new Date().setDate(new Date().getDate() - 1)),
+			"Please choose a future date for the start date",
+		),
+	saleClosingDate: z.coerce.date(),
+	initialTokenQuantity: z.coerce
+		.number()
+		.int()
+		.min(1, "Initial token quantity must be at least 1")
+		.min(1, "Initial token quantity required"),
+	availableTokenQuantity: z.coerce
+		.number()
+		.int()
+		.min(0, "Available token quantity must be at least 0")
+		.max(
+			Number.MAX_SAFE_INTEGER,
+			"Available quantity cannot safe number quantity",
+		)
+		.min(1, "Available token quantity required"),
+	minimumTokenBuyPerUser: z.coerce
+		.number()
+		.int()
+		.min(1, "Minimum buy per user must be at least 1")
+		.max(Number.MAX_SAFE_INTEGER, "Minimum cannot safe number quantity")
+		.min(1, "Minimum buy per user required"),
+	maximumTokenBuyPerUser: z.coerce
+		.number()
+		.int()
+		.max(Number.MAX_SAFE_INTEGER, "Maximum cannot safe number quantity")
+		.nullable()
+		.refine(
+			(val: number | null) => val === null || val > -1,
+			"Maximum buy per user must be 0 or greater",
+		),
+	saftCheckbox: z.boolean().default(false),
+	requiresKYC: z.boolean().default(false),
 } satisfies Record<SaleKeys, z.ZodType>;
 
 export const SaleFormSchema = z
-  .object(formSchemaShape)
-  .superRefine((data, ctx) => {
-    if (
-      data.saleClosingDate &&
-      data.saleStartDate &&
-      data.saleClosingDate <= data.saleStartDate
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'End date must be after the start date',
-        path: ['saleClosingDate'],
-      });
-    }
-    if (data.tokenContractAddress && !data.tokenContractChainId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Blockchain is required when token contract is specified',
-        path: ['tokenContractChainId'],
-      });
-    }
-    if (data.availableTokenQuantity > data.initialTokenQuantity) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Available quantity cannot exceed initial quantity',
-        path: ['availableTokenQuantity'],
-      });
-    }
-    if (data.minimumTokenBuyPerUser > data.availableTokenQuantity) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Minimum buy per user cannot exceed available quantity',
-        path: ['minimumTokenBuyPerUser'],
-      });
-    }
-    if (
-      data.maximumTokenBuyPerUser &&
-      data.maximumTokenBuyPerUser < data.minimumTokenBuyPerUser &&
-      Number(data.maximumTokenBuyPerUser) !== 0
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Maximum buy per user cannot exceed minimum buy per user',
-        path: ['maximumTokenBuyPerUser'],
-      });
-    }
-  });
+	.object(formSchemaShape)
+	.superRefine((data, ctx) => {
+		if (
+			data.saleClosingDate &&
+			data.saleStartDate &&
+			data.saleClosingDate <= data.saleStartDate
+		) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "End date must be after the start date",
+				path: ["saleClosingDate"],
+			});
+		}
+		if (data.tokenContractAddress && !data.tokenContractChainId) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "Blockchain is required when token contract is specified",
+				path: ["tokenContractChainId"],
+			});
+		}
+		if (data.availableTokenQuantity > data.initialTokenQuantity) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "Available quantity cannot exceed initial quantity",
+				path: ["availableTokenQuantity"],
+			});
+		}
+		if (data.minimumTokenBuyPerUser > data.availableTokenQuantity) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "Minimum buy per user cannot exceed available quantity",
+				path: ["minimumTokenBuyPerUser"],
+			});
+		}
+		if (
+			data.maximumTokenBuyPerUser &&
+			data.maximumTokenBuyPerUser < data.minimumTokenBuyPerUser &&
+			Number(data.maximumTokenBuyPerUser) !== 0
+		) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "Maximum buy per user cannot exceed minimum buy per user",
+				path: ["maximumTokenBuyPerUser"],
+			});
+		}
+	});
 
 export type InputProps<T extends string> = {
-  [key in T]: Omit<FormInputProps, 'name'> & {
-    optionKey?: string;
-  };
+	[key in T]: Omit<FormInputProps, "name"> & {
+		optionKey?: string;
+	};
 };
 
 export const InputProps = {
-  id: { type: 'hidden' },
-  name: { type: 'text' },
-  tokenName: { type: 'text' },
-  tokenSymbol: { type: 'text' },
-  tokenContractAddress: { type: 'text' },
-  tokenContractChainId: { type: 'select', optionKey: 'blockchain' },
-  tokenPricePerUnit: {
-    type: 'number',
-    inputProps: {
-      inputMode: 'decimal',
-      autoComplete: 'off',
-      step: '0.001',
-      min: 0.001,
-    },
-  },
-  currency: {
-    type: 'select',
-    optionKey: 'fiatCurrencies',
-  },
-  toWalletsAddress: { type: 'text' },
-  saleStartDate: {
-    type: 'date',
-    inputProps: {
-      disabled: (date) => date < new Date(new Date().setHours(0, 0, 0, 0)),
-    },
-  },
-  saleClosingDate: {
-    type: 'date',
-    inputProps: { disabled: (date) => date < new Date() },
-  },
-  initialTokenQuantity: {
-    type: 'number',
-    inputProps: { inputMode: 'decimal', autoComplete: 'off' },
-  },
-  availableTokenQuantity: {
-    type: 'number',
-    inputProps: { inputMode: 'decimal', autoComplete: 'off' },
-  },
-  minimumTokenBuyPerUser: {
-    type: 'number',
-    inputProps: { inputMode: 'decimal', autoComplete: 'off' },
-  },
-  maximumTokenBuyPerUser: {
-    type: 'number',
-    inputProps: { inputMode: 'decimal', autoComplete: 'off' },
-  },
-  saftCheckbox: { type: 'checkbox' },
-  requiresKYC: { type: 'checkbox' },
+	id: { type: "hidden" },
+	name: { type: "text" },
+	tokenName: { type: "text" },
+	tokenSymbol: { type: "text" },
+	tokenContractAddress: { type: "text" },
+	tokenContractChainId: { type: "select", optionKey: "blockchain" },
+	tokenPricePerUnit: {
+		type: "number",
+		inputProps: {
+			inputMode: "decimal",
+			autoComplete: "off",
+			step: "0.001",
+			min: 0.001,
+		},
+	},
+	currency: {
+		type: "select",
+		optionKey: "fiatCurrencies",
+	},
+	toWalletsAddress: { type: "text" },
+	saleStartDate: {
+		type: "date",
+		inputProps: {
+			disabled: (date) => date < new Date(new Date().setHours(0, 0, 0, 0)),
+		},
+	},
+	saleClosingDate: {
+		type: "date",
+		inputProps: { disabled: (date) => date < new Date() },
+	},
+	initialTokenQuantity: {
+		type: "number",
+		inputProps: { inputMode: "decimal", autoComplete: "off" },
+	},
+	availableTokenQuantity: {
+		type: "number",
+		inputProps: { inputMode: "decimal", autoComplete: "off" },
+	},
+	minimumTokenBuyPerUser: {
+		type: "number",
+		inputProps: { inputMode: "decimal", autoComplete: "off" },
+	},
+	maximumTokenBuyPerUser: {
+		type: "number",
+		inputProps: { inputMode: "decimal", autoComplete: "off" },
+	},
+	saftCheckbox: { type: "checkbox" },
+	requiresKYC: { type: "checkbox" },
 } satisfies InputProps<keyof typeof formSchemaShape>;
 
 export const saleInformationSchema = {
-  summary: z.string().min(1, 'Summary is required'),
-  tokenUtility: z.string().min(1, 'Token utility is required'),
-  tokenDistribution: z.string().min(1, 'Token distribution is required'),
-  futurePlans: z.string().min(1, 'Roadmap is required'),
-  contactEmail: z.string().email('Invalid email address'),
-  imageSale: z
-    .instanceof(File, { message: 'Sale image is required' })
-    .refine((file) => file.type.startsWith('image/'), 'File must be an image'),
-  imageToken: z
-    .instanceof(File, { message: 'Token image is required' })
-    .refine((file) => file.type.startsWith('image/'), 'File must be an image'),
+	summary: z.string().min(1, "Summary is required"),
+	tokenUtility: z.string().min(1, "Token utility is required"),
+	tokenDistribution: z.string().min(1, "Token distribution is required"),
+	futurePlans: z.string().min(1, "Roadmap is required"),
+	contactEmail: z.string().email("Invalid email address"),
+	imageSale: z
+		.instanceof(File, { message: "Sale image is required" })
+		.refine((file) => file.type.startsWith("image/"), "File must be an image"),
+	imageToken: z
+		.instanceof(File, { message: "Token image is required" })
+		.refine((file) => file.type.startsWith("image/"), "File must be an image"),
 } as const;
 
 export const saleInformationInputProps = {
-  summary: {
-    type: 'textarea',
-    inputProps: {
-      size: 'small' as const,
-      multiline: true,
-      rows: 1,
-    },
-  },
-  tokenUtility: {
-    type: 'textarea',
-    inputProps: {
-      size: 'small' as const,
-      multiline: true,
-      rows: 1,
-    },
-  },
-  tokenDistribution: {
-    type: 'textarea',
-    inputProps: {
-      placeholder: 'Smat Public Sale',
-      size: 'small' as const,
-      multiline: true,
-      rows: 1,
-    },
-  },
-  futurePlans: {
-    type: 'textarea',
-    inputProps: {
-      placeholder: 'Smat Public Sale',
-      size: 'small' as const,
-      multiline: true,
-      rows: 1,
-    },
-  },
-  contactEmail: {
-    type: 'email',
-    inputProps: {},
-  },
-  imageSale: {
-    type: 'file',
-    inputProps: {
-      accept: ['image/*'],
-    },
-  },
-  imageToken: {
-    type: 'file',
-    inputProps: {
-      accept: ['image/*'],
-    },
-  },
+	summary: {
+		type: "textarea",
+		inputProps: {
+			size: "small" as const,
+			multiline: true,
+			rows: 1,
+		},
+	},
+	tokenUtility: {
+		type: "textarea",
+		inputProps: {
+			size: "small" as const,
+			multiline: true,
+			rows: 1,
+		},
+	},
+	tokenDistribution: {
+		type: "textarea",
+		inputProps: {
+			placeholder: "Smat Public Sale",
+			size: "small" as const,
+			multiline: true,
+			rows: 1,
+		},
+	},
+	futurePlans: {
+		type: "textarea",
+		inputProps: {
+			placeholder: "Smat Public Sale",
+			size: "small" as const,
+			multiline: true,
+			rows: 1,
+		},
+	},
+	contactEmail: {
+		type: "email",
+		inputProps: {},
+	},
+	imageSale: {
+		type: "file",
+		inputProps: {
+			accept: ["image/*"],
+		},
+	},
+	imageToken: {
+		type: "file",
+		inputProps: {
+			accept: ["image/*"],
+		},
+	},
 } as InputProps<keyof typeof saleInformationSchema>;
 
 export const getSteps = (_t: ReturnType<typeof useTranslations>) => [
-  { id: 1, name: 'Create', description: 'Basic information' },
-  { id: 2, name: 'Contract', description: 'Contract details' },
-  { id: 3, name: 'Payment', description: 'Payment details' },
-  { id: 4, name: 'Additional Information', description: 'Final details' },
+	{ id: 1, name: "Create", description: "Basic information" },
+	{ id: 2, name: "Contract", description: "Contract details" },
+	{ id: 3, name: "Payment", description: "Payment details" },
+	{ id: 4, name: "Additional Information", description: "Final details" },
 ];
 
 export const SaftSchema = z.object({
-  content: z.custom<JSONContent>(),
-  name: z.string().default(''),
-  description: z.string().default(''),
+	content: z.custom<JSONContent>(),
+	name: z.string().default(""),
+	description: z.string().default(""),
+	approver: z
+		.object({
+			email: z.string().email(),
+			fullname: z.string(),
+			role: SignableDocumentRoleSchema,
+		})
+		.partial()
+		.optional()
+		.nullable(),
 });
 
 export const BankDetailsSchema = z.object({
-  id: z.string().optional(),
-  accountName: z.string().trim().optional(),
-  iban: z.string().min(1, 'IBAN is required').trim(),
-  swift: z.string().trim().optional(),
-  bankName: z.string().min(1, 'Bank name is required').trim(),
-  address: z.string().trim().optional(),
-  memo: z.string().trim().optional(),
-  currency: z
-    .string()
-    .min(1, 'Currency is required')
-    .trim()
-    .max(5, 'Currency is too long'),
+	id: z.string().optional(),
+	accountName: z.string().trim().optional(),
+	iban: z.string().min(1, "IBAN is required").trim(),
+	swift: z.string().trim().optional(),
+	bankName: z.string().min(1, "Bank name is required").trim(),
+	address: z.string().trim().optional(),
+	memo: z.string().trim().optional(),
+	currency: z
+		.string()
+		.min(1, "Currency is required")
+		.trim()
+		.max(5, "Currency is too long"),
 });
 export type BankDetailsForm = z.infer<typeof BankDetailsSchema>;
 
 export const SaleSchemas = {
-  1: SaleFormSchema,
-  2: SaftSchema,
-  3: z.object({ banks: z.array(BankDetailsSchema) }),
-  4: InformationSchema,
+	1: SaleFormSchema,
+	2: SaftSchema,
+	3: z.object({ banks: z.array(BankDetailsSchema) }),
+	4: InformationSchema,
 } as const;
 
-export type FileType = Extract<SaleInformationItem, { type: 'file' }>;
+export type FileType = Extract<SaleInformationItem, { type: "file" }>;

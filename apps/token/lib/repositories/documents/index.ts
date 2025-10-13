@@ -14,7 +14,10 @@ import { z } from "zod";
 import { env } from "@/common/config/env";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
 import { Failure, Success } from "@/common/schemas/dtos/utils";
-import { KycStatusSchema } from "@/common/schemas/generated";
+import {
+	KycStatusSchema,
+	SignableDocumentRoleType,
+} from "@/common/schemas/generated";
 import { prisma } from "@/db";
 import logger from "@/lib/services/logger.server";
 import contractController from "../contract";
@@ -38,17 +41,24 @@ class DocumentsController {
 	 * @returns
 	 */
 	async createSaft(
-		dto: {
+		payload: {
 			content: string | JSONContent;
 			name: string;
 			description?: string;
 			saleId: string;
+			approver?: {
+				email: string;
+				fullname: string;
+				role: SignableDocumentRoleType;
+			} | null;
 		},
 		_ctx: ActionCtx,
 	) {
 		try {
-			invariant(dto.saleId, "Sale ID is required");
-			invariant(dto.content, "Content is required");
+			invariant(payload.saleId, "Sale ID is required");
+			invariant(payload.content, "Content is required");
+
+			const { approver, ...dto } = payload;
 			// Check if sale already has a saft
 			const sale = await prisma.sale.findUnique({
 				where: {
@@ -61,6 +71,12 @@ class DocumentsController {
 							id: true,
 							version: true,
 							parentId: true,
+							approver: {
+								select: {
+									email: true,
+									fullname: true,
+								},
+							},
 							isCurrent: true,
 						},
 					},
@@ -100,6 +116,17 @@ class DocumentsController {
 								id: dto.saleId,
 							},
 						},
+						...(approver
+							? {
+									approver: {
+										create: {
+											email: approver.email,
+											fullname: approver.fullname,
+											role: approver.role,
+										},
+									},
+								}
+							: {}),
 						variables,
 					},
 				});
