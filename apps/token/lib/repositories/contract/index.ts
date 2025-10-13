@@ -1,12 +1,16 @@
 import "server-only";
 import { invariant } from "@epic-web/invariant";
 import { SaleStatus } from "@prisma/client";
+import { defineChain } from "thirdweb";
+import { verifySignature } from "thirdweb/auth";
 import { env } from "@/common/config/env";
 import { DocumensoStatusToContractStatusMapping } from "@/common/schemas/dtos/contracts";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
+import { Signature } from "@/common/schemas/dtos/signatures";
 import { Failure, Success } from "@/common/schemas/dtos/utils";
 import { prisma } from "@/db";
 import { agreementCache } from "@/lib/auth/cache";
+import { serverClient } from "@/lib/auth/thirdweb";
 import { DocumensoSdk } from "@/lib/documents/documenso";
 import logger from "@/services/logger.server";
 import { StorageService } from "../documents/storage";
@@ -291,6 +295,37 @@ class ContractController {
 			logger(e);
 			return Failure(e);
 		}
+	}
+
+	/**
+	 * Remove the approver from a SAFT contract template
+	 */
+	async removeApproverFromSaft(
+		dto: { saftId: string; signature: Signature },
+		ctx: ActionCtx,
+	) {
+		const { saftId, signature } = dto;
+		const { address } = ctx;
+
+		invariant(signature, "Missing signature");
+		invariant(saftId, "Missing saftId");
+		invariant(address, "Missing address");
+
+		const result = await verifySignature({
+			client: serverClient,
+			signature: signature.signature,
+			message: signature.message,
+			address: ctx.address,
+			chain: defineChain(signature.chainId),
+		});
+		invariant(result, "Invalid signature");
+
+		await prisma.saftContract.update({
+			where: { id: saftId },
+			data: { approver: { delete: true } },
+		});
+
+		return Success({ message: "Approver removed from SAFT" });
 	}
 
 	/**

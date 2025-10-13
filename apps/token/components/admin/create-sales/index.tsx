@@ -129,13 +129,16 @@ export const CreateSaleForm = () => {
             }
             if (step === 2) {
               const vals = SaleSchemas[2].parse(value);
+
+
               const f = formApi.getFieldMeta("content");
+              const apf = formApi.getFieldMeta("approver");
 
               if (sale?.saftCheckbox === true && !vals.content) {
                 toast.error("Please fill in the Saft contract");
                 return;
               }
-              if (f?.isPristine) {
+              if (f?.isPristine && apf?.isPristine) {
                 setStep((pv) => pv + 1);
                 return;
               }
@@ -146,6 +149,7 @@ export const CreateSaleForm = () => {
                 name: vals.name,
                 description: vals.description,
                 saleId,
+                approver: vals.approver,
               });
               if (res?.data) {
                 setStep((pv) => pv + 1);
@@ -321,6 +325,7 @@ export const CreateSaleForm = () => {
 const FormStepper = ({
   step,
   className,
+  setStep,
   ...props
 }: {
   className?: string;
@@ -328,9 +333,15 @@ const FormStepper = ({
   step: number;
   setStep: Dispatch<SetStateAction<number>>;
 }) => {
+
   return (
     <Card className={getGlassyCardClassName(className)}>
-      <Stepper currentStep={step} {...props} />
+      <Stepper
+        currentStep={step}
+        onStepClick={(e) => {
+          setStep(e);
+        }}
+        {...props} />
     </Card>
   );
 };

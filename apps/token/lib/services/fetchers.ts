@@ -175,6 +175,7 @@ export const getSaleSaft = async (id: string) => {
 		const data = await fetcher<{
 			saft: SaftContract | null;
 			versions: SaftContract[];
+			approver?: Pick<DocumentRecipient, "email" | "fullname" | "role"> | null;
 		}>(`/sales/${id}/saft`);
 		return { data: data, error: null };
 	} catch (e) {

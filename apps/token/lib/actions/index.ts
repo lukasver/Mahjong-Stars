@@ -19,6 +19,7 @@ import {
 import { env } from "@/common/config/env";
 import { CreateContractStatusDto } from "@/common/schemas/dtos/contracts";
 import { GetSaleDto, GetSalesDto } from "@/common/schemas/dtos/sales";
+import { SignatureSchema } from "@/common/schemas/dtos/signatures";
 import { UpdateTransactionDto } from "@/common/schemas/dtos/transactions";
 import {
 	FOPSchema,
@@ -85,7 +86,7 @@ export const isLoggedIn = loginActionClient
 	});
 
 const LoginParams = z.object({
-	signature: z.string(),
+	signature: SignatureSchema.shape.signature,
 	payload: z.object({
 		address: z.string(),
 		chain_id: z.string().optional(),
@@ -668,6 +669,24 @@ export const confirmCryptoTransaction = authActionClient
 					...parsedInput.extraPayload,
 				},
 			},
+			ctx,
+		);
+		if (!result.success) {
+			throw new Error(result.message);
+		}
+		return result.data;
+	});
+
+export const removeApproverFromSaft = authActionClient
+	.schema(
+		z.object({
+			saftId: z.string().describe("Saft contract ID"),
+			signature: SignatureSchema,
+		}),
+	)
+	.action(async ({ ctx, parsedInput }) => {
+		const result = await contractController.removeApproverFromSaft(
+			parsedInput,
 			ctx,
 		);
 		if (!result.success) {

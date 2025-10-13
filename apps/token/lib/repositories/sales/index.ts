@@ -1,6 +1,12 @@
 import "server-only";
 import { invariant } from "@epic-web/invariant";
-import { Prisma, SaftContract, Sale, SaleStatus } from "@prisma/client";
+import {
+	DocumentRecipient,
+	Prisma,
+	SaftContract,
+	Sale,
+	SaleStatus,
+} from "@prisma/client";
 import { DateTime } from "luxon";
 import mime from "mime-types";
 import { defineChain } from "thirdweb";
@@ -17,6 +23,7 @@ import {
 	UpdateSaleStatusDto,
 } from "@/common/schemas/dtos/sales";
 import { SaleInformationItem } from "@/common/schemas/dtos/sales/information";
+import { Signature } from "@/common/schemas/dtos/signatures";
 import { Failure, isObject, Success } from "@/common/schemas/dtos/utils";
 import { Document } from "@/common/schemas/generated";
 import { SaleWithRelations, SaleWithToken } from "@/common/types/sales";
@@ -204,7 +211,7 @@ class SalesController {
 	 */
 	async createSale(
 		payload: CreateSaleDto & {
-			signature: { signature: string; chainId: number; message: string };
+			signature: Signature;
 		},
 		ctx: ActionCtx,
 	): Promise<Success<{ sale: Sale }> | Failure> {
@@ -405,7 +412,7 @@ class SalesController {
 			data,
 			signature,
 		}: UpdateSaleDto & {
-			signature: { signature: string; chainId: number; message: string };
+			signature: Signature;
 		},
 		ctx: ActionCtx,
 	): Promise<Success<{ sale: SaleWithToken }> | Failure> {
@@ -881,11 +888,44 @@ class SalesController {
 				},
 				select: {
 					id: true,
-					saftContract: true,
+					saftContract: {
+						select: {
+							content: true,
+							version: true,
+							parentId: true,
+							id: true,
+							isCurrent: true,
+							name: true,
+							recipients: true,
+							saleId: true,
+							url: true,
+							variables: true,
+							updatedAt: true,
+							description: true,
+							createdAt: true,
+							approver: {
+								select: {
+									id: true,
+									email: true,
+									fullname: true,
+									role: true,
+								},
+							},
+						},
+					},
 				},
 			});
 
-			const saft = data.saftContract?.isCurrent ? data.saftContract : null;
+			const { approver, ...saftContract } =
+				data.saftContract ||
+				({} as (typeof data)["saftContract"] & {
+					approver?: Pick<
+						DocumentRecipient,
+						"email" | "fullname" | "role"
+					> | null;
+				});
+
+			const saft = saftContract?.isCurrent ? saftContract : null;
 			let versions: SaftContract[] = [];
 			if (saft && saft.version > 1) {
 				versions = await prisma.saftContract.findMany({
@@ -907,6 +947,7 @@ class SalesController {
 			return Success({
 				saft,
 				versions,
+				approver,
 			});
 		} catch (e) {
 			logger(e);

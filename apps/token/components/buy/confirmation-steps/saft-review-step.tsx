@@ -82,6 +82,26 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
         contractId: value.contractId || data.id,
         transactionId: value.transactionId || (txId as string),
       };
+
+
+      // We shouild check that all custom inputs have values
+      for (const [key, v] of Object.entries(formData.variables || {})) {
+        // check for nested variables
+        if (v && typeof v === 'object' && Object.keys(v).length > 0) {
+          for (const [k2, v2] of Object.entries(v || {})) {
+            if (k2 && !v2) {
+              toast.error(`Variable ${k2} is required`);
+              return
+            }
+          }
+        }
+        // check for single variables
+        if (key && !v) {
+          toast.error(`Variable ${key} is required`);
+          return
+        }
+      }
+
       action.execute(formData);
     },
     onSubmitInvalid(_props) {
@@ -162,6 +182,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
 
   return (
     <>
+      <Button onClick={() => console.debug("🚀 ~ saft-review-step.tsx:178 ~ FORM VALUES:", form.state.values)}>check values</Button>
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

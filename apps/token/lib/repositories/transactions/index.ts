@@ -10,6 +10,7 @@ import {
 	TransactionStatus,
 } from "@prisma/client";
 import { waitUntil } from "@vercel/functions";
+import { deepmerge } from "deepmerge-ts";
 import Handlebars from "handlebars";
 import { DateTime } from "luxon";
 import {
@@ -34,6 +35,7 @@ import {
 	Profile,
 	SaftContract,
 	SignableDocumentRoleSchema,
+	SignableDocumentRoleType,
 	User,
 } from "@/common/schemas/generated";
 import {
@@ -713,6 +715,9 @@ class TransactionsController {
 				{ txId: dto.transactionId, variables: dto.variables },
 				ctx,
 			);
+
+			// const temp = result.data;
+			// return temp;
 			invariant(result.success, "Failed to get sale saft for transaction");
 			const { content } = result.data;
 			const user = await prisma.user.findUnique({
@@ -748,13 +753,34 @@ class TransactionsController {
 				},
 			});
 
+			const res = await prisma.saftContract.findUnique({
+				where: { id: dto.contractId },
+				select: { approver: { select: { email: true, fullname: true } } },
+			});
+
+			// Purchase recipient
+			const recipients: {
+				email: string;
+				name: string;
+				role: SignableDocumentRoleType;
+			}[] = [{ email: user.email, name: fullname, role: "SIGNER" }];
+
+			// Add the approver as recipient if configured
+			if (res && res.approver) {
+				recipients.push({
+					email: res.approver.email,
+					name: res.approver.fullname || "Approver",
+					role: "APPROVER",
+				});
+			}
+
 			// This needs to be here for this to work in Vercel Functions
 			waitUntil(
 				this.documents
 					.generatePDF({
 						content,
-						title: `Token SAFT | tx:${dto.transactionId} | ${user.id}:${user.email}`,
-						recipients: [{ email: user.email, name: fullname }],
+						title: `Token Agreement | tx:${dto.transactionId} | ${user.id}:${user.email}`,
+						recipients,
 						reference: recipient.id,
 					})
 					.catch(async (e) => {
@@ -767,8 +793,6 @@ class TransactionsController {
 						logger(e);
 					}),
 			);
-
-			console.log("SIGUE?", recipient.id);
 
 			return Success({
 				id: recipient.id,
@@ -815,6 +839,7 @@ class TransactionsController {
 					},
 				},
 			});
+
 			invariant(transaction, "Transaction not found");
 			const saftContract = transaction?.sale?.saftContract;
 			invariant(saftContract, "SAFT template not found in transaction");
@@ -835,8 +860,6 @@ class TransactionsController {
 				saftContract.variables,
 				contractVariables.variables,
 			);
-
-			console.log("🚀 ~ index.ts:839 ~ missingVariables:", missingVariables);
 
 			return Success({
 				id: saftContract.id,
@@ -1422,7 +1445,7 @@ class TransactionsController {
 		inputVariables,
 	}: {
 		tx: SaleTransactions;
-		sale: Pick<Sale, "currency" | "tokenPricePerUnit">;
+		sale: Pick<Sale, "currency" | "tokenPricePerUnit" | "tokenName">;
 		contract: SaftContract["content"];
 		inputVariables?: Record<string, string | Record<string, string>>;
 		user?: Partial<User> | null;
@@ -1437,6 +1460,7 @@ class TransactionsController {
 				lastName: profile?.lastName || null,
 				email: user?.email || null,
 				// address
+				street: address?.street || null,
 				city: address?.city || null,
 				zipcode: address?.zipCode || null,
 				state: address?.state || null,
@@ -1446,6 +1470,7 @@ class TransactionsController {
 			token: {
 				quantity: tx.quantity.toString() || null,
 				symbol: tx.tokenSymbol,
+				name: sale.tokenName,
 			},
 			paid: {
 				currency: tx.paidCurrency || null,
@@ -1464,6 +1489,7 @@ class TransactionsController {
 			date: new Date().toISOString().split("T")[0],
 		};
 
+		const inputObject = {};
 		// Merge inputVariables into computedVariables using dot notation
 		if (inputVariables && Object.keys(inputVariables).length > 0) {
 			for (const key in inputVariables) {
@@ -1472,15 +1498,19 @@ class TransactionsController {
 					continue;
 				}
 				if (inputVariables[key]) {
-					this.setNestedValue(computedVariables, key, inputVariables[key]);
+					this.setNestedValue(inputObject, key, inputVariables[key]);
 				}
 			}
 		}
-
+		const variables = deepmerge(computedVariables, inputObject);
 		const template = Handlebars.compile(contract);
-		const fullContract = template(computedVariables);
+		const fullContract = template(variables);
 
-		return { contract: fullContract, variables: computedVariables };
+		console.log("🚀 ~ index.ts:1520 ~ fullContract:", fullContract);
+
+		console.log("🚀 ~ index.ts:1523 ~ variables:", variables);
+
+		return { contract: fullContract, variables };
 	}
 }
 

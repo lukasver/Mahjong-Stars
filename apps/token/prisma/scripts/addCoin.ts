@@ -148,7 +148,6 @@ async function main() {
 						update: {},
 					})
 					.catch((error) => {
-						console.log("🚀 ~ addCoin.ts:150 ~ error:", error);
 						throw error;
 					});
 			}
@@ -169,7 +168,6 @@ async function main() {
 				update: {},
 			})
 			.catch((error) => {
-				console.log("🚀 ~ addCoin.ts:171 ~ error:", error);
 				throw error;
 			});
 	});
