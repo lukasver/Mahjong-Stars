@@ -20,6 +20,7 @@ import {
 } from "novel/extensions";
 
 import { UploadImagesPlugin } from "novel/plugins";
+import { PageBreak } from "./extensions/page-break";
 
 const aiHighlight = AIHighlight;
 const placeholder = Placeholder;
@@ -84,7 +85,6 @@ const underline = TiptapUnderline.configure({
 	},
 });
 const starterKit = StarterKit.configure({
-	document: {},
 	bulletList: {
 		HTMLAttributes: {
 			class: cx("list-disc list-outside leading-3 -mt-2"),
@@ -147,7 +147,13 @@ const tableKit = TableKit.configure({
 	table: { resizable: true },
 });
 
-export const defaultExtensions: any[] = [
+const pageBreak = PageBreak.configure({
+	HTMLAttributes: {
+		class: "page-break",
+	},
+});
+
+export const defaultExtensions: unknown[] = [
 	starterKit,
 	textAlign,
 	hardBreak,
@@ -179,4 +185,5 @@ export const defaultExtensions: any[] = [
 	color,
 	textStyle,
 	tableKit,
+	pageBreak,
 ];

@@ -141,6 +141,16 @@ export async function generatePdf(
       /* Force page breaks before elements with class="page-break" */
       .page-break {
         page-break-before: always;
+        /* Hide the visual content in PDF but keep the page break functionality */
+        color: transparent;
+        border: none;
+        height: 0;
+        margin: 0;
+        padding: 0;
+      }
+      /* Hide the "Page Break" text in PDF */
+      .page-break span {
+        display: none;
       }
       /* Avoid page breaks inside elements with class="no-break" */
       .no-break {

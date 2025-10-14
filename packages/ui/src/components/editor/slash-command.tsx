@@ -7,6 +7,7 @@ import {
   CheckSquare,
   Code,
   FileSignature,
+  FileText,
   Heading1,
   Heading2,
   Heading3,
@@ -230,6 +231,16 @@ export const getSuggestionItems = (
           editor.commands.insertTable({
             rows: 3, cols: 2, withHeaderRow: false,
           });
+        },
+      },
+      {
+        title: "Page Break",
+        description: "Insert a page break for PDF generation.",
+        searchTerms: ["page", "break", "new", "page", "pdf"],
+        icon: <FileText size={18} />,
+        // @ts-expect-error fixme?
+        command: ({ editor, range }) => {
+          editor.chain().focus().deleteRange(range).setPageBreak().run();
         },
       },
 
