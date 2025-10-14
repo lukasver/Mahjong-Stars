@@ -12,6 +12,7 @@ const bodySchema = z.object({
 		z.object({
 			email: z.string(),
 			name: z.optional(z.string()),
+			role: z.enum(["CC", "SIGNER", "VIEWER", "APPROVER"]),
 		}),
 	),
 	reference: z.string(),
@@ -84,6 +85,8 @@ async function main(req: IncomingMessage, res: ServerResponse) {
 			return;
 		}
 		const body = parsed.data;
+
+		console.log("🚀 ~ main.ts:89 ~ body:", body.recipients);
 
 		console.log(`Starting PDF generation...`);
 		console.time("PDF generated");

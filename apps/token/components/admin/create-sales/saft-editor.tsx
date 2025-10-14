@@ -206,7 +206,7 @@ export function SaftEditor({ saleId, placeholder }: SaftEditorProps) {
       <div>
         <CardContainer
           className="bg-card relative"
-          title="Add approver? (optional)"
+          title="Approver (optional)"
           glassy={false}
           description="By adding an approver, the document will only be finalized after the approver has signed it"
         >

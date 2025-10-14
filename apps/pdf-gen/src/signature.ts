@@ -8,7 +8,7 @@ import {
 } from "@documenso/sdk-typescript/models/operations/documentcreatedocumenttemporary.js";
 import type { FieldCreateDocumentFieldsFieldUnion } from "@documenso/sdk-typescript/models/operations/fieldcreatedocumentfields.js";
 
-class DocumensoService {
+export class DocumensoService {
 	private sdk: Documenso;
 	private REVIEWER: string | null = null;
 
@@ -19,8 +19,8 @@ class DocumensoService {
 		this.sdk = new Documenso({
 			apiKey: process.env.DOCUMENSO_API_KEY,
 		});
-		if (process.env.DOCUMENT_APPROVER_EMAIL) {
-			this.REVIEWER = process.env.DOCUMENT_APPROVER_EMAIL;
+		if (process.env.DOCUMENT_CC_EMAIL) {
+			this.REVIEWER = process.env.DOCUMENT_CC_EMAIL;
 		}
 	}
 
@@ -34,7 +34,7 @@ class DocumensoService {
 		reference,
 	}: {
 		title: string;
-		recipients: { email: string; name?: string; role?: DocumentRole }[];
+		recipients: { email: string; name?: string; role: DocumentRole }[];
 		meta?: DocumentCreateDocumentTemporaryMeta;
 		file: Buffer;
 		pageSize: number;
@@ -72,6 +72,9 @@ class DocumensoService {
 						signingOrder === "SEQUENTIAL" ? recipients.length + 1 : 1,
 				});
 			}
+
+			console.debug("RECIPIENTS", rec);
+
 			const res = await this.sdk.documents.createV0({
 				title,
 				recipients: rec,
@@ -144,14 +147,20 @@ class DocumensoService {
 	/**
 	 * Compute signature fields in the bottom of the document pages.
 	 */
-	private calculateFields(recipients: DocumentRecipient[], pageSize: number) {
-		// Field dimensions as percentage of page
-		const width = 18; // 18% of page width
-		const height = 3.5; // 3.5% of page height
+	calculateFields(recipients: DocumentRecipient[], pageSize: number) {
+		console.log("🚀 ~ sCREATED RECIPIENTS IN DOC:", recipients);
+		const SIGN_LAST_PAGE_ONLY = process.env.SIGN_LAST_PAGE_ONLY === "true";
 
 		// Base positioning
-		const basePageY = 88; // Base Y position for signatures (bottom of page)
-		const spacing = 2; // Spacing between signature blocks (percentage)
+		const MAX_RECIPIENTS = 5;
+		const BASE_PAGE_Y = 88; // Base Y position for signatures (bottom of page)
+		const SPACING = 2; // Spacing between signature blocks (percentage)
+		const MARGIN_X = 12; // side margin for the page
+		const TOTAL_WIDTH = 100 - MARGIN_X * 2;
+
+		// Field dimensions as percentage of page
+		const FIELD_WIDTH = Math.min(18, TOTAL_WIDTH / MAX_RECIPIENTS);
+		const FIELD_HEIGHT = 3.5; // 3.5% of page height
 
 		// Separate APPROVER from other recipients
 		const approverRecipients = recipients.filter(
@@ -161,6 +170,8 @@ class DocumensoService {
 			(rec) => rec.role === DocumentRole.Signer,
 		);
 
+		const MAX_SIGNERS = MAX_RECIPIENTS - approverRecipients.length;
+
 		// Validate that there's at most one APPROVER
 		if (approverRecipients.length > 1) {
 			throw new Error("Maximum of 1 approver allowed per document");
@@ -168,29 +179,31 @@ class DocumensoService {
 
 		// Calculate field positions based on number of signers (excluding approver)
 		const signerCount = signerRecipients.length;
-		if (signerCount > 5) {
-			throw new Error("Maximum of 5 signers allowed per document");
+		if (recipients.length > 5) {
+			throw new Error("Maximum of 5 recipients allowed per document");
 		}
 
 		const fields: FieldCreateDocumentFieldsFieldUnion[] = [];
+		// Position APPROVER on the far left side (opposite to signers)
 
 		// Handle APPROVER positioning (far left side)
 		if (approverRecipients.length > 0) {
 			const approver = approverRecipients[0];
-			// Position APPROVER on the far left side (opposite to signers)
-			const approverX = 12; // Far left position
 
 			// Add signature fields for APPROVER on each page
 			for (let page = 1; page <= pageSize; page++) {
+				if (SIGN_LAST_PAGE_ONLY && page !== pageSize) {
+					continue;
+				}
 				// Add signature field (on top of email)
 				fields.push({
 					recipientId: approver.id,
 					type: "SIGNATURE",
 					pageNumber: page,
-					pageX: approverX,
-					pageY: basePageY,
-					height,
-					width,
+					pageX: MARGIN_X,
+					pageY: BASE_PAGE_Y,
+					height: FIELD_HEIGHT,
+					width: FIELD_WIDTH,
 				});
 
 				// Add email field (below signature)
@@ -198,54 +211,38 @@ class DocumensoService {
 					recipientId: approver.id,
 					type: "EMAIL",
 					pageNumber: page,
-					pageX: approverX,
-					pageY: basePageY + height + 1, // 1% spacing between signature and email
-					height,
-					width,
+					pageX: MARGIN_X,
+					pageY: BASE_PAGE_Y + FIELD_HEIGHT + 1, // 1% spacing between signature and email
+					height: FIELD_HEIGHT,
+					width: FIELD_WIDTH,
 				});
 			}
 		}
 
 		// Handle regular signers positioning (right side)
 		if (signerCount > 0) {
-			// Calculate total width needed for all signer signatures
-			const totalWidthNeeded =
-				signerCount * width + (signerCount - 1) * spacing;
-
-			// Maximum number of signers we want to accommodate
-			const maxSigners = 5;
-
 			// Calculate starting X position for signers:
-			// - If less than 5 signers, align to right side
-			// - Otherwise, center the signature block
-			let startX = 0;
-			if (signerCount < maxSigners) {
-				// Right-align: start from right edge and move left. Subtract spacing for proper margin
-				startX = 100 - totalWidthNeeded - spacing;
-			} else {
-				// Center-align
-				startX = (100 - totalWidthNeeded) / 2;
-			}
 
-			// Ensure startX is never negative
-			startX = Math.max(0, startX);
-
+			// TODO! max
 			// Create signature and email fields for each signer
 			signerRecipients.forEach((rec, index) => {
 				// Calculate X position for this signer's fields
-				const pageX = startX + index * (width + spacing);
+				const pageX = startX + index * (FIELD_WIDTH + SPACING);
 
 				// Add signature fields on each page
 				for (let page = 1; page <= pageSize; page++) {
+					if (SIGN_LAST_PAGE_ONLY && page !== pageSize) {
+						continue;
+					}
 					// Add signature field (on top of email)
 					fields.push({
 						recipientId: rec.id,
 						type: "SIGNATURE",
 						pageNumber: page,
 						pageX,
-						pageY: basePageY,
-						height,
-						width,
+						pageY: BASE_PAGE_Y,
+						height: FIELD_HEIGHT,
+						width: FIELD_WIDTH,
 					});
 
 					// Add email field (below signature)
@@ -254,13 +251,15 @@ class DocumensoService {
 						type: "EMAIL",
 						pageNumber: page,
 						pageX,
-						pageY: basePageY + height + 1, // 1% spacing between signature and email
-						height,
-						width,
+						pageY: BASE_PAGE_Y + FIELD_HEIGHT + 1, // 1% spacing between signature and email
+						height: FIELD_HEIGHT,
+						width: FIELD_WIDTH,
 					});
 				}
 			});
 		}
+
+		console.debug("✅ FINAL FIELDS", fields);
 
 		return fields;
 	}

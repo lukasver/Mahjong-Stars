@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
+import { cn } from "@mjs/ui/lib/utils";
 import {
-  EditorRoot,
-  EditorCommand,
-  EditorCommandItem,
-  EditorCommandEmpty,
-  EditorContent,
-  type JSONContent,
-  EditorCommandList,
   EditorBubble,
+  EditorCommand,
+  EditorCommandEmpty,
+  EditorCommandItem,
+  EditorCommandList,
+  EditorContent,
   type EditorInstance,
-} from 'novel';
-import { ImageResizer, handleCommandNavigation } from 'novel/extensions';
-import { handleImageDrop, handleImagePaste } from 'novel/plugins';
-import { useState, type Dispatch, type SetStateAction } from 'react';
-import { Separator } from '../../primitives/separator';
-import { uploadFn } from './image-upload';
-import { ColorSelector } from './selectors/color-selector';
-import { LinkSelector } from './selectors/link-selector';
-import { NodeSelector } from './selectors/node-selector';
-
-import { TextButtons } from './selectors/text-buttons';
-import { getSlashCommands, getSuggestionItems } from './slash-command';
-import { cn } from '@mjs/ui/lib/utils';
-import { defaultExtensions } from './extensions';
+  EditorRoot,
+  type JSONContent,
+} from "novel";
+import { handleCommandNavigation, ImageResizer } from "novel/extensions";
+import { handleImageDrop, handleImagePaste } from "novel/plugins";
+import { type Dispatch, type SetStateAction, useState } from "react";
+import { Separator } from "../../primitives/separator";
+import { defaultExtensions } from "./extensions";
+import { uploadFn } from "./image-upload";
+import { ColorSelector } from "./selectors/color-selector";
+import { LinkSelector } from "./selectors/link-selector";
+import { NodeSelector } from "./selectors/node-selector";
+import { TextAlignButtons } from "./selectors/text-align-buttons";
+import { TextButtons } from "./selectors/text-buttons";
+import { getSlashCommands, getSuggestionItems } from "./slash-command";
 
 const extensions = defaultExtensions;
 
@@ -32,7 +32,7 @@ export interface EditorProps {
   initialValue?: JSONContent;
   onChange: (value: JSONContent | HTMLContent, editor: EditorInstance) => void;
   className?: string;
-  output?: 'json' | 'html';
+  output?: "json" | "html";
   setEditor?: Dispatch<SetStateAction<EditorInstance | null>>;
   // If SSR set to false
   immediatelyRender?: boolean;
@@ -45,7 +45,7 @@ const Editor = ({
   initialValue,
   onChange,
   className,
-  output = 'json',
+  output = "json",
   setEditor,
   // immediatelyRender = true,
   onUpload,
@@ -60,8 +60,8 @@ const Editor = ({
       <EditorContent
         immediatelyRender={false}
         className={cn(
-          'h-[200px] overflow-y-auto rounded-xl border p-4',
-          className
+          "h-[200px] overflow-y-auto rounded-xl border p-4",
+          className,
         )}
         {...(initialValue && { initialContent: initialValue })}
         extensions={[...extensions, getSlashCommands(onUpload)]}
@@ -79,12 +79,12 @@ const Editor = ({
           attributes: {
             class: cn(
               `prose !text-base dark:prose-invert prose-headings:font-title font-common focus:outline-none`,
-              classes.editor
+              classes.editor,
             ),
           },
         }}
         onUpdate={({ editor }) => {
-          if (output === 'json') {
+          if (output === "json") {
             onChange(editor.getJSON(), editor);
           } else {
             onChange(editor.getHTML(), editor);
@@ -100,8 +100,8 @@ const Editor = ({
         })}
         slotAfter={<ImageResizer />}
       >
-        <EditorCommand className='border-muted bg-background z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border px-1 py-2 shadow-md transition-all'>
-          <EditorCommandEmpty className='text-muted-foreground px-2'>
+        <EditorCommand className="border-muted bg-background z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border px-1 py-2 shadow-md transition-all">
+          <EditorCommandEmpty className="text-muted-foreground px-2">
             No results
           </EditorCommandEmpty>
           <EditorCommandList>
@@ -112,12 +112,12 @@ const Editor = ({
                 className={`hover:bg-primary/15 aria-selected:bg-primary/15 flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm`}
                 key={item.title}
               >
-                <div className='border-muted bg-background flex h-10 w-10 items-center justify-center rounded-md border'>
+                <div className="border-muted bg-background flex h-10 w-10 items-center justify-center rounded-md border">
                   {item.icon}
                 </div>
                 <div>
-                  <p className='font-medium'>{item.title}</p>
-                  <p className='text-muted-foreground text-xs'>
+                  <p className="font-medium">{item.title}</p>
+                  <p className="text-muted-foreground text-xs">
                     {item.description}
                   </p>
                 </div>
@@ -128,18 +128,20 @@ const Editor = ({
 
         <EditorBubble
           tippyOptions={{
-            placement: 'top',
+            placement: "top",
           }}
-          className='border-muted bg-background flex w-fit max-w-[90vw] overflow-hidden rounded-md border shadow-xl'
+          className="border-muted bg-background flex w-fit max-w-[90vw] overflow-hidden rounded-md border shadow-xl"
         >
-          <Separator orientation='vertical' />
+          <Separator orientation="vertical" />
           <NodeSelector open={openNode} onOpenChange={setOpenNode} />
-          <Separator orientation='vertical' />
+          <Separator orientation="vertical" />
 
           <LinkSelector open={openLink} onOpenChange={setOpenLink} />
-          <Separator orientation='vertical' />
+          <Separator orientation="vertical" />
           <TextButtons />
-          <Separator orientation='vertical' />
+          <Separator orientation="vertical" />
+          <TextAlignButtons />
+          <Separator orientation="vertical" />
           <ColorSelector open={openColor} onOpenChange={setOpenColor} />
         </EditorBubble>
       </EditorContent>
