@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { AnyExtension } from "@tiptap/core";
 import HardBreak from "@tiptap/extension-hard-break";
 import { TableKit } from "@tiptap/extension-table";
 import TextAlign from "@tiptap/extension-text-align";
@@ -18,7 +19,6 @@ import {
 	TiptapUnderline,
 	UpdatedImage,
 } from "novel/extensions";
-
 import { UploadImagesPlugin } from "novel/plugins";
 import { PageBreak } from "./extensions/page-break";
 
@@ -153,7 +153,7 @@ const pageBreak = PageBreak.configure({
 	},
 });
 
-export const defaultExtensions: unknown[] = [
+export const defaultExtensions: AnyExtension[] = [
 	starterKit,
 	textAlign,
 	hardBreak,

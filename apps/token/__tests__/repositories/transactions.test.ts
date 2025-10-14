@@ -319,6 +319,7 @@ describe("TransactionsController", () => {
 			const sale = {
 				tokenPricePerUnit: new Prisma.Decimal(10),
 				currency: "USD",
+				tokenName: "TestToken",
 			};
 			// All variables as used in the controller
 			const contractTemplate = `

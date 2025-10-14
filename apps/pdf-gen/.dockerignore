@@ -1,4 +1,4 @@
 node_modules
 .gitignore
 .env
-__tests__
+src/__tests__

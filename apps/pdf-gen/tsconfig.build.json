@@ -26,9 +26,9 @@
 		"isolatedModules": true,
 
 		// Monorepo specific
-		"composite": true,
-		"declaration": true,
-		"declarationMap": true,
+		"composite": false,
+		"declaration": false,
+		"declarationMap": false,
 		"sourceMap": true,
 
 		// Best practices
@@ -46,10 +46,10 @@
 		"inlineSources": false,
 		"preserveWatchOutput": true,
 		"alwaysStrict": true,
-		"verbatimModuleSyntax": true,
+		"verbatimModuleSyntax": false,
 		"useUnknownInCatchVariables": true,
 		"allowUnreachableCode": false
 	},
-	"include": ["src/**/*", "reset.d.ts"],
-	"exclude": ["node_modules", "dist"]
+	"include": ["src/**/*.ts", "reset.d.ts"],
+	"exclude": ["node_modules", "dist", "src/__tests__/*.ts"]
 }
