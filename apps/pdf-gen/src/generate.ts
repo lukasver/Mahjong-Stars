@@ -127,7 +127,7 @@ export async function generatePdf(
 	await page.addStyleTag({
 		content: `
       @page {
-        padding-bottom: 4cm;
+        padding-bottom: 3cm;
         size: A4;
         padding-top: 1cm;
       }
@@ -138,6 +138,11 @@ export async function generatePdf(
         margin: 0;
         padding: 0;
       }
+
+			ol, ul {
+			page-break-inside: auto
+			}
+
       /* Force page breaks before elements with class="page-break" */
       .page-break {
         page-break-before: always;

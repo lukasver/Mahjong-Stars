@@ -85,16 +85,25 @@ describe("DocumensoService", () => {
 				createMockRecipient(1, "signer@test.com", DocumentRole.Signer),
 			];
 
-			const [fields] = documensoService.calculateFields(recipients, 1);
+			const [fields, config] = documensoService.calculateFields(recipients, 1);
 			expect(fields).toHaveLength(2); // 1 signature + 1 email field
 			const signatureField = fields[0];
 			const emailField = fields[1];
 			expect(signatureField).toHaveProperty("type", "SIGNATURE");
-			expect(signatureField).toHaveProperty("pageX", 88);
-			expect(signatureField).toHaveProperty("pageY", 88);
+			expect(signatureField).toHaveProperty(
+				"pageX",
+				config.WIDTH - config.MARGIN_RIGHT,
+			);
+			expect(signatureField).toHaveProperty("pageY", config.BASE_PAGE_Y);
 			expect(emailField).toHaveProperty("type", "EMAIL");
-			expect(emailField).toHaveProperty("pageX", 88);
-			expect(emailField).toHaveProperty("pageY", 88 + 3.5 + 2);
+			expect(emailField).toHaveProperty(
+				"pageX",
+				config.WIDTH - config.MARGIN_RIGHT,
+			);
+			expect(emailField).toHaveProperty(
+				"pageY",
+				config.BASE_PAGE_Y + config.FIELD_HEIGHT + config.SPACING,
+			);
 		});
 
 		it("should create fields for a single signer on multiple pages", () => {
@@ -117,7 +126,7 @@ describe("DocumensoService", () => {
 				createMockRecipient(2, "signer@test.com", DocumentRole.Signer),
 			];
 
-			const [fields] = documensoService.calculateFields(recipients, 1);
+			const [fields, config] = documensoService.calculateFields(recipients, 1);
 			expect(fields).toHaveLength(4); // 2 fields per recipient
 
 			const approverFields = fields.slice(0, 2);
@@ -132,10 +141,13 @@ describe("DocumensoService", () => {
 			const approverField = approverFields[0];
 			const signerField = signerFields[0];
 			expect(approverField).toHaveProperty("type", "SIGNATURE");
-			expect(approverField).toHaveProperty("pageX", 12);
+			expect(approverField).toHaveProperty("pageX", config.SPACING);
 			expect(approverField).toHaveProperty("pageY", 88);
 			expect(signerField).toHaveProperty("type", "SIGNATURE");
-			expect(signerField).toHaveProperty("pageX", 88);
+			expect(signerField).toHaveProperty(
+				"pageX",
+				config.WIDTH - config.MARGIN_RIGHT,
+			);
 			expect(signerField).toHaveProperty("pageY", 88);
 		});
 
@@ -182,7 +194,9 @@ describe("DocumensoService", () => {
 				}
 
 				const pageX =
-					100 - config.MARGIN_X - index * (config.FIELD_WIDTH + config.SPACING);
+					100 -
+					config.MARGIN_RIGHT -
+					index * (config.FIELD_WIDTH + config.SPACING);
 
 				const pageY =
 					config.BASE_PAGE_Y +

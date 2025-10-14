@@ -81,7 +81,7 @@ export class DocumensoService {
 					timezone: meta?.timezone || "Europe/Zurich",
 					dateFormat: "dd/MM/yyyy hh:mm a",
 					language: meta?.language || "en",
-					subject: `Mahjonst Stars signature request`,
+					subject: `Mahjong Stars signature request`,
 					message: `Please sign the document: ${title} by clicking on the link below`,
 					emailSettings: {
 						recipientRemoved: false,
@@ -103,9 +103,11 @@ export class DocumensoService {
 
 			const docId = res.document.id;
 
-			const [fields] = this.calculateFields(res.document.recipients, pageSize);
-
-			console.log("🚀 ~ signature.ts:108 ~ fields:", fields);
+			const [fields] = this.calculateFields(
+				// Do not include CC in the fields since it's not a signer
+				res.document.recipients.filter((r) => r.role !== DocumentRole.Cc),
+				pageSize,
+			);
 
 			// Create the computed fields in the provider document
 			const createFields = await this.sdk.documents.fields.createMany({
@@ -155,21 +157,26 @@ export class DocumensoService {
 		const MAX_RECIPIENTS = 5;
 		const BASE_PAGE_Y = 88; // Base Y position for signatures (bottom of page)
 		const SPACING = 2; // Spacing between signature blocks (percentage)
-		const MARGIN_X = 12; // side margin for the page
-		const TOTAL_WIDTH = WIDTH - MARGIN_X * 2;
 		// Field dimensions as percentage of page
-		const FIELD_WIDTH = Math.min(18, TOTAL_WIDTH / MAX_RECIPIENTS);
+		const FIELD_WIDTH =
+			WIDTH / MAX_RECIPIENTS -
+			(SPACING * (MAX_RECIPIENTS + 1)) / MAX_RECIPIENTS;
+
 		const FIELD_HEIGHT = 3.5; // 3.5% of page height
+
+		const MARGIN_RIGHT = Math.round((FIELD_WIDTH + SPACING) * 10) / 10; // side margin for the page
 
 		const config = {
 			FIELD_WIDTH,
 			FIELD_HEIGHT,
 			BASE_PAGE_Y,
-			MARGIN_X,
-			TOTAL_WIDTH,
+			MARGIN_RIGHT,
+			WIDTH,
 			SPACING,
 			SIGN_LAST_PAGE_ONLY,
 		};
+
+		// | - - - - - |
 
 		// Separate APPROVER from other recipients
 		const approverRecipients = recipients.filter(
@@ -207,7 +214,7 @@ export class DocumensoService {
 					recipientId: approver.id,
 					type: "SIGNATURE",
 					pageNumber: page,
-					pageX: MARGIN_X,
+					pageX: SPACING,
 					pageY: BASE_PAGE_Y,
 					height: FIELD_HEIGHT,
 					width: FIELD_WIDTH,
@@ -218,7 +225,7 @@ export class DocumensoService {
 					recipientId: approver.id,
 					type: "EMAIL",
 					pageNumber: page,
-					pageX: MARGIN_X,
+					pageX: SPACING,
 					pageY: BASE_PAGE_Y + FIELD_HEIGHT + SPACING, // spacing between signature and email
 					height: FIELD_HEIGHT,
 					width: FIELD_WIDTH,
@@ -230,7 +237,8 @@ export class DocumensoService {
 		if (signerCount > 0) {
 			// Calculate starting X position for signers:
 
-			const FAR_RIGHT = WIDTH - MARGIN_X;
+			const FAR_RIGHT = WIDTH - MARGIN_RIGHT;
+
 			// Create signature and email fields for each signer
 			signerRecipients.forEach((rec, index) => {
 				// Calculate X position for this signer's fields
