@@ -73,8 +73,6 @@ export class DocumensoService {
         });
       }
 
-      console.debug('RECIPIENTS', rec);
-
       const res = await this.sdk.documents.createV0({
         title,
         recipients: rec,
@@ -148,7 +146,6 @@ export class DocumensoService {
    * Compute signature fields in the bottom of the document pages.
    */
   calculateFields(recipients: DocumentRecipient[], pageSize: number) {
-    console.log('🚀 ~ sCREATED RECIPIENTS IN DOC:', recipients);
     const SIGN_LAST_PAGE_ONLY = process.env.SIGN_LAST_PAGE_ONLY === 'true';
 
     // Base positioning
@@ -158,10 +155,19 @@ export class DocumensoService {
     const SPACING = 2; // Spacing between signature blocks (percentage)
     const MARGIN_X = 12; // side margin for the page
     const TOTAL_WIDTH = WIDTH - MARGIN_X * 2;
-
     // Field dimensions as percentage of page
     const FIELD_WIDTH = Math.min(18, TOTAL_WIDTH / MAX_RECIPIENTS);
     const FIELD_HEIGHT = 3.5; // 3.5% of page height
+
+    const config = {
+      FIELD_WIDTH,
+      FIELD_HEIGHT,
+      BASE_PAGE_Y,
+      MARGIN_X,
+      TOTAL_WIDTH,
+      SPACING,
+      SIGN_LAST_PAGE_ONLY,
+    };
 
     // Separate APPROVER from other recipients
     const approverRecipients = recipients.filter(
@@ -229,7 +235,7 @@ export class DocumensoService {
       signerRecipients.forEach((rec, index) => {
         // Calculate X position for this signer's fields
         const pageX =
-          index === 0 ? FAR_RIGHT : FAR_RIGHT + index * (FIELD_WIDTH + SPACING);
+          index === 0 ? FAR_RIGHT : FAR_RIGHT - index * (FIELD_WIDTH + SPACING);
 
         // Add signature fields on each page
         for (let page = 1; page <= pageSize; page++) {
@@ -261,9 +267,7 @@ export class DocumensoService {
       });
     }
 
-    console.debug('✅ FINAL FIELDS', fields);
-
-    return fields;
+    return [fields, config] as const;
   }
 
   // Upload PDF file to the provider

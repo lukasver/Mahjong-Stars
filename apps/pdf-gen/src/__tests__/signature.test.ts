@@ -85,7 +85,7 @@ describe('DocumensoService', () => {
         createMockRecipient(1, 'signer@test.com', DocumentRole.Signer),
       ];
 
-      const fields = documensoService.calculateFields(recipients, 1);
+      const [fields] = documensoService.calculateFields(recipients, 1);
       expect(fields).toHaveLength(2); // 1 signature + 1 email field
       const signatureField = fields[0];
       const emailField = fields[1];
@@ -102,7 +102,7 @@ describe('DocumensoService', () => {
       const recipients = [
         createMockRecipient(1, 'signer@test.com', DocumentRole.Signer),
       ];
-      const fields = documensoService.calculateFields(recipients, 3);
+      const [fields] = documensoService.calculateFields(recipients, 3);
 
       expect(fields).toHaveLength(6); // 2 fields per page × 3 pages
 
@@ -111,17 +111,16 @@ describe('DocumensoService', () => {
       expect(pageNumbers).toEqual([1, 1, 2, 2, 3, 3]);
     });
 
-    it.only('should create fields for approver and signer', () => {
+    it('should create fields for approver and signer', () => {
       const recipients = [
         createMockRecipient(1, 'approver@test.com', DocumentRole.Approver),
         createMockRecipient(2, 'signer@test.com', DocumentRole.Signer),
       ];
 
-      const fields = documensoService.calculateFields(recipients, 1);
+      const [fields] = documensoService.calculateFields(recipients, 1);
       expect(fields).toHaveLength(4); // 2 fields per recipient
 
       const approverFields = fields.slice(0, 2);
-      console.log('🚀 ~ approverFields:', approverFields);
       expect(approverFields).toHaveLength(2);
       expect(approverFields.every((field) => field.recipientId === 1)).toBe(
         true
@@ -147,23 +146,23 @@ describe('DocumensoService', () => {
         createMockRecipient(1, 'signer@test.com', DocumentRole.Signer),
       ];
 
-      const fields = documensoService.calculateFields(recipients, 3);
+      const [fields] = documensoService.calculateFields(recipients, 3);
 
       // Should only create fields for the last page
       expect(fields).toHaveLength(2); // 2 fields only on last page
       expect(fields.every((field) => field.pageNumber === 3)).toBe(true);
     });
 
-    it('should handle multiple signers correctly', () => {
+    it.only('should handle multiple signers correctly', () => {
       const recipients = [
         createMockRecipient(1, 'signer1@test.com', DocumentRole.Signer),
         createMockRecipient(2, 'signer2@test.com', DocumentRole.Signer),
         createMockRecipient(3, 'signer3@test.com', DocumentRole.Signer),
       ];
 
-      const fields = documensoService.calculateFields(recipients, 1);
+      const [fields, config] = documensoService.calculateFields(recipients, 1);
 
-      expect(fields).toHaveLength(6); // 2 fields per signer
+      expect(fields).toHaveLength(recipients.length * 2); // 2 fields per signer
 
       // Check that each signer has signature and email fields
       const signer1Fields = fields.filter((field) => field.recipientId === 1);
@@ -173,6 +172,19 @@ describe('DocumensoService', () => {
       expect(signer1Fields).toHaveLength(2);
       expect(signer2Fields).toHaveLength(2);
       expect(signer3Fields).toHaveLength(2);
+
+      // Should have correctly positioned fields
+      fields.forEach((f, i) => {
+        console.debug('x', f.pageX, 'y', f.pageY);
+        const mod = i % 2;
+        const pageX =
+          100 - config.MARGIN_X - i * (config.FIELD_WIDTH + config.SPACING);
+        const pageY =
+          config.BASE_PAGE_Y +
+          (!mod ? 0 : config.FIELD_HEIGHT + config.SPACING);
+        expect(f).toHaveProperty('pageX', pageX);
+        expect(f).toHaveProperty('pageY', pageY);
+      });
     });
 
     it('should position fields correctly for different scenarios', () => {
@@ -180,7 +192,7 @@ describe('DocumensoService', () => {
         createMockRecipient(1, 'signer@test.com', DocumentRole.Signer),
       ];
 
-      const fields = documensoService.calculateFields(recipients, 1);
+      const [fields] = documensoService.calculateFields(recipients, 1);
 
       // Check that email field is positioned below signature field
       const signatureField = fields.find((field) => field.type === 'SIGNATURE');
