@@ -1,15 +1,15 @@
+import { cn } from "@mjs/ui/lib/utils";
 import {
   BoldIcon,
-  ItalicIcon,
-  UnderlineIcon,
-  StrikethroughIcon,
   CodeIcon,
-} from 'lucide-react';
-import { EditorBubbleItem, useEditor } from 'novel';
-
-import { Button } from '../../../primitives/button';
-import { type SelectorItem } from './node-selector';
-import { cn } from '@mjs/ui/lib/utils';
+  FileTextIcon,
+  ItalicIcon,
+  StrikethroughIcon,
+  UnderlineIcon,
+} from "lucide-react";
+import { EditorBubbleItem, useEditor } from "novel";
+import { Button } from "../../../primitives/button";
+import { type SelectorItem } from "./node-selector";
 
 export const TextButtons = () => {
   const { editor } = useEditor();
@@ -17,43 +17,49 @@ export const TextButtons = () => {
 
   const items: SelectorItem[] = [
     {
-      name: 'bold',
-      isActive: (editor) => editor.isActive('bold'),
+      name: "bold",
+      isActive: (editor) => editor.isActive("bold"),
 
       command: (editor) => editor.chain().focus().toggleBold().run(),
       icon: BoldIcon,
     },
     {
-      name: 'italic',
-      isActive: (editor) => editor.isActive('italic'),
+      name: "italic",
+      isActive: (editor) => editor.isActive("italic"),
 
       command: (editor) => editor.chain().focus().toggleItalic().run(),
       icon: ItalicIcon,
     },
     {
-      name: 'underline',
-      isActive: (editor) => editor.isActive('underline'),
+      name: "underline",
+      isActive: (editor) => editor.isActive("underline"),
       command: (editor) => editor.chain().focus().toggleUnderline().run(),
       icon: UnderlineIcon,
     },
     {
-      name: 'strike',
-      isActive: (editor) => editor.isActive('strike'),
+      name: "strike",
+      isActive: (editor) => editor.isActive("strike"),
 
       command: (editor) => editor.chain().focus().toggleStrike().run(),
       icon: StrikethroughIcon,
     },
     {
-      name: 'code',
-      isActive: (editor) => editor.isActive('code'),
+      name: "code",
+      isActive: (editor) => editor.isActive("code"),
 
       command: (editor) => editor.chain().focus().toggleCode().run(),
       icon: CodeIcon,
     },
+    {
+      name: "pageBreak",
+      isActive: () => false,
+      command: (editor) => editor.chain().focus().setPageBreak().run(),
+      icon: FileTextIcon,
+    },
   ];
 
   return (
-    <div className='flex'>
+    <div className="flex">
       {items.map((item, index) => (
         <EditorBubbleItem
           key={index}
@@ -62,14 +68,14 @@ export const TextButtons = () => {
           }}
         >
           <Button
-            size='sm'
-            className='rounded-none'
-            variant='ghost'
-            type={'button'}
+            size="sm"
+            className="rounded-none"
+            variant="ghost"
+            type={"button"}
           >
             <item.icon
-              className={cn('h-4 w-4', {
-                'text-blue-500': item.isActive(editor),
+              className={cn("h-4 w-4", {
+                "text-blue-500": item.isActive(editor),
               })}
             />
           </Button>
