@@ -157,22 +157,6 @@ export const defaultExtensions: AnyExtension[] = [
 	starterKit,
 	textAlign,
 	hardBreak,
-	// Pages.configure({
-	//   pageFormat: PAGE_FORMATS.A4,
-	//   onPageFormatChange: setActivePageFormat,
-	//   header: threeColumnHeaderFooter({
-	//     left: 'Page header',
-	//     center: '',
-	//     right: '',
-	//   }),
-	//   footer: threeColumnHeaderFooter({
-	//     left: 'Page footer',
-	//     center: '',
-	//     right: '{page} of {total}',
-	//   }),
-	//   pageBreakBackground: '#f7f7f7',
-	// }),
-	hardBreak,
 	placeholder,
 	tiptapLink,
 	tiptapImage,

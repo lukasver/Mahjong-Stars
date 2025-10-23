@@ -27,8 +27,9 @@ export async function POST(req: NextRequest) {
 
 	try {
 		const isCompleted = body.payload.id && body.payload.status === "COMPLETED";
-
 		const isFailed = body.payload.id && body.event === "DOCUMENT_REJECTED";
+
+		console.debug("DEBUG", JSON.stringify(body));
 
 		const found = await prisma.documentRecipient.findFirst({
 			where: { externalId: body.payload.id },
