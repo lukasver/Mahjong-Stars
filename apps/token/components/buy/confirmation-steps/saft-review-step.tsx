@@ -140,7 +140,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
 
   if (isLoading)
     return (
-      <CardContent>
+      <CardContent className='min-h-96 grid place-items-center w-full h-full'>
         <PulseLoader text="Loading document..." />
       </CardContent>
     );
