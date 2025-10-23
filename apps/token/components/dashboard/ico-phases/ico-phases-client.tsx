@@ -27,7 +27,40 @@ const IcoPhasesPayload = Prisma.validator<Prisma.SaleFindManyArgs>()({
 
 type IcoPhases = Prisma.SaleGetPayload<typeof IcoPhasesPayload>;
 
+/**
+ * Sort sales by priority:
+ * 1. Active sales (OPEN status with future end date) - first
+ * 2. Other sales ordered by closest start date to now
+ */
+const sortSalesByPriority = (sales: IcoPhases[]): IcoPhases[] => {
+  const now = new Date();
+
+  return [...sales].sort((a, b) => {
+    const aEndDate = new Date(a.saleClosingDate);
+    const bEndDate = new Date(b.saleClosingDate);
+    const aStartDate = new Date(a.saleStartDate);
+    const bStartDate = new Date(b.saleStartDate);
+
+    // Check if sales are active (OPEN status with future end date)
+    const aIsActive = a.status === SaleStatus.OPEN && aEndDate > now;
+    const bIsActive = b.status === SaleStatus.OPEN && bEndDate > now;
+
+    // Active sales come first
+    if (aIsActive && !bIsActive) return -1;
+    if (!aIsActive && bIsActive) return 1;
+
+    // If both are active or both are not active, sort by start date (closest to now first)
+    const aStartDiff = Math.abs(aStartDate.getTime() - now.getTime());
+    const bStartDiff = Math.abs(bStartDate.getTime() - now.getTime());
+
+    return aStartDiff - bStartDiff;
+  });
+};
+
 export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
+  // Sort sales according to the specified logic
+  const sortedSales = sortSalesByPriority(sales);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -65,8 +98,10 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
                   style={{ transformOrigin: "top" }}
                 />
 
-                {sales.map((sale, index) => {
-                  const statusBadge = getStatusBadge(sale.status);
+                {sortedSales.map((sale, index) => {
+                  const isEndDateInPast = new Date(sale.saleClosingDate) < new Date();
+                  const effectiveStatus = isEndDateInPast ? SaleStatus.FINISHED : sale.status;
+                  const statusBadge = getStatusBadge(effectiveStatus);
                   const dateRange = formatDateRange(
                     sale.saleStartDate,
                     sale.saleClosingDate,
@@ -100,9 +135,9 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
                           duration: 0.6,
                           ease: "easeOut",
                         }}
-                        className={`absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border ${sale.status === SaleStatus.OPEN
+                        className={`absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border ${effectiveStatus === SaleStatus.OPEN
                           ? "border-purple-500 bg-purple-900/50"
-                          : sale.status === SaleStatus.FINISHED
+                          : effectiveStatus === SaleStatus.FINISHED
                             ? "border-purple-500 bg-zinc-900"
                             : "border-zinc-700 bg-zinc-900"
                           }`}
@@ -115,9 +150,9 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
                             duration: 0.4,
                             ease: "easeOut",
                           }}
-                          className={`h-2 w-2 rounded-full ${sale.status === SaleStatus.OPEN
+                          className={`h-2 w-2 rounded-full ${effectiveStatus === SaleStatus.OPEN
                             ? "bg-purple-500"
-                            : sale.status === SaleStatus.FINISHED
+                            : effectiveStatus === SaleStatus.FINISHED
                               ? "bg-purple-500"
                               : "bg-zinc-700"
                             }`}
@@ -135,7 +170,7 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
                       >
                         <div className="flex items-center gap-2">
                           <h3
-                            className={`font-medium ${sale.status === SaleStatus.CREATED
+                            className={`font-medium ${effectiveStatus === SaleStatus.CREATED
                               ? "text-zinc-500"
                               : ""
                               }`}
@@ -160,7 +195,7 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
                           </motion.div>
                         </div>
                         <p
-                          className={`text-sm ${sale.status === SaleStatus.CREATED
+                          className={`text-sm ${effectiveStatus === SaleStatus.CREATED
                             ? "text-zinc-600"
                             : "text-zinc-400"
                             }`}
@@ -168,7 +203,7 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
                           {dateRange}
                         </p>
                         <div
-                          className={`text-sm ${sale.status === SaleStatus.CREATED
+                          className={`text-sm ${effectiveStatus === SaleStatus.CREATED
                             ? "text-zinc-500"
                             : ""
                             }`}
@@ -178,7 +213,7 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
                             sale.tokenPricePerUnit.toString(),
                           ).toFixed(3)}{" "}
                           |{" "}
-                          {sale.status === SaleStatus.FINISHED ? (
+                          {effectiveStatus === SaleStatus.FINISHED ? (
                             <>
                               <span className="font-medium">Raised:</span> $
                               {raised.toLocaleString()}
