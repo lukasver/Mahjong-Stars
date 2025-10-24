@@ -57,12 +57,7 @@ export const formSchemaShape = {
 		.string()
 		.regex(/^0x[a-fA-F0-9]{40}$/g, "Invalid wallet address")
 		.min(1, "Wallet address required"),
-	saleStartDate: z.coerce
-		.date()
-		.min(
-			new Date(new Date().setDate(new Date().getDate() - 1)),
-			"Please choose a future date for the start date",
-		),
+	saleStartDate: z.coerce.date(),
 	saleClosingDate: z.coerce.date(),
 	initialTokenQuantity: z.coerce
 		.number()
@@ -100,6 +95,20 @@ export const formSchemaShape = {
 export const SaleFormSchema = z
 	.object(formSchemaShape)
 	.superRefine((data, ctx) => {
+		if (
+			(data.saleStartDate &&
+				!data.id &&
+				data.saleStartDate <
+					new Date(new Date().setDate(new Date().getDate() - 1))) ||
+			!data.saleStartDate
+		) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: "Please choose a future date for the start date",
+				path: ["saleStartDate"],
+			});
+		}
+
 		if (
 			data.saleClosingDate &&
 			data.saleStartDate &&

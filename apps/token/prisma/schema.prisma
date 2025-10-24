@@ -510,9 +510,17 @@ model KycVerification {
   verifiedAt      DateTime?
   rejectionReason String?
 
+  tier KycTier?
+
   documents Document[] @relation("KycDocuments")
 
   @@map("kyc_verifications")
+}
+
+enum KycTier {
+  SIMPLIFIED
+  STANDARD
+  ENHANCED
 }
 
 model Role {

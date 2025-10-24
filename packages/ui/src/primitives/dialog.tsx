@@ -1,10 +1,9 @@
 "use client";
 
+import { cn } from "@mjs/ui/lib/utils";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 import * as React from "react";
-
-import { cn } from "@mjs/ui/lib/utils";
 
 function Dialog({
 	...props
@@ -49,10 +48,13 @@ function DialogOverlay({
 function DialogContent({
 	className,
 	children,
+	container,
 	...props
-}: React.ComponentProps<typeof DialogPrimitive.Content>) {
+}: React.ComponentProps<typeof DialogPrimitive.Content> & {
+	container?: HTMLElement;
+}) {
 	return (
-		<DialogPortal data-slot="dialog-portal">
+		<DialogPortal data-slot="dialog-portal" container={container}>
 			<DialogOverlay />
 			<DialogPrimitive.Content
 				data-slot="dialog-content"

@@ -28,11 +28,11 @@ export function Stepper({
   return (
     <div
       className={cn(
-        'w-full py-4 sm:py-6 max-w-[350px] scrollbar-hidden sm:max-w-none',
+        'w-full py-4 sm:py-6 max-w-md scrollbar-hidden sm:max-w-none',
         className
       )}
     >
-      <div className='flex items-center justify-between px-2 sm:px-4 py-2'>
+      <div className='flex items-center justify-between px-2 sm:px-4 py-2 w-full'>
         {steps.map((step, index) => (
           <div key={step.id} className='flex not-last:flex-1 items-center'>
             <div className='flex flex-col items-center'>

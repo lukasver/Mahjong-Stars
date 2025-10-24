@@ -95,7 +95,7 @@ export const PurchaseSummaryCard = ({
         <div className="flex justify-between">
           <span className="text-secondary font-bold">Total amount to pay</span>
           <span className="text-white font-bold">
-            {gettotalAmountToPay({
+            {getTotalAmountToPay({
               ...paid,
               locale,
             })}
@@ -106,7 +106,7 @@ export const PurchaseSummaryCard = ({
   );
 };
 
-const gettotalAmountToPay = (paid: {
+const getTotalAmountToPay = (paid: {
   totalAmount: string;
   currency: string;
   locale: string;
@@ -121,7 +121,7 @@ const gettotalAmountToPay = (paid: {
     totalAmount: paid.totalAmount,
   }, {
     locale: paid.locale,
-    precision: "FIAT",
+    precision: 2,
   });
 };
 

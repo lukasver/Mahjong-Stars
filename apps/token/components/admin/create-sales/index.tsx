@@ -92,6 +92,7 @@ export const CreateSaleForm = () => {
         return;
       }
 
+
       try {
         // Execute with wallet authentication for sensitive actions
         const success = await sensitiveAction.executeAction(
@@ -134,11 +135,17 @@ export const CreateSaleForm = () => {
               const f = formApi.getFieldMeta("content");
               const apf = formApi.getFieldMeta("approver");
 
+              console.debug('Q PASA?', 'checkbox', sale?.saftCheckbox)
+              console.debug('content', 'f', f?.isPristine)
+              console.debug('approver', 'apf', apf?.isPristine)
+
               if (sale?.saftCheckbox === true && !vals.content) {
                 toast.error("Please fill in the Saft contract");
                 return;
               }
-              if (f?.isPristine && apf?.isPristine) {
+
+
+              if ((f?.isPristine && apf?.isPristine) || sale?.saftCheckbox === false) {
                 setStep((pv) => pv + 1);
                 return;
               }
