@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import tsConfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
-dotenv.config({ path: ".env.test" });
+dotenv.config({ path: [".env.test", ".env.test.local"] });
 
 export default defineConfig({
 	// @ts-ignore -- types mismatch between versions

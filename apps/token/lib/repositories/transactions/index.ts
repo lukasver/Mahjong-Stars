@@ -1506,10 +1506,6 @@ class TransactionsController {
 		const template = Handlebars.compile(contract);
 		const fullContract = template(variables);
 
-		console.log("🚀 ~ index.ts:1520 ~ fullContract:", fullContract);
-
-		console.log("🚀 ~ index.ts:1523 ~ variables:", variables);
-
 		return { contract: fullContract, variables };
 	}
 }

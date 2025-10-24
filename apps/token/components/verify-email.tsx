@@ -26,7 +26,9 @@ import {
   validateMagicWord,
   verifyEmail,
 } from "@/lib/actions";
+import { useUser } from "@/lib/services/api";
 import useActiveAccount from "./hooks/use-active-account";
+import { PulseLoader } from './pulse-loader';
 
 const titleMapping = {
   1: {
@@ -43,8 +45,15 @@ const titleMapping = {
   },
 };
 
-export function VerifyEmail({ token }: { token: string }) {
+export function VerifyEmail({
+  token,
+  email,
+}: {
+  token: string;
+  email?: string;
+}) {
   const [magicWord] = useLocalStorage(MW_KEY, "");
+  const { data, isLoading } = useUser();
   const [step, setStep] = useState<1 | 2 | 3>(token ? 3 : magicWord ? 2 : 1);
   const router = useRouter();
 
@@ -77,10 +86,13 @@ export function VerifyEmail({ token }: { token: string }) {
             />
           )}
           {step === 2 && (
-            <VerifyEmailForm
+            isLoading ? <PulseLoader /> : <VerifyEmailForm
               key={2}
               onCancel={handleCancel}
               onSuccess={() => handleNextStep(3)}
+              defaultEmail={email || (!data?.email?.startsWith('temp_') ? data?.email : undefined)}
+              defaultFirstName={data?.name !== 'Anonymous' ? data?.name?.split(' ')[0] : undefined}
+              defaultLastName={data?.name !== 'Anonymous' ? data?.name?.split(' ')[1] : undefined}
             />
           )}
           {step === 3 && (
@@ -201,12 +213,17 @@ export const VerifyEmailForm = ({
   onSuccess,
   canSkip = true,
   defaultEmail,
+  defaultFirstName,
+  defaultLastName,
 }: {
   onCancel?: () => void;
   onSuccess: () => void;
   canSkip?: boolean;
   defaultEmail?: string;
+  defaultFirstName?: string;
+  defaultLastName?: string;
 }) => {
+
   const { execute, isExecuting } = useActionListener(
     useAction(createEmailVerification),
     {
@@ -228,8 +245,8 @@ export const VerifyEmailForm = ({
     },
     defaultValues: {
       email: defaultEmail ?? "",
-      firstName: "",
-      lastName: "",
+      firstName: defaultFirstName ?? "",
+      lastName: defaultLastName ?? "",
     },
     onSubmit: ({ value }) => onSubmit(value),
   });
@@ -253,7 +270,7 @@ export const VerifyEmailForm = ({
             <FormInput
               name="firstName"
               type="text"
-              label="First name (optional)"
+              label="First name"
               inputProps={{
                 placeholder: "Tony",
                 required: false,
@@ -262,7 +279,7 @@ export const VerifyEmailForm = ({
             <FormInput
               name="lastName"
               type="text"
-              label="Last name (optional)"
+              label="Last name"
               inputProps={{
                 placeholder: "Kong",
                 required: false,

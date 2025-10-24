@@ -4,10 +4,13 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { decimalsToString } from "@/common/schemas/dtos/utils";
 import { isAdmin } from "../actions/admin";
-
 import { getUserFromCache } from "../auth/cache";
 import { getSessionCookie } from "../auth/cookies";
-import { verifyJwt } from "../auth/thirdweb";
+import {
+	extractEmailVerification,
+	getUserFromAddress,
+	verifyJwt,
+} from "../auth/thirdweb";
 import { prisma } from "../db/prisma";
 import blockchains from "../repositories/chains";
 import sales from "../repositories/sales";
@@ -169,3 +172,43 @@ export const getBlockchains = cache(async () => {
 		return { data: null, error: result };
 	}
 });
+
+export const checkUserAndVerifyEmail = async (address: string) => {
+	const twUser = await getUserFromAddress(address);
+	if (!twUser) {
+		return;
+	}
+	const verif = extractEmailVerification(twUser.profiles);
+	let email: string | undefined;
+	let emailVerified = false;
+	let firstName = "Anonymous";
+	let lastName = "";
+	let image: string | undefined;
+	if (verif) {
+		email = verif.email || email;
+		emailVerified = verif.emailVerified;
+		firstName = verif.firstName || firstName;
+		lastName = verif.lastName || "";
+		image = verif.image || undefined;
+		const res = await users.updateUser(
+			{
+				user: {
+					...(email && { email }),
+					...(emailVerified && { emailVerified }),
+					...(firstName && {
+						name: lastName ? `${firstName} ${lastName}` : firstName,
+					}),
+					...(image && { image }),
+					emailVerified: !!verif?.emailVerified,
+				},
+			},
+			{
+				address,
+			},
+		);
+		if (res.success && res.data?.user && "email" in res.data.user) {
+			return res.data?.user?.email || null;
+		}
+	}
+	return email || null;
+};

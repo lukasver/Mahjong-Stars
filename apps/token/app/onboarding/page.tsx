@@ -7,7 +7,10 @@ import { COOKIE_PREFIX, MW_KEY } from "@/common/config/constants";
 import BackgroundWrapper from "@/components/bg-wrapper";
 import { PulseLoader } from "@/components/pulse-loader";
 import { PointerEventsGuard } from "@/components/thirdweb/pointer-events-guard";
-import { getCurrentUser } from "@/lib/services/fetchers.server";
+import {
+  checkUserAndVerifyEmail,
+  getCurrentUser,
+} from "@/lib/services/fetchers.server";
 import { VerifyEmail } from "../../components/verify-email";
 
 export default async function Onboarding({ searchParams }: PageProps) {
@@ -17,13 +20,27 @@ export default async function Onboarding({ searchParams }: PageProps) {
     cookies(),
   ]);
 
+  // Here we should check if:
+  // User is logged in from a social
+
   if (!res?.data) {
     redirect("/?error=unauthorized");
   }
 
   const user = res.data;
+  let defaultEmail: string | undefined;
+
+
+  if (!user.emailVerified && user.walletAddress) {
+    // Check email and verify
+    const result = await checkUserAndVerifyEmail(user.walletAddress);
+    if (result) {
+      defaultEmail = result;
+    }
+  }
 
   const magicWord = c.get(`${COOKIE_PREFIX}_${MW_KEY}`);
+
   if (user.emailVerified && magicWord) {
     redirect("/dashboard");
   }
@@ -31,7 +48,14 @@ export default async function Onboarding({ searchParams }: PageProps) {
   return (
     <Container>
       <Suspense fallback={<PulseLoader text="Wait for it..." />}>
-        <VerifyEmail token={params.token ? String(params.token) : ""} />
+        <VerifyEmail
+          token={params.token ? String(params.token) : ""}
+          email={
+            !defaultEmail || defaultEmail?.startsWith("temp_")
+              ? undefined
+              : defaultEmail
+          }
+        />
       </Suspense>
     </Container>
   );

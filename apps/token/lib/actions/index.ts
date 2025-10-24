@@ -556,21 +556,17 @@ export const getFileUploadPrivatePresignedUrl = authActionClient
 export const validateMagicWord = authActionClient
 	.schema(z.object({ invitationCode: z.string() }))
 	.action(async ({ parsedInput }) => {
+		if (env.MAGIC_WORD && parsedInput.invitationCode !== env.MAGIC_WORD) {
+			throw new Error("Invalid magic word");
+		}
 		const c = await cookies();
-		c.set(`${COOKIE_PREFIX}-${MW_KEY}`, MW_KEY, {
+		c.set(`${COOKIE_PREFIX}_${MW_KEY}`, MW_KEY, {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
 			maxAge: ONE_YEAR * 100, // Set to effectively never expire (100 years)
 			path: "/",
 			sameSite: "strict",
 		});
-		if (!env.MAGIC_WORD) {
-			// IF not set, then allow access
-			return true;
-		}
-		if (parsedInput.invitationCode !== env.MAGIC_WORD) {
-			throw new Error("Invalid magic word");
-		}
 		return true;
 	});
 

@@ -33,7 +33,7 @@ export default async (req: NextRequest) => {
 		return NextResponse.redirect(new URL("/", req.url));
 	}
 
-	const magicWord = req.cookies.get(`${COOKIE_PREFIX}-${MW_KEY}`);
+	const magicWord = req.cookies.get(`${COOKIE_PREFIX}_${MW_KEY}`);
 
 	switch (req.nextUrl.pathname) {
 		case "/": {

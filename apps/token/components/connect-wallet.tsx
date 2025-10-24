@@ -1,6 +1,7 @@
 "use client";
 
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
+import { defineChain } from "thirdweb";
 // import { bscTestnet, sepolia } from "thirdweb/chains";
 import { ConnectButton } from "thirdweb/react";
 import { Wallet } from "thirdweb/wallets";
@@ -9,13 +10,12 @@ import {
   doLogout,
   getLoginPayload,
   isLoggedIn,
-} from "@/lib/auth/functions";
+} from "@/lib/auth/actions";
 import { client } from "@/lib/auth/thirdweb-client";
 import { wallets } from "@/lib/auth/wallets";
 import { useBlockchains } from "@/lib/services/api";
 import { metadata } from "../common/config/site";
 import useActiveAccount from "./hooks/use-active-account";
-import { defineChain } from 'thirdweb';
 
 const localeMapping = {
   en: "en_US",
@@ -41,7 +41,6 @@ export const ConnectWallet = ({
   onConnect?: (wallet: Wallet) => void;
   chains: { chainId: number }[];
 }) => {
-
   const mappedLocale = locale ? localeMapping[locale] : "en_US";
   const { signout } = useActiveAccount();
 
@@ -92,8 +91,6 @@ export const ConnectWallet = ({
 
 export const ConnectWalletWithChains = () => {
   const { data, isLoading, error } = useBlockchains();
-
-
 
   if (isLoading) {
     return <Skeleton className="w-full min-w-[165px] h-10" />;
