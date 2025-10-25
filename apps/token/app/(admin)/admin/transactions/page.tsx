@@ -1,10 +1,17 @@
-import AdminTransactions from '@/components/admin/transactions';
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
-} from '@tanstack/react-query';
-import { getAllTransactions } from '@/lib/services/fetchers.server';
+} from "@tanstack/react-query";
+import AdminTransactions from "@/components/admin/transactions";
+import { getAllTransactions } from "@/lib/services/fetchers.server";
+
+interface PageProps {
+  searchParams: Promise<{
+    saleId?: string;
+    userId?: string;
+  }>;
+}
 
 export default async function AdminTransactionsPage({
   searchParams,
@@ -12,16 +19,24 @@ export default async function AdminTransactionsPage({
   const queryClient = new QueryClient();
   const query = await searchParams;
   const saleId = query.saleId;
+  const userId = query.userId;
   await queryClient.prefetchQuery({
-    queryKey: ['transactions', 'admin', saleId],
-    queryFn: () => getAllTransactions({ saleId: saleId as string | undefined }),
+    queryKey: ["transactions", "admin", saleId, userId],
+    queryFn: () =>
+      getAllTransactions({
+        saleId: saleId as string | undefined,
+        userId: userId as string | undefined,
+      }),
   });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <AdminTransactions saleId={saleId as string | undefined} />
+      <AdminTransactions
+        saleId={saleId as string | undefined}
+        userId={userId as string | undefined}
+      />
     </HydrationBoundary>
   );
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";

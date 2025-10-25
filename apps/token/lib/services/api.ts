@@ -36,10 +36,11 @@ import {
 	getSales,
 	getTokens,
 	getUserPendingTransactionsForSale,
+	getUsers,
 	getUserTransactions,
 } from "./fetchers";
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: needed for error handling
 const getError = (data: any, error: any): string | null => {
 	return (
 		(error && error?.message) ||
@@ -238,10 +239,10 @@ export const useUserTransactions = (
 /**
  * Get all transactions (admin only)
  */
-export const useAllTransactions = (saleId?: string) => {
+export const useAllTransactions = (saleId?: string, userId?: string) => {
 	const { data, status, error, isLoading } = useSuspenseQuery({
-		queryKey: ["transactions", "admin", saleId],
-		queryFn: () => getAllTransactions({ saleId }),
+		queryKey: ["transactions", "admin", saleId, userId ?? ""],
+		queryFn: () => getAllTransactions({ saleId, userId }),
 		staleTime: DEFAULT_STALE_TIME,
 	});
 	const e = getError(data, error);
@@ -412,4 +413,24 @@ export const useSaleBanks = (saleId: string) => {
 	});
 	const e = getError(data, error);
 	return { data: data?.data, error: e, isLoading, refetch };
+};
+
+/**
+ * Get all users (admin only)
+ */
+export const useAllUsers = (
+	params: {
+		page?: number;
+		limit?: number;
+		search?: string;
+		kycStatus?: "NOT_STARTED" | "SUBMITTED" | "VERIFIED" | "REJECTED";
+	} = {},
+) => {
+	const { data, status, error, isLoading } = useSuspenseQuery({
+		queryKey: ["users", "admin", params],
+		queryFn: () => getUsers(params),
+		staleTime: DEFAULT_STALE_TIME,
+	});
+	const e = getError(data, error);
+	return { data: data?.data, error: e, status, isLoading };
 };

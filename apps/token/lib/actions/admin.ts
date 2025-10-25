@@ -12,6 +12,10 @@ import {
 	UpdateSaleStatusDto,
 } from "@/common/schemas/dtos/sales";
 import { SignatureSchema } from "@/common/schemas/dtos/signatures";
+import {
+	GetUsersDto,
+	UpdateUserKycStatusDto,
+} from "@/common/schemas/dtos/users";
 import { BankDetailsSchema } from "@/components/admin/create-sales/utils";
 import { prisma } from "@/db";
 import {
@@ -22,6 +26,7 @@ import { adminCache } from "@/lib/auth/cache";
 import documentsController from "@/lib/repositories/documents";
 import salesController from "@/lib/repositories/sales";
 import transactionsController from "@/lib/repositories/transactions";
+import usersController from "@/lib/repositories/users";
 import { TransactionsExporter } from "../repositories/transactions/exporter";
 import { authActionClient } from "./config";
 
@@ -354,4 +359,72 @@ export const exportTransactions = adminClient
 			throw new Error(transactions.message);
 		}
 		return transactions.data;
+	});
+
+/**
+ * @warning ADMIN REQUIRED
+ */
+export const getUsers = adminClient
+	.schema(GetUsersDto)
+	.action(async ({ ctx, parsedInput }) => {
+		const users = await usersController.getAllUsers(parsedInput, ctx);
+		if (!users.success) {
+			throw new Error(users.message);
+		}
+		return users.data;
+	});
+
+/**
+ * @warning ADMIN REQUIRED
+ */
+export const updateUserKycStatus = adminClient
+	.schema(UpdateUserKycStatusDto)
+	.action(async ({ ctx, parsedInput }) => {
+		const result = await usersController.updateUserKycStatus(parsedInput, ctx);
+		if (!result.success) {
+			throw new Error(result.message);
+		}
+		return result.data;
+	});
+
+/**
+ * @warning ADMIN REQUIRED
+ */
+export const getDocumentReadPresignedUrl = adminClient
+	.schema(
+		z.object({
+			documentId: z.string(),
+		}),
+	)
+	.action(async ({ ctx, parsedInput }) => {
+		// Get the document to extract the key and bucket info
+		const document = await prisma.document.findUniqueOrThrow({
+			where: {
+				id: parsedInput.documentId,
+			},
+			select: {
+				id: true,
+				// key
+				fileName: true,
+			},
+		});
+
+		// public bucket doesn't need a signed url to read
+		const bucket = "private";
+
+		const result = await documentsController.getPresignedUrl(
+			document.fileName,
+			bucket,
+			"read",
+			3600,
+		);
+		if (!result.success) {
+			throw new Error(result.message);
+		}
+
+		return {
+			id: document.id,
+			url: result.data.url,
+			fileName: document.fileName,
+		};
 	});

@@ -9,6 +9,8 @@ import {
 	CreateUserDto,
 	GetUserDto,
 	GetUserKycVerificationDto,
+	GetUsersDto,
+	UpdateUserKycStatusDto,
 } from "@/common/schemas/dtos/users";
 import { Failure, isObject, Success } from "@/common/schemas/dtos/utils";
 import { KycStatusSchema, Profile, User } from "@/common/schemas/generated";
@@ -462,6 +464,171 @@ class UsersController {
 			});
 
 			return Success({ kyc: user.kycVerification });
+		} catch (error) {
+			logger(error);
+			return Failure(error);
+		}
+	}
+
+	async getAllUsers(dto: GetUsersDto, ctx: ActionCtx) {
+		console.log("🚀 ~ index.ts:475 ~ ctx:", ctx);
+
+		console.log("🚀 ~ index.ts:475 ~ dto:", dto);
+
+		try {
+			invariant(ctx.isAdmin, "Forbidden");
+
+			const { page, limit, search, kycStatus } = dto;
+			const skip = (page - 1) * limit;
+
+			// Build where clause for search and filters
+			const whereClause: Record<string, unknown> = {};
+
+			if (search) {
+				whereClause.OR = [
+					{ email: { contains: search, mode: "insensitive" } },
+					{ name: { contains: search, mode: "insensitive" } },
+					{ walletAddress: { contains: search, mode: "insensitive" } },
+					{
+						profile: {
+							OR: [
+								{ firstName: { contains: search, mode: "insensitive" } },
+								{ lastName: { contains: search, mode: "insensitive" } },
+							],
+						},
+					},
+				];
+			}
+
+			if (kycStatus) {
+				whereClause.kycVerification = {
+					status: kycStatus,
+				};
+			}
+
+			// Get users with pagination
+			const [users, totalCount] = await Promise.all([
+				prisma.user.findMany({
+					where: whereClause,
+					select: {
+						id: true,
+						walletAddress: true,
+						email: true,
+						name: true,
+						emailVerified: true,
+						createdAt: true,
+						profile: {
+							select: {
+								firstName: true,
+								lastName: true,
+								dateOfBirth: true,
+								address: true,
+							},
+						},
+						kycVerification: {
+							select: {
+								status: true,
+								verifiedAt: true,
+								rejectionReason: true,
+								tier: true,
+								documents: {
+									select: {
+										id: true,
+										url: true,
+										fileName: true,
+										name: true,
+									},
+								},
+							},
+						},
+						_count: {
+							select: {
+								transactions: true,
+							},
+						},
+						transactions: {
+							select: {
+								status: true,
+							},
+						},
+					},
+					skip,
+					take: limit,
+					orderBy: {
+						createdAt: "desc",
+					},
+				}),
+				prisma.user.count({
+					where: whereClause,
+				}),
+			]);
+
+			// Process transaction counts by status
+			const usersWithTransactionCounts = users.map((user) => {
+				const transactionCounts = user.transactions.reduce(
+					(acc: Record<string, number>, tx) => {
+						acc[tx.status] = (acc[tx.status] || 0) + 1;
+						return acc;
+					},
+					{} as Record<string, number>,
+				);
+
+				return {
+					...user,
+					transactionCounts,
+				};
+			});
+
+			return Success({
+				users: usersWithTransactionCounts,
+				pagination: {
+					page,
+					limit,
+					total: totalCount,
+					totalPages: Math.ceil(totalCount / limit),
+				},
+			});
+		} catch (error) {
+			logger(error);
+			return Failure(error);
+		}
+	}
+
+	async updateUserKycStatus(dto: UpdateUserKycStatusDto, ctx: ActionCtx) {
+		try {
+			invariant(ctx.isAdmin, "Forbidden");
+
+			const { userId, status, rejectionReason } = dto;
+
+			const data = {
+				status,
+				...(status === "VERIFIED" && { verifiedAt: new Date() }),
+				...(status === "REJECTED" && { rejectionReason }),
+			};
+			// Update KYC verification
+			const kyc = await prisma.kycVerification.upsert({
+				where: {
+					userId: userId,
+				},
+				create: {
+					...data,
+					user: {
+						connect: {
+							id: userId,
+						},
+					},
+				},
+				update: data,
+				select: {
+					status: true,
+					verifiedAt: true,
+					rejectionReason: true,
+					tier: true,
+					updatedAt: true,
+				},
+			});
+
+			return Success({ kyc });
 		} catch (error) {
 			logger(error);
 			return Failure(error);

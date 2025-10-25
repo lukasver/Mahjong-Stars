@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { env } from "@/common/config/env";
+import { GetUsersDto } from "@/common/schemas/dtos/users";
 import { TransactionStatusSchema } from "@/common/schemas/generated";
 import blockchains from "@/lib/repositories/chains";
 import documents from "@/lib/repositories/documents";
@@ -7,7 +8,6 @@ import rates from "@/lib/repositories/feeds/rates";
 import sales from "@/lib/repositories/sales";
 import transactions from "@/lib/repositories/transactions";
 import users from "@/lib/repositories/users";
-
 import { withAuth } from "./_auth";
 
 /**
@@ -221,6 +221,19 @@ export const GET = withAuth(async (req, context, auth) => {
 							isAdmin: auth.isAdmin,
 						},
 					);
+					return NextResponse.json(data);
+				}
+				if (identifier === "users") {
+					// Parse and validate the query parameters using the DTO schema
+					const parsedParams = GetUsersDto.parse(qParamsObject);
+
+					console.log("🚀 ~ route.ts:230 ~ parsedParams:", parsedParams);
+
+					const data = await users.getAllUsers(parsedParams, {
+						address: auth.address,
+						userId: auth.userId,
+						isAdmin: auth.isAdmin,
+					});
 					return NextResponse.json(data);
 				}
 				return NextResponse.json({ error: "Bad request" }, { status: 404 });

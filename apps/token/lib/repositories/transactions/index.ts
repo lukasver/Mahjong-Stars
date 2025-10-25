@@ -62,12 +62,25 @@ class TransactionsController {
 	/**
 	 * Get all transactions (admin only).
 	 */
-	async getAllTransactions(dto: { saleId?: string }, ctx: ActionCtx) {
+	async getAllTransactions(
+		dto: { saleId?: string; userId?: string },
+		ctx: ActionCtx,
+	) {
 		try {
 			invariant(ctx.isAdmin, "Forbidden");
+			const whereClause: Record<string, string> = {};
+
+			if (dto.saleId) {
+				whereClause.saleId = dto.saleId;
+			}
+
+			if (dto.userId) {
+				whereClause.userId = dto.userId;
+			}
+
 			const transactions: AdminTransactionsWithRelations[] =
 				await prisma.saleTransactions.findMany({
-					...(dto.saleId && { where: { saleId: dto.saleId } }),
+					...(Object.keys(whereClause).length > 0 && { where: whereClause }),
 					include: {
 						sale: true,
 						user: {

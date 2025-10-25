@@ -3,7 +3,7 @@ import { SaleStatus, TransactionStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { decimalsToString } from "@/common/schemas/dtos/utils";
-import { isAdmin } from "../actions/admin";
+import { getUsers, isAdmin } from "../actions/admin";
 import { getUserFromCache } from "../auth/cache";
 import { getSessionCookie } from "../auth/cookies";
 import {
@@ -56,11 +56,11 @@ export const getUserTransactions = cache(async () => {
 });
 
 export const getAllTransactions = cache(
-	async ({ saleId }: { saleId?: string }) => {
+	async ({ saleId, userId }: { saleId?: string; userId?: string }) => {
 		const user = await getUserFromSession();
 		const isAdminUser = await isAdmin(user.walletAddress);
 		const result = await transactions.getAllTransactions(
-			{ saleId },
+			{ saleId, userId },
 			{
 				address: user.walletAddress,
 				userId: user.id,
@@ -72,6 +72,43 @@ export const getAllTransactions = cache(
 			return { data: result.data, error: null };
 		} else {
 			return { data: null, error: result };
+		}
+	},
+);
+
+export const getAllUsers = cache(
+	async (params: {
+		page?: number;
+		limit?: number;
+		search?: string;
+		kycStatus?: string;
+	}) => {
+		const user = await getUserFromSession();
+		const isAdminUser = await isAdmin(user.walletAddress);
+
+		if (!isAdminUser) {
+			return { data: null, error: "Forbidden" };
+		}
+
+		const result = await getUsers({
+			page: params.page || 1,
+			limit: params.limit || 20,
+			search: params.search,
+			kycStatus: params.kycStatus as
+				| "NOT_STARTED"
+				| "SUBMITTED"
+				| "VERIFIED"
+				| "REJECTED"
+				| undefined,
+		});
+
+		if (result?.data) {
+			return { data: result.data, error: null };
+		} else {
+			return {
+				data: null,
+				error: result?.serverError || "Failed to fetch users",
+			};
 		}
 	},
 );

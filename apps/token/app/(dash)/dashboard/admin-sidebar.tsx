@@ -1,38 +1,49 @@
-'use client';
+"use client";
 
-import { useUser } from '@/lib/services/api';
-import { isAdmin } from '@/lib/utils';
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-} from '@mjs/ui/primitives/sidebar';
-import { NavAdmin } from '../../../components/nav/nav-admin';
+} from "@mjs/ui/primitives/sidebar";
+import { useUser } from "@/lib/services/api";
+import { isAdmin } from "@/lib/utils";
+import { NavAdmin } from "../../../components/nav/nav-admin";
 
 const items = [
   {
-    title: 'Sales',
-    url: '/admin/sales',
-    icon: 'sale',
+    title: "Sales",
+    url: "/admin/sales",
+    icon: "sale",
     items: [
       {
-        title: 'List',
-        url: '/admin/sales',
+        title: "List",
+        url: "/admin/sales",
       },
       {
-        title: 'New sale',
-        url: '/admin/sales/create',
+        title: "New sale",
+        url: "/admin/sales/create",
       },
     ],
   },
   {
-    title: 'Transactions',
-    url: '/admin/transactions',
-    icon: 'transaction',
+    title: "Transactions",
+    url: "/admin/transactions",
+    icon: "transaction",
     items: [
       {
-        title: 'List',
-        url: '/admin/transactions',
+        title: "List",
+        url: "/admin/transactions",
+      },
+    ],
+  },
+  {
+    title: "Users",
+    url: "/admin/users",
+    icon: "users",
+    items: [
+      {
+        title: "List",
+        url: "/admin/users",
       },
     ],
   },

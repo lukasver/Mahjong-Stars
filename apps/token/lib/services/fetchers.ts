@@ -39,7 +39,7 @@ export type FetcherOptions = Omit<RequestInit, "body"> & {
 		  }
 		| {
 				rawBody?: false | never;
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				// biome-ignore lint/suspicious/noExplicitAny: needed for request body
 				body?: any;
 		  }
 	);
@@ -403,7 +403,10 @@ export const getUserTransactions = async (params: {
 	}
 };
 
-export const getAllTransactions = async (params: { saleId?: string }) => {
+export const getAllTransactions = async (params: {
+	saleId?: string;
+	userId?: string;
+}) => {
 	const search = new URLSearchParams();
 
 	Object.entries(params || {}).forEach(([key, value]) => {
@@ -550,5 +553,72 @@ export const getCurrentUserKycVerification = async () => {
 		return { data, error: null };
 	} catch (e) {
 		return { data: null, error: e };
+	}
+};
+
+export const getUsers = async (params: {
+	page?: number;
+	limit?: number;
+	search?: string;
+	kycStatus?: string;
+}) => {
+	const search = new URLSearchParams();
+
+	Object.entries(params || {}).forEach(([key, value]) => {
+		if (value) {
+			search.set(key, String(value));
+		}
+	});
+	const queryParams = search.size > 0 ? `?${search.toString()}` : "";
+
+	try {
+		const data = await fetcher<{
+			users: Array<{
+				id: string;
+				walletAddress: string;
+				email: string;
+				name: string;
+				emailVerified: boolean;
+				createdAt: Date;
+				profile: {
+					firstName: string | null;
+					lastName: string | null;
+					dateOfBirth: Date | null;
+					address: {
+						street: string | null;
+						city: string | null;
+						zipCode: string | null;
+						state: string | null;
+						country: string | null;
+					} | null;
+				} | null;
+				kycVerification: {
+					status: string;
+					verifiedAt: Date | null;
+					rejectionReason: string | null;
+					tier: string | null;
+					documents?: Array<{
+						id: string;
+						url: string;
+						fileName: string;
+						name: string;
+					}>;
+				} | null;
+				transactionCounts: Record<string, number>;
+				_count: {
+					transactions: number;
+				};
+			}>;
+			pagination: {
+				page: number;
+				limit: number;
+				total: number;
+				totalPages: number;
+			};
+		}>(`/admin/users${queryParams}`);
+
+		return { data, error: null };
+	} catch (error) {
+		return { data: null, error };
 	}
 };

@@ -173,7 +173,7 @@ class DocumentsController {
 			let bucketName: string = "";
 			if (type === "read") {
 				const res = await this.s3.generateReadSignedUrl(bucket, key, {
-					expires: expiresIn,
+					expires: Date.now() + expiresIn * 1000, // Convert seconds to milliseconds
 				});
 				url = res.url;
 				bucketName = res.bucket;
