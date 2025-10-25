@@ -13,10 +13,7 @@ import { waitUntil } from "@vercel/functions";
 import { deepmerge } from "deepmerge-ts";
 import Handlebars from "handlebars";
 import { DateTime } from "luxon";
-import {
-	FIAT_CURRENCIES,
-	MAX_ALLOWANCE_WITHOUT_KYC,
-} from "@/common/config/constants";
+import { FIAT_CURRENCIES } from "@/common/config/constants";
 import { publicUrl } from "@/common/config/env";
 import { metadata } from "@/common/config/site";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
@@ -32,6 +29,9 @@ import {
 import {
 	Address,
 	DocumentSignatureStatusSchema,
+	KycStatusSchema,
+	KycTierSchema,
+	KycTierType,
 	Profile,
 	SaftContract,
 	SignableDocumentRoleSchema,
@@ -46,6 +46,7 @@ import {
 import { prisma } from "@/db";
 import logger from "@/lib/services/logger.server";
 import documentsController from "../documents";
+import rates from "../feeds/rates";
 import notificatorService, { Notificator } from "../notifications";
 import { TransactionValidator } from "./validator";
 
@@ -298,7 +299,7 @@ class TransactionsController {
 		}
 	}
 
-	async getTransactionById(dto: { id: string }, _ctx: ActionCtx) {
+	async getTransactionById(dto: { id: string }, ctx: ActionCtx) {
 		try {
 			const transaction = await prisma.saleTransactions.findUnique({
 				where: { id: String(dto.id) },
@@ -362,9 +363,24 @@ class TransactionsController {
 
 			const { blockchain, ...tx } = transaction;
 
+			let kycTier: KycTierType | null = null;
+			// Derive if the TX requires saft based on:
+			if (tx.sale.requiresKYC) {
+				const result = await this.checkMaxAllowanceWithKYC(
+					{ amount: tx.totalAmount, currency: tx.totalAmountCurrency },
+					ctx,
+				);
+
+				kycTier =
+					result.result === "failure"
+						? // Default tier to apply if failed to check KYC
+							KycTierSchema.enum.ENHANCED
+						: result.result;
+			}
+
 			return Success({
 				transaction: decimalsToString(tx) as TransactionByIdWithRelations,
-				requiresKYC: tx.sale.requiresKYC,
+				requiresKYC: kycTier,
 				requiresSAFT: tx.sale.saftCheckbox,
 				explorerUrl: tx.txHash
 					? `${blockchain?.explorerUrl}/tx/${transaction.txHash}`
@@ -1286,29 +1302,104 @@ class TransactionsController {
 		}
 	}
 
-	private checkMaxAllowanceWithoutKYC(
-		boughtTokenQuantity: string,
-		sale: Pick<Sale, "tokenPricePerUnit" | "currency">,
-	) {
-		if (
-			!boughtTokenQuantity ||
-			isNaN(parseInt(boughtTokenQuantity)) ||
-			!sale?.tokenPricePerUnit
-		) {
-			invariant(
-				false,
-				"Invalid token quantity or token price while checking max KYC allowance",
-			);
-		}
-		if (
-			new Prisma.Decimal(boughtTokenQuantity)
-				.mul(sale.tokenPricePerUnit)
-				.greaterThan(MAX_ALLOWANCE_WITHOUT_KYC)
-		) {
-			invariant(
-				false,
-				`SIWE users are entitled to make transactions up to ${MAX_ALLOWANCE_WITHOUT_KYC}${sale.currency} without KYC`,
-			);
+	private async checkMaxAllowanceWithKYC(
+		dto: { amount: Prisma.Decimal; currency: string },
+		ctx: ActionCtx,
+	): Promise<{ result: null | KycTierType | "failure" }> {
+		try {
+			const { amount, currency } = dto;
+			const { kycVerification: kyc } = await prisma.user.findUniqueOrThrow({
+				where: {
+					walletAddress: ctx.address,
+				},
+				select: {
+					kycVerification: {
+						select: {
+							status: true,
+							tier: true,
+						},
+					},
+				},
+			});
+
+			const mapping = {
+				[KycTierSchema.enum.SIMPLIFIED]: 0,
+				[KycTierSchema.enum.STANDARD]: 1,
+				[KycTierSchema.enum.ENHANCED]: 2,
+			};
+
+			let usdAmount = amount;
+			if (currency !== "USD") {
+				const data = await rates.getExchangeRate(currency, "USD");
+				if (!data?.success || !data.data?.[currency]) {
+					return { result: "failure" };
+				}
+				const TO = "USD";
+				const exRate = data.data?.[currency]?.[TO];
+				if (!exRate) {
+					return { result: "failure" };
+				}
+				usdAmount = usdAmount.mul(exRate);
+			}
+
+			function getDerivedTier(amount: Prisma.Decimal): KycTierType | undefined {
+				if (amount.lessThanOrEqualTo(new Prisma.Decimal("1000"))) {
+					return KycTierSchema.enum.SIMPLIFIED;
+				}
+				if (
+					amount.greaterThan(new Prisma.Decimal("1000")) &&
+					amount.lessThanOrEqualTo(new Prisma.Decimal("10000"))
+				) {
+					return KycTierSchema.enum.STANDARD;
+				}
+				if (amount.greaterThan(new Prisma.Decimal("10000"))) {
+					return KycTierSchema.enum.ENHANCED;
+				}
+			}
+
+			const derivedTier = getDerivedTier(usdAmount);
+			const currentTierScore = mapping[kyc?.tier as KycTierType];
+			const targetTierScore = mapping[derivedTier as KycTierType];
+
+			// if current is higher than target means we don't need to perform new KYC.
+			// if current is equal to target AND status is VERIFIED or SUBMITTED means we don't need to perform new KYC.
+			// if current is equal to target AND status is other, we need to ask for the same verification.
+			// If current is lower than target, we need to perform new KYC.
+
+			let resultTier: KycTierType | null;
+
+			if (currentTierScore > targetTierScore) {
+				// Current tier is higher, no new KYC needed
+				resultTier = null;
+			} else if (currentTierScore === targetTierScore) {
+				// Same tier level
+				if (
+					kyc?.status === KycStatusSchema.enum.VERIFIED ||
+					kyc?.status === KycStatusSchema.enum.SUBMITTED
+				) {
+					// Status is verified/submitted, no new KYC needed
+					resultTier = null;
+				} else {
+					// Need to verify at current tier
+					resultTier = kyc?.tier as KycTierType | null;
+				}
+			} else {
+				// Current tier is lower, need new KYC at derived tier
+				resultTier = derivedTier || "ENHANCED";
+			}
+
+			console.debug("amount", usdAmount);
+			console.debug("current KYC TIER", kyc?.tier);
+			console.debug("derived KYC TIER", derivedTier);
+			console.debug("RESULT TIER", resultTier);
+
+			return {
+				result:
+					resultTier === null ? null : resultTier || kyc?.tier || "failure",
+			};
+		} catch (e) {
+			logger(e);
+			return { result: "failure" };
 		}
 	}
 

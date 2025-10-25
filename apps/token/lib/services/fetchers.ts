@@ -15,6 +15,7 @@ import {
 	Blockchain,
 	Currency,
 	Document,
+	KycTierType,
 	SaftContract,
 	Sale,
 	SaleTransactions,
@@ -305,7 +306,7 @@ export const getTransactionById = async (id: string) => {
 	try {
 		const data = await fetcher<{
 			transaction: TransactionByIdWithRelations;
-			requiresKYC: boolean;
+			requiresKYC: KycTierType | null;
 			requiresSAFT: boolean;
 		}>(`/transactions/${id}`);
 		return { data, error: null };
@@ -542,3 +543,12 @@ export const getTokens = cache(
 		}
 	},
 );
+
+export const getCurrentUserKycVerification = async () => {
+	try {
+		const data = await fetcher<{ kyc: unknown }>(`/users/me/kyc`);
+		return { data, error: null };
+	} catch (e) {
+		return { data: null, error: e };
+	}
+};

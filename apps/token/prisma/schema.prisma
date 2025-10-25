@@ -256,7 +256,7 @@ model SaftContract {
   approver   DocumentRecipient? @relation(name: "approver", fields: [approverId], references: [id])
   approverId String?            @unique
 
-  version   Int     @default(1)
+  version   Int     @default(0)
   parentId  String? // Points to the original contract (null for v1)
   isCurrent Boolean @default(true)
 
@@ -510,7 +510,10 @@ model KycVerification {
   verifiedAt      DateTime?
   rejectionReason String?
 
-  tier KycTier?
+  version       Int   @default(1)
+  questionnaire Json?
+
+  tier KycTier? @default(SIMPLIFIED)
 
   documents Document[] @relation("KycDocuments")
 

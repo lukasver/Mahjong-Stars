@@ -113,12 +113,12 @@ export function FormInput({
   return (
     <form.AppField name={name} listeners={listeners} validators={validators}>
       {(field) => (
-        <field.FormItem className={cn(className)}>
+        <field.FormItem className={className}>
           <div
             className={cn(
               type === "checkbox" &&
               "flex flex-1 justify-between items-center gap-2",
-              type === "checkbox" && getInputClass(),
+              type === "checkbox" && getInputClass('h-auto'),
               type !== "checkbox" && "contents",
             )}
           >
@@ -141,6 +141,10 @@ export function FormInput({
                 value={field.state.value}
                 // @ts-expect-error fixme
                 onChange={(e) => {
+                  if (type === "textarea") {
+                    field.handleChange(e.target.value);
+                    return;
+                  }
                   if (e instanceof Date) {
                     field.handleChange(e);
                     return;
@@ -210,9 +214,6 @@ function InputWrapper({ type, ...props }: InputWrapperProps) {
 //     return <CountrySelectInput {...(props as CountrySelectInputProps)} />;
 //   }
 
-//   if (props.type === 'textarea') {
-//     return <Textarea {...(props as TextAreaInputProps)} />;
-//   }
 
 //   if (props.type === 'file') {
 //     return <FileInput {...(props as FileInputProps)} />;

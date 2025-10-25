@@ -23,6 +23,7 @@ import { SignatureSchema } from "@/common/schemas/dtos/signatures";
 import { UpdateTransactionDto } from "@/common/schemas/dtos/transactions";
 import {
 	FOPSchema,
+	KycVerificationSchema,
 	ProfileSchema,
 	TransactionStatusSchema,
 	UserSchema,
@@ -682,6 +683,25 @@ export const removeApproverFromSaft = authActionClient
 	)
 	.action(async ({ ctx, parsedInput }) => {
 		const result = await contractController.removeApproverFromSaft(
+			parsedInput,
+			ctx,
+		);
+		if (!result.success) {
+			throw new Error(result.message);
+		}
+		return result.data;
+	});
+
+export const updateKYCVerification = authActionClient
+	.schema(
+		KycVerificationSchema.pick({
+			status: true,
+			tier: true,
+			questionnaire: true,
+		}).partial(),
+	)
+	.action(async ({ ctx, parsedInput }) => {
+		const result = await usersController.updateKycVerification(
 			parsedInput,
 			ctx,
 		);

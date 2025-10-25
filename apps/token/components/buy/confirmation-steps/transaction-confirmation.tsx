@@ -15,6 +15,7 @@ import { SaftReviewStep } from "./saft-review-step";
 interface TransactionConfirmationProps {
   steps: { id: number; name: string; description: string }[];
   initialStep: { id: number; name: string; description: string };
+  transactionId: string;
 }
 
 /**
@@ -24,6 +25,7 @@ interface TransactionConfirmationProps {
 export function TransactionConfirmation({
   steps,
   initialStep,
+  transactionId,
 }: TransactionConfirmationProps) {
   const [step, setStep] = useState<(typeof steps)[number]>(
     initialStep || steps[0],
@@ -73,6 +75,7 @@ export function TransactionConfirmation({
                   transition={{ duration: 0.4, ease: "easeInOut" }}
                 >
                   <KycUploadStep
+                    transactionId={transactionId}
                     onSuccess={() => {
                       const nextStep = steps.find(
                         (s) => s.name === "SAFT" || s.name === "Payment",

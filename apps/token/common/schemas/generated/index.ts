@@ -110,7 +110,7 @@ export const ContractStatusScalarFieldEnumSchema = z.enum(['id','createdAt','upd
 
 export const AuditTrailScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','actionType','performerAddress','content','comment']);
 
-export const KycVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','status','verifiedAt','rejectionReason']);
+export const KycVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','status','verifiedAt','rejectionReason','version','questionnaire','tier']);
 
 export const RoleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description']);
 
@@ -143,6 +143,10 @@ export type SignableDocumentRoleType = `${z.infer<typeof SignableDocumentRoleSch
 export const DocumentSignatureStatusSchema = z.enum(['CREATED','SENT_FOR_SIGNATURE','WAITING_FOR_COUNTERPARTY','SIGNED','EXPIRED','REJECTED','OPENED','ERROR']);
 
 export type DocumentSignatureStatusType = `${z.infer<typeof DocumentSignatureStatusSchema>}`
+
+export const KycTierSchema = z.enum(['SIMPLIFIED','STANDARD','ENHANCED']);
+
+export type KycTierType = `${z.infer<typeof KycTierSchema>}`
 
 export const RegistrationStepSchema = z.enum(['REGISTRATION_NEW_ACCOUNT','REGISTRATION_PERSONAL_DETAIL','REGISTRATION_DOCUMENT_DETAIL','REGISTRATION_COMPLETED']);
 
@@ -574,6 +578,7 @@ export type AuditTrail = z.infer<typeof AuditTrailSchema>
 
 export const KycVerificationSchema = z.object({
   status: KycStatusSchema,
+  tier: KycTierSchema.nullable(),
   id: z.string().cuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -581,6 +586,8 @@ export const KycVerificationSchema = z.object({
   userId: z.string(),
   verifiedAt: z.coerce.date().nullable(),
   rejectionReason: z.string().nullable(),
+  version: z.number().int(),
+  questionnaire: JsonValueSchema.nullable(),
 })
 
 export type KycVerification = z.infer<typeof KycVerificationSchema>

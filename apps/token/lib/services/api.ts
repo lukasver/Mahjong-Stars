@@ -1,7 +1,11 @@
 "use client";
 
 import { FOP } from "@prisma/client";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {
+	keepPreviousData,
+	useQuery,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
 import { DEFAULT_STALE_TIME } from "@/common/config/constants";
 import { Currency } from "@/common/schemas/generated";
 import {
@@ -19,6 +23,7 @@ import {
 	getCryptoTransaction,
 	getCurrencies,
 	getCurrentUser,
+	getCurrentUserKycVerification,
 	getRecipientForCurrentTransactionSaft,
 	getSaftForTransactionDetails,
 	getSale,
@@ -143,6 +148,7 @@ export const useTransactionById = (
 		queryKey: ["transactions", id],
 		queryFn: () => getTransactionById({ id }),
 		staleTime: DEFAULT_STALE_TIME,
+		placeholderData: keepPreviousData,
 		...opts,
 	});
 	const e = getError(data, error);
@@ -379,6 +385,16 @@ export const useTokens = (
 	});
 	const e = getError(data, error);
 	return { data: data?.data, error: e, isLoading, refetch };
+};
+
+export const useUserKyc = () => {
+	const { data, status, error, isLoading } = useQuery({
+		queryKey: ["users", "me", "kyc"],
+		queryFn: () => getCurrentUserKycVerification(),
+		staleTime: DEFAULT_STALE_TIME,
+	});
+	const e = getError(data, error);
+	return { data: data?.data, error: e, status, isLoading };
 };
 
 /**

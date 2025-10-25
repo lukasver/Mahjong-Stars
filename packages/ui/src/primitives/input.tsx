@@ -1,7 +1,7 @@
 import { cn } from "@mjs/ui/lib/utils";
 import * as React from "react";
 
-export const getInputClass = () => {
+export const getInputClass = (className?: string) => {
   return cn(
     "flex h-10 w-full rounded-md",
     "border-none bg-secondary-600/50 backdrop-blur-xs",
@@ -12,6 +12,7 @@ export const getInputClass = () => {
     "placeholder:text-foreground/70",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-800 focus-visible:ring-offset-2",
     "disabled:cursor-not-allowed disabled:opacity-50",
+    className,
   );
 };
 

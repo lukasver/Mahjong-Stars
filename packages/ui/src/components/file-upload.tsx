@@ -37,7 +37,7 @@ const isImage = (fileName: string | null) => {
 
 type FileUploadProps = Partial<FileUploadOptions> & {
   className?: string;
-  type?: "image" | "document" | "camera" | "all";
+  type?: "image" | "document" | "camera" | "camera-only" | "all";
   maxSizeMB?: number;
   label?: ReactNode;
   cameraProps?: Pick<CameraProps, "facingMode" | "aspectRatio">;
@@ -53,6 +53,7 @@ const typeMapping = {
   image: imageTypes,
   document: documentTypes,
   camera: imageTypes,
+  "camera-only": imageTypes,
   all: imageTypes + "," + documentTypes,
 };
 
@@ -72,6 +73,7 @@ export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
       removeFile,
       getInputProps,
       addFiles,
+
     },
   ] = useFileUpload({
     accept: typeMapping[type],
@@ -85,7 +87,8 @@ export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
   const handleTakePicture = () => {
     const photo = cameraRef?.current?.takePhoto();
     if (photo && typeof photo === "string") {
-      addFiles([base64ToFile(photo, "camera-photo.jpg", "image/jpeg")]);
+      const file = base64ToFile(photo, "camera-photo.jpg", "image/jpeg");
+      addFiles([file]);
       setIsShutterOpen(false);
     }
   };
@@ -98,11 +101,11 @@ export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
         <div className="relative">
           {/* Drop area */}
           <div
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            data-dragging={isDragging || undefined}
+            onDragEnter={type === 'camera-only' ? undefined : handleDragEnter}
+            onDragLeave={type === 'camera-only' ? undefined : handleDragLeave}
+            onDragOver={type === 'camera-only' ? undefined : handleDragOver}
+            onDrop={type === 'camera-only' ? undefined : handleDrop}
+            data-dragging={type === 'camera-only' ? false : isDragging || undefined}
             className="border-input data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors has-[input:focus]:ring-[3px]"
           >
             <input
@@ -137,12 +140,12 @@ export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
                   multiple={props.multiple}
                   label={label}
                 />
-                {type === "camera" ? (
+                {type?.includes("camera") ? (
                   <ButtonGroup className="mt-4">
-                    <Button variant="outline" onClick={() => openFileDialog()}>
+                    {type === 'camera' && <Button variant="outline" onClick={() => openFileDialog()}>
                       <Upload className="mr-2 size-4" />
                       Upload File
-                    </Button>
+                    </Button>}
 
                     <AlertDialogTrigger
                       asChild
@@ -201,7 +204,7 @@ export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
           </div>
         )}
       </div>
-      {type === "camera" && isShutterOpen && (
+      {type?.includes("camera") && isShutterOpen && (
         <AlertDialogContent
           className={cn("z-50! w-full aspect-square max-w-none sm:max-w-xl m-auto flex flex-col items-center justify-center bg-primary rounded-2xl", props.cameraClassName)}
         >
@@ -230,8 +233,6 @@ const CameraShutter = (props: {
   cameraProps?: Pick<CameraProps, "facingMode" | "aspectRatio">;
 }) => {
   const [isCameraReady, setIsCameraReady] = useState(false);
-
-  console.debug('props', props.onCancel)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -263,7 +264,7 @@ const CameraShutter = (props: {
           {...(props.cameraProps || {})}
         />
       </div>
-      <div className="w-full shrink-0 flex items-center justify-center gap-2 bg-primary">
+      <div className="w-full shrink-0 flex items-center justify-center gap-2 bg-primary z-[9999]">
         <AlertDialogCancel
           onClick={props.onCancel}
           asChild
@@ -316,7 +317,7 @@ const FileUploadHeader = ({
             <UploadIcon className="size-4 opacity-90 text-secondary-300" />
           </div>
         )}
-        {["camera"].includes(type) && (
+        {["camera", "camera-only"].includes(type) && (
           <div
             className="bg-background mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border border-solid border-secondary-300"
             aria-hidden="true"

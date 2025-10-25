@@ -1,14 +1,18 @@
 import { invariant } from "@epic-web/invariant";
+import { KycVerification } from "@prisma/client";
 import { DateTime } from "luxon";
 import { headers } from "next/headers";
 import { JWT_EXPIRATION_TIME, ONE_DAY, ROLES } from "@/common/config/constants";
 import { env, publicUrl } from "@/common/config/env";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
-import { CreateUserDto, GetUserDto } from "@/common/schemas/dtos/users";
+import {
+	CreateUserDto,
+	GetUserDto,
+	GetUserKycVerificationDto,
+} from "@/common/schemas/dtos/users";
 import { Failure, isObject, Success } from "@/common/schemas/dtos/utils";
 import { KycStatusSchema, Profile, User } from "@/common/schemas/generated";
 import { prisma } from "@/db";
-
 import {
 	extractEmailVerification,
 	getUserFromAddress,
@@ -371,6 +375,97 @@ class UsersController {
 			}
 		}
 		return;
+	}
+	async updateKycVerification(
+		dto: Partial<Pick<KycVerification, "status" | "tier" | "questionnaire">>,
+		ctx: ActionCtx,
+	) {
+		try {
+			const user = await prisma.user.findUniqueOrThrow({
+				where: {
+					walletAddress: ctx.address,
+				},
+				select: {
+					id: true,
+				},
+			});
+
+			const kyc = await prisma.kycVerification.upsert({
+				where: {
+					userId: user.id,
+				},
+				create: {
+					...(dto.questionnaire && {
+						questionnaire: dto.questionnaire,
+						version: 1,
+					}),
+					...(dto.status && { status: dto.status }),
+					...(dto.tier && { tier: dto.tier }),
+					user: {
+						connect: {
+							id: user.id,
+						},
+					},
+				},
+				update: {
+					...(dto.questionnaire && {
+						questionnaire: dto.questionnaire,
+						version: { increment: 1 },
+					}),
+					...(dto.status && { status: dto.status }),
+					...(dto.tier && { tier: dto.tier }),
+				},
+				select: {
+					status: true,
+					tier: true,
+					questionnaire: true,
+					version: true,
+					updatedAt: true,
+					verifiedAt: true,
+				},
+			});
+
+			invariant(user, "User not found");
+
+			return Success({ kyc });
+		} catch (error) {
+			logger(error);
+			return Failure(error);
+		}
+	}
+
+	async getCurrentUserKycVerification({ address }: GetUserKycVerificationDto) {
+		try {
+			const user = await prisma.user.findUniqueOrThrow({
+				where: {
+					walletAddress: address,
+				},
+				select: {
+					kycVerification: {
+						select: {
+							status: true,
+							verifiedAt: true,
+							rejectionReason: true,
+							tier: true,
+							documents: {
+								select: {
+									id: true,
+									fileName: true,
+									type: true,
+									name: true,
+									url: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			return Success({ kyc: user.kycVerification });
+		} catch (error) {
+			logger(error);
+			return Failure(error);
+		}
 	}
 
 	public crons = {
