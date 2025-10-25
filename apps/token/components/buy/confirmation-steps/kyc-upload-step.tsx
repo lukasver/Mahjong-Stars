@@ -20,6 +20,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useCallback, useTransition } from "react";
 import { z } from "zod";
 import { KycTierSchema, KycTierType } from "@/common/schemas/generated";
+import { FormError } from "@/components/form-error";
 import { useCameraCapabilities } from "@/components/hooks/use-camera-capabilities";
 import { useQuestionnaireDialog } from "@/components/hooks/use-kyc-questionaire";
 import { PulseLoader } from "@/components/pulse-loader";
@@ -31,7 +32,7 @@ import {
 import { useTransactionById, useUser } from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
-import { QuestionnaireData } from "../proof-of-funds-questionaire";
+import { QuestionnaireData } from '../steps/types';
 
 const KycUploadFormSchema = z.object({
   id: z.custom<File>((file) => file instanceof File),
@@ -58,7 +59,7 @@ const labelMappings = {
 };
 
 const getFilesPerTier = (
-  kycTier: KycTierType,
+  kycTier: KycTierType | "BLOCKED",
   value: z.infer<typeof KycUploadFormSchema>,
 ) => {
   const files: { file: File; key: string }[] = [];
@@ -148,8 +149,8 @@ export function KycUploadStep({
 
   const updateKYCAction = useAction(updateKYCVerification);
 
-  const kycTier: KycTierType | undefined = tx?.requiresKYC || undefined;
-
+  const kycTier: KycTierType | "BLOCKED" | undefined =
+    tx?.requiresKYC || undefined;
 
   const form = useAppForm({
     onSubmit: async ({ value }) => {
@@ -213,10 +214,12 @@ export function KycUploadStep({
             }),
           );
 
-          updateKYCAction.execute({
-            ...(questionnaireResult && { questionnaire: questionnaireResult }),
-            tier: kycTier,
-          });
+          if (kycTier !== "BLOCKED") {
+            updateKYCAction.execute({
+              ...(questionnaireResult && { questionnaire: questionnaireResult }),
+              tier: kycTier,
+            });
+          }
 
           action.execute({
             type: "KYC",
@@ -253,9 +256,14 @@ export function KycUploadStep({
     (name: "id" | "address" | "selfie" | "proofOfFunds") =>
       (fileList: FileWithPreview[]) => {
         if (fileList.length > 0) {
-          const isProofOfFunds = name === 'proofOfFunds';
-          // @ts-expect-error tanstack form types does not match the complex Schema
-          form.setFieldValue(name, (isProofOfFunds ? fileList.map((file) => file.file) : fileList[0]?.file as File) || null);
+          const isProofOfFunds = name === "proofOfFunds";
+          form.setFieldValue(
+            // @ts-expect-error tanstack form types does not match the complex Schema
+            name,
+            (isProofOfFunds
+              ? fileList.map((file) => file.file)
+              : (fileList[0]?.file as File)) || null,
+          );
         } else {
           // @ts-expect-error tanstack form types does not match the complex Schema
           form.setFieldValue(name, null);
@@ -273,70 +281,80 @@ export function KycUploadStep({
 
   return (
     <CardContent>
-      <form.AppForm>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-          >
-            <CardHeader>
-              <CardTitle>KYC Document Upload</CardTitle>
-              <CardDescription>
-                Please upload your documents for your KYC verification
-              </CardDescription>
-            </CardHeader>
-          </motion.div>
+      {kycTier === "BLOCKED" ? (
+        <FormError
+          type="custom"
+          message={
+            "KYC verification failed or rejected, please contact support"
+          }
+          title="KYC Verification Rejected"
+        />
+      ) : (
+        <form.AppForm>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+            >
+              <CardHeader>
+                <CardTitle>KYC Document Upload</CardTitle>
+                <CardDescription>
+                  Please upload your documents for your KYC verification
+                </CardDescription>
+              </CardHeader>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <div className="space-y-4">
-              {kycTier && (
-                <KycTierComponent
-                  tier={kycTier}
-                  onFileChange={handleFileChange}
-                />
-              )}
-              {isLoading ? <PulseLoader /> : <ComplianceConfirmations />}
-            </div>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+            >
+              <div className="space-y-4">
+                {kycTier && (
+                  <KycTierComponent
+                    tier={kycTier}
+                    onFileChange={handleFileChange}
+                  />
+                )}
+                {isLoading ? <PulseLoader /> : <ComplianceConfirmations />}
+              </div>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
-            className="space-y-2"
-          >
-            {/* {error && <div className="text-destructive mt-2">{error}</div>}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+              className="space-y-2"
+            >
+              {/* {error && <div className="text-destructive mt-2">{error}</div>}
             {success && (
               <div className="text-success mt-2">Files uploaded successfully!</div>
             )} */}
-            <Button
-              className="mt-4 w-full"
-              type="submit"
-              variant="accent"
-              // disabled={Object.keys(files).length === 0 || !isCompliant}
-              disabled={isLoading}
-              loading={isPending || action.isExecuting}
-            >
-              Submit KYC Documents
-            </Button>
-            {process.env.NODE_ENV === "development" && (
               <Button
-                type="button"
-                variant="outline"
-                onClick={() => console.log(form.state.values)}
+                className="mt-4 w-full"
+                type="submit"
+                variant="accent"
+                // disabled={Object.keys(files).length === 0 || !isCompliant}
+                disabled={isLoading}
+                loading={isPending || action.isExecuting}
               >
-                CHECK VALS
+                Submit KYC Documents
               </Button>
-            )}
-          </motion.div>
-          <QuestionnaireDialog />
-        </form>
-      </form.AppForm>
+              {process.env.NODE_ENV === "development" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => console.log(form.state.values)}
+                >
+                  CHECK VALS
+                </Button>
+              )}
+            </motion.div>
+            <QuestionnaireDialog />
+          </form>
+        </form.AppForm>
+      )}
     </CardContent>
   );
 }
@@ -414,7 +432,6 @@ const Tier1Component = (props: KycTierComponentProps) => {
 const Tier2Component = (props: KycTierComponentProps) => {
   const { isCameraOnly, permissionState } = useCameraCapabilities();
 
-
   // Determine the appropriate type based on camera capabilities
   // If camera is available, use camera-only for better UX
   // If camera is not available, fallback to camera type (which allows file upload)
@@ -423,9 +440,10 @@ const Tier2Component = (props: KycTierComponentProps) => {
   return (
     <div className="space-y-2">
       <Label>Selfie</Label>
-      {permissionState === 'denied' && (
+      {permissionState === "denied" && (
         <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-3">
-          <strong>Camera access denied:</strong> Please refresh the page and give camera permission.
+          <strong>Camera access denied:</strong> Please refresh the page and
+          give camera permission.
         </div>
       )}
       <FileUpload

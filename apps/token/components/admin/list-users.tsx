@@ -476,7 +476,7 @@ export function ListUsers({
                         </TableCell>
                         <TableCell>
                           {getKycStatusBadge(
-                            user.kycVerification?.status,
+                            user.kycVerification?.status as KycStatusType,
                             user.kycVerification?.tier,
                           )}
                         </TableCell>
@@ -497,6 +497,7 @@ export function ListUsers({
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuItem
+                                // @ts-expect-error - FIXME
                                 onClick={() => handleViewDetails(user)}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
