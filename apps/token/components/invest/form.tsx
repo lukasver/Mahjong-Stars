@@ -33,6 +33,7 @@ import { useCallback, useRef, useState, useTransition } from "react";
 import { Account } from "thirdweb/wallets";
 import z from "zod";
 import { FIAT_CURRENCIES } from "@/common/config/constants";
+import { KycStatusSchema } from "@/common/schemas/generated";
 import { TransactionModalTypes } from "@/common/types";
 import { SaleWithToken } from "@/common/types/sales";
 import { FormError, FormErrorProps } from "@/components/form-error";
@@ -43,6 +44,7 @@ import {
   usePendingTransactionsForSale,
   useSaleInvestInfo,
   useUser,
+  useUserKyc,
 } from "@/lib/services/api";
 import calculator from "@/lib/services/pricefeeds";
 import { getQueryClient } from "@/lib/services/query";
@@ -61,6 +63,8 @@ export const InvestForm = ({
   children?: React.ReactNode;
 }) => {
   const { activeAccount } = useActiveAccount();
+  const { data: kycData, isLoading: loadingKyc } = useUserKyc();
+
   const { data: user } = useUser();
   const errorCountRef = useRef(0);
   const [blockForm, setBlockForm] = useState<null | Omit<
@@ -195,16 +199,15 @@ export const InvestForm = ({
         invariant(q, "Quantity is required");
         invariant(currency, "Currency is required");
         invariant(decimals, "Decimals are required");
-        const { pricePerUnit, amount, fees } = await calculator.calculateAmountToPay({
-
-
-          quantity: String(q),
-          sale: sale,
-          currency,
-          // Add fee if we have a BPS fee configured
-          addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
-          // tokenDecimals: decimals,
-        });
+        const { pricePerUnit, amount, fees } =
+          await calculator.calculateAmountToPay({
+            quantity: String(q),
+            sale: sale,
+            currency,
+            // Add fee if we have a BPS fee configured
+            addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
+            // tokenDecimals: decimals,
+          });
         // form.reset({})
         form.setFieldValue("paid.amount", amount);
         form.setFieldValue("paid.ppu", pricePerUnit);
@@ -223,8 +226,21 @@ export const InvestForm = ({
     });
   };
 
-  if (isLoading || loadingOptions) {
+  if (isLoading || loadingOptions || loadingKyc) {
     return <InvestSkeleton />;
+  }
+
+  if (kycData?.kyc?.status === KycStatusSchema.enum.REJECTED) {
+    return (
+      <FormError
+        type="custom"
+        message={
+          kycData?.kyc?.rejectionReason ||
+          "Please get in touch with our support team"
+        }
+        title="KYC Verification Rejected"
+      />
+    );
   }
 
   if (blockForm) {
@@ -545,8 +561,6 @@ const getAmountDescription = (
   >,
   locale: string,
 ) => {
-
-
   let base = `Min: ${formatCurrency(sale.minimumTokenBuyPerUser, {
     locale,
   })}`;

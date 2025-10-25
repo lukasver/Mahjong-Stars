@@ -96,6 +96,10 @@ export default async function TransactionConfiramationPage({
     redirect(`/dashboard/buy/${tx.data.transaction.id}/success`);
   }
 
+  if (tx.data.requiresKYC === "BLOCKED") {
+    redirect(`/dashboard/buy/${tx.data.transaction.id}/failure?code=KYC_BLOCKED`);
+  }
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ErrorBoundary fallback={<div>Error</div>}>

@@ -376,7 +376,7 @@ class TransactionsController {
 
 			const { blockchain, ...tx } = transaction;
 
-			let kycTier: KycTierType | null = null;
+			let kycTier: KycTierType | "BLOCKED" | null = null;
 			// Derive if the TX requires saft based on:
 			if (tx.sale.requiresKYC) {
 				const result = await this.checkMaxAllowanceWithKYC(
@@ -385,7 +385,7 @@ class TransactionsController {
 				);
 
 				kycTier =
-					result.result === "failure"
+					result.result === "FAILURE"
 						? // Default tier to apply if failed to check KYC
 							KycTierSchema.enum.ENHANCED
 						: result.result;
@@ -1318,7 +1318,7 @@ class TransactionsController {
 	private async checkMaxAllowanceWithKYC(
 		dto: { amount: Prisma.Decimal; currency: string },
 		ctx: ActionCtx,
-	): Promise<{ result: null | KycTierType | "failure" }> {
+	): Promise<{ result: null | KycTierType | "FAILURE" | "BLOCKED" }> {
 		try {
 			const { amount, currency } = dto;
 			const { kycVerification: kyc } = await prisma.user.findUniqueOrThrow({
@@ -1330,11 +1330,15 @@ class TransactionsController {
 						select: {
 							status: true,
 							tier: true,
+							rejectionReason: true,
 						},
 					},
 				},
 			});
 
+			if (kyc?.status === KycStatusSchema.enum.REJECTED) {
+				return { result: "BLOCKED" as const };
+			}
 			const mapping = {
 				[KycTierSchema.enum.SIMPLIFIED]: 0,
 				[KycTierSchema.enum.STANDARD]: 1,
@@ -1345,12 +1349,12 @@ class TransactionsController {
 			if (currency !== "USD") {
 				const data = await rates.getExchangeRate(currency, "USD");
 				if (!data?.success || !data.data?.[currency]) {
-					return { result: "failure" };
+					return { result: "FAILURE" };
 				}
 				const TO = "USD";
 				const exRate = data.data?.[currency]?.[TO];
 				if (!exRate) {
-					return { result: "failure" };
+					return { result: "FAILURE" };
 				}
 				usdAmount = usdAmount.mul(exRate);
 			}
@@ -1401,18 +1405,13 @@ class TransactionsController {
 				resultTier = derivedTier || "ENHANCED";
 			}
 
-			console.debug("amount", usdAmount);
-			console.debug("current KYC TIER", kyc?.tier);
-			console.debug("derived KYC TIER", derivedTier);
-			console.debug("RESULT TIER", resultTier);
-
 			return {
 				result:
-					resultTier === null ? null : resultTier || kyc?.tier || "failure",
+					resultTier === null ? null : resultTier || kyc?.tier || "FAILURE",
 			};
 		} catch (e) {
 			logger(e);
-			return { result: "failure" };
+			return { result: "FAILURE" };
 		}
 	}
 

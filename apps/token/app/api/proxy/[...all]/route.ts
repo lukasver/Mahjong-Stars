@@ -72,13 +72,13 @@ export const GET = withAuth(async (req, context, auth) => {
 
 			case "users": {
 				if (identifier === "me") {
+					if (subIdentifier === "kyc") {
+						const data = await users.getCurrentUserKycVerification({
+							address: auth.address,
+						});
+						return NextResponse.json(data);
+					}
 					const data = await users.getMe({ address: auth.address });
-					return NextResponse.json(data);
-				}
-				if (identifier === "kyc") {
-					const data = await users.getCurrentUserKycVerification({
-						address: auth.address,
-					});
 					return NextResponse.json(data);
 				}
 				return NextResponse.json({ error: "Bad request" }, { status: 404 });

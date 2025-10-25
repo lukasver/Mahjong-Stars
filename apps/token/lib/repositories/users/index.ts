@@ -449,6 +449,7 @@ class UsersController {
 							verifiedAt: true,
 							rejectionReason: true,
 							tier: true,
+							updatedAt: true,
 							documents: {
 								select: {
 									id: true,

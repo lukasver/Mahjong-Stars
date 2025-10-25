@@ -3,6 +3,7 @@ import {
 	DocumentRecipient,
 	DocumentSignatureStatus,
 	FOP,
+	KycVerification,
 	Token,
 	TokensOnBlockchains,
 } from "@prisma/client";
@@ -549,7 +550,14 @@ export const getTokens = cache(
 
 export const getCurrentUserKycVerification = async () => {
 	try {
-		const data = await fetcher<{ kyc: unknown }>(`/users/me/kyc`);
+		const data = await fetcher<{
+			kyc: Pick<
+				KycVerification,
+				"status" | "tier" | "verifiedAt" | "rejectionReason" | "updatedAt"
+			> & {
+				documents: Pick<Document, "id" | "fileName" | "name" | "url">[];
+			};
+		}>(`/users/me/kyc`);
 		return { data, error: null };
 	} catch (e) {
 		return { data: null, error: e };

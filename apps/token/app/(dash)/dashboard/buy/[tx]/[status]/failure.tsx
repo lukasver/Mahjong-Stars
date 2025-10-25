@@ -5,9 +5,16 @@ import { FailureContent } from '@/components/buy/confirmation-steps/failure-cont
  * Failure status page for dashboard actions.
  * Shows error message, project name, support email, and transaction link if available.
  */
-const Failure = () => {
+const Failure = ({ code }: { code?: string }) => {
+  let reason: string | undefined = undefined;
+  if (code === "KYC_BLOCKED") {
+    reason = "KYC verification failed or rejected, please contact support";
+  }
+  console.log("🚀 ~ failure.tsx:13 ~ reason:", reason);
   return (
-    <FailureContent className='min-h-screen md:min-h-[60dvh] grid place-content-center' />
+    <FailureContent
+      reason={reason}
+      className='min-h-screen md:min-h-[60dvh] grid place-content-center' />
   );
 };
 

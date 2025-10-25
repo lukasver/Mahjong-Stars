@@ -1,17 +1,18 @@
-import Failure from './failure';
-import { notFound } from 'next/navigation';
-import Success from './success';
-import Pending from './pending';
+import { notFound } from "next/navigation";
+import Failure from "./failure";
+import Pending from "./pending";
+import Success from "./success";
 
 export default async function StatusPage({
   params,
-}: PageProps<{ status: 'success' | 'failure' | 'pending' }>) {
-  const p = await params;
-  if (p.status === 'success') {
+  searchParams,
+}: PageProps<{ status: "success" | "failure" | "pending" }>) {
+  const [p, sp] = await Promise.all([params, searchParams]);
+  if (p.status === "success") {
     return <Success />;
-  } else if (p.status === 'failure') {
-    return <Failure />;
-  } else if (p.status === 'pending') {
+  } else if (p.status === "failure") {
+    return <Failure code={sp.code ? sp.code.toString() : undefined} />;
+  } else if (p.status === "pending") {
     return <Pending />;
   }
 
