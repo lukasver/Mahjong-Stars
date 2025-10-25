@@ -22,6 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@mjs/ui/primitives/card";
+import { type ColumnDef, DataTable } from "@mjs/ui/primitives/data-table";
 import {
   Dialog,
   DialogContent,
@@ -29,29 +30,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@mjs/ui/primitives/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@mjs/ui/primitives/dropdown-menu";
 import { Input } from "@mjs/ui/primitives/input";
 import { Label } from "@mjs/ui/primitives/label";
 import { toast } from "@mjs/ui/primitives/sonner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@mjs/ui/primitives/table";
 import { Textarea } from "@mjs/ui/primitives/textarea";
 import {
   Tooltip,
@@ -62,14 +43,10 @@ import { formatDate } from "@mjs/utils/client";
 import {
   Copy,
   ExternalLink,
-  Eye,
   FileText,
   Loader2,
-  MoreHorizontal,
   Search,
   User,
-  UserCheck,
-  UserX,
 } from "lucide-react";
 import { DateTime } from "luxon";
 import { useLocale } from "next-intl";
@@ -78,12 +55,12 @@ import { ReactNode, useState } from "react";
 import { KycStatusSchema, KycStatusType } from "@/common/schemas/generated";
 import {
   getDocumentReadPresignedUrl,
-  updateUserKycStatus
+  updateUserKycStatus,
 } from "@/lib/actions/admin";
 import { useAllUsers } from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
-import AppLink from "../link";
 import { SearchSelect } from "../searchBar/search-select";
+import { getUsersColumns } from "./users-columns";
 
 type UserWithTransactions = {
   id: string;
@@ -166,6 +143,11 @@ export function ListUsers({
       return matchesSearch && matchesStatus;
     }) || [];
 
+  // Set initial column visibility to hide the ID column
+  const initialColumnVisibility = {
+    id: false, // Hide the ID column by default
+  };
+
   const handleViewDetails = (user: UserWithTransactions) => {
     setSelectedUser(user);
     setIsUserDetailsDialogOpen(true);
@@ -176,8 +158,6 @@ export function ListUsers({
     setKycAction(action);
     setIsKycDialogOpen(true);
   };
-
-  const locale = useLocale();
 
   const { executeAsync, isExecuting } = useAction(updateUserKycStatus);
 
@@ -218,15 +198,6 @@ export function ListUsers({
     }
   };
 
-  const handleCopyToClipboard = async (text: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success(`${label} copied to clipboard`);
-    } catch {
-      toast.error("Failed to copy to clipboard");
-    }
-  };
-
   return (
     <div className={cn("flex-1 space-y-4 md:p-4", className)}>
       {children}
@@ -258,6 +229,60 @@ export function ListUsers({
               {title && <CardTitle>{title}</CardTitle>}
               {description && <CardDescription>{description}</CardDescription>}
             </motion.div>
+          </CardHeader>
+        </Card>
+      </motion.div>
+
+      {/* Filter Summary */}
+      {(searchTerm || statusFilter !== "all") && (
+        <motion.div
+          className="mb-4 flex items-center gap-2 text-sm text-secondary"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: 0.6,
+            duration: 0.4,
+          }}
+        >
+          <span>
+            Showing {filteredUsers.length} of {usersData?.users.length || 0}{" "}
+            users
+          </span>
+          <span>•</span>
+          <span>
+            {searchTerm && `Search: "${searchTerm}"`}
+            {searchTerm && statusFilter !== "all" && " • "}
+            {statusFilter !== "all" && `Status: ${statusFilter}`}
+          </span>
+        </motion.div>
+      )}
+
+      {/* Data Table */}
+      <motion.div
+        className="max-w-[350px] flex justify-center sm:block sm:max-w-none w-full min-h-[30rem] max-h-screen h-full mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.7,
+          duration: 0.6,
+        }}
+      >
+        <DataTable
+          columns={
+            getUsersColumns({
+              onViewDetails: handleViewDetails,
+              onKycAction: handleKycAction,
+            }) as unknown as ColumnDef<Record<string, unknown>>[]
+          }
+          data={filteredUsers}
+          loading={false}
+          pageSize={20}
+          showPagination={true}
+          showColumnVisibility={true}
+          initialColumnVisibility={initialColumnVisibility}
+        >
+
+          <div className="flex items-center gap-2 w-full md:w-auto h-full flex-1 md:mr-2">
             <motion.div
               className="flex items-center justify-between space-x-2"
               initial={{ opacity: 0, x: 20 }}
@@ -310,282 +335,8 @@ export function ListUsers({
                 </motion.div>
               </div>
             </motion.div>
-          </CardHeader>
-          <CardContent className="p-0 md:p-6">
-            {/* Filter Summary */}
-            {(searchTerm || statusFilter !== "all") && (
-              <motion.div
-                className="mb-4 flex items-center gap-2 text-sm text-secondary"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.6,
-                  duration: 0.4,
-                }}
-              >
-                <span>
-                  Showing {filteredUsers.length} of{" "}
-                  {usersData?.users.length || 0} users
-                </span>
-                <span>•</span>
-                <span>
-                  {searchTerm && `Search: "${searchTerm}"`}
-                  {searchTerm && statusFilter !== "all" && " • "}
-                  {statusFilter !== "all" && `Status: ${statusFilter}`}
-                </span>
-              </motion.div>
-            )}
-
-            {/* Data Table */}
-            <motion.div
-              className="rounded-b border bg-primary flex justify-center sm:block sm:max-w-none w-full min-h-[30rem] max-h-screen h-full"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.7,
-                duration: 0.6,
-              }}
-            >
-              <Table>
-                <TableHeader>
-                  <TableRow className="text-secondary [&>th]:text-secondary">
-                    <TableHead>User</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Profile</TableHead>
-                    <TableHead>Transactions</TableHead>
-                    <TableHead>KYC Status</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers?.map((user, index) => {
-                    const fullName = user.profile
-                      ? `${user.profile.firstName || ""} ${user.profile.lastName || ""}`.trim()
-                      : user.name;
-
-                    return (
-                      <motion.tr
-                        key={user.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          delay: 0.8 + index * 0.05,
-                          duration: 0.4,
-                        }}
-                        className="border-b"
-                      >
-                        <TableCell className="font-medium">
-                          <div>
-                            <div className="font-medium">{user.name}</div>
-                            <div
-                              className="text-sm text-secondary cursor-pointer hover:text-primary-foreground flex items-center gap-1 transition-colors"
-                              role="button"
-                              tabIndex={0}
-                              onClick={() =>
-                                handleCopyToClipboard(user.id, "User ID")
-                              }
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  handleCopyToClipboard(user.id, "User ID");
-                                }
-                              }}
-                            >
-                              ID: {user.id.slice(0, 8)}...
-                              <Copy className="h-3 w-3 opacity-50" />
-                            </div>
-                            <div
-                              className="text-xs text-muted-foreground cursor-pointer hover:text-primary-foreground flex items-center gap-1 transition-colors"
-                              role="button"
-                              tabIndex={0}
-                              onClick={() =>
-                                handleCopyToClipboard(
-                                  user.walletAddress,
-                                  "Wallet Address",
-                                )
-                              }
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  handleCopyToClipboard(
-                                    user.walletAddress,
-                                    "Wallet Address",
-                                  );
-                                }
-                              }}
-                            >
-                              {user.walletAddress.slice(0, 6)}...
-                              {user.walletAddress.slice(-4)}
-                              <Copy className="h-3 w-3 opacity-50" />
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{user.email}</div>
-                            <div className="text-sm text-secondary">
-                              {user.emailVerified ? (
-                                <Badge variant="secondary" className="text-xs">
-                                  Verified
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-xs">
-                                  Unverified
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {fullName || "No profile"}
-                            </div>
-                            {user.profile?.dateOfBirth && (
-                              <div className="text-sm text-secondary">
-                                DOB:{" "}
-                                {formatDate(user.profile.dateOfBirth, {
-                                  locale,
-                                  format: DateTime.DATE_MED,
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            {Object.entries(user.transactionCounts).map(
-                              ([status, count]) => (
-                                <Badge
-                                  key={status}
-                                  variant={getTransactionStatusVariant(status)}
-                                  className="text-xs w-fit"
-                                >
-                                  {count} {status.toLowerCase()}
-                                </Badge>
-                              ),
-                            )}
-                            {Object.keys(user.transactionCounts).length ===
-                              0 && (
-                                <span className="text-sm text-secondary">
-                                  No transactions
-                                </span>
-                              )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {getKycStatusBadge(
-                            user.kycVerification?.status as KycStatusType,
-                            user.kycVerification?.tier,
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {formatDate(user.createdAt, {
-                            locale,
-                            format: DateTime.DATE_MED,
-                          })}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                // @ts-expect-error - FIXME
-                                onClick={() => handleViewDetails(user)}
-                              >
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <AppLink
-                                  href={`/admin/transactions?userId=${user.id}`}
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View Transactions
-                                </AppLink>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  Update KYC Status
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuPortal>
-                                  <DropdownMenuSubContent>
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleKycAction(user.id, "approve")
-                                      }
-                                      disabled={
-                                        user.kycVerification?.status ===
-                                        "VERIFIED"
-                                      }
-                                    >
-                                      <UserCheck className="mr-2 h-4 w-4" />
-                                      Approve
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleKycAction(user.id, "reject")
-                                      }
-                                      disabled={
-                                        user.kycVerification?.status ===
-                                        "REJECTED"
-                                      }
-                                    >
-                                      <UserX className="mr-2 h-4 w-4" />
-                                      Reject
-                                    </DropdownMenuItem>
-                                  </DropdownMenuSubContent>
-                                </DropdownMenuPortal>
-                              </DropdownMenuSub>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </motion.tr>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </motion.div>
-
-            {filteredUsers.length === 0 && (
-              <motion.div
-                className="text-center py-8"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.8,
-                  duration: 0.4,
-                }}
-              >
-                <p className="text-secondary">
-                  No users found matching your criteria.
-                </p>
-                {(searchTerm || statusFilter !== "all") && (
-                  <div className="mt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSearchTerm("");
-                        setStatusFilter("all");
-                      }}
-                    >
-                      Clear filters
-                    </Button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+        </DataTable>
       </motion.div>
 
       {/* KYC Status Update Dialog */}
@@ -990,7 +741,11 @@ const UserDetailsDialog = ({
                             </div>
                           </div>
                         </div>
-                        {isGettingUrl ? <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" /> : <ExternalLink className="h-4 w-4 text-muted-foreground" />}
+                        {isGettingUrl ? (
+                          <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                        ) : (
+                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1076,18 +831,28 @@ function getKycStatusBadge(status?: KycStatusType, tier?: string | null) {
   return badge;
 }
 
-function getTransactionStatusVariant(status: string) {
-  const statusConfig = {
-    PENDING: "secondary" as const,
-    AWAITING_PAYMENT: "secondary" as const,
-    PAYMENT_SUBMITTED: "secondary" as const,
-    PAYMENT_VERIFIED: "default" as const,
-    COMPLETED: "default" as const,
-    TOKENS_DISTRIBUTED: "default" as const,
-    REJECTED: "destructive" as const,
-    CANCELLED: "outline" as const,
-    REFUNDED: "outline" as const,
-  };
-
-  return statusConfig[status as keyof typeof statusConfig] || "outline";
+{
+  /* Filter Summary */
 }
+//  {(searchTerm || statusFilter !== "all") && (
+//   <motion.div
+//     className="mb-4 flex items-center gap-2 text-sm text-secondary"
+//     initial={{ opacity: 0, y: 10 }}
+//     animate={{ opacity: 1, y: 0 }}
+//     transition={{
+//       delay: 0.9,
+//       duration: 0.4,
+//     }}
+//   >
+//     <span>
+//       Showing {filteredUsers.length} of{" "}
+//       {usersData?.users.length || 0} users
+//     </span>
+//     <span>•</span>
+//     <span>
+//       {searchTerm && `Search: "${searchTerm}"`}
+//       {searchTerm && statusFilter !== "all" && " • "}
+//       {statusFilter !== "all" && `Status: ${statusFilter}`}
+//     </span>
+//   </motion.div>
+// )}

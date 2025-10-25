@@ -472,10 +472,6 @@ class UsersController {
 	}
 
 	async getAllUsers(dto: GetUsersDto, ctx: ActionCtx) {
-		console.log("🚀 ~ index.ts:475 ~ ctx:", ctx);
-
-		console.log("🚀 ~ index.ts:475 ~ dto:", dto);
-
 		try {
 			invariant(ctx.isAdmin, "Forbidden");
 
