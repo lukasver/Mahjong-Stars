@@ -103,7 +103,7 @@ export default async function TransactionConfiramationPage({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ErrorBoundary fallback={<div>Error</div>}>
-        <Suspense fallback={null} key={steps.length}>
+        <Suspense fallback={null} key={`steps-${steps.length}-${tx?.data?.requiresKYC || ''}`}>
           <TransactionConfirmation
             steps={steps}
             initialStep={getInitialStep(tx.data.transaction.status, steps)}
