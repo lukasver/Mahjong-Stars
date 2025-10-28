@@ -13,7 +13,6 @@ type SaleKeys = Partial<
 	keyof Omit<
 		Sale,
 		| "status"
-		| "catchPhrase"
 		| "createdAt"
 		| "updatedAt"
 		| "deletedAt"
@@ -29,6 +28,11 @@ type SaleKeys = Partial<
 export const formSchemaShape = {
 	id: z.string().optional(),
 	name: z.string().min(1, "Sale name required"),
+	catchPhrase: z
+		.string()
+		.max(200, "Catch phrase must be at most 200 characters")
+		.trim()
+		.optional(),
 	tokenName: z.string().min(1, "Token name required"),
 	tokenSymbol: z
 		.string()
@@ -163,6 +167,10 @@ export type InputProps<T extends string> = {
 export const InputProps = {
 	id: { type: "hidden" },
 	name: { type: "text" },
+	catchPhrase: {
+		type: "text",
+		inputProps: { maxLength: 200 },
+	},
 	tokenName: { type: "text" },
 	tokenSymbol: { type: "text" },
 	tokenContractAddress: { type: "text" },
@@ -210,73 +218,6 @@ export const InputProps = {
 	saftCheckbox: { type: "checkbox" },
 	requiresKYC: { type: "checkbox" },
 } satisfies InputProps<keyof typeof formSchemaShape>;
-
-export const saleInformationSchema = {
-	summary: z.string().min(1, "Summary is required"),
-	tokenUtility: z.string().min(1, "Token utility is required"),
-	tokenDistribution: z.string().min(1, "Token distribution is required"),
-	futurePlans: z.string().min(1, "Roadmap is required"),
-	contactEmail: z.string().email("Invalid email address"),
-	imageSale: z
-		.instanceof(File, { message: "Sale image is required" })
-		.refine((file) => file.type.startsWith("image/"), "File must be an image"),
-	imageToken: z
-		.instanceof(File, { message: "Token image is required" })
-		.refine((file) => file.type.startsWith("image/"), "File must be an image"),
-} as const;
-
-export const saleInformationInputProps = {
-	summary: {
-		type: "textarea",
-		inputProps: {
-			size: "small" as const,
-			multiline: true,
-			rows: 1,
-		},
-	},
-	tokenUtility: {
-		type: "textarea",
-		inputProps: {
-			size: "small" as const,
-			multiline: true,
-			rows: 1,
-		},
-	},
-	tokenDistribution: {
-		type: "textarea",
-		inputProps: {
-			placeholder: "Smat Public Sale",
-			size: "small" as const,
-			multiline: true,
-			rows: 1,
-		},
-	},
-	futurePlans: {
-		type: "textarea",
-		inputProps: {
-			placeholder: "Smat Public Sale",
-			size: "small" as const,
-			multiline: true,
-			rows: 1,
-		},
-	},
-	contactEmail: {
-		type: "email",
-		inputProps: {},
-	},
-	imageSale: {
-		type: "file",
-		inputProps: {
-			accept: ["image/*"],
-		},
-	},
-	imageToken: {
-		type: "file",
-		inputProps: {
-			accept: ["image/*"],
-		},
-	},
-} as InputProps<keyof typeof saleInformationSchema>;
 
 export const getSteps = (_t: ReturnType<typeof useTranslations>) => [
 	{ id: 1, name: "Create", description: "Basic information" },

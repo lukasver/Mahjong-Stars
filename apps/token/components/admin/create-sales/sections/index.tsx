@@ -26,7 +26,7 @@ import {
   useFormContext,
 } from "@mjs/ui/primitives/form/index";
 import { FormInput } from "@mjs/ui/primitives/form-input";
-import { EditableFormField } from "@mjs/ui/primitives/form-input/editable-field";
+import { EditableFormField, FormFieldData } from "@mjs/ui/primitives/form-input/editable-field";
 import { SelectOption } from "@mjs/ui/primitives/form-input/types";
 import {
   Tabs,
@@ -62,13 +62,6 @@ import {
   InputProps,
 } from "../utils";
 
-type ProjectInfoField = {
-  label: string;
-  type: string;
-  value: string;
-  props?: Record<string, unknown>;
-};
-
 const getInputProps = (
   key: keyof typeof formSchemaShape,
   t: ReturnType<typeof useTranslations>,
@@ -82,6 +75,7 @@ const getInputProps = (
   return {
     name: key,
     type: inputProps.type,
+    className: inputProps && 'className' in inputProps ? inputProps.className as string : undefined,
     label: t(`${key}.label`),
     description: t(`${key}.description`),
     //@ts-expect-error fixme
@@ -162,6 +156,7 @@ export const TokenInformation = ({
             return (
               <li key={key} className="">
                 <FormInput
+                  className={input.className}
                   name={name}
                   type={type}
                   label={label}
@@ -221,6 +216,7 @@ export const ProjectInformation = ({
   saleId?: string;
   className?: string;
 }) => {
+  const containerRef = useRef<HTMLUListElement>(null);
   const { data: info, isLoading: isInfoLoading } = useSaleInformation(saleId);
   const { data: existing, isLoading: isDocsLoading } = useSaleDocuments(saleId);
   const form = useFormContext() as unknown as UseAppForm;
@@ -233,7 +229,7 @@ export const ProjectInformation = ({
   }, []);
 
   const handleAddField = (
-    field: ProjectInfoField | ProjectInfoField[] = {
+    field: FormFieldData | FormFieldData[] = {
       label: "New Field",
       type: "textarea",
       value: "",
@@ -252,10 +248,21 @@ export const ProjectInformation = ({
 
   useEffect(() => {
 
+    // INIT
     if (!isLoading) {
       const value =
-        getInformationDefaultValues(info, existing)
-      const stepValue = form.getFieldValue("information");
+        getInformationDefaultValues(info, null) //existing)
+
+      console.log("🚀 ~ index.tsx:256 ~ existing:", existing);
+
+
+      console.log("🚀 ~ index.tsx:256 ~ info:", info);
+
+
+      console.log("🚀 ~ index.tsx:256 ~ value:", value);
+
+      const stepValue = form.getFieldValue("information") as FormFieldData[];
+
       // Load default information values
       if (!stepValue) {
         handleAddField(value);
@@ -266,6 +273,31 @@ export const ProjectInformation = ({
   if (!saleId) {
     return <div>No saleId</div>;
   }
+
+  const handleClickPlusButton = () => {
+    handleAddField();
+    // Focus and scroll to the newly added field(s)
+    setTimeout(() => {
+      if (containerRef.current) {
+        const lastLiElement = containerRef.current.querySelector('li:last-child');
+        if (lastLiElement) {
+          const textareaElement = lastLiElement.querySelector('textarea');
+          if (textareaElement) {
+            // Scroll the field into view
+            textareaElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+
+            // Focus the field
+            (textareaElement as HTMLTextAreaElement).focus({
+              preventScroll: true,
+            });
+          }
+        }
+      }
+    }, 100); // Small delay to ensure DOM is updated
+  };
 
 
   return (
@@ -280,7 +312,7 @@ export const ProjectInformation = ({
                 variant="outline"
                 size="icon"
                 className="shrink-0"
-                onClick={() => handleAddField()}
+                onClick={handleClickPlusButton}
                 type="button"
               >
                 <Icons.plus className="w-4 h-4" />
@@ -294,22 +326,24 @@ export const ProjectInformation = ({
         <div className="flex flex-col gap-4">
           {isLoading && <PulseLoader text="Loading information..." />}
           {!isLoading && (
-            <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4" ref={containerRef}>
               <form.Field name="information" mode="array">
                 {(field) => {
                   return (
                     <>
-                      {(field.state.value as unknown[])?.map((_, index) => (
-                        <form.Field key={index} name={`information[${index}]`}>
-                          {(itemField) => (
-                            <EditableFormField
-                              field={itemField}
-                              index={index}
-                              onRemove={(idx) => field.removeValue(idx)}
-                            />
-                          )}
-                        </form.Field>
-                      ))}
+                      {(field.state.value as unknown[])?.map((_, index) => {
+                        return <li key={`list-${index}`}>
+                          <form.Field key={index} name={`information[${index}]`}>
+                            {(itemField) => (
+                              <EditableFormField
+                                field={itemField}
+                                index={index}
+                                onRemove={(idx) => field.removeValue(idx)}
+                              />
+                            )}
+                          </form.Field>
+                        </li>;
+                      })}
                       {(field.state.value as unknown[])?.length === 0 && (
                         <Placeholder
                           title="No fields yet"
@@ -802,17 +836,26 @@ const initialFields = [
     type: "textarea",
     value: "",
   },
-] satisfies ProjectInfoField[];
+] satisfies FormFieldData[];
 
 const getInformationDefaultValues = (
   info: SaleInformationItem[] | undefined | null,
   docs: { images: Document[]; documents: Document[] } | null | undefined,
-): ProjectInfoField[] => {
-  const data = (info ? (SaleInformationItem.array().safeParse(info)?.data) : [...initialFields]) as ProjectInfoField[];
+): FormFieldData[] => {
+  const data = (info ? (SaleInformationItem.array().safeParse(info)?.data) : [...initialFields])?.map((v) => ({
+    ...v,
+    type: v.type === 'text' ? 'textarea' : v.type
+  })).sort((a, b) => {
+    if (a.type === 'file' && b.type !== 'file') return -1;
+    if (a.type !== 'file' && b.type === 'file') return 1;
+    return 0;
+  }) as FormFieldData[];
+
+
   docs?.documents.forEach((doc) => {
     const isBanner = doc.name === 'Banner image';
     const isTokenImage = doc.name === 'Token image';
-    data.push({
+    data.unshift({
       type: "file",
       value: doc.url,
       label: doc.name,
@@ -826,7 +869,7 @@ const getInformationDefaultValues = (
   docs?.images.forEach((img) => {
     const isBanner = img.name === 'Banner image';
     const isTokenImage = img.name === 'Token image';
-    data.push({
+    data.unshift({
       type: "file",
       value: img.url,
       label: img.name,
@@ -837,8 +880,9 @@ const getInformationDefaultValues = (
       }
     });
   });
+
   if (data.length === 0) {
-    return initialFields;
+    return initialFields as FormFieldData[];
   }
 
   // Here we need to ensure that if data does not have at this point at least one Banner image or Token image in the array, we need to add the default options
@@ -851,12 +895,12 @@ const getInformationDefaultValues = (
 
   // Add default Banner image if missing
   if (!hasBannerImage) {
-    data.push(initialFields[0]!);
+    data.unshift(initialFields[0]! as FormFieldData);
   }
 
   // Add default Token image if missing
   if (!hasTokenImage) {
-    data.push(initialFields[1]!);
+    data.unshift(initialFields[1]! as FormFieldData);
   }
 
   return data;

@@ -42,6 +42,8 @@ type FileUploadProps = Partial<FileUploadOptions> & {
   label?: ReactNode;
   cameraProps?: Pick<CameraProps, "facingMode" | "aspectRatio">;
   cameraClassName?: string;
+  defaultValue?: string;
+  id?: string;
 };
 
 const imageTypes =
@@ -57,11 +59,21 @@ const typeMapping = {
   all: imageTypes + "," + documentTypes,
 };
 
-export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
+export function FileUpload({ type = "all", label, defaultValue, ...props }: FileUploadProps) {
   const maxSizeMB = props.maxSizeMB || 2;
   const maxSize = maxSizeMB * 1024 * 1024; // 2MB default
   const cameraRef = useRef<CameraType>(null);
   const [isShutterOpen, setIsShutterOpen] = useState(false);
+
+  // Convert defaultValue to FileMetadata if provided
+  const initialFiles = defaultValue ? [{
+    name: decodeURIComponent(defaultValue.split('/').pop() || '') || 'default-file',
+    size: 0, // Unknown size for URL
+    type: 'application/octet-stream', // Generic type
+    url: defaultValue,
+    id: 'default-value',
+  }] : [];
+
   const [
     { files, isDragging, errors },
     {
@@ -78,6 +90,7 @@ export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
   ] = useFileUpload({
     accept: typeMapping[type],
     maxSize,
+    initialFiles,
     ...props,
   });
   const previewUrl = files[0]?.preview || null;
@@ -92,7 +105,6 @@ export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
       setIsShutterOpen(false);
     }
   };
-
 
 
   return (
@@ -112,7 +124,9 @@ export function FileUpload({ type = "all", label, ...props }: FileUploadProps) {
               {...getInputProps()}
               className="sr-only"
               aria-label="Upload file"
+              {...(props.id ? { id: props.id } : {})}
             />
+
             {previewUrl ? (
               props.multiple ? (
                 <MultipleFilesPreview

@@ -172,6 +172,7 @@ export const CreateSaleForm = () => {
               }
             }
             if (step === 3) {
+              // === PAYMENT STEP ===
               const vals = SaleSchemas[3].parse(value);
 
               //Create sale and update query params to reflect the current saleId
@@ -201,18 +202,24 @@ export const CreateSaleForm = () => {
               }
             }
             if (step === 4) {
+              // === INFORMATION STEP ===
               const values = SaleSchemas[4].parse(value);
               const fileValues = values.information.filter(
-                (item) => item.type === "file",
+                (item) => item.type === "file" && item.value instanceof File,
               ) as unknown as FileType[];
+
+
               let uploadedFiles: {
                 type: "file";
                 value: string;
                 label: string;
               }[] = [];
+
+
               const nonFileValues = values.information.filter(
-                (item) => item.type !== "file",
+                (item) => item.type !== "file" || (typeof item.value === 'string' && item.type === 'file'),
               );
+
 
               if (fileValues.length > 0) {
                 const uploads = await Promise.all(
@@ -253,10 +260,13 @@ export const CreateSaleForm = () => {
                 }));
               }
 
+              const formData = InformationSchemaAsStrings.parse({
+                information: [...nonFileValues, ...uploadedFiles],
+              })
+
+
               const result = await informationAction.executeAsync({
-                data: InformationSchemaAsStrings.parse({
-                  information: [...nonFileValues, ...uploadedFiles],
-                }),
+                data: formData,
                 signature: signPayload,
                 id: saleId,
               });

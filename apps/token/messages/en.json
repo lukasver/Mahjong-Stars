@@ -35,6 +35,10 @@
 						"label": "Name",
 						"description": "Public name for this sale round"
 					},
+					"catchPhrase": {
+						"label": "Catch Phrase",
+						"description": "Sub title to be displayed under the sale name"
+					},
 					"tokenName": {
 						"label": "Token Name",
 						"description": "Long name for the token. I.e: Chainlink"
