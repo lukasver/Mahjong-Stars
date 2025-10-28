@@ -5,6 +5,7 @@
 import { getAddress, NATIVE_TOKEN_ADDRESS } from "thirdweb";
 
 import * as c from "thirdweb/chains";
+import { TokenInfo } from "thirdweb/react";
 
 export const ALLOWED_CHAINS =
 	process.env.NODE_ENV === "production"
@@ -302,4 +303,10 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 				"https://storage.googleapis.com/mjs-public/branding/curs/WBTC.webp",
 		},
 	},
+};
+
+export type AppTokenInfo = Omit<TokenInfo, "icon"> & {
+	decimals: number;
+	isNative: boolean;
+	image?: string | null;
 };

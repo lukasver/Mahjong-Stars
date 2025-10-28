@@ -710,3 +710,22 @@ export const updateKYCVerification = authActionClient
 		}
 		return result.data;
 	});
+
+export const buyPrepare = authActionClient
+	.schema(
+		z.object({
+			chainId: z.number(),
+			amount: z.string(),
+			originTokenAddress: z.string(),
+			sender: z.string(),
+			// destinationChainId, Needs to be defined in the backend with fortris
+			// destinationTokenAddress, Needs to be defined in the backend with fortris
+		}),
+	)
+	.action(async ({ ctx, parsedInput }) => {
+		const result = await ratesController.buyPrepare(parsedInput, ctx);
+		if (!result.success) {
+			throw new Error(result.message);
+		}
+		return result.data;
+	});

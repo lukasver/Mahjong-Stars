@@ -102,6 +102,7 @@ export const GET = withAuth(async (req, context, auth) => {
 
 					return NextResponse.json(data);
 				}
+
 				return NextResponse.json({ error: "Bad request" }, { status: 404 });
 			}
 

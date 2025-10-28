@@ -3,8 +3,8 @@ import "server-only";
 import { invariant } from "@epic-web/invariant";
 import { Currency } from "@prisma/client";
 import { Cacheable } from "cacheable";
-import { getContract, readContract } from "thirdweb";
-import { bsc } from "thirdweb/chains";
+import { Bridge, getContract, readContract } from "thirdweb";
+import { base, bsc } from "thirdweb/chains";
 import { env } from "@/common/config/env";
 import { GetExchangeRate } from "@/common/schemas/dtos/rates";
 import { Failure, Success } from "@/common/schemas/dtos/utils";
@@ -14,7 +14,7 @@ import { AggregatorV3InterfaceABI } from "@/lib/services/crypto/ABI";
 import logger from "@/lib/services/logger.server";
 import "server-only";
 import { Decimal } from "@prisma/client/runtime/library";
-import { formatUnits } from "ethers";
+import { formatUnits, parseUnits } from "ethers";
 import { ONE_MINUTE } from "@/common/config/constants";
 
 const cacheTTL =
@@ -273,6 +273,59 @@ export class RatesController {
 					.toFixed(Number(decimals || 8)),
 			},
 		};
+	}
+
+	async buyPrepare(params: {
+		chainId: number;
+		amount: string;
+		originTokenAddress: string;
+		sender: string;
+	}) {
+		try {
+			const { chainId, amount, originTokenAddress, sender } = params;
+
+			console.log("🚀 ~ rates.ts:288 ~ params:", params);
+
+			const token = await prisma.tokensOnBlockchains.findFirst({
+				where: {
+					chainId: chainId,
+					contractAddress: originTokenAddress,
+				},
+				select: {
+					decimals: true,
+					id: true,
+				},
+			});
+
+			invariant(token, "Token not not configured in app");
+
+			// TODO: Get receiver from Fortris
+			const receiver = "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70";
+			// TODO: Get receiver from Fortris
+			const destinationTokenAddress =
+				"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+			// Define from mapping w/ fortris
+			const destinationChainId = base.id;
+			// const destinationTokenDecimals = STABLECOIN_DECIMALS;
+
+			const preparedQuote = await Bridge.Sell.prepare({
+				originChainId: chainId,
+				originTokenAddress,
+				destinationChainId,
+				destinationTokenAddress,
+				amount: parseUnits(amount, token.decimals),
+				sender,
+				receiver,
+				client: serverClient,
+			});
+
+			console.log("🚀 ~ rates.ts:307 ~ preparedQuote:", preparedQuote);
+
+			return Success(preparedQuote);
+		} catch (e) {
+			logger(e);
+			return Failure(e);
+		}
 	}
 }
 

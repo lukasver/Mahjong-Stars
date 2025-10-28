@@ -49,7 +49,8 @@ import {
 } from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
-import { OnRampWidget } from "../onramp";
+import { OnRampWidget } from "../widgets/onramp";
+import { CryptoTransactionWidget } from "../widgets/transaction";
 import { CryptoPaymentButton } from "./crypto-payment-btn";
 import { isFileWithPreview } from "./utils";
 
@@ -350,6 +351,13 @@ const FiatPayment = ({
     }
   };
 
+  const CryptoComponent = () => true ?
+    <CryptoTransactionWidget
+      transaction={tx}
+      onSuccessPayment={onSuccess}
+    />
+    : <OnRampWidget transaction={tx} onSuccessPayment={onSuccess} />
+
   // If no banks available or form of payment is CARD, show only card payment
   if (
     (!isBanksLoading && banks?.banks?.length === 0) ||
@@ -361,13 +369,15 @@ const FiatPayment = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <OnRampWidget transaction={tx} onSuccessPayment={onSuccess} />
+        <CryptoComponent />
       </motion.div>
     );
   }
 
   // If banks are available, show tabs for payment method selection
   const hasBanks = banks?.banks && banks.banks.length > 0;
+
+
 
   return (
     <div className="space-y-4">
@@ -389,7 +399,7 @@ const FiatPayment = ({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              <OnRampWidget transaction={tx} onSuccessPayment={onSuccess} />
+              <CryptoComponent />
             </motion.div>
           </TabsContent>
 
@@ -527,7 +537,8 @@ const FiatPayment = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <OnRampWidget transaction={tx} onSuccessPayment={onSuccess} />
+          <CryptoComponent />
+
         </motion.div>
       )}
     </div>

@@ -1,18 +1,18 @@
 "use client";
-import ErrorBoundary from "@mjs/ui/components/error-boundary";
 import { motion, StaggeredRevealAnimation } from "@mjs/ui/components/motion";
 import { usePrevious } from "@mjs/ui/hooks";
-import { Banner } from "@mjs/ui/primitives/banner";
 import { toast } from "@mjs/ui/primitives/sonner";
 import Decimal from "decimal.js";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
-import { defineChain, NATIVE_TOKEN_ADDRESS } from "thirdweb";
+import {
+  defineChain, NATIVE_TOKEN_ADDRESS
+} from "thirdweb";
 import { BuyWidget, useActiveWallet } from "thirdweb/react";
 import { shortenAddress } from "thirdweb/utils";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
-import { FormError } from "@/components/form-error";
+import { Banner } from "@/components/banner";
 import useActiveAccount from "@/components/hooks/use-active-account";
 import { PurchaseSummaryCard } from "@/components/invest/summary";
 import { client } from "@/lib/auth/thirdweb-client";
@@ -23,26 +23,9 @@ import { CryptoPaymentButton } from "../confirmation-steps/crypto-payment-btn";
 import { PaymentStatusIndicator } from "../confirmation-steps/payment-status-indicator";
 import { PaymentInstructions } from "./instructions";
 import { OnRampSkeleton } from "./skeletons";
+import { WithErrorHandler } from "./utils";
 
-const WithErrorHandler = <P extends object>(
-  Component: React.ComponentType<P>,
-) => {
-  return (props: P) => {
-    return (
-      <ErrorBoundary
-        fallback={
-          <FormError
-            type="custom"
-            title="Error"
-            message="An error occurred while processing your request"
-          />
-        }
-      >
-        <Component {...props} />
-      </ErrorBoundary>
-    );
-  };
-};
+const TEST_WALLET = "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70";
 
 const OnRampWidgetComponent = ({
   transaction: tx,
@@ -137,20 +120,6 @@ const OnRampWidgetComponent = ({
     }
   }, [totalAmountToPay, pv]);
 
-  if (blockError) {
-    throw new Error(blockError);
-  }
-  if (error) {
-    return <div>Error</div>;
-  }
-
-  if (!chain || !data?.chains?.length) {
-    throw new Error("Chain not supported or not found");
-  }
-
-  if (isLoading || !amount.amount || totalAmountToPay === "0") {
-    return <OnRampSkeleton />;
-  }
 
   const handleSuccessPurcharse = () => {
     toast.success("Purchase successful", {
@@ -167,6 +136,25 @@ const OnRampWidgetComponent = ({
   const handleReadyToPay = () => {
     setDisabled(false);
   };
+
+  if (blockError) {
+    throw new Error(blockError);
+  }
+  if (error) {
+    return <div>Error</div>;
+  }
+
+  if (!chain || !data?.chains?.length) {
+    throw new Error("Chain not supported or not found");
+  }
+
+  if (isLoading || !amount.amount || totalAmountToPay === "0") {
+    return <OnRampSkeleton />;
+  }
+
+  if (!chainId) {
+    return null;
+  }
 
   return (
     <div className="space-y-4">

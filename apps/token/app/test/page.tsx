@@ -1,15 +1,7 @@
-"use client";
-
-import { FileUpload } from "@mjs/ui/components/file-upload";
-import {
-  Dialog,
-  DialogContent
-} from "@mjs/ui/primitives/dialog";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { useRef, useState } from "react";
-import { Camera, CameraType } from "react-camera-pro";
 import AccountProvider from "@/components/thirdweb/account-provider";
 import AutoConnect from "@/components/thirdweb/autoconnect";
+import { TestClientComponent } from './component';
 
 export default function Page() {
   // const [selectedValue, setSelectedValue] = useState<string>("");
@@ -53,55 +45,13 @@ export default function Page() {
   //   return <div>Transaction not found</div>;
   // }
 
-  const [open, setOpen] = useState(false);
-  const cameraRef = useRef<CameraType>(null);
+
 
   return (
     <NuqsAdapter>
       <AutoConnect />
       <AccountProvider>
-        <Dialog
-          open={open}
-          onOpenChange={(open) => {
-            setOpen(open);
-          }}
-        >
-          <div className="h-screen w-screen grid place-items-center">
-            <div className="max-w-4xl w-full flex flex-col gap-8 justify-center">
-              <h1>test</h1>
-              <FileUpload type="camera"
-                label="Take Picture"
-              />
-              <DialogContent className="w-full h-[90%] max-w-3xl sm:max-w-3xl flex flex-col">
-                <div className="relative w-full flex-1">
-                  {open && (
-                    <Camera
-                      ref={cameraRef}
-                      aspectRatio={"cover"}
-                      facingMode="user"
-                      errorMessages={{
-                        noCameraAccessible:
-                          "No camera device accessible. Please connect your camera or try a different browser.",
-                        permissionDenied:
-                          "Permission denied. Please refresh and give camera permission.",
-                        switchCamera:
-                          "It is not possible to switch camera to different one because there is only one video device accessible.",
-                        canvas: "Canvas is not supported.",
-                      }}
-                    />
-                  )}
-                </div>
-              </DialogContent>
-              {/* <ConnectionTest /> */}
-              {/* <OnRampWidget
-              transaction={tx?.transaction}
-              onSuccessPayment={() => {
-                //
-              }}
-            /> */}
-            </div>
-          </div>
-        </Dialog>
+        <TestClientComponent />
       </AccountProvider>
     </NuqsAdapter>
   );
