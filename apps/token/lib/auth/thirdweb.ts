@@ -75,11 +75,10 @@ export const generateJWT = async (
 //Todo should check if is ok to use the admin account.
 export const refreshJWT = async (jwt: string) => {
 	return await refreshJWTUtils({
-		account: adminWallet,
-		// privateKeyToAccount({
-		// 	client: serverClient,
-		// 	privateKey: env.THIRDWEB_ADMIN_PRIVATE_KEY,
-		// }),
+		account: privateKeyToAccount({
+			client: serverClient,
+			privateKey: env.THIRDWEB_ADMIN_PRIVATE_KEY,
+		}),
 		jwt,
 		expirationTime: JWT_EXPIRATION_TIME,
 	});

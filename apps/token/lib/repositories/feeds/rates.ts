@@ -16,6 +16,7 @@ import "server-only";
 import { Decimal } from "@prisma/client/runtime/library";
 import { formatUnits, parseUnits } from "ethers";
 import { ONE_MINUTE } from "@/common/config/constants";
+import { ActionCtx } from "@/common/schemas/dtos/sales";
 
 const cacheTTL =
 	ONE_MINUTE * (process.env.NODE_ENV === "production" ? 1 : 10 * 60);
@@ -275,12 +276,15 @@ export class RatesController {
 		};
 	}
 
-	async buyPrepare(params: {
-		chainId: number;
-		amount: string;
-		originTokenAddress: string;
-		sender: string;
-	}) {
+	async buyPrepare(
+		params: {
+			chainId: number;
+			amount: string;
+			originTokenAddress: string;
+			sender: string;
+		},
+		_ctx: ActionCtx,
+	) {
 		if (process.env.NODE_ENV === "production") {
 			throw new Error("Not implemented");
 		}
@@ -303,7 +307,7 @@ export class RatesController {
 			invariant(token, "Token not not configured in app");
 
 			// TODO: Get receiver from Fortris
-			const receiver = process.env.NEXT_PUBLIC_MAIN_WALLET;
+			const receiver = env.THIRDWEB_SERVER_WALLET_ADDRESS;
 			// TODO: Get receiver from Fortris
 			const destinationTokenAddress =
 				"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";

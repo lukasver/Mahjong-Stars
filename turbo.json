@@ -102,6 +102,7 @@
 				"!.next/cache/**"
 			],
 			"env": [
+				"THIRDWEB_SERVER_WALLET_ADDRESS",
 				"THIRDWEB_API_SECRET",
 				"EMAIL_API_KEY",
 				"THIRDWEB_ADMIN_PRIVATE_KEY",

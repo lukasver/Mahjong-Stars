@@ -114,7 +114,6 @@ export const TestClientComponent = () => {
           }}
           image='https://storage.googleapis.com/mjs-public/branding/banner.webp'
           paymentMethods={['crypto', 'card']}
-          presetOptions={[100, 200, 300]}
           title='Purchase'
           buttonLabel='Proceed'
 
