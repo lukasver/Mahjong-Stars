@@ -76,10 +76,23 @@ export class EmailVerificationService {
 	async createEmailVerification(email: string, ctx: ActionCtx) {
 		try {
 			invariant(email, "Email is required");
+			let userId = ctx.userId;
+			if (!userId && ctx.address) {
+				userId = (
+					await prisma.user.findUnique({
+						where: {
+							walletAddress: ctx.address,
+						},
+						select: {
+							id: true,
+						},
+					})
+				)?.id;
+			}
 
 			const verification = await prisma.emailVerification.upsert({
 				where: {
-					userId: ctx.userId,
+					userId,
 				},
 				update: {
 					email,
@@ -88,7 +101,7 @@ export class EmailVerificationService {
 				create: {
 					email,
 					token: this.generateToken(),
-					user: { connect: { id: ctx.userId } },
+					user: { connect: { id: userId } },
 				},
 			});
 

@@ -111,6 +111,8 @@ export const login = loginActionClient
 	.action(async ({ parsedInput }) => {
 		const verifiedPayload = await verifyAuthPayload(parsedInput);
 
+		console.log("🚀 ~ index.ts:114 ~ verifiedPayload:", verifiedPayload);
+
 		if (!verifiedPayload.valid) {
 			redirect("/?error=invalid_payload");
 		}
@@ -124,6 +126,7 @@ export const login = loginActionClient
 				...(payload.chain_id && { chainId: payload.chain_id }),
 			}),
 		]);
+
 		await setSessionCookie(jwt);
 		const user = await usersController.createUser({
 			address: payload.address,

@@ -34,6 +34,9 @@ export default async function Onboarding({ searchParams }: PageProps) {
   if (!user.emailVerified && user.walletAddress) {
     // Check email and verify
     const result = await checkUserAndVerifyEmail(user.walletAddress);
+
+    console.log("🚀 ~ page.tsx:38 ~ result:", result);
+
     if (result) {
       defaultEmail = result;
     }

@@ -28,7 +28,7 @@ const E_SIGN_DOMAIN = `https://*.documenso.com/`;
 
 const cspHeader = `
     default-src 'self' ${MAIN_DOMAIN};
-    connect-src 'self' ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP};
+    connect-src 'self' ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} ipfscdn.io/ipfs/;
     frame-src 'self' https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.adobesign.com https://*.thirdweb.com/;
     script-src 'self' 'unsafe-eval' 'unsafe-inline' ${ANALYTICS_PROVIDERS} ${GOOGLE_CSP} ${E_SIGN_DOMAIN};
     worker-src 'self' blob:;
@@ -51,7 +51,7 @@ const config: NextConfig = () => {
 		createNextIntlPlugin("./lib/i18n.ts"),
 	];
 	return plugins.reduce((acc, next) => next(acc), {
-		reactStrictMode: true,
+		reactStrictMode: process.env.NODE_ENV === "development",
 		async headers() {
 			return [
 				{
@@ -99,11 +99,12 @@ const config: NextConfig = () => {
 		},
 		compiler: {
 			// Automatically remove console.* other than 'error' & 'info' in production,
-			...(process.env.NODE_ENV !== "development" && {
-				removeConsole: {
-					exclude: ["error", "info", "debug", "warn"],
-				},
-			}),
+			...(process.env.NODE_ENV !== "development" &&
+				!!process.env.VERCEL && {
+					removeConsole: {
+						exclude: ["error", "info", "debug", "warn"],
+					},
+				}),
 		},
 		logging: {
 			fetches: {

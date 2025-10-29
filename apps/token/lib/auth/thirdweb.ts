@@ -6,7 +6,7 @@ import { Profile, privateKeyToAccount } from "thirdweb/wallets";
 import { JWT_EXPIRATION_TIME } from "@/common/config/constants";
 import { env, publicUrl } from "@/common/config/env";
 import { LoginParams } from "../actions";
-
+import logger from "../services/logger.server";
 import {
 	EmailVerificationResult,
 	isCoinbaseProfileDetails,
@@ -86,7 +86,11 @@ export const refreshJWT = async (jwt: string) => {
 
 export const getUserFromAddress = async (address: string) => {
 	return await getUser({ client: serverClient, walletAddress: address }).catch(
-		() => null,
+		(e) => {
+			console.log("Error fetching user from address w/ thirdweb");
+			logger(e);
+			return null;
+		},
 	);
 };
 
