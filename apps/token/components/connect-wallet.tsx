@@ -61,7 +61,7 @@ export const ConnectWallet = ({
       // accountAbstraction={{
       //   chain: bscTestnet, // ethereum, // replace with the chain you want
       //   sponsorGas: false,
-      //   // factoryAddress: '0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70',
+      //   // factoryAddress: '',
       // }}
 
       detailsModal={{

@@ -11,7 +11,7 @@ import sales from "../../data/sales.json";
 export async function seedOpenSale(prisma: PrismaClient) {
 	invariant(
 		process.env.NEXT_PUBLIC_MAIN_WALLET,
-		"NEXT_PUBLIC_SMAT_WALLET is not set",
+		"NEXT_PUBLIC_MAIN_WALLET is not set",
 	);
 
 	const user = await prisma.user.findUnique({
@@ -56,7 +56,7 @@ export async function seedOpenSale(prisma: PrismaClient) {
 			initialTokenQuantity: 29_166_667,
 			// When created should be the same as initialTokenQuantity
 			availableTokenQuantity: 29_166_667,
-			toWalletsAddress: process.env.NEXT_PUBLIC_TEST_WALLET!,
+			toWalletsAddress: process.env.NEXT_PUBLIC_MAIN_WALLET!,
 			tokenPricePerUnit: Prisma.Decimal("0.012"),
 			comparisonPricePerUnit: Prisma.Decimal("0.030"),
 			saftCheckbox: false,

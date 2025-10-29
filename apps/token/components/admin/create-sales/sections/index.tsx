@@ -253,14 +253,6 @@ export const ProjectInformation = ({
       const value =
         getInformationDefaultValues(info, null) //existing)
 
-      console.log("🚀 ~ index.tsx:256 ~ existing:", existing);
-
-
-      console.log("🚀 ~ index.tsx:256 ~ info:", info);
-
-
-      console.log("🚀 ~ index.tsx:256 ~ value:", value);
-
       const stepValue = form.getFieldValue("information") as FormFieldData[];
 
       // Load default information values

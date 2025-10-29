@@ -31,7 +31,7 @@ import calculator from "@/lib/services/pricefeeds";
 import { OnRampSkeleton } from "./skeletons";
 import { WithErrorHandler } from "./utils";
 
-const TEST_WALLET = "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70";
+const TEST_WALLET = "";
 
 const CryptoTransactionWidgetComponent = ({
   transaction: tx,

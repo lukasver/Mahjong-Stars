@@ -12,9 +12,7 @@ const randomUUID = crypto.randomUUID();
 const IS_DEVELOPMENT =
 	process.env.NODE_ENV !== "production" ||
 	process.env.NEXT_PUBLIC_IS_DEVELOPMENT === "true";
-const SMAT_WALLET_ADDRESS = IS_DEVELOPMENT
-	? process.env.NEXT_PUBLIC_TEST_WALLET || process.env.NEXT_PUBLIC_SMAT_WALLET
-	: process.env.NEXT_PUBLIC_SMAT_WALLET;
+const MAIN_WALLET_ADDRESS = process.env.NEXT_PUBLIC_MAIN_WALLET;
 
 export async function seedTransactions(prisma: PrismaClient) {
 	let commonSale: Sale;
@@ -47,7 +45,7 @@ export async function seedTransactions(prisma: PrismaClient) {
 				tokenName: "SMAT",
 				tokenPricePerUnit: 0.1,
 				tokenSymbol: "SMAT",
-				toWalletsAddress: SMAT_WALLET_ADDRESS,
+				toWalletsAddress: MAIN_WALLET_ADDRESS,
 				saleStartDate: saleStartDate.toISOString(),
 				saleClosingDate: saleClosingDate.toISOString(),
 				createdBy: createdByUser?.sub as string,

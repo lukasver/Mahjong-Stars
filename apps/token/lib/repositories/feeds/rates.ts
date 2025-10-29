@@ -281,6 +281,9 @@ export class RatesController {
 		originTokenAddress: string;
 		sender: string;
 	}) {
+		if (process.env.NODE_ENV === "production") {
+			throw new Error("Not implemented");
+		}
 		try {
 			const { chainId, amount, originTokenAddress, sender } = params;
 
@@ -300,7 +303,7 @@ export class RatesController {
 			invariant(token, "Token not not configured in app");
 
 			// TODO: Get receiver from Fortris
-			const receiver = "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70";
+			const receiver = process.env.NEXT_PUBLIC_MAIN_WALLET;
 			// TODO: Get receiver from Fortris
 			const destinationTokenAddress =
 				"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";

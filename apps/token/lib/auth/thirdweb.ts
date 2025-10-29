@@ -20,13 +20,14 @@ import {
 // secretKey for serverside usage, wont be available in client
 export const serverClient = createThirdwebClient({
 	secretKey: env.THIRDWEB_API_SECRET,
-	teamId: "team_cmbakugit008e9j0kq3a1l0c0",
+	teamId: env.THIRDWEB_TEAM_ID,
 	clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
 });
 
 const auth = createAuth({
 	domain: publicUrl,
 	client: serverClient,
+	// PK of dedicated account used for authentication purposes
 	adminAccount: privateKeyToAccount({
 		client: serverClient,
 		privateKey: env.THIRDWEB_ADMIN_PRIVATE_KEY,
@@ -74,10 +75,11 @@ export const generateJWT = async (
 //Todo should check if is ok to use the admin account.
 export const refreshJWT = async (jwt: string) => {
 	return await refreshJWTUtils({
-		account: privateKeyToAccount({
-			client: serverClient,
-			privateKey: env.THIRDWEB_ADMIN_PRIVATE_KEY,
-		}),
+		account: adminWallet,
+		// privateKeyToAccount({
+		// 	client: serverClient,
+		// 	privateKey: env.THIRDWEB_ADMIN_PRIVATE_KEY,
+		// }),
 		jwt,
 		expirationTime: JWT_EXPIRATION_TIME,
 	});

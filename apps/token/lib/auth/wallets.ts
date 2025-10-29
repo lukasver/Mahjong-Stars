@@ -5,6 +5,9 @@ import MahjongStarsLogo from "@/public/static/images/logo-wt.webp";
 
 export const wallets = [
 	inAppWallet({
+		// https://portal.thirdweb.com/dotnet/wallets/account-abstraction
+		// executionMode:
+		hidePrivateKeyExport: false,
 		auth: {
 			options: [
 				"google",

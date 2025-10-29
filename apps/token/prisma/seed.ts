@@ -27,7 +27,7 @@ const truncateTables = async (prisma: PrismaClient, _tables?: string[]) => {
 	);
 };
 
-const TEST_ADMIN_WALLET = "0x8f75517e97e0bB99A2E2132FDe0bBaC5815Bac70";
+const TEST_ADMIN_WALLET = process.env.NEXT_PUBLIC_MAIN_WALLET;
 
 const options = {
 	environment: { type: "string" as const },
