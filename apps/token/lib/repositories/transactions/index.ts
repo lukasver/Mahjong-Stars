@@ -969,6 +969,7 @@ class TransactionsController {
 						blockchain: {
 							select: {
 								explorerUrl: true,
+								chainId: true,
 							},
 						},
 						user: {

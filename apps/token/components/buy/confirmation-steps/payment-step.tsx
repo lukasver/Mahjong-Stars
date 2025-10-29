@@ -3,7 +3,7 @@
 import { invariant } from "@epic-web/invariant";
 import { FileUpload } from "@mjs/ui/components/file-upload";
 import { motion } from "@mjs/ui/components/motion";
-import { Banner } from "@mjs/ui/primitives/banner";
+import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
 import { Button } from "@mjs/ui/primitives/button";
 import {
   CardContent,
@@ -23,21 +23,21 @@ import { copyToClipboard, safeFormatCurrency } from "@mjs/utils/client";
 import { TransactionStatus } from "@prisma/client";
 import { notFound, useParams } from "next/navigation";
 import { useLocale } from "next-intl";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
-import { shortenAddress } from "thirdweb/utils";
 import { FIAT_CURRENCIES, ONE_MINUTE } from "@/common/config/constants";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import {
   BankDetailsCard,
   BankDetailsSkeleton,
 } from "@/components/bank-details";
-import { BalanceChecker } from "@/components/buy/balance-checker";
 import { FormError } from "@/components/form-error";
 import useActiveAccount from "@/components/hooks/use-active-account";
 import { PurchaseSummaryCard } from "@/components/invest/summary";
 import { PulseLoader } from "@/components/pulse-loader";
 import {
   associateDocumentsToUser,
+  confirmCryptoTransaction,
   confirmTransaction,
   getFileUploadPrivatePresignedUrl,
 } from "@/lib/actions";
@@ -50,8 +50,7 @@ import {
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
 import { OnRampWidget } from "../widgets/onramp";
-import { CryptoTransactionWidget } from "../widgets/transaction";
-import { CryptoPaymentButton } from "./crypto-payment-btn";
+import { CryptoTransactionWidget, SuccessCryptoPaymentData } from "../widgets/transaction";
 import { isFileWithPreview } from "./utils";
 
 interface PaymentStepProps {
@@ -66,6 +65,16 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
   const { tx: txId } = useParams();
   const { data: tx, isLoading } = useTransactionById(txId as string);
 
+  const { execute } = useActionListener(useAction(confirmCryptoTransaction), {
+    onSuccess: () => {
+      onSuccess();
+    },
+    onError: (error) => {
+      console.error("Transaction error", error);
+      toast.error(error);
+    },
+  });
+
   useEffect(() => {
     const status = tx?.transaction?.status;
     if (
@@ -77,6 +86,26 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
       onSuccess();
     }
   }, [tx?.transaction?.status]);
+
+  const handleCryptoSuccessPayment = (d: SuccessCryptoPaymentData) => {
+    console.debug('Q CALLBACK PAYLOADT', d);
+
+    // amount paid can vary if the user paid in a different token than selected, Example: selected fiat but ended up payingi n ETH
+    const payload = {
+      txId,
+      receipt: d.transactionHash,
+      chainId: d.chainId,
+      amountPaid: d.amountPaid,
+      paymentDate: d.paymentDate || new Date,
+      extraPayload: {
+        formOfPayment:
+          d.formOfPayment,
+        paidCurrency: d.paidCurrency,
+      }
+    } as Parameters<typeof execute>[0];
+    console.debug('Q SE MANDA PARA O BACK', payload);
+    execute(payload);
+  };
 
   if (isLoading) {
     return (
@@ -130,9 +159,12 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
       </motion.div>
       <CardContent>
         {paymentMethod !== "CRYPTO" ? (
-          <FiatPayment tx={tx.transaction} onSuccess={onSuccess} />
+          <FiatPayment tx={tx.transaction}
+            onSuccess={onSuccess}
+            onSuccessCrypto={handleCryptoSuccessPayment}
+          />
         ) : (
-          <CryptoPayment tx={tx.transaction} onSuccess={onSuccess} />
+          <CryptoPayment tx={tx.transaction} onSuccess={handleCryptoSuccessPayment} />
         )}
       </CardContent>
     </>
@@ -144,7 +176,7 @@ const CryptoPayment = ({
   onSuccess,
 }: {
   tx: TransactionByIdWithRelations;
-  onSuccess: () => void;
+  onSuccess: (d: SuccessCryptoPaymentData) => void;
 }) => {
   const locale = useLocale();
   const { chainId } = useActiveAccount();
@@ -154,12 +186,7 @@ const CryptoPayment = ({
     error,
   } = useCryptoTransaction(tx.id, { chainId: chainId || 0 });
 
-  const [isBalanceSufficient, setIsBalanceSufficient] = useState(false);
-
-  // const { data: profiles } = useSocialProfiles({
-  //   client,
-  //   address: ac?.address,
-  // });
+  // const [isBalanceSufficient, setIsBalanceSufficient] = useState(false);
 
   return (
     <div className="py-2 text-center space-y-4">
@@ -199,8 +226,12 @@ const CryptoPayment = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.4 }}
           >
-            <BalanceChecker
+            <CryptoComponent transaction={tx} onSuccessPayment={onSuccess} />
+            {/* <BalanceChecker
               onBalanceCheck={(result) => {
+
+                console.log("🚀 ~ payment-step.tsx:200 ~ result:", result);
+
                 setIsBalanceSufficient(result);
               }}
               requiredAmount={tx.totalAmount.toString()}
@@ -214,17 +245,12 @@ const CryptoPayment = ({
                 // Open external link to add funds
                 window.open("https://binance.com", "_blank");
               }}
-            />
+            /> */}
           </motion.div>
         )
       )}
-      {/* <div className='mb-2'>
-        <span className='font-medium'>Crypto payment</span> (coming soon)
-      </div> */}
-      {/* <div className='text-muted-foreground'>
-        Please follow the instructions for crypto payment in the next step.
-      </div> */}
-      {!isLoading && cryptoTransaction?.paymentToken && (
+
+      {/* {!isLoading && cryptoTransaction?.paymentToken && (
         <>
           <Banner
             size={"sm"}
@@ -253,7 +279,7 @@ const CryptoPayment = ({
             />
           </motion.div>
         </>
-      )}
+      )} */}
     </div>
   );
 };
@@ -261,9 +287,11 @@ const CryptoPayment = ({
 const FiatPayment = ({
   tx,
   onSuccess,
+  onSuccessCrypto
 }: {
   tx: TransactionByIdWithRelations;
   onSuccess: () => void;
+  onSuccessCrypto: (d: SuccessCryptoPaymentData) => void;
 }) => {
   const { data: banks, isLoading: isBanksLoading } = useSaleBanks(
     tx?.sale?.id || "",
@@ -351,13 +379,6 @@ const FiatPayment = ({
     }
   };
 
-  const CryptoComponent = () => true ?
-    <CryptoTransactionWidget
-      transaction={tx}
-      onSuccessPayment={onSuccess}
-    />
-    : <OnRampWidget transaction={tx} onSuccessPayment={onSuccess} />
-
   // If no banks available or form of payment is CARD, show only card payment
   if (
     (!isBanksLoading && banks?.banks?.length === 0) ||
@@ -369,15 +390,13 @@ const FiatPayment = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <CryptoComponent />
+        <CryptoComponent transaction={tx} onSuccessPayment={onSuccessCrypto} />
       </motion.div>
     );
   }
 
   // If banks are available, show tabs for payment method selection
   const hasBanks = banks?.banks && banks.banks.length > 0;
-
-
 
   return (
     <div className="space-y-4">
@@ -399,7 +418,7 @@ const FiatPayment = ({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              <CryptoComponent />
+              <CryptoComponent transaction={tx} onSuccessPayment={onSuccessCrypto} />
             </motion.div>
           </TabsContent>
 
@@ -537,8 +556,7 @@ const FiatPayment = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <CryptoComponent />
-
+          <CryptoComponent transaction={tx} onSuccessPayment={onSuccessCrypto} />
         </motion.div>
       )}
     </div>
@@ -579,3 +597,17 @@ export function PaymentAvailabilityGuard({
 
   return children;
 }
+
+type CryptoComponentProps = {
+  mode?: "transaction" | "onramp";
+  transaction: TransactionByIdWithRelations;
+  onSuccessPayment: (d: SuccessCryptoPaymentData) => void;
+};
+const CryptoComponent = (props: CryptoComponentProps) => {
+  const { mode = "transaction", ...rest } = props;
+  return mode === "transaction" ? (
+    <CryptoTransactionWidget {...rest} />
+  ) : (
+    <OnRampWidget {...rest} />
+  );
+};

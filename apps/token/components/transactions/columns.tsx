@@ -206,10 +206,13 @@ export const getColumns = (isAdmin = false) => {
     // },
     {
       accessorKey: "totalAmount",
-      header: "Paid / To pay",
+      header: "Amount",
       cell: ({ row }) => {
         const totalAmount = row.original.totalAmount?.toString();
+        const amountCurrency = row.original.totalAmountCurrency;
         const paidCurrency = row.original.paidCurrency;
+        const paidAmount = row.original.amountPaid;
+        const isDifferentPaidCurrency = paidAmount && amountCurrency !== paidCurrency;
         const locale = useLocale();
 
         if (Number.isNaN(Number(totalAmount))) return "TBD";
@@ -218,8 +221,8 @@ export const getColumns = (isAdmin = false) => {
           <span>
             {safeFormatCurrency(
               {
-                totalAmount: totalAmount,
-                currency: paidCurrency,
+                totalAmount: isDifferentPaidCurrency ? paidAmount : totalAmount,
+                currency: isDifferentPaidCurrency ? paidCurrency : amountCurrency,
               },
               {
                 locale,

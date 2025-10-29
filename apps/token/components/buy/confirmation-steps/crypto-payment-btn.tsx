@@ -1,5 +1,6 @@
 import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
 import { SaleTransactions, TokensOnBlockchains } from "@prisma/client";
+import { InferSafeActionFnResult } from "next-safe-action";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import {
@@ -13,10 +14,12 @@ import {
 } from "thirdweb";
 import { transfer } from "thirdweb/extensions/erc20";
 import { TransactionButton } from "thirdweb/react";
+import { FOPSchema } from "@/common/schemas/generated";
 import useActiveAccount from "@/components/hooks/use-active-account";
 import { confirmCryptoTransaction } from "@/lib/actions";
 import { client } from "@/lib/auth/thirdweb-client";
 import { DialogLoader } from "../dialog-loader";
+import { SuccessCryptoPaymentData } from "../widgets/transaction";
 
 export function CryptoPaymentButton({
   chain,
@@ -30,27 +33,37 @@ export function CryptoPaymentButton({
   chain:
   | Pick<
     TokensOnBlockchains,
-    | "contractAddress"
-    | "decimals"
-    | "isNative"
-    | "chainId"
+    "contractAddress" | "decimals" | "isNative" | "chainId"
   >
   | undefined;
   toWallet: string | undefined;
   amount: string;
   disabled?: boolean;
   txId: string;
-  extraPayload?: Partial<Pick<SaleTransactions, 'formOfPayment' | 'paidCurrency'>>;
+  extraPayload?: Partial<
+    Pick<SaleTransactions, "formOfPayment" | "paidCurrency">
+  >;
 
-  onSuccess: () => void;
+  onSuccess: (d: SuccessCryptoPaymentData) => void;
 }) {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
   const { activeAccount } = useActiveAccount();
 
   const { execute } = useActionListener(useAction(confirmCryptoTransaction), {
-    onSuccess: () => {
-      onSuccess();
+    onSuccess: (d) => {
+      const data = d as InferSafeActionFnResult<
+        typeof confirmCryptoTransaction
+      >;
+      onSuccess({
+        transactionHash: data.data?.transaction.txHash || "",
+        chainId: data.data?.transaction?.blockchain?.chainId || 0,
+        amountPaid: data.data?.transaction.amountPaid || "",
+        paidCurrency: data.data?.transaction.paidCurrency || "",
+        formOfPayment:
+          data.data?.transaction.formOfPayment || FOPSchema.enum.CRYPTO,
+        paymentDate: data.data?.transaction.paymentDate || new Date(),
+      });
       setIsTransactionDialogOpen(false);
     },
     onError: (error) => {
@@ -83,7 +96,6 @@ export function CryptoPaymentButton({
 
     const formattedAmount = toUnits(amount, chain.decimals);
 
-
     // Native token
     if (chain.isNative || chain.contractAddress === NATIVE_TOKEN_ADDRESS) {
       return prepareTransaction({
@@ -95,7 +107,7 @@ export function CryptoPaymentButton({
     }
     // ERC-20
     if (chain.decimals) {
-      console.log('ENTRANDO A ERC20', contract, amount)
+      console.log("ENTRANDO A ERC20", contract, amount);
       const txs = transfer({
         contract,
         amount,
@@ -105,15 +117,11 @@ export function CryptoPaymentButton({
       return txs;
       // Native BTC for example? :think
     } else {
-      throw new Error('NOT IMPLEMENTED')
+      throw new Error("NOT IMPLEMENTED");
       const txs = prepareContractCall({
         contract,
         method: resolveMethod("transfer"),
-        params: [
-          activeAccount?.address!,
-          toWallet,
-          formattedAmount,
-        ],
+        params: [activeAccount?.address!, toWallet, formattedAmount],
       });
       return txs;
     }
@@ -129,7 +137,6 @@ export function CryptoPaymentButton({
       amountPaid: amount,
       paymentDate: new Date(),
       ...(props.extraPayload && { extraPayload: props.extraPayload }),
-
     } as Parameters<typeof execute>[0];
     execute(payload);
   };
@@ -137,7 +144,7 @@ export function CryptoPaymentButton({
   return (
     <>
       <TransactionButton
-        className='w-full'
+        className="w-full"
         disabled={disabled}
         transaction={handleTransaction}
         onTransactionSent={(result) => {

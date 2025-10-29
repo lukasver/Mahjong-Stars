@@ -5,10 +5,9 @@ import { toast } from "@mjs/ui/primitives/sonner";
 import Decimal from "decimal.js";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
+import { SupportedFiatCurrency } from "node_modules/thirdweb/dist/types/pay/convert/type";
 import { useEffect, useState } from "react";
-import {
-  defineChain, NATIVE_TOKEN_ADDRESS
-} from "thirdweb";
+import { defineChain, NATIVE_TOKEN_ADDRESS } from "thirdweb";
 import { BuyWidget, useActiveWallet } from "thirdweb/react";
 import { shortenAddress } from "thirdweb/utils";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
@@ -23,16 +22,18 @@ import { CryptoPaymentButton } from "../confirmation-steps/crypto-payment-btn";
 import { PaymentStatusIndicator } from "../confirmation-steps/payment-status-indicator";
 import { PaymentInstructions } from "./instructions";
 import { OnRampSkeleton } from "./skeletons";
+import { SuccessCryptoPaymentData } from "./transaction";
 import { WithErrorHandler } from "./utils";
-
-const TEST_WALLET = "";
 
 const OnRampWidgetComponent = ({
   transaction: tx,
   onSuccessPayment,
 }: {
   transaction: TransactionByIdWithRelations;
-  onSuccessPayment: () => void;
+  onSuccessPayment: ({
+    transactionHash,
+    chainId,
+  }: SuccessCryptoPaymentData) => void;
 }) => {
   const [mounted, toggleMount] = useState(true);
   const [disabled, setDisabled] = useState(true);
@@ -120,7 +121,6 @@ const OnRampWidgetComponent = ({
     }
   }, [totalAmountToPay, pv]);
 
-
   const handleSuccessPurcharse = () => {
     toast.success("Purchase successful", {
       description: "Please proceed with payment",
@@ -129,8 +129,8 @@ const OnRampWidgetComponent = ({
     router.refresh();
   };
 
-  const handleSuccessPayment = () => {
-    onSuccessPayment();
+  const handleSuccessPayment = (d: SuccessCryptoPaymentData) => {
+    onSuccessPayment(d);
   };
 
   const handleReadyToPay = () => {
@@ -175,7 +175,7 @@ const OnRampWidgetComponent = ({
         <div className="shrink-0">
           <StaggeredRevealAnimation isVisible={mounted}>
             <BuyWidget
-              currency={tx.paidCurrency}
+              currency={tx.paidCurrency as SupportedFiatCurrency}
               client={client}
               title="Get Funds"
               chain={defineChain(chain.chainId)}

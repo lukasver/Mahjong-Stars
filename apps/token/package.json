@@ -88,10 +88,10 @@
 		"sanitize-html": "^2.17.0",
 		"server-only": "^0.0.1",
 		"sharp": "^0.34.3",
-		"thirdweb": "^5.105.37",
+		"thirdweb": "^5.110.5",
 		"usehooks-ts": "^3.1.1",
 		"xlsx": "^0.18.5",
-		"zod": "^3.25.67",
+		"zod": "^3.25.76",
 		"zod-prisma-types": "^3.2.4"
 	},
 	"browserslist": {
