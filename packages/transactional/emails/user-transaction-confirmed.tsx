@@ -1,17 +1,17 @@
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
+  Hr,
   Html,
   Link,
   Preview,
   Section,
   Text,
-  Hr,
-  Button,
-} from '@react-email/components';
-import * as styles from './shared-styles';
+} from "@react-email/components";
+import * as styles from "./shared-styles";
 
 interface UserTransactionConfirmationProps {
   userName: string;
@@ -44,9 +44,9 @@ export const UserTransactionNotification = ({
   vestingSchedule,
   transactionId,
   distributionDate,
-  dashboardUrl = '#',
+  dashboardUrl = "#",
   transactionUrl,
-  supportEmail = 'support@company.com',
+  supportEmail = "support@company.com",
   paidCurrency,
 }: {
   userName: string;
@@ -69,7 +69,7 @@ export const UserTransactionNotification = ({
   <Html>
     <Head />
     <Preview>
-      Transaction confirmed! You've successfully purchased {tokenAmount}{' '}
+      Transaction confirmed! You've successfully purchased {tokenAmount}{" "}
       {tokenSymbol}
     </Preview>
     <Body style={styles.main}>
@@ -82,10 +82,10 @@ export const UserTransactionNotification = ({
           <Text style={styles.greeting}>Hello {userName},</Text>
 
           <Text style={styles.paragraph}>
-            Congratulations! Your purchase of{' '}
+            Congratulations! Your purchase of{" "}
             <strong>
               {tokenName} ({tokenSymbol})
-            </strong>{' '}
+            </strong>{" "}
             tokens has been successfully confirmed and processed.
           </Text>
 
@@ -133,7 +133,7 @@ export const UserTransactionNotification = ({
           </Section>
 
           <Section style={styles.transactionBox}>
-            {paymentMethod === 'CRYPTO' ? (
+            {paymentMethod === "CRYPTO" ? (
               <>
                 <Text style={styles.h3}>Transaction Hash:</Text>
                 <Text style={styles.transactionHash}>{transactionHash}</Text>
@@ -167,16 +167,13 @@ export const UserTransactionNotification = ({
           <Section style={styles.nextStepsSection}>
             <Heading style={styles.h3}>What Happens Next?</Heading>
             <Text style={styles.listItem}>
-              • Your tokens are securely allocated to your wallet address
-            </Text>
-            <Text style={styles.listItem}>
               • You'll receive updates on token distribution timeline
             </Text>
             <Text style={styles.listItem}>
               • Access exclusive investor updates and project milestones
             </Text>
             <Text style={styles.listItem}>
-              • Monitor your investment performance in real-time
+              • Monitor your investment from your dashboard
             </Text>
           </Section>
 
@@ -200,7 +197,7 @@ export const UserTransactionNotification = ({
 
           <Text style={styles.footer}>
             Thank you for your investment! If you have any questions, please
-            contact us at{' '}
+            contact us at{" "}
             <Link href={`mailto:${supportEmail}`} style={styles.link}>
               {supportEmail}
             </Link>
@@ -218,23 +215,23 @@ export const UserTransactionNotification = ({
 );
 
 UserTransactionNotification.PreviewProps = {
-  userName: 'John Doe',
-  tokenName: 'MyToken',
-  tokenSymbol: 'MTK',
-  purchaseAmount: '1,000 USDC',
-  tokenAmount: '10,000',
+  userName: "John Doe",
+  tokenName: "MyToken",
+  tokenSymbol: "MTK",
+  purchaseAmount: "1,000 USDC",
+  tokenAmount: "10,000",
   transactionHash:
-    '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-  transactionTime: '2024-01-15 14:30:00 UTC',
-  paymentMethod: 'CRYPTO',
-  walletAddress: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-  vestingSchedule: '6-month cliff, 24-month linear vesting',
-  distributionDate: '2024-02-15',
-  dashboardUrl: 'https://dashboard.example.com',
-  transactionId: '1234567890',
+    "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  transactionTime: "2024-01-15 14:30:00 UTC",
+  paymentMethod: "CRYPTO",
+  walletAddress: "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6",
+  vestingSchedule: "6-month cliff, 24-month linear vesting",
+  distributionDate: "2024-02-15",
+  dashboardUrl: "https://dashboard.example.com",
+  transactionId: "1234567890",
   transactionUrl:
-    'https://etherscan.io/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-  supportEmail: 'support@example.com',
+    "https://etherscan.io/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  supportEmail: "support@example.com",
 } satisfies UserTransactionConfirmationProps;
 
 export default UserTransactionNotification;

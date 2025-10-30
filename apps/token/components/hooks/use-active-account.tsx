@@ -1,14 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useCallback, useTransition } from "react";
+import { useCallback } from "react";
 import {
   useActiveAccount as useActiveAccountThirdweb,
   useActiveWallet,
   useActiveWalletChain,
-  useActiveWalletConnectionStatus,
-  useDisconnect,
+  useActiveWalletConnectionStatus
 } from "thirdweb/react";
-import { getQueryClient } from "@/lib/services/query";
 
 function useActiveAccount() {
   const ac = useActiveAccountThirdweb();
@@ -17,23 +15,9 @@ function useActiveAccount() {
   const activeChain = useActiveWalletChain();
   const router = useRouter();
 
-  // const { data: profiles } = useProfiles({
-  //   client,
-  // });
-
-  const { disconnect } = useDisconnect();
-  const [isPending, startTransition] = useTransition();
-
-  const signout = useCallback(() => {
-    startTransition(async () => {
-      if (wallet) {
-        disconnect(wallet);
-        getQueryClient().clear();
-      }
-      // await logout({ redirectTo: "/", redirect: true });
-      router.push("/in?logout=true");
-    });
-  }, [wallet, disconnect]);
+  const signout = () => {
+    router.push("/in?logout=true");
+  }
 
   const signMessage = useCallback(
     async (message: string) => {
@@ -49,7 +33,7 @@ function useActiveAccount() {
   return {
     activeAccount: ac,
     status,
-    isLoading: isPending || status === "connecting",
+    isLoading: status === "connecting",
     isConnected: status === "connected",
     signout,
     signMessage,

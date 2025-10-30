@@ -307,10 +307,12 @@ const CryptoTransactionWidgetComponent = ({
             toast.error(error.message);
           }}
         />
-        <p>{isSupported ? "Supported" : "Not supported"}</p>
-        <p>Payment currency: {tx.totalAmountCurrency}</p>
-        <p>token to purchase: {paymentToken?.symbol}</p>
-        <Button onClick={handleCheckQuote}>Check quote</Button>
+        {process.env.NODE_ENV === "development" && <>
+          <p>{isSupported ? "Supported" : "Not supported"}</p>
+          <p>Payment currency: {tx.totalAmountCurrency}</p>
+          <p>token to purchase: {paymentToken?.symbol}</p>
+          <Button onClick={handleCheckQuote}>Check quote</Button>
+        </>}
       </div>
     </StaggeredRevealAnimation>
   );

@@ -52,6 +52,7 @@ import {
 	verifyJwt,
 } from "../auth/thirdweb";
 import { erc20Abi } from "../services/crypto/ABI";
+import logger from "../services/logger.server";
 import { authActionClient, loginActionClient } from "./config";
 
 export const hasActiveSession = async (address: string, token: string) => {
@@ -160,8 +161,9 @@ export const logout = loginActionClient
 	)
 	.action(async ({ parsedInput: { redirectTo, redirect: _redirect } }) => {
 		const data = String((await getSessionCookie()) || "");
-
+		logger("CALLED LOGOUT ACTION data", data);
 		await deleteSessionCookie();
+		logger("CALLED LOGOUT ACTION deleteSessionCookie");
 		if (data) {
 			const verified = await verifyJwt(data);
 			if (verified.valid) {
@@ -188,6 +190,9 @@ export const logout = loginActionClient
 				);
 			}
 		}
+
+		logger("CALLED LOGOUT ACTION _redirect: " + _redirect);
+
 		if (_redirect) {
 			redirect((redirectTo || "/") as Route);
 		}

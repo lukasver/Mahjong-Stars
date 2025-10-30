@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { COOKIE_NAME, COOKIE_PREFIX } from "@/common/config/constants";
 import { publicUrl } from "@/common/config/env";
 import "server-only";
+import logger from "../services/logger.server";
 
 /**
  * Determines the appropriate domain for cookie setting based on the environment
@@ -10,9 +11,9 @@ import "server-only";
 const getCookieDomain = (url: string): string | undefined => {
 	const hostname = new URL(url).hostname;
 
-	// For Vercel preview deployments, don't set domain to allow subdomain flexibility
+	// // For Vercel preview deployments, don't set domain to allow subdomain flexibility
 	if (hostname.includes(".vercel.app")) {
-		return undefined; // This allows the cookie to work on the exact domain
+		return `.${hostname}`; // This allows the cookie to work on the exact domain
 	}
 
 	// For custom domains, extract the root domain
@@ -22,10 +23,10 @@ const getCookieDomain = (url: string): string | undefined => {
 		if (parts.length > 2) {
 			return parts.slice(-2).join(".");
 		}
-		return hostname;
+		return `.${hostname}`;
 	}
 
-	return hostname;
+	return `.${hostname}`;
 };
 
 export const getSessionCookie = async (
@@ -55,6 +56,7 @@ export const setSessionCookie = async (
 	const c = await cookies();
 	// Extract hostname from publicUrl
 	const domain = getCookieDomain(publicUrl);
+	logger("SET SESSION COOKIE domain: " + domain);
 	c.set(cookieName, jwt, {
 		domain,
 		httpOnly: true,
@@ -73,7 +75,8 @@ export const deleteSessionCookie = async (
 	const cookieName = opts.cookiePrefix + COOKIE_NAME;
 	const c = await cookies();
 	// Extract hostname from publicUrl to match the domain used when setting the cookie
-	const domain = new URL(publicUrl).hostname;
+	const domain = getCookieDomain(publicUrl);
+	logger("DELETE SESSION COOKIE domain: " + domain);
 	// Set the cookie with an expired date to effectively delete it
 	c.set(cookieName, "", {
 		domain,

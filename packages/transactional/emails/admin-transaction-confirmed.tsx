@@ -1,17 +1,17 @@
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
+  Hr,
   Html,
   Link,
   Preview,
   Section,
   Text,
-  Hr,
-  Button,
-} from '@react-email/components';
-import * as styles from './shared-styles';
+} from "@react-email/components";
+import * as styles from "./shared-styles";
 
 interface AdminTransactionNotificationProps {
   adminName?: string;
@@ -33,7 +33,7 @@ interface AdminTransactionNotificationProps {
 }
 
 export const AdminTransactionNotification = ({
-  adminName = 'Admin',
+  adminName = "Admin",
   userName,
   userEmail,
   tokenName,
@@ -45,9 +45,9 @@ export const AdminTransactionNotification = ({
   paymentMethod,
   walletAddress,
   transactionId,
-  dashboardUrl = '#',
-  transactionUrl = '#',
-  supportEmail = 'support@company.com',
+  dashboardUrl = "#",
+  transactionUrl = "#",
+  supportEmail = "support@company.com",
   paidCurrency,
 }: {
   adminName?: string;
@@ -70,7 +70,7 @@ export const AdminTransactionNotification = ({
   <Html>
     <Head />
     <Preview>
-      New ICO transaction confirmed: {userName} purchased {tokenAmount}{' '}
+      New ICO transaction confirmed: {userName} purchased {tokenAmount}{" "}
       {tokenSymbol}
     </Preview>
     <Body style={styles.main}>
@@ -83,10 +83,10 @@ export const AdminTransactionNotification = ({
           <Text style={styles.greeting}>Hello {adminName},</Text>
 
           <Text style={styles.paragraph}>
-            A new transaction has been successfully confirmed for the{' '}
+            A new transaction has been successfully confirmed for the{" "}
             <strong>
               {tokenName} ({tokenSymbol})
-            </strong>{' '}
+            </strong>{" "}
             ICO sale.
           </Text>
 
@@ -126,7 +126,7 @@ export const AdminTransactionNotification = ({
           </Section>
 
           <Section style={styles.transactionBox}>
-            {paymentMethod === 'CRYPTO' ? (
+            {paymentMethod === "CRYPTO" ? (
               <>
                 <Text style={styles.h3}>Transaction Hash:</Text>
                 <Text style={styles.transactionHash}>{transactionHash}</Text>
@@ -161,20 +161,17 @@ export const AdminTransactionNotification = ({
               • Transaction has been automatically processed
             </Text>
             <Text style={styles.listItem}>
-              • Tokens will be distributed according to vesting schedule
-            </Text>
-            <Text style={styles.listItem}>
               • Customer confirmation email has been sent
             </Text>
             <Text style={styles.listItem}>
-              • Sale metrics have been updated in real-time
+              • Sale metrics have been updated
             </Text>
           </Section>
 
           <Hr style={styles.divider} />
 
           <Text style={styles.footer}>
-            For any questions or issues, contact support at{' '}
+            For any questions or issues, contact support at{" "}
             <Link href={`mailto:${supportEmail}`} style={styles.link}>
               {supportEmail}
             </Link>
@@ -192,23 +189,23 @@ export const AdminTransactionNotification = ({
 );
 
 AdminTransactionNotification.PreviewProps = {
-  adminName: 'Admin User',
-  userName: 'John Doe',
-  userEmail: 'john.doe@example.com',
-  tokenName: 'MyToken',
-  tokenSymbol: 'MTK',
-  purchaseAmount: '1,000 USDC',
-  tokenAmount: '10,000',
+  adminName: "Admin User",
+  userName: "John Doe",
+  userEmail: "john.doe@example.com",
+  tokenName: "MyToken",
+  tokenSymbol: "MTK",
+  purchaseAmount: "1,000 USDC",
+  tokenAmount: "10,000",
   transactionHash:
-    '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-  transactionTime: '2024-01-15 14:30:00 UTC',
-  paymentMethod: 'TRANSFER',
-  walletAddress: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-  dashboardUrl: 'https://admin.example.com',
-  transactionId: '1234567890',
+    "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  transactionTime: "2024-01-15 14:30:00 UTC",
+  paymentMethod: "TRANSFER",
+  walletAddress: "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6",
+  dashboardUrl: "https://admin.example.com",
+  transactionId: "1234567890",
   transactionUrl:
-    'https://etherscan.io/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-  supportEmail: 'support@example.com',
+    "https://etherscan.io/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  supportEmail: "support@example.com",
 } satisfies AdminTransactionNotificationProps;
 
 export default AdminTransactionNotification;

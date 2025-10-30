@@ -22,10 +22,8 @@ const getPublicUrl = () => {
 					process.env.VERCEL_PROJECT_PRODUCTION_URL
 					? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
 					: vercelUrl;
-			case "stage":
-				return process.env.NEXT_PUBLIC_DOMAIN || vercelUrl;
 			case "preview":
-				return vercelUrl;
+				return process.env.NEXT_PUBLIC_DOMAIN || vercelUrl;
 			default:
 				return process.env.NEXT_PUBLIC_DOMAIN || vercelUrl;
 		}
@@ -124,6 +122,8 @@ export const env = createEnv({
 
 //Cannot do this with serverside variables
 const _publicUrl = env.NEXT_PUBLIC_DOMAIN;
+
+console.debug("PUBLIC URL: " + _publicUrl);
 
 if (!_publicUrl) {
 	throw new Error("Missing NEXT_PUBLIC_DOMAIN");
