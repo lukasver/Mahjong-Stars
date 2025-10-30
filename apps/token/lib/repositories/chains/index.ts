@@ -34,8 +34,22 @@ export class BlockchainController {
 				},
 			});
 
+			// Sort chains by default chain id if present
+			const defaultChainId =
+				process.env.DEFAULT_CHAIN_ID && Number(process.env.DEFAULT_CHAIN_ID);
+			let sortedChains = chains;
+			if (defaultChainId) {
+				sortedChains = chains.sort((a, b) =>
+					a.chainId === defaultChainId
+						? -1
+						: b.chainId === defaultChainId
+							? 1
+							: 0,
+				);
+			}
+
 			return Success({
-				chains,
+				chains: sortedChains,
 			});
 		} catch (e) {
 			logger(e);

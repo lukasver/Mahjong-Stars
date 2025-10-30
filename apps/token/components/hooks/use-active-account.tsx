@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import {
   useActiveAccount as useActiveAccountThirdweb,
@@ -13,10 +12,11 @@ function useActiveAccount() {
   const status = useActiveWalletConnectionStatus();
   const wallet = useActiveWallet();
   const activeChain = useActiveWalletChain();
-  const router = useRouter();
+  // const router = useRouter();
+  // const [isPending, startTransition] = useTransition();
 
   const signout = () => {
-    router.push("/in?logout=true");
+    window.location.href = "/in?logout=true";
   }
 
   const signMessage = useCallback(

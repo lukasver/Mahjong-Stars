@@ -3,7 +3,8 @@
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { defineChain } from "thirdweb";
 // import { bscTestnet, sepolia } from "thirdweb/chains";
-import { ConnectButton } from "thirdweb/react";
+import { ConnectButton, useActiveWalletChain, useSwitchActiveWalletChain } from "thirdweb/react";
+
 import { Wallet } from "thirdweb/wallets";
 import {
   doLogin,
@@ -43,8 +44,15 @@ export const ConnectWallet = ({
 }) => {
   const mappedLocale = locale ? localeMapping[locale] : "en_US";
   const { signout } = useActiveAccount();
+  const activeChain = useActiveWalletChain();
+  const switchActiveWalletChain = useSwitchActiveWalletChain();
 
   const onConnect = (wallet: Wallet) => {
+    const desired = process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || props.chains?.[0]?.chainId;
+    if (desired && activeChain?.id !== desired) {
+      // Switch to the first provided chain as the default
+      void switchActiveWalletChain(defineChain(Number(desired)));
+    }
     props.onConnect?.(wallet);
   };
 
@@ -63,7 +71,6 @@ export const ConnectWallet = ({
       //   sponsorGas: false,
       //   // factoryAddress: '',
       // }}
-
       detailsModal={{
         // https://portal.thirdweb.com/references/typescript/v5/ConnectButton_detailsModalOptions
         manageWallet: {
