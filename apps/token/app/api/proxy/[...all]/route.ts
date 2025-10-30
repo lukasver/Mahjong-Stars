@@ -228,8 +228,6 @@ export const GET = withAuth(async (req, context, auth) => {
 					// Parse and validate the query parameters using the DTO schema
 					const parsedParams = GetUsersDto.parse(qParamsObject);
 
-					console.log("🚀 ~ route.ts:230 ~ parsedParams:", parsedParams);
-
 					const data = await users.getAllUsers(parsedParams, {
 						address: auth.address,
 						userId: auth.userId,

@@ -171,7 +171,6 @@ const CryptoTransactionWidgetComponent = ({
         contractAddress: paymentToken?.address || NATIVE_TOKEN_ADDRESS,
       };
 
-      console.log("🚀 ~ transaction.tsx:152 ~ chain:", chain);
 
       const contract = getContract({
         client: client,
@@ -181,10 +180,6 @@ const CryptoTransactionWidgetComponent = ({
 
       const formattedAmount = toUnits(amount, chain.decimals);
 
-      console.log(
-        "🚀 ~ transaction.tsx:167 ~ formattedAmount:",
-        formattedAmount,
-      );
 
       // Native token
       if (chain.isNative || chain.contractAddress === NATIVE_TOKEN_ADDRESS) {
@@ -246,7 +241,6 @@ const CryptoTransactionWidgetComponent = ({
         sender: activeAccount?.address || "",
       });
 
-      console.debug("🚀 ~ transaction.tsx:225 ~ res:", res);
     } catch (e) {
       toast.error(
         e instanceof Error

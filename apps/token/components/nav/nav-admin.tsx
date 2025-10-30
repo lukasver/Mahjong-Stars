@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { ChevronRight } from 'lucide-react';
+import { Icon } from "@mjs/ui/components/icons";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@mjs/ui/primitives/collapsible';
+} from "@mjs/ui/primitives/collapsible";
 import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from '@mjs/ui/primitives/sidebar';
-
-import { Icon } from '@mjs/ui/components/icons';
-import AppLink from '../link';
+} from "@mjs/ui/primitives/sidebar";
+import { ChevronRight } from "lucide-react";
+import { Route } from "next";
+import AppLink from "../link";
 
 export function NavAdmin({
   items,
@@ -39,14 +39,14 @@ export function NavAdmin({
           key={item.title}
           asChild
           defaultOpen={item.isActive}
-          className='group/collapsible'
+          className="group/collapsible"
         >
           <SidebarMenuItem>
             <CollapsibleTrigger asChild>
               <SidebarMenuButton tooltip={item.title}>
                 <Icon icon={item.icon} />
                 <span>{item.title}</span>
-                <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
+                <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
               </SidebarMenuButton>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -54,7 +54,7 @@ export function NavAdmin({
                 {item.items?.map((subItem) => (
                   <SidebarMenuSubItem key={subItem.title}>
                     <SidebarMenuSubButton asChild>
-                      <AppLink href={subItem.url} prefetch={true}>
+                      <AppLink href={subItem.url as Route} prefetch={true}>
                         <span>{subItem.title}</span>
                       </AppLink>
                     </SidebarMenuSubButton>

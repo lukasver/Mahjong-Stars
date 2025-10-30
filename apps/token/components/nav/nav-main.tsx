@@ -17,6 +17,7 @@ import {
   SidebarMenuSubItem,
 } from "@mjs/ui/primitives/sidebar";
 import { ChevronRight, ExternalLink, type LucideIcon } from "lucide-react";
+import { Route } from "next";
 import AppLink from "../link";
 
 export function NavMain({
@@ -59,8 +60,9 @@ export function NavMain({
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
                         <AppLink
-                          href={subItem.url}
-                          prefetch={true}
+                          href={subItem.url as Route}
+                          // Do not prefetch if opening in new window
+                          prefetch={!subItem.openInNew}
                           target={subItem.openInNew ? "_blank" : undefined}
                         >
                           <div

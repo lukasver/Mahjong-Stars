@@ -1,4 +1,5 @@
 import "server-only";
+import { invariant } from "@epic-web/invariant";
 import { createThirdwebClient, getUser } from "thirdweb";
 import { createAuth } from "thirdweb/auth";
 import { refreshJWT as refreshJWTUtils } from "thirdweb/utils";
@@ -17,11 +18,16 @@ import {
 	ProfileDetails,
 } from "../types/profile-details";
 
+invariant(env.THIRDWEB_API_SECRET, "THIRDWEB_API_SECRET is not set");
+invariant(env.THIRDWEB_TEAM_ID, "THIRDWEB_TEAM_ID is not set");
+invariant(
+	env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+	"NEXT_PUBLIC_THIRDWEB_CLIENT_ID is not set",
+);
 // secretKey for serverside usage, wont be available in client
 export const serverClient = createThirdwebClient({
 	secretKey: env.THIRDWEB_API_SECRET,
 	teamId: env.THIRDWEB_TEAM_ID,
-	clientId: env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
 });
 
 const auth = createAuth({
@@ -32,6 +38,7 @@ const auth = createAuth({
 		client: serverClient,
 		privateKey: env.THIRDWEB_ADMIN_PRIVATE_KEY,
 	}),
+
 	jwt: {
 		// One day
 		expirationTimeSeconds: JWT_EXPIRATION_TIME,
@@ -87,7 +94,7 @@ export const refreshJWT = async (jwt: string) => {
 export const getUserFromAddress = async (address: string) => {
 	return await getUser({ client: serverClient, walletAddress: address }).catch(
 		(e) => {
-			console.log("Error fetching user from address w/ thirdweb");
+			logger("Error fetching user from address w/ thirdweb");
 			logger(e);
 			return null;
 		},
@@ -179,3 +186,5 @@ export const extractEmailVerification = (
 
 	return null;
 };
+
+export const runtime = "nodejs";

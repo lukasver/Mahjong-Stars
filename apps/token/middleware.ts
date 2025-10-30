@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { COOKIE_PREFIX, MW_KEY } from "./common/config/constants";
-import { deleteSessionCookie, getSessionCookie } from "./lib/auth/cookies";
-import { verifyJwt } from "./lib/auth/thirdweb";
+import { getSessionCookie } from "./lib/auth/cookies";
 import log from "./lib/services/logger.server";
 
 const PUBLIC_ROUTES: string[] = ["/", "/onboarding", "/test", "/in"];
@@ -40,11 +39,7 @@ export default async (req: NextRequest) => {
 			if (!magicWord) {
 				return NextResponse.redirect(new URL("/onboarding", req.url));
 			}
-			const verified = await verifyJwt(sessionCookie);
-			if (!verified.valid) {
-				await deleteSessionCookie();
-				return NextResponse.next();
-			}
+
 			return NextResponse.redirect(new URL("/dashboard", req.url));
 		}
 		case "/dashboard":

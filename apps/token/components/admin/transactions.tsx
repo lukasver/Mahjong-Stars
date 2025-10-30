@@ -3,6 +3,7 @@
 import { Badge } from "@mjs/ui/primitives/badge";
 import { Button } from "@mjs/ui/primitives/button";
 import { BanknoteArrowUp, X } from "lucide-react";
+import { Route } from "next";
 import { useRouter } from "next/navigation";
 import { AdminTransactionsWithRelations } from "@/common/types/transactions";
 import { useAllTransactions } from "@/lib/services/api";
@@ -24,7 +25,7 @@ export default function AdminTransactions({
     // Remove userId from URL to show all transactions
     const url = new URL(window.location.href);
     url.searchParams.delete("userId");
-    router.push(url.pathname + url.search);
+    router.push((url.pathname + url.search) as Route);
   };
 
   if (isLoading) {

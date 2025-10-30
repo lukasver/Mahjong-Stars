@@ -21,6 +21,7 @@ import { FOP, Prisma, TransactionStatus } from "@prisma/client";
 import Decimal from "decimal.js";
 import { Copy, ExternalLink } from "lucide-react";
 import { DateTime } from "luxon";
+import { Route } from "next";
 import { useLocale } from "next-intl";
 import type React from "react";
 import { FIAT_CURRENCIES } from "@/common/config/constants";
@@ -152,7 +153,6 @@ export function TransactionDetailsModal({
   const { data: user } = useUser();
   const locale = useLocale();
 
-
   if (!id) return null;
   const tx = data?.transaction;
 
@@ -170,7 +170,6 @@ export function TransactionDetailsModal({
 
   const isCryptoPayment = tx.formOfPayment === FOP.CRYPTO;
   const isFiatCurrency = FIAT_CURRENCIES.includes(tx.paidCurrency);
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -208,7 +207,6 @@ export function TransactionDetailsModal({
                   <div className="text-2xl font-bold">
                     {safeFormatCurrency(
                       {
-
                         totalAmount: tx.totalAmount.toString(),
                         currency: tx.totalAmountCurrency,
                       },
@@ -218,17 +216,20 @@ export function TransactionDetailsModal({
                     )}
                   </div>
                 ) : null}
-                {tx.totalAmountCurrency !== tx.paidCurrency && <span className="text-xs text-muted">
-                  ~ {safeFormatCurrency(
-                    {
-                      totalAmount: tx.amountPaid || tx.totalAmount.toString(),
-                      currency: tx.paidCurrency,
-                    },
-                    {
-                      locale,
-                    },
-                  )}
-                </span>}
+                {tx.totalAmountCurrency !== tx.paidCurrency && (
+                  <span className="text-xs text-muted">
+                    ~{" "}
+                    {safeFormatCurrency(
+                      {
+                        totalAmount: tx.amountPaid || tx.totalAmount.toString(),
+                        currency: tx.paidCurrency,
+                      },
+                      {
+                        locale,
+                      },
+                    )}
+                  </span>
+                )}
               </div>
               <div className="glassy text-foreground p-4 rounded-lg">
                 <div className="text-sm text-secondary">Tokens Purchased</div>
@@ -271,9 +272,7 @@ export function TransactionDetailsModal({
           {/* Sale Information */}
           <div>
             <h3 className="text-lg font-semibold mb-3">Sale Information</h3>
-            <div className="space-y-1"
-              data-sale-id={tx.sale.id}
-            >
+            <div className="space-y-1" data-sale-id={tx.sale.id}>
               <DetailRow label="Sale Name" value={tx.sale.name} />
 
               <DetailRow label="Token Symbol" value={tx.tokenSymbol} />
@@ -283,8 +282,7 @@ export function TransactionDetailsModal({
           <Separator />
 
           {/* Token Information */}
-          <div
-          >
+          <div>
             <h3 className="text-lg font-semibold mb-3">Token Information</h3>
             <div className="space-y-1">
               <DetailRow
@@ -343,7 +341,9 @@ export function TransactionDetailsModal({
               ) : (
                 <DetailRow label="Amount Paid" value="Awaiting payment" />
               )}
-              {isFiatCurrency && <DetailRow label="Currency" value={tx.paidCurrency} />}
+              {isFiatCurrency && (
+                <DetailRow label="Currency" value={tx.paidCurrency} />
+              )}
               {tx.comment && <DetailRow label="Comment" value={tx.comment} />}
             </div>
           </div>
@@ -509,7 +509,7 @@ export function TransactionDetailsModal({
           </Button>
           {user?.id === tx.userId &&
             tx.status === TransactionStatus.PENDING && (
-              <AppLink href={`/dashboard/buy/${tx.id}`} prefetch>
+              <AppLink href={`/dashboard/buy/${tx.id}` as Route} prefetch>
                 <Button>Continue Transaction</Button>
               </AppLink>
             )}

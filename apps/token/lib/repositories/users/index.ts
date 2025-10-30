@@ -149,16 +149,11 @@ class UsersController {
 			let lastName = "";
 			let image: string | undefined;
 
-			console.debug("ANTES CHECKING ADDRESS");
 			// Check if user has more data in social provider to augment user profile
 			const twUser = await getUserFromAddress(address);
 
-			console.debug("🚀 ~ index.ts:154 ~ twUser:", twUser);
-
 			if (twUser) {
 				const verif = extractEmailVerification(twUser.profiles);
-
-				console.log("🚀 ~ index.ts:160 ~ verif:", verif);
 
 				if (verif) {
 					email = verif.email || email;

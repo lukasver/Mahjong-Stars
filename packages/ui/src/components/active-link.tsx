@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useActiveLink } from '@mjs/ui/hooks/use-active-link';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React, { useState, useEffect, Children } from 'react';
+import { useActiveLink } from "@mjs/ui/hooks/use-active-link";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React, { Children, useEffect, useState } from "react";
 
 type ActiveLinkProps = {
   children: React.ReactElement;
@@ -25,7 +25,7 @@ const ActiveLink = ({
 
   const child = Children.only(children);
   // @ts-expect-error wontfix
-  const childClassName = child.props.className || '';
+  const childClassName = child.props.className || "";
   const [className, setClassName] = useState(childClassName);
 
   useEffect(() => {
@@ -53,7 +53,12 @@ const ActiveLink = ({
   };
 
   return (
-    <Link {...props} href={props.href} onClick={handleHashChange(props.href)}>
+    <Link
+      {...props}
+      // When migrating rest of apps to nextjs 15+ cast to Route
+      href={props.href as any}
+      onClick={handleHashChange(props.href)}
+    >
       {React.cloneElement(child, {
         // @ts-expect-error wontfix
         className: className || null,

@@ -1,6 +1,11 @@
 import ErrorBoundary from "@mjs/ui/components/error-boundary";
 import { VisuallyHidden } from "@mjs/ui/primitives/visually-hidden";
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import {
   DashboardCardLoading,
@@ -16,17 +21,27 @@ import {
 } from "@/components/dashboard/loading-components";
 import { RecentTransactionsSSR } from "@/components/dashboard/recent-transactions";
 import { FeatureCards } from "@/components/feature-cards";
-import { getActiveSale } from "@/lib/services/fetchers.server";
+import {
+  getActiveSale,
+  getUserFromSession,
+} from "@/lib/services/fetchers.server";
 import { ComingSoonContent } from "../../../components/coming-soon";
 import { FundraisingProgress } from "../../../components/dashboard/fundraising-progress";
 
-export default async function DashboardPage(_props: PageProps) {
+export default async function DashboardPage(_props: PageProps<"/dashboard">) {
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: ["sales", "active"],
-    queryFn: () => getActiveSale(),
-  });
+  const [user] = await Promise.all([
+    getUserFromSession(),
+    queryClient.prefetchQuery({
+      queryKey: ["sales", "active"],
+      queryFn: () => getActiveSale(),
+    }),
+  ]);
+
+  if (!user) {
+    redirect("/in?error=invalid_session");
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

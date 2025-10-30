@@ -21,8 +21,6 @@ export const isLoggedIn = async (address: string) => {
 export const doLogin = async (params: LoginParams) => {
 	const res = await login(params);
 
-	console.log("🚀 ~ actions.ts:24 ~ res:", res);
-
 	if (!res?.serverError || res.validationErrors) {
 		throw new Error("Login failed");
 	}

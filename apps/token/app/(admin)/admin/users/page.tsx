@@ -6,16 +6,8 @@ import {
 import { ListUsers } from "@/components/admin/list-users";
 import { getAllUsers } from "@/lib/services/fetchers.server";
 
-interface PageProps {
-  searchParams: Promise<{
-    page?: string;
-    limit?: string;
-    search?: string;
-    kycStatus?: string;
-  }>;
-}
 
-export default async function AdminUsersPage({ searchParams }: PageProps) {
+export default async function AdminUsersPage({ searchParams }: PageProps<'/admin/users'>) {
   const queryClient = new QueryClient();
   const query = await searchParams;
 
@@ -24,18 +16,18 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
       "users",
       "admin",
       {
-        page: query.page ? parseInt(query.page) : 1,
-        limit: query.limit ? parseInt(query.limit) : 20,
+        page: query.page ? parseInt(query.page as string) : 1,
+        limit: query.limit ? parseInt(query.limit as string) : 20,
         search: query.search,
         kycStatus: query.kycStatus,
       },
     ],
     queryFn: () =>
       getAllUsers({
-        page: query.page ? parseInt(query.page) : 1,
-        limit: query.limit ? parseInt(query.limit) : 20,
-        search: query.search,
-        kycStatus: query.kycStatus,
+        page: query.page ? parseInt(query.page as string) : 1,
+        limit: query.limit ? parseInt(query.limit as string) : 20,
+        search: query.search as string | undefined,
+        kycStatus: query.kycStatus as string | undefined,
       }),
   });
 

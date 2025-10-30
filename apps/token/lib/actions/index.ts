@@ -4,6 +4,7 @@ import { invariant } from "@epic-web/invariant";
 import { FOP, Prisma } from "@prisma/client";
 import { waitUntil } from "@vercel/functions";
 import Decimal from "decimal.js";
+import { Route } from "next";
 import { cookies } from "next/headers";
 import { RedirectType, redirect } from "next/navigation";
 import { defineChain, getContract as getContractThirdweb } from "thirdweb";
@@ -110,15 +111,10 @@ export const login = loginActionClient
 	.schema(LoginParams)
 	.action(async ({ parsedInput }) => {
 		const verifiedPayload = await verifyAuthPayload(parsedInput);
-
-		console.log("🚀 ~ index.ts:114 ~ verifiedPayload:", verifiedPayload);
-
 		if (!verifiedPayload.valid) {
 			redirect("/?error=invalid_payload");
 		}
 		const { payload } = verifiedPayload;
-
-		console.log("VERIFIED PAYLOAD");
 		// Here should go the JWT logic
 		const [jwt] = await Promise.all([
 			generateJWT(payload, {
@@ -193,7 +189,7 @@ export const logout = loginActionClient
 			}
 		}
 		if (_redirect) {
-			redirect(redirectTo || "/");
+			redirect((redirectTo || "/") as Route);
 		}
 	});
 

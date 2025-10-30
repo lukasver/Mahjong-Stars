@@ -182,7 +182,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
 
   return (
     <>
-      {process.env.NODE_ENV === "development" && <Button onClick={() => console.debug("🚀 ~ saft-review-step.tsx:178 ~ FORM VALUES:", form.state.values)}>check values</Button>}
+      {process.env.NODE_ENV === "development" && <Button onClick={() => console.debug("FORM VALUES:", form.state.values)}>check values</Button>}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

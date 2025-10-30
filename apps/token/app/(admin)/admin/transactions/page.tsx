@@ -6,16 +6,10 @@ import {
 import AdminTransactions from "@/components/admin/transactions";
 import { getAllTransactions } from "@/lib/services/fetchers.server";
 
-interface PageProps {
-  searchParams: Promise<{
-    saleId?: string;
-    userId?: string;
-  }>;
-}
 
 export default async function AdminTransactionsPage({
   searchParams,
-}: PageProps) {
+}: PageProps<'/admin/transactions'>) {
   const queryClient = new QueryClient();
   const query = await searchParams;
   const saleId = query.saleId;

@@ -290,9 +290,6 @@ export class RatesController {
 		}
 		try {
 			const { chainId, amount, originTokenAddress, sender } = params;
-
-			console.log("🚀 ~ rates.ts:288 ~ params:", params);
-
 			const token = await prisma.tokensOnBlockchains.findFirst({
 				where: {
 					chainId: chainId,
@@ -326,7 +323,7 @@ export class RatesController {
 				client: serverClient,
 			});
 
-			console.log("🚀 ~ rates.ts:307 ~ preparedQuote:", preparedQuote);
+			console.log(" rates.ts:307 ~ preparedQuote:", preparedQuote);
 
 			return Success(preparedQuote);
 		} catch (e) {

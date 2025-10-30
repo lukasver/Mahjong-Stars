@@ -6,7 +6,7 @@ import {
 import { UserTransactions } from "@/components/transactions";
 import { getUserTransactions } from "@/lib/services/fetchers.server";
 
-export default async function TransactionsPage(_props: PageProps) {
+export default async function TransactionsPage(_props: PageProps<'/dashboard/transactions'>) {
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
     queryKey: ["transactions", "user", "me", {}],

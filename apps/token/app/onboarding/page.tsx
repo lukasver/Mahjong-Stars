@@ -13,7 +13,7 @@ import {
 } from "@/lib/services/fetchers.server";
 import { VerifyEmail } from "../../components/verify-email";
 
-export default async function Onboarding({ searchParams }: PageProps) {
+export default async function Onboarding({ searchParams }: PageProps<'/onboarding'>) {
   const [res, params, c] = await Promise.all([
     getCurrentUser().catch(() => null),
     searchParams,
@@ -34,8 +34,6 @@ export default async function Onboarding({ searchParams }: PageProps) {
   if (!user.emailVerified && user.walletAddress) {
     // Check email and verify
     const result = await checkUserAndVerifyEmail(user.walletAddress);
-
-    console.log("🚀 ~ page.tsx:38 ~ result:", result);
 
     if (result) {
       defaultEmail = result;

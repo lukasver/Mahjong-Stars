@@ -6,7 +6,7 @@ import {
 import { CreateSaleForm } from "@/components/admin/create-sales";
 import { getSale } from "@/lib/actions";
 
-export default async function AdminPage({ params, searchParams }: PageProps) {
+export default async function AdminPage({ params, searchParams }: PageProps<'/admin/sales/create'>) {
   const [_, { saleId }] = await Promise.all([params, searchParams]);
 
   const queryClient = new QueryClient();

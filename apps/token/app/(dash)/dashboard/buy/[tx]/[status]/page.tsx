@@ -6,7 +6,7 @@ import Success from "./success";
 export default async function StatusPage({
   params,
   searchParams,
-}: PageProps<{ status: "success" | "failure" | "pending" }>) {
+}: PageProps<'/dashboard/buy/[tx]/[status]'>) {
   const [p, sp] = await Promise.all([params, searchParams]);
   if (p.status === "success") {
     return <Success />;

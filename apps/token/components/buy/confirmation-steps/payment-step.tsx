@@ -229,9 +229,6 @@ const CryptoPayment = ({
             <CryptoComponent transaction={tx} onSuccessPayment={onSuccess} />
             {/* <BalanceChecker
               onBalanceCheck={(result) => {
-
-                console.log("🚀 ~ payment-step.tsx:200 ~ result:", result);
-
                 setIsBalanceSufficient(result);
               }}
               requiredAmount={tx.totalAmount.toString()}

@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import { Logo } from '@/components/logo';
-import { cn } from '@mjs/ui/lib/utils';
-import { Button } from '@mjs/ui/primitives/button';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { cn } from "@mjs/ui/lib/utils";
+import { Button } from "@mjs/ui/primitives/button";
+import { Route } from "next";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Logo } from "@/components/logo";
 
 /**
  * ComingSoon page for the buy dashboard section.
  * Shows a coming soon message and a button to go to the dashboard.
  */
-export const ComingSoon = ({ to = '/dashboard' }: { to?: string }) => {
+export const ComingSoon = ({ to = "/dashboard" }: { to?: string }) => {
   return (
-    <div className='grid place-content-center min-h-[100dvh] sm:min-h-[800px] w-full h-full'>
+    <div className="grid place-content-center min-h-[100dvh] sm:min-h-[800px] w-full h-full">
       <ComingSoonContent to={to} />
     </div>
   );
@@ -25,34 +26,34 @@ export const ComingSoonContent = ({
   to: string | undefined;
   className?: string;
 }) => {
-  const t = useTranslations('Global');
+  const t = useTranslations("Global");
   const router = useRouter();
   const handleClick = () => {
     if (to) {
-      router.push(to);
+      router.push(to as Route);
     }
   };
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center h-full w-full p-4 sm:p-6 md:p-8 rounded-xl gap-4 sm:gap-6 -mt-10',
-        className
+        "flex flex-col items-center justify-center h-full w-full p-4 sm:p-6 md:p-8 rounded-xl gap-4 sm:gap-6 -mt-10",
+        className,
       )}
     >
-      <div className='w-16 sm:w-20 md:w-24 flex justify-center'>
-        <Logo variant='iconXl' />
+      <div className="w-16 sm:w-20 md:w-24 flex justify-center">
+        <Logo variant="iconXl" />
       </div>
-      <h2 className='text-xl sm:text-2xl md:text-3xl font-semibold text-center leading-tight max-w-full'>
-        {t('soon')}
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center leading-tight max-w-full">
+        {t("soon")}
       </h2>
       {to && (
         <Button
-          type='button'
-          variant='primary'
+          type="button"
+          variant="primary"
           onClick={handleClick}
-          className='w-full max-w-xs'
+          className="w-full max-w-xs"
         >
-          {t('goDashboard')}
+          {t("goDashboard")}
         </Button>
       )}
     </div>

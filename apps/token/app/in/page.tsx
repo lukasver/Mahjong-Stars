@@ -3,7 +3,7 @@ import BackgroundWrapper from "@/components/bg-wrapper";
 import { PulseLoader } from "@/components/pulse-loader";
 import { AuthRedirect } from "./auth-redirect";
 
-export default async function AuthRedirectPage(_props: PageProps) {
+export default async function AuthRedirectPage(_props: PageProps<'/in'>) {
   return (
     <BackgroundWrapper>
       <div className="relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40">

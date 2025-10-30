@@ -10,7 +10,6 @@ const Failure = ({ code }: { code?: string }) => {
   if (code === "KYC_BLOCKED") {
     reason = "KYC verification failed or rejected, please contact support";
   }
-  console.log("🚀 ~ failure.tsx:13 ~ reason:", reason);
   return (
     <FailureContent
       reason={reason}
