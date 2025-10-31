@@ -6,6 +6,7 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { metadata as siteConfig } from "@/common/config/site";
+import packageJson from "../package.json";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
@@ -59,13 +60,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const [locale, messages] = await Promise.all([getLocale(), getMessages()]);
+  const deploymentId =
+    process.env.VERCEL_GIT_COMMIT_SHA || packageJson.version || "unknown";
   return (
     <html lang={locale}>
       <body
         className={`${fontClash.variable} ${fontTeachers.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-          <Providers>
+          <Providers deploymentId={deploymentId}>
             {children}
             <Toaster />
             {process.env.NODE_ENV === "production" && <VercelAnalytics />}

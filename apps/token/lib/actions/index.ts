@@ -567,11 +567,11 @@ export const validateMagicWord = authActionClient
 		}
 		const c = await cookies();
 		c.set(`${COOKIE_PREFIX}_${MW_KEY}`, MW_KEY, {
-			httpOnly: true,
+			httpOnly: false,
 			secure: process.env.NODE_ENV === "production",
 			maxAge: ONE_YEAR * 100, // Set to effectively never expire (100 years)
 			path: "/",
-			sameSite: "strict",
+			sameSite: "lax",
 		});
 		return true;
 	});

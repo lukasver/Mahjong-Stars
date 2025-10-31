@@ -77,6 +77,11 @@ export const env = createEnv({
 		NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: z.string().min(1),
 		NEXT_PUBLIC_MAIN_WALLET: z.string().min(1),
 		NEXT_PUBLIC_BUCKET_PUBLIC_URL: z.string().url().min(1),
+		NEXT_PUBLIC_CLEAR_STORAGE_ON_DEPLOYMENT: z.preprocess(
+			(val) => val === "true" || val === "1",
+			z.boolean().optional().default(false),
+		),
+		NEXT_PUBLIC_DEPLOYMENT_ID: z.string().optional(),
 	},
 	runtimeEnv: {
 		DOCUMENSO_WEBHOOK_API_KEY: process.env.DOCUMENSO_WEBHOOK_API_KEY,
@@ -88,6 +93,9 @@ export const env = createEnv({
 			process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
 		NEXT_PUBLIC_THIRDWEB_CLIENT_ID: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
 		NEXT_PUBLIC_MAIN_WALLET: process.env.NEXT_PUBLIC_MAIN_WALLET,
+		NEXT_PUBLIC_CLEAR_STORAGE_ON_DEPLOYMENT:
+			process.env.NEXT_PUBLIC_CLEAR_STORAGE_ON_DEPLOYMENT,
+		NEXT_PUBLIC_DEPLOYMENT_ID: process.env.NEXT_PUBLIC_DEPLOYMENT_ID,
 		IS_PRODUCTION: process.env.NODE_ENV === "production",
 		IS_DEV: process.env.NODE_ENV === "development",
 		IS_TEST: process.env.NODE_ENV === "test",
@@ -122,8 +130,6 @@ export const env = createEnv({
 
 //Cannot do this with serverside variables
 const _publicUrl = env.NEXT_PUBLIC_DOMAIN;
-
-console.debug("PUBLIC URL: " + _publicUrl);
 
 if (!_publicUrl) {
 	throw new Error("Missing NEXT_PUBLIC_DOMAIN");

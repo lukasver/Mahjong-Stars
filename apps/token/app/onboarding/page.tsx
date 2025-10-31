@@ -46,11 +46,17 @@ export default async function Onboarding({ searchParams }: PageProps<'/onboardin
     redirect("/dashboard");
   }
 
+  let initialStep: 1 | 2 | 3 | undefined;
+  if (user.emailVerified && !magicWord) {
+    initialStep = 1;
+  }
+
   return (
     <Container>
       <Suspense fallback={<PulseLoader text="Wait for it..." />}>
         <VerifyEmail
           token={params.token ? String(params.token) : ""}
+          initialStep={initialStep}
           email={
             !defaultEmail || defaultEmail?.startsWith("temp_")
               ? undefined

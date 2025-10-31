@@ -1099,6 +1099,7 @@ class TransactionsController {
 							transactionUrl: `${publicUrl}/admin/transactions?txId=${tx.id}`,
 						}),
 						transactionTime: new Date().toISOString(),
+						supportEmail: metadata.supportEmail,
 					},
 				}),
 				// Notify user

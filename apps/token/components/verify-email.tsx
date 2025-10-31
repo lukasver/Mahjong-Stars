@@ -48,13 +48,15 @@ const titleMapping = {
 export function VerifyEmail({
   token,
   email,
+  initialStep,
 }: {
   token: string;
-  email?: string;
+  email?: string
+  initialStep?: 1 | 2 | 3;
 }) {
   const [magicWord] = useLocalStorage(MW_KEY, "");
   const { data, isLoading } = useUser();
-  const [step, setStep] = useState<1 | 2 | 3>(token ? 3 : magicWord ? 2 : 1);
+  const [step, setStep] = useState<1 | 2 | 3>(initialStep ?? (token ? 3 : magicWord ? 2 : 1));
   const router = useRouter();
 
   const handleCancel = async () => {
@@ -82,7 +84,13 @@ export function VerifyEmail({
             <MagicWordForm
               key={1}
               onCancel={handleCancel}
-              onSuccess={() => handleNextStep(2)}
+              onSuccess={() => {
+                if (initialStep) {
+                  router.push("/dashboard");
+                } else {
+                  handleNextStep(2);
+                }
+              }}
             />
           )}
           {step === 2 && (
