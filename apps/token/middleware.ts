@@ -35,13 +35,13 @@ export default async (req: NextRequest) => {
 	const magicWord = req.cookies.get(`${COOKIE_PREFIX}_${MW_KEY}`);
 
 	switch (req.nextUrl.pathname) {
-		case "/": {
-			if (!magicWord) {
-				return NextResponse.redirect(new URL("/onboarding", req.url));
-			}
+		// case "/": {
+		// 	if (!magicWord) {
+		// 		return NextResponse.redirect(new URL("/onboarding", req.url));
+		// 	}
 
-			return NextResponse.redirect(new URL("/dashboard", req.url));
-		}
+		// 	return NextResponse.redirect(new URL("/dashboard", req.url));
+		// }
 		case "/dashboard":
 			if (!magicWord) {
 				return NextResponse.redirect(new URL("/onboarding", req.url));

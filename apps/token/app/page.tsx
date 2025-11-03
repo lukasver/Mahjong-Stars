@@ -2,14 +2,25 @@ import { invariant } from "@epic-web/invariant";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { ConnectWallet } from "@/components/connect-wallet";
 import { Logo, LogoAnimate } from "@/components/logo";
+import { getSessionCookie } from "@/lib/auth/cookies";
+import { verifyJwt } from "@/lib/auth/thirdweb";
 import { getBlockchains } from "@/lib/services/fetchers.server";
 import { getQueryClient } from "@/lib/services/query";
 
 export default async function Login() {
+  const session = await getSessionCookie();
+  if (session) {
+    const verified = await verifyJwt(session).catch(() => null);
+    if (verified?.valid) {
+      redirect("/dashboard");
+    }
+  }
+
   return (
     <div className={"grid min-h-[100dvh] grid-rows-[auto_1fr_auto]"}>
       <div />

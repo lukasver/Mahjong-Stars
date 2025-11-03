@@ -165,8 +165,10 @@ export const logout = loginActionClient
 		await deleteSessionCookie();
 		logger("CALLED LOGOUT ACTION deleteSessionCookie");
 		if (data) {
-			const verified = await verifyJwt(data);
-			if (verified.valid) {
+			const verified = await verifyJwt(data).catch(() => {
+				return { valid: false, parsedJWT: null };
+			});
+			if (verified.valid && verified.parsedJWT) {
 				const hashedJwt = hashJwt(data);
 				waitUntil(
 					Promise.allSettled([
