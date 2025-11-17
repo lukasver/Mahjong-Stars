@@ -37,7 +37,7 @@ const cspHeader = `
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com;
-    img-src 'self' data: blob: ${MAIN_DOMAIN} https://*.ipfscdn.io https://*.walletconnect.org https://*.walletconnect.com https://storage.googleapis.com;
+    img-src 'self' data: blob: ${MAIN_DOMAIN} https://*.ipfscdn.io https://*.walletconnect.org https://*.walletconnect.com https://storage.googleapis.com https://i.ibb.co;
     object-src 'none';
     base-uri 'self';
     form-action 'self';

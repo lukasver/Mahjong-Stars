@@ -86,8 +86,6 @@ async function main(req: IncomingMessage, res: ServerResponse) {
 		}
 		const body = parsed.data;
 
-		console.log("🚀 ~ main.ts:89 ~ body:", body.recipients);
-
 		console.log(`Starting PDF generation...`);
 		console.time("PDF generated");
 		const { pageCount, buffer } = await generatePdf(body.content);

@@ -25,6 +25,12 @@ export const wallets = [
 			// passkeyDomain: env.NEXT_PUBLIC_DOMAIN,
 			mode: "popup",
 		},
+		...(env.NEXT_PUBLIC_SPONSOR_GAS_FEES && {
+			executionMode: {
+				mode: "EIP7702",
+				sponsorGas: true,
+			},
+		}),
 		metadata: {
 			name: metadata.businessName,
 			image: {

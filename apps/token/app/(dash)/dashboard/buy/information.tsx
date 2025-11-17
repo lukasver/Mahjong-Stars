@@ -35,6 +35,7 @@ import { InformationSchemaAsStrings } from "@/common/schemas/dtos/sales/informat
 import { Document } from "@/common/schemas/generated";
 import { SaleWithToken } from "@/common/types/sales";
 import { FieldDescription } from "@/components/buy/fields";
+import { BuyTokenButtonClient } from "@/components/buy-token-button/buy-token-button.client";
 import ImagesSection from "@/components/images-gallery";
 import { Placeholder } from "@/components/placeholder";
 import { useSaleDocuments } from "@/lib/services/api";
@@ -96,6 +97,13 @@ export const ProjectInformation = ({
             </TabsTrigger>
           </TabsList>
 
+          <div className="sm:hidden py-2 mt-2">
+            <BuyTokenButtonClient
+              symbol={sale.tokenSymbol}
+              className="w-full"
+            />
+          </div>
+
           <TabsContent value="info" className="mt-6">
             <ProjectInfoTab sale={sale} />
           </TabsContent>
@@ -116,7 +124,7 @@ const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
     sale?.information as unknown as InformationSchemaAsStrings["information"];
   if (!information) return null;
   return (
-    <div className="mt-4">
+    <div className="sm:mt-4">
       <Accordion
         type="multiple"
         className="w-full"

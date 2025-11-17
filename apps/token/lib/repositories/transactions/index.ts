@@ -379,16 +379,26 @@ class TransactionsController {
 			let kycTier: KycTierType | "BLOCKED" | null = null;
 			// Derive if the TX requires saft based on:
 			if (tx.sale.requiresKYC) {
-				const result = await this.checkMaxAllowanceWithKYC(
-					{ amount: tx.totalAmount, currency: tx.totalAmountCurrency },
-					ctx,
-				);
+				// For payments in CC the KYC is done by the bank, so we don't need to check KYC
+				if (tx.formOfPayment === FOP.CARD) {
+					kycTier = null;
+				}
 
-				kycTier =
-					result.result === "FAILURE"
-						? // Default tier to apply if failed to check KYC
-							KycTierSchema.enum.ENHANCED
-						: result.result;
+				if (
+					tx.formOfPayment === FOP.CRYPTO ||
+					tx.formOfPayment === FOP.TRANSFER
+				) {
+					const result = await this.checkMaxAllowanceWithKYC(
+						{ amount: tx.totalAmount, currency: tx.totalAmountCurrency },
+						ctx,
+					);
+
+					kycTier =
+						result.result === "FAILURE"
+							? // Default tier to apply if failed to check KYC
+								KycTierSchema.enum.ENHANCED
+							: result.result;
+				}
 			}
 
 			return Success({
@@ -420,6 +430,7 @@ class TransactionsController {
 				totalAmount,
 				paidCurrency,
 			} = dto;
+
 			const userId = ctx.userId;
 			invariant(saleId, "Sale id missing");
 			invariant(userId, "User id missing");
