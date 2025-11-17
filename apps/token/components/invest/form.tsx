@@ -2,6 +2,8 @@
 
 import { invariant } from "@epic-web/invariant";
 import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
+import { useHash } from "@mjs/ui/hooks/use-hash";
+import { cn } from "@mjs/ui/lib/utils";
 import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
 import { Button } from "@mjs/ui/primitives/button";
 import { Card, CardContent } from "@mjs/ui/primitives/card";
@@ -23,8 +25,9 @@ import { Input } from "@mjs/ui/primitives/input";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
 import { formatCurrency } from "@mjs/utils/client";
-import { Prisma } from "@prisma/client";
+import { FOP, Prisma } from "@prisma/client";
 import { FileText, Shield } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { InferSafeActionFnResult } from "next-safe-action";
@@ -33,7 +36,7 @@ import { useCallback, useRef, useState, useTransition } from "react";
 import { Account } from "thirdweb/wallets";
 import z from "zod";
 import { FIAT_CURRENCIES } from "@/common/config/constants";
-import { KycStatusSchema } from "@/common/schemas/generated";
+import { FOPSchema, KycStatusSchema } from "@/common/schemas/generated";
 import { TransactionModalTypes } from "@/common/types";
 import { SaleWithToken } from "@/common/types/sales";
 import { FormError, FormErrorProps } from "@/components/form-error";
@@ -42,12 +45,14 @@ import { createTransaction } from "@/lib/actions";
 import {
   useInputOptions,
   usePendingTransactionsForSale,
+  useSaleBanks,
   useSaleInvestInfo,
   useUser,
   useUserKyc,
 } from "@/lib/services/api";
 import calculator from "@/lib/services/pricefeeds";
 import { getQueryClient } from "@/lib/services/query";
+import { FiatPaymentSelector } from "./fiat-payment";
 import { InvestFormSchema } from "./schemas";
 import { PurchaseSummary } from "./summary";
 
@@ -64,6 +69,10 @@ export const InvestForm = ({
 }) => {
   const { activeAccount } = useActiveAccount();
   const { data: kycData, isLoading: loadingKyc } = useUserKyc();
+  const [paymentMethod, setPaymentMethod] = useState<
+    Omit<FOP, "CRYPTO"> | null
+  >(null);
+  const [hash] = useHash();
 
   const { data: user } = useUser();
   const errorCountRef = useRef(0);
@@ -79,6 +88,10 @@ export const InvestForm = ({
   );
 
   const { data, isLoading } = useSaleInvestInfo(props.sale.id);
+  const { data: banks } = useSaleBanks(
+    props.sale.id,
+  );
+
   const [isPending, startTransition] = useTransition();
   const action = useActionListener(useAction(createTransaction), {
     onSuccess: (d) => {
@@ -109,6 +122,10 @@ export const InvestForm = ({
         pendingTransactions?.transactions?.length &&
         pendingTransactions.transactions.length > 0;
 
+      if (action.isPending) {
+        return;
+      }
+
       if (hasPendingTransaction) {
         openModal(TransactionModalTypes.PendingTx);
         return;
@@ -118,6 +135,7 @@ export const InvestForm = ({
         openModal(TransactionModalTypes.VerifyEmail);
         return;
       }
+
 
       // @ts-expect-error fixme
       action.execute(value);
@@ -186,7 +204,7 @@ export const InvestForm = ({
       const q = form.getFieldValue("paid.quantity") || 1;
       try {
         invariant(q, "Quantity is required");
-
+        form.setFieldValue("fop", FIAT_CURRENCIES.includes(v) ? FOPSchema.enum.CARD : FOPSchema.enum.CRYPTO);
         // Change to original currency
         if (v === sale?.currency) {
           resetCurrencyAndPPU(q);
@@ -266,9 +284,14 @@ export const InvestForm = ({
     pendingTransactions?.transactions?.length &&
     pendingTransactions.transactions.length > 0;
 
+  const shouldPulse = hash === "#invest-component";
+
+  const hasBanks = banks?.banks && banks?.banks?.length > 0;
+
   return (
     <form.AppForm>
       <form className="space-y-4" onSubmit={handleSubmit}>
+
         {/* Wallet */}
         <FormInput
           name="receivingWallet"
@@ -368,18 +391,25 @@ export const InvestForm = ({
           </div>
 
           {children}
+
           {hasPendingTransaction ? (
             <Button
               onClick={() => openModal(TransactionModalTypes.PendingTx)}
-              // || !amount || !paymentMethod}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50"
+              className={cn(
+                "w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50",
+                shouldPulse && "animate-pulse",
+              )}
               type="button"
             >
               <Shield className="w-4 h-4 mr-2" />
               Continue pending transaction
             </Button>
           ) : (
-            <PurchaseButton loading={action.isExecuting} disabled={isPending}>
+            <PurchaseButton
+              loading={action.isExecuting}
+              disabled={isPending}
+              pulse={shouldPulse}
+            >
               <PurchaseSummary sale={sale} />
               {sale.requiresKYC && (
                 <Alert className="bg-secondary-800/50 border-secondary">
@@ -399,23 +429,31 @@ export const InvestForm = ({
                   </AlertDescription>
                 </Alert>
               )}
-              {/* @ts-expect-error fixme */}
-              <SubmitButton form={form} onSubmit={handleSubmit} />
+              <SubmitButton
+                form={form}
+                onSubmit={handleSubmit}
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                hasBanks={!!hasBanks}
+                isPending={action.isPending}
+              />
             </PurchaseButton>
           )}
-          <SecurityNotice />
+        </div>
+        <SecurityNotice />
 
-          {process.env.NODE_ENV === "development" && (
-            <>
-              <Button onClick={() => console.debug(form.state.values)}>
-                checkvalue
-              </Button>
+        {process.env.NODE_ENV === "development" && (
+          <div className="flex gap-2 justify-between">
+            <Button onClick={() => console.debug(form.state.values)}>
+              checkvalue
+            </Button>
+            <Link href={`/dashboard/buy`}>
               <Button onClick={() => console.debug(form.getAllErrors())}>
                 Check errors
               </Button>
-            </>
-          )}
-        </div>
+            </Link>
+          </div>
+        )}
       </form>
     </form.AppForm>
   );
@@ -424,30 +462,52 @@ export const InvestForm = ({
 const SubmitButton = ({
   form,
   onSubmit,
+  paymentMethod,
+  setPaymentMethod,
+  hasBanks,
+  isPending,
 }: {
   form: unknown;
-  onSubmit: () => void;
+  onSubmit: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  paymentMethod: Omit<FOP, "CRYPTO"> | null;
+  setPaymentMethod: (method: Omit<FOP, "CRYPTO">) => void;
+  hasBanks: boolean;
+  isPending: boolean;
 }) => {
   return (
     // @ts-expect-error fixme
     <form.Subscribe
       // @ts-expect-error fixme
-      selector={(state) => ({
-        isValid: state.isValid,
-        isSubmitting: state.isSubmitting,
-      })}
+      selector={(state) => {
+        return {
+          isValid: state.isValid,
+          isSubmitting: state.isSubmitting || isPending,
+          isFiatPayment:
+            state.values.paid.currency &&
+            FIAT_CURRENCIES.includes(state.values.paid.currency)
+        };
+      }}
     >
       {/* @ts-expect-error fixme */}
-      {({ isValid, isSubmitting }) => (
-        <Button
-          type={"button"}
-          onClick={onSubmit}
-          disabled={!isValid}
-          loading={isSubmitting}
-        >
-          Proceed
-        </Button>
-      )}
+      {({ isValid, isSubmitting, isFiatPayment }) =>
+        isFiatPayment ? (
+          <FiatPaymentSelector
+            onClick={onSubmit}
+            disabled={!isValid}
+            loading={isSubmitting}
+            hasBanks={hasBanks}
+          />
+        ) : (
+          <Button
+            type={"button"}
+            onClick={onSubmit}
+            disabled={!isValid}
+            loading={isSubmitting || isPending}
+          >
+            Proceed
+          </Button>
+        )
+      }
       {/* @ts-expect-error fixme */}
     </form.Subscribe>
   );
@@ -455,11 +515,13 @@ const SubmitButton = ({
 
 const PurchaseButton = ({
   children,
+  pulse = false,
   ...props
 }: {
   loading?: boolean;
   disabled?: boolean;
   children?: React.ReactNode;
+  pulse?: boolean;
 }) => {
   const { isConnected } = useActiveAccount();
   const form = useFormContext() as unknown as UseAppForm;
@@ -479,7 +541,10 @@ const PurchaseButton = ({
             <Button
               disabled={!isConnected || props.disabled}
               // || !amount || !paymentMethod}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50"
+              className={cn(
+                "w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50",
+                pulse && "animate-pulse",
+              )}
               type="button"
               loading={isSubmitting || props.loading}
             >
@@ -498,6 +563,7 @@ const PurchaseButton = ({
     </Dialog>
   );
 };
+
 const SecurityNotice = () => {
   return (
     <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">

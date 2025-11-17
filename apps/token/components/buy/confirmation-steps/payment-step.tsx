@@ -88,8 +88,6 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
   }, [tx?.transaction?.status]);
 
   const handleCryptoSuccessPayment = (d: SuccessCryptoPaymentData) => {
-    console.debug('Q CALLBACK PAYLOADT', d);
-
     // amount paid can vary if the user paid in a different token than selected, Example: selected fiat but ended up payingi n ETH
     const payload = {
       txId,
@@ -103,7 +101,6 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
         paidCurrency: d.paidCurrency,
       }
     } as Parameters<typeof execute>[0];
-    console.debug('Q SE MANDA PARA O BACK', payload);
     execute(payload);
   };
 

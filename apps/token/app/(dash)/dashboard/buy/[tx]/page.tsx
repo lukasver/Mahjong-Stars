@@ -65,9 +65,10 @@ const getSteps = (
 
 export default async function TransactionConfiramationPage({
   params,
+  searchParams,
 }: PageProps<'/dashboard/buy/[tx]'>) {
   const queryClient = new QueryClient();
-  const [p, user] = await Promise.all([params, getCurrentUser()]);
+  const [p, user, sp] = await Promise.all([params, getCurrentUser(), searchParams]);
 
   const tx = await queryClient.fetchQuery({
     queryKey: ["transactions", p.tx],

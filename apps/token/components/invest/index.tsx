@@ -52,6 +52,11 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
         </CardHeader>
       }
     >
+      {/* Div used to scroll into view with required margin top */}
+      <div
+        className='invisible md:hidden absolute -top-20'
+        id='invest-component'
+      />
       <div
         className={cn(
           "mb-6 font-medium grid grid-cols-1 items-center gap-x-4 gap-y-4 text-xs text-foreground",

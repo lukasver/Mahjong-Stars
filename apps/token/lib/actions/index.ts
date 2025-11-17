@@ -362,9 +362,11 @@ export const createTransaction = authActionClient
 			{
 				tokenSymbol: parsedInput.tokenSymbol,
 				quantity: new Prisma.Decimal(parsedInput.paid.quantity),
-				formOfPayment: FIAT_CURRENCIES.includes(parsedInput.paid.currency)
-					? FOP.TRANSFER
-					: FOP.CRYPTO,
+				formOfPayment:
+					parsedInput.fop ||
+					(FIAT_CURRENCIES.includes(parsedInput.paid.currency)
+						? FOP.TRANSFER
+						: FOP.CRYPTO),
 				receivingWallet: parsedInput.receivingWallet,
 				saleId: parsedInput.saleId,
 				totalAmount: parsedInput.paid.amount as unknown as Decimal,

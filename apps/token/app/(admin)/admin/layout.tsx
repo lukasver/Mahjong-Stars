@@ -1,25 +1,25 @@
-import AdminSidebar from '@/app/(dash)/dashboard/admin-sidebar';
-import { DashboardHeader } from '@/app/(dash)/dashboard/header';
-import { PagesProviders } from '@/app/providers';
-import { getFooterLinks, metadata } from '@/common/config/site';
-import BackgroundWrapper from '@/components/bg-wrapper';
-import { BuyTokenButton } from '@/components/buy-token-button';
-import { InputOptionsProvider } from '@/components/hooks/use-input-options';
-import { DashboardSidebar } from '@/components/sidebar';
+import { Footer } from "@mjs/ui/components/footer";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import React, { Suspense } from "react";
+import AdminSidebar from "@/app/(dash)/dashboard/admin-sidebar";
+import { DashboardHeader } from "@/app/(dash)/dashboard/header";
+import { PagesProviders } from "@/app/providers";
+import { getFooterLinks, metadata } from "@/common/config/site";
+import BackgroundWrapper from "@/components/bg-wrapper";
+import { BuyTokenButton } from "@/components/buy-token-button";
+import { InputOptionsProvider } from "@/components/hooks/use-input-options";
+import { DashboardSidebar } from "@/components/sidebar";
 import {
   getCurrentUser,
   getUserFromSession,
-} from '@/lib/services/fetchers.server';
-import { isAdmin } from '@/lib/utils';
-import { Footer } from '@mjs/ui/components/footer';
-import {
-  HydrationBoundary,
-  QueryClient,
-  dehydrate,
-} from '@tanstack/react-query';
-import { getTranslations } from 'next-intl/server';
-import { redirect } from 'next/navigation';
-import React, { Suspense } from 'react';
+} from "@/lib/services/fetchers.server";
+import { isAdmin } from "@/lib/utils";
 
 export default async function AdminLayout({
   children,
@@ -34,11 +34,11 @@ export default async function AdminLayout({
   ]);
 
   if (!user || !isAdmin(user.roles)) {
-    redirect('/?error=unauthorized');
+    redirect("/?error=unauthorized");
   }
 
   await queryClient.prefetchQuery({
-    queryKey: ['user', 'me'],
+    queryKey: ["user", "me"],
     queryFn: () => getCurrentUser(),
   });
 
@@ -52,7 +52,7 @@ export default async function AdminLayout({
                 <AdminSidebar />
               </Suspense>
             </DashboardSidebar>
-            <section className='flex-1 grid grid-rows-[auto_1fr_auto]'>
+            <section className="flex-1 grid grid-rows-[auto_1fr_auto]">
               <DashboardHeader>
                 <Suspense fallback={null}>
                   <BuyTokenButton />
@@ -60,8 +60,8 @@ export default async function AdminLayout({
               </DashboardHeader>
               <InputOptionsProvider>
                 <BackgroundWrapper>
-                  <div className='relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40'>
-                    <main className='container mx-auto z-10 py-4 sm:py-10 px-4 sm:px-10 xl:px-20 xl:py-20'>
+                  <div className="relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-primary before:to-5% before:to-transparent before:pointer-events-none before:-z-40">
+                    <main className="container mx-auto z-10 py-4 sm:py-10 px-4 sm:px-10 xl:px-20 xl:py-20">
                       {children}
                     </main>
                   </div>
@@ -70,10 +70,10 @@ export default async function AdminLayout({
               <Footer
                 siteConfig={metadata}
                 links={getFooterLinks(t)}
-                copyright={t('Footer.copyright', {
+                copyright={t("Footer.copyright", {
                   year: new Date().getFullYear(),
                 })}
-                className='bg-black'
+                className="bg-black"
               />
             </section>
           </>
@@ -83,4 +83,4 @@ export default async function AdminLayout({
   );
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";

@@ -212,11 +212,12 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
                           {parseFloat(
                             sale.tokenPricePerUnit.toString(),
                           ).toFixed(3)}{" "}
-                          |{" "}
+                          {/* |{" "} */}
                           {effectiveStatus === SaleStatus.FINISHED ? (
                             <>
-                              <span className="font-medium">Raised:</span> $
-                              {raised.toLocaleString()}
+                              {null}
+                              {/* <span className="font-medium">Raised:</span> $
+                              {raised.toLocaleString()} */}
                             </>
                           ) : (
                             <>
