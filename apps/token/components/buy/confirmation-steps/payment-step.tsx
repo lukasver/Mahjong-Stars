@@ -13,12 +13,7 @@ import {
 } from "@mjs/ui/primitives/card";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@mjs/ui/primitives/tabs";
+import { Tabs, TabsContent } from "@mjs/ui/primitives/tabs";
 import { copyToClipboard, safeFormatCurrency } from "@mjs/utils/client";
 import { TransactionStatus } from "@prisma/client";
 import { notFound, useParams } from "next/navigation";
@@ -26,6 +21,8 @@ import { useLocale } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { FIAT_CURRENCIES, ONE_MINUTE } from "@/common/config/constants";
+import { metadata as siteConfig } from "@/common/config/site";
+import { FOPSchema } from "@/common/schemas/generated";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import {
   BankDetailsCard,
@@ -50,7 +47,10 @@ import {
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
 import { OnRampWidget } from "../widgets/onramp";
-import { CryptoTransactionWidget, SuccessCryptoPaymentData } from "../widgets/transaction";
+import {
+  CryptoTransactionWidget,
+  SuccessCryptoPaymentData,
+} from "../widgets/transaction";
 import { isFileWithPreview } from "./utils";
 
 interface PaymentStepProps {
@@ -94,12 +94,11 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
       receipt: d.transactionHash,
       chainId: d.chainId,
       amountPaid: d.amountPaid,
-      paymentDate: d.paymentDate || new Date,
+      paymentDate: d.paymentDate || new Date(),
       extraPayload: {
-        formOfPayment:
-          d.formOfPayment,
+        formOfPayment: d.formOfPayment,
         paidCurrency: d.paidCurrency,
-      }
+      },
     } as Parameters<typeof execute>[0];
     execute(payload);
   };
@@ -156,12 +155,16 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
       </motion.div>
       <CardContent>
         {paymentMethod !== "CRYPTO" ? (
-          <FiatPayment tx={tx.transaction}
+          <FiatPayment
+            tx={tx.transaction}
             onSuccess={onSuccess}
             onSuccessCrypto={handleCryptoSuccessPayment}
           />
         ) : (
-          <CryptoPayment tx={tx.transaction} onSuccess={handleCryptoSuccessPayment} />
+          <CryptoPayment
+            tx={tx.transaction}
+            onSuccess={handleCryptoSuccessPayment}
+          />
         )}
       </CardContent>
     </>
@@ -182,8 +185,6 @@ const CryptoPayment = ({
     isLoading,
     error,
   } = useCryptoTransaction(tx.id, { chainId: chainId || 0 });
-
-  // const [isBalanceSufficient, setIsBalanceSufficient] = useState(false);
 
   return (
     <div className="py-2 text-center space-y-4">
@@ -223,57 +224,14 @@ const CryptoPayment = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.4 }}
           >
-            <CryptoComponent transaction={tx} onSuccessPayment={onSuccess} />
-            {/* <BalanceChecker
-              onBalanceCheck={(result) => {
-                setIsBalanceSufficient(result);
-              }}
-              requiredAmount={tx.totalAmount.toString()}
-              tokenAddress={
-                cryptoTransaction.paymentToken.contractAddress || undefined
-              }
-              tokenSymbol={cryptoTransaction.paymentToken.tokenSymbol}
-              isNativeToken={cryptoTransaction.paymentToken.isNative}
-              chainId={cryptoTransaction.blockchain.chainId}
-              onAddFunds={() => {
-                // Open external link to add funds
-                window.open("https://binance.com", "_blank");
-              }}
-            /> */}
+            <CryptoComponent
+              transaction={tx}
+              onSuccessPayment={onSuccess}
+              showHelp
+            />
           </motion.div>
         )
       )}
-
-      {/* {!isLoading && cryptoTransaction?.paymentToken && (
-        <>
-          <Banner
-            size={"sm"}
-            message={
-              <>
-                Always ensure you are sending funds to the sale owner wallet:{" "}
-                <span className="font-medium text-secondary-500">
-                  {shortenAddress(tx.sale.toWalletsAddress)}
-                </span>
-              </>
-            }
-          />
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.4 }}
-            className="flex flex-col gap-2"
-          >
-            <CryptoPaymentButton
-              chain={cryptoTransaction?.paymentToken}
-              toWallet={cryptoTransaction?.transaction?.sale?.toWalletsAddress}
-              amount={tx.totalAmount.toString()}
-              disabled={!isBalanceSufficient}
-              txId={tx.id}
-              onSuccess={onSuccess}
-            />
-          </motion.div>
-        </>
-      )} */}
     </div>
   );
 };
@@ -281,7 +239,7 @@ const CryptoPayment = ({
 const FiatPayment = ({
   tx,
   onSuccess,
-  onSuccessCrypto
+  onSuccessCrypto,
 }: {
   tx: TransactionByIdWithRelations;
   onSuccess: () => void;
@@ -295,9 +253,9 @@ const FiatPayment = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"CARD" | "TRANSFER">(
-    "CARD",
-  );
+  // const [paymentMethod, setPaymentMethod] = useState<"CARD" | "TRANSFER">(
+  //   "CARD",
+  // );
 
   /**
    * Handles the upload of the bank slip file.
@@ -384,35 +342,42 @@ const FiatPayment = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <CryptoComponent transaction={tx} onSuccessPayment={onSuccessCrypto} />
+        <CryptoComponent
+          transaction={tx}
+          onSuccessPayment={onSuccessCrypto}
+          showHelp
+        />
       </motion.div>
     );
   }
 
-  // If banks are available, show tabs for payment method selection
-  const hasBanks = banks?.banks && banks.banks.length > 0;
-
   return (
     <div className="space-y-4">
-      {hasBanks ? (
+      {[FOPSchema.enum.CARD, FOPSchema.enum.TRANSFER].includes(
+        tx.formOfPayment,
+      ) ? (
         <Tabs
-          value={paymentMethod}
-          onValueChange={(value) =>
-            setPaymentMethod(value as "CARD" | "TRANSFER")
-          }
+          value={tx.formOfPayment}
+        // onValueChange={(value) =>
+        //   setPaymentMethod(value as "CARD" | "TRANSFER")
+        // }
         >
-          <TabsList className="grid w-full grid-cols-2">
+          {/* <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="CARD">Card Payment</TabsTrigger>
             <TabsTrigger value="TRANSFER">Bank Transfer</TabsTrigger>
-          </TabsList>
+          </TabsList> */}
 
-          <TabsContent value="CARD">
+          <TabsContent value={FOPSchema.enum.CARD}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              <CryptoComponent transaction={tx} onSuccessPayment={onSuccessCrypto} />
+              <CryptoComponent
+                transaction={tx}
+                onSuccessPayment={onSuccessCrypto}
+                showHelp
+              />
             </motion.div>
           </TabsContent>
 
@@ -550,7 +515,11 @@ const FiatPayment = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <CryptoComponent transaction={tx} onSuccessPayment={onSuccessCrypto} />
+          <CryptoComponent
+            transaction={tx}
+            onSuccessPayment={onSuccessCrypto}
+            showHelp
+          />
         </motion.div>
       )}
     </div>
@@ -596,11 +565,36 @@ type CryptoComponentProps = {
   mode?: "transaction" | "onramp";
   transaction: TransactionByIdWithRelations;
   onSuccessPayment: (d: SuccessCryptoPaymentData) => void;
+
+  showHelp?: boolean;
 };
 const CryptoComponent = (props: CryptoComponentProps) => {
   const { mode = "transaction", ...rest } = props;
+
   return mode === "transaction" ? (
-    <CryptoTransactionWidget {...rest} />
+    <div className="space-y-4">
+      {props.showHelp && (
+        <div className="space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600 max-w-[398] mx-auto">
+          <h4 className="text-secondary-300 font-medium">Important notice:</h4>
+          <div className="space-y-2 text-sm">
+            <p>
+              Payments with credit card are processed by Thirdweb Payments
+              providers. <br />
+              You will be redirected to fund your current wallet with the
+              required amount of crypto to pay for the tokens.
+              <br />
+              This process can take a couple minutes, please do not close this
+              page.
+            </p>
+          </div>
+        </div>
+      )}
+      <CryptoTransactionWidget {...rest} />
+      <p className='text-center'>
+        Need help?{" "}
+        <a className="transition-all text-secondary-300 hover:underline hover:text-secondary-500" href={`mailto:${siteConfig.supportEmail}`}>Contact support</a>
+      </p>
+    </div>
   ) : (
     <OnRampWidget {...rest} />
   );

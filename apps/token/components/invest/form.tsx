@@ -462,15 +462,11 @@ export const InvestForm = ({
 const SubmitButton = ({
   form,
   onSubmit,
-  paymentMethod,
-  setPaymentMethod,
   hasBanks,
   isPending,
 }: {
   form: unknown;
   onSubmit: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  paymentMethod: Omit<FOP, "CRYPTO"> | null;
-  setPaymentMethod: (method: Omit<FOP, "CRYPTO">) => void;
   hasBanks: boolean;
   isPending: boolean;
 }) => {

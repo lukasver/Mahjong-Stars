@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@mjs/ui/primitives/radio-group";
 import { Banknote, CreditCard } from "lucide-react";
 import { useEffect } from "react";
 import { z } from "zod";
+import { metadata } from "@/common/config/site";
 import { FOPSchema } from "@/common/schemas/generated";
 import { InvestFormSchema } from "./schemas";
 
@@ -45,9 +46,7 @@ export function FiatPaymentSelector({
           {(field) => (
             <field.FormItem>
               <RadioGroup
-                value={
-                  (field.state.value as string | null) || "CARD"
-                }
+                value={(field.state.value as string | null) || "CARD"}
                 onValueChange={(value) => {
                   field.setValue(value);
                 }}
@@ -106,6 +105,22 @@ export function FiatPaymentSelector({
             </field.FormItem>
           )}
         </form.AppField>
+        {!hasBanks ? (
+          <div className='text-sm'>
+            <p>
+              If you prefer to pay via bank transfer, or if your payment amount
+              exceeds USD 1,000, please contact us at {' '}
+              <a
+                className="transition-all text-secondary-300 hover:underline hover:text-secondary-500"
+                href={`mailto:${metadata.supportEmail}`}
+              >
+                {metadata.supportEmail}
+              </a>
+              . Our team will provide you with the necessary payment details and
+              instructions.
+            </p>
+          </div>
+        ) : null}
       </div>
       <div className="flex gap-3 pt-2 border-t border-red-700">
         <DialogClose asChild>
@@ -118,7 +133,10 @@ export function FiatPaymentSelector({
         </DialogClose>
         <form.Subscribe
           selector={(state) => {
-            return { fop: (state.values as unknown as z.infer<typeof InvestFormSchema>)?.fop };
+            return {
+              fop: (state.values as unknown as z.infer<typeof InvestFormSchema>)
+                ?.fop,
+            };
           }}
         >
           {({ fop }) => {

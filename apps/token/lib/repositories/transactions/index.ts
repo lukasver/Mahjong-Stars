@@ -401,9 +401,6 @@ class TransactionsController {
 				}
 			}
 
-			console.debug("KYC TIER", kycTier);
-			console.debug("TX", tx.formOfPayment);
-
 			return Success({
 				transaction: decimalsToString(tx) as TransactionByIdWithRelations,
 				requiresKYC: kycTier,

@@ -82,6 +82,10 @@ export const env = createEnv({
 			z.boolean().optional().default(false),
 		),
 		NEXT_PUBLIC_DEPLOYMENT_ID: z.string().optional(),
+		NEXT_PUBLIC_SPONSOR_GAS_FEES: z.preprocess(
+			(val) => val === "true" || val === "1",
+			z.boolean().optional().default(false),
+		),
 	},
 	runtimeEnv: {
 		DOCUMENSO_WEBHOOK_API_KEY: process.env.DOCUMENSO_WEBHOOK_API_KEY,
@@ -124,6 +128,7 @@ export const env = createEnv({
 		EMAIL_OCTOPUS_API_KEY: process.env.EMAIL_OCTOPUS_API_KEY,
 		JWT_SECRET: process.env.JWT_SECRET,
 		CRON_SECRET: process.env.CRON_SECRET,
+		NEXT_PUBLIC_SPONSOR_GAS_FEES: process.env.NEXT_PUBLIC_SPONSOR_GAS_FEES,
 	},
 	skipValidation: process.env.NODE_ENV === "test",
 });

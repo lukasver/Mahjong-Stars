@@ -201,15 +201,6 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			isNative: true,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
-		["USDT"]: {
-			symbol: "USDT",
-			contract: getAddress("0x94b008aA00579c1307B0EF2c499aD98a8ce58e58"),
-			enabled: true,
-			decimals: STABLECOIN_DECIMALS,
-			isNative: false,
-			image:
-				"https://storage.googleapis.com/mjs-public/branding/curs/USDT.webp",
-		},
 		["USDC"]: {
 			symbol: "USDC",
 			contract: getAddress("0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"),
@@ -218,6 +209,15 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			isNative: false,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
+		},
+		["USDT"]: {
+			symbol: "USDT",
+			contract: getAddress("0x94b008aA00579c1307B0EF2c499aD98a8ce58e58"),
+			enabled: true,
+			decimals: STABLECOIN_DECIMALS,
+			isNative: false,
+			image:
+				"https://storage.googleapis.com/mjs-public/branding/curs/USDT.webp",
 		},
 		["WBTC"]: {
 			symbol: "WBTC",
@@ -238,15 +238,6 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			isNative: true,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
-		["USDT"]: {
-			symbol: "USDT",
-			contract: getAddress("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"),
-			enabled: true,
-			decimals: STABLECOIN_DECIMALS,
-			isNative: false,
-			image:
-				"https://storage.googleapis.com/mjs-public/branding/curs/USDT.webp",
-		},
 		["USDC"]: {
 			symbol: "USDC",
 			contract: getAddress("0xaf88d065e77c8cC2239327C5EDb3A432268e5831"),
@@ -255,6 +246,15 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			isNative: false,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
+		},
+		["USDT"]: {
+			symbol: "USDT",
+			contract: getAddress("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"),
+			enabled: true,
+			decimals: STABLECOIN_DECIMALS,
+			isNative: false,
+			image:
+				"https://storage.googleapis.com/mjs-public/branding/curs/USDT.webp",
 		},
 		["WBTC"]: {
 			symbol: "WBTC",

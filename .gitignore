@@ -46,3 +46,6 @@ _pagefind
 *_tsbuildinfo
 
 .wrangler
+
+
+apps/token/components/buy/widgets/data.json
