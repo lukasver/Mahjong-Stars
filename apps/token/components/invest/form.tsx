@@ -25,7 +25,7 @@ import { Input } from "@mjs/ui/primitives/input";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
 import { formatCurrency } from "@mjs/utils/client";
-import { FOP, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { FileText, Shield } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -69,9 +69,7 @@ export const InvestForm = ({
 }) => {
   const { activeAccount } = useActiveAccount();
   const { data: kycData, isLoading: loadingKyc } = useUserKyc();
-  const [paymentMethod, setPaymentMethod] = useState<
-    Omit<FOP, "CRYPTO"> | null
-  >(null);
+
   const [hash] = useHash();
 
   const { data: user } = useUser();
@@ -204,6 +202,7 @@ export const InvestForm = ({
       const q = form.getFieldValue("paid.quantity") || 1;
       try {
         invariant(q, "Quantity is required");
+        // @ts-expect-error fop exists in the form below in the tree
         form.setFieldValue("fop", FIAT_CURRENCIES.includes(v) ? FOPSchema.enum.CARD : FOPSchema.enum.CRYPTO);
         // Change to original currency
         if (v === sale?.currency) {
@@ -432,8 +431,6 @@ export const InvestForm = ({
               <SubmitButton
                 form={form}
                 onSubmit={handleSubmit}
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
                 hasBanks={!!hasBanks}
                 isPending={action.isPending}
               />
