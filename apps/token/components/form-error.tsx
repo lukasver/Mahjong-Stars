@@ -1,87 +1,104 @@
-import { AlertCircle, Clock, Lock, XCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@mjs/ui/primitives/alert';
+import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
+import { AlertCircle, Clock, Lock, XCircle } from "lucide-react";
 
 /**
  * FormError component to display different error states when forms need to be blocked
  */
 export interface FormErrorProps {
   type:
-    | 'sale-ended'
-    | 'maintenance'
-    | 'wallet-required'
-    | 'kyc-required'
-    | 'network-error'
-    | 'insufficient-funds'
-    | 'custom';
+  | "sale-ended"
+  | "maintenance"
+  | "wallet-required"
+  | "kyc-required"
+  | "network-error"
+  | "insufficient-funds"
+  | "switch-network"
+  | "custom";
   title?: string;
   message?: string;
   icon?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
-export const FormError = ({ type, title, message, icon }: FormErrorProps) => {
+export const FormError = ({
+  type,
+  title,
+  message,
+  icon,
+  children,
+}: FormErrorProps) => {
   const getDefaultContent = () => {
     switch (type) {
-      case 'sale-ended':
+      case "sale-ended":
         return {
-          title: 'Investment Period Ended',
+          title: "Investment Period Ended",
           message:
-            'This token sale has concluded and is no longer accepting new investments. Thank you for your interest.',
-          icon: <XCircle className='h-4 w-4 text-red-500' />,
+            "This token sale has concluded and is no longer accepting new investments. Thank you for your interest.",
+          icon: <XCircle className="h-4 w-4 text-red-500" />,
           className:
-            'border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-950/50',
+            "border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-950/50",
         };
-      case 'maintenance':
+      case "maintenance":
         return {
-          title: 'System Maintenance',
+          title: "System Maintenance",
           message:
-            'The investment platform is currently under maintenance. Please try again later.',
-          icon: <Clock className='h-4 w-4 text-yellow-500' />,
+            "The investment platform is currently under maintenance. Please try again later.",
+          icon: <Clock className="h-4 w-4 text-yellow-500" />,
           className:
-            'border-yellow-200 bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950/50',
+            "border-yellow-200 bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950/50",
         };
-      case 'wallet-required':
+      case "wallet-required":
         return {
-          title: 'Wallet Connection Required',
+          title: "Wallet Connection Required",
           message:
-            'Please connect your wallet to continue with the investment process.',
-          icon: <Lock className='h-4 w-4 text-blue-500' />,
+            "Please connect your wallet to continue with the investment process.",
+          icon: <Lock className="h-4 w-4 text-blue-500" />,
           className:
-            'border-blue-200 bg-blue-100 dark:border-blue-800 dark:bg-blue-950/50',
+            "border-blue-200 bg-blue-100 dark:border-blue-800 dark:bg-blue-950/50",
         };
-      case 'kyc-required':
+      case "kyc-required":
         return {
-          title: 'KYC Verification Required',
+          title: "KYC Verification Required",
           message:
-            'Please complete your KYC verification before making an investment.',
-          icon: <AlertCircle className='h-4 w-4 text-orange-500' />,
+            "Please complete your KYC verification before making an investment.",
+          icon: <AlertCircle className="h-4 w-4 text-orange-500" />,
           className:
-            'border-orange-200 bg-orange-100 dark:border-orange-800 dark:bg-orange-950/50',
+            "border-orange-200 bg-orange-100 dark:border-orange-800 dark:bg-orange-950/50",
         };
-      case 'network-error':
+      case "network-error":
         return {
-          title: 'Network Error',
+          title: "Network Error",
           message:
-            'Unable to connect to the network. Please check your internet connection and try again.',
-          icon: <AlertCircle className='h-4 w-4 text-red-500' />,
+            "Unable to connect to the network. Please check your internet connection and try again.",
+          icon: <AlertCircle className="h-4 w-4 text-red-500" />,
           className:
-            'border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-950/50',
+            "border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-950/50",
         };
-      case 'insufficient-funds':
+      case "insufficient-funds":
         return {
-          title: 'Insufficient Funds',
+          title: "Insufficient Funds",
           message:
-            'Your wallet does not have enough funds to complete this transaction.',
-          icon: <AlertCircle className='h-4 w-4 text-red-500' />,
+            "Your wallet does not have enough funds to complete this transaction.",
+          icon: <AlertCircle className="h-4 w-4 text-red-500" />,
           className:
-            'border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-950/50',
+            "border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-950/50",
         };
-      case 'custom':
+      case "switch-network":
         return {
-          title: title || 'Error',
-          message: message || 'Please try again later or contact support.',
-          icon: icon || <AlertCircle className='h-4 w-4 text-red-500' />,
+          title: "Switch Network",
+          message:
+            "Please switch to the correct network to continue with the transaction.",
+          icon: <AlertCircle className="h-4 w-4 text-primary!" />,
           className:
-            'border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-950/50',
+            "border-yellow-200 bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950/50",
+        };
+      case "custom":
+        return {
+          title: title || "Error",
+          message: message || "Please try again later or contact support.",
+          icon: icon || <AlertCircle className="h-4 w-4 text-red-500" />,
+          className:
+            "border-red-200 bg-red-100 dark:border-red-800 dark:bg-red-950/50",
         };
     }
   };
@@ -91,14 +108,16 @@ export const FormError = ({ type, title, message, icon }: FormErrorProps) => {
   return (
     <Alert className={content.className}>
       {content.icon}
-      <AlertDescription className='text-white/90 space-y-1'>
-        <h4 className='text-xs sm:text-sm font-medium text-red-800 dark:text-red-200'>
+      <AlertDescription className="text-white/90 space-y-1">
+        <h4 className="text-xs sm:text-sm font-medium text-red-800 dark:text-red-200">
           {content.title}
         </h4>
-        <p className='text-xs text-red-700 dark:text-red-300'>
+        <p className="text-xs text-red-700 dark:text-red-300">
           {content.message}
         </p>
       </AlertDescription>
+
+      {children}
     </Alert>
   );
 };

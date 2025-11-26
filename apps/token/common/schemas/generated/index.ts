@@ -102,7 +102,7 @@ export const VestingScheduleScalarFieldEnumSchema = z.enum(['id','createdAt','up
 
 export const TokenDistributionScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','amount','distributionDate','txHash','status']);
 
-export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','price','totalAmount','totalAmountCurrency','formOfPayment','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidenceId','paymentDate']);
+export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','price','totalAmount','totalAmountCurrency','formOfPayment','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidenceId','paymentDate','metadata']);
 
 export const BlockchainScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','chainId','rpcUrl','explorerUrl','isTestnet','isEnabled']);
 
@@ -511,6 +511,7 @@ export const SaleTransactionsSchema = z.object({
   rejectionReason: z.string().nullable(),
   paymentEvidenceId: z.string().nullable(),
   paymentDate: z.coerce.date().nullable(),
+  metadata: JsonValueSchema.nullable(),
 })
 
 export type SaleTransactions = z.infer<typeof SaleTransactionsSchema>

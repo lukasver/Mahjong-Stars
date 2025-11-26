@@ -15,7 +15,7 @@ import Handlebars from "handlebars";
 import { DateTime } from "luxon";
 import { FIAT_CURRENCIES } from "@/common/config/constants";
 import { publicUrl } from "@/common/config/env";
-import { metadata } from "@/common/config/site";
+import { metadata as siteMetadata } from "@/common/config/site";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
 import {
 	CreateTransactionDto,
@@ -212,7 +212,7 @@ class TransactionsController {
 						paymentMethod: tx.formOfPayment,
 						walletAddress: tx.receivingWallet || tx.user.walletAddress,
 						transactionId: tx.id,
-						supportEmail: metadata.supportEmail,
+						supportEmail: siteMetadata.supportEmail,
 						paidCurrency: tx.paidCurrency,
 					},
 				});
@@ -234,7 +234,7 @@ class TransactionsController {
 						walletAddress: tx.receivingWallet || tx.user.walletAddress,
 						transactionId: tx.id,
 						rejectionReason: tx.rejectionReason || dto.comment,
-						supportEmail: metadata.supportEmail,
+						supportEmail: siteMetadata.supportEmail,
 						paidCurrency: tx.paidCurrency,
 					},
 				});
@@ -686,7 +686,7 @@ class TransactionsController {
 									tokenSymbol: tx.sale.tokenSymbol,
 									reason:
 										"Transaction cancelled for not being confirmed after time limit",
-									supportEmail: metadata.supportEmail,
+									supportEmail: siteMetadata.supportEmail,
 								},
 							}),
 						),
@@ -958,6 +958,7 @@ class TransactionsController {
 				paymentDate?: Date;
 				paymentEvidenceId?: string;
 				paidCurrency?: string;
+				metadata?: Record<string, unknown>;
 			};
 		},
 		ctx: ActionCtx,
@@ -1025,13 +1026,28 @@ class TransactionsController {
 				tx.sale.availableTokenQuantity,
 			).equals(tx.quantity);
 
+			if (payload?.metadata) {
+				//Debug
+				logger(`metadata ${JSON.stringify(payload.metadata)}`);
+			}
+
 			const {
 				chainId,
 				paymentEvidenceId,
 				paidCurrency,
 				formOfPayment,
+				metadata,
 				...rest
 			} = payload || {};
+
+			const isCryptoWithoutConfirmation =
+				formOfPayment === "CRYPTO" && (!chainId || !rest.txHash);
+			if (isCryptoWithoutConfirmation) {
+				throw new Error(
+					"Crypto transaction without confirmation is not allowed, please wait for the transaction to be confirmed or contact support",
+				);
+			}
+
 			const [updatedTx] = await prisma.$transaction([
 				prisma.saleTransactions.update({
 					where: { id },
@@ -1044,6 +1060,13 @@ class TransactionsController {
 								},
 							},
 						}),
+						...(metadata && {
+							metadata: {
+								toJSON() {
+									return metadata;
+								},
+							},
+						}),
 						amountPaid: tx.totalAmount.toString(),
 						paymentDate: new Date(),
 						...(paymentEvidenceId && {
@@ -1053,6 +1076,7 @@ class TransactionsController {
 								},
 							},
 						}),
+						// ...(metadata && { metadata }),
 						...(formOfPayment && { formOfPayment }),
 						...(paidCurrency && {
 							amountPaidCurrency: { connect: { symbol: paidCurrency } },
@@ -1110,7 +1134,7 @@ class TransactionsController {
 							transactionUrl: `${publicUrl}/admin/transactions?txId=${tx.id}`,
 						}),
 						transactionTime: new Date().toISOString(),
-						supportEmail: metadata.supportEmail,
+						supportEmail: siteMetadata.supportEmail,
 					},
 				}),
 				// Notify user
@@ -1148,7 +1172,7 @@ class TransactionsController {
 							transactionHash: updatedTx.id,
 							transactionUrl: `${publicUrl}/dashboard/transactions?txId=${updatedTx.id}`,
 						}),
-						supportEmail: metadata.supportEmail,
+						supportEmail: siteMetadata.supportEmail,
 					},
 				}),
 			]);
@@ -1169,7 +1193,7 @@ class TransactionsController {
 						// totalRaised: new Decimal(tx.totalAmount).toFixed(2),
 						// tokensDistributed: tx.quantity.toString() || '0',
 						dashboardUrl: `${publicUrl}/dashboard/sales`,
-						supportEmail: metadata.supportEmail,
+						supportEmail: siteMetadata.supportEmail,
 					},
 				});
 			}

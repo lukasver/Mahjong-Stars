@@ -56,6 +56,7 @@ export type SuccessCryptoPaymentData = {
   paidCurrency: string;
   formOfPayment: FOP;
   paymentDate: Date;
+  metadata?: Record<string, unknown>;
 };
 
 type CryptoTransactionWidgetComponentProps = {
@@ -72,7 +73,7 @@ type CryptoTransactionWidgetComponentProps = {
 const CryptoTransactionWidgetComponent = ({
   transaction: tx,
   onSuccessPayment,
-  acceptStablecoins = false,
+  acceptStablecoins = true,
   acceptNativeTokens = true,
   ...props
 }: CryptoTransactionWidgetComponentProps) => {
@@ -108,6 +109,9 @@ const CryptoTransactionWidgetComponent = ({
     },
   );
 
+  console.log("🚀 ~ transaction.tsx:106 ~ upportedTokens, isSupported:", supportedTokens, isSupported);
+  console.log("🚀 ~ transaction.tsx:106 ~ acceptStablecoins:", acceptStablecoins);
+  console.log("🚀 ~ transaction.tsx:106 ~ acceptNativeTokens:", acceptNativeTokens);
   // If user is paying in FIAT, we default to native currency of connected chain.
   const paymentToken = supportedTokens.find((token) =>
     isFiatCurrency(tx.totalAmountCurrency)
@@ -117,6 +121,7 @@ const CryptoTransactionWidgetComponent = ({
       : // Else, find the crypto token that matches the paid currency
       token.symbol === tx.totalAmountCurrency,
   );
+
 
   const receiverAddress = tx.sale.toWalletsAddress;
 
@@ -245,9 +250,19 @@ const CryptoTransactionWidgetComponent = ({
     };
 
   function handleSuccessPayment(payload: HandleSuccessPaymentPayload) {
+    logWithBigInt("handleSuccessPayment", payload);
     if (payload.variant === "checkout") {
       // Get the receipt for the last transaction to use as txhash
-      const receipt = payload.data.statuses.at(-1)?.transactions?.at(-1)
+      // Loop through all statuses to get the latest transaction
+      const transactions = payload.data.statuses.flatMap(status => status.transactions || []);
+      const receipt = transactions.at(-1);
+
+      if (!receipt || !receipt.transactionHash) {
+        toast.error("No blockchain transactino found", {
+          description: "Please try again or reach support if your payment got through",
+        });
+        return;
+      }
 
       onSuccessPayment({
         transactionHash: receipt?.transactionHash || "",
@@ -256,6 +271,20 @@ const CryptoTransactionWidgetComponent = ({
         paidCurrency: paymentToken?.symbol || tx.paidCurrency,
         formOfPayment: FOPSchema.enum.CRYPTO,
         paymentDate: new Date(),
+        metadata: {
+          purchaseData: payload.data.statuses.map((status) => status.purchaseData).flat().filter(Boolean),
+          transactions: payload.data.statuses.map((status) => ({
+            type: status.type,
+            status: status.status,
+            // @ts-expect-error - if available
+            ...(status.sender && { sender: status.sender }),
+            // @ts-expect-error - if available
+            ...(status.receiver && { receiver: status.receiver }),
+            // @ts-expect-error - if available
+            ...(status.paymentId && { paymentId: status.paymentId }),
+            transactions: status.transactions
+          }))
+        },
       });
     }
 
@@ -326,9 +355,10 @@ const CryptoTransactionWidgetComponent = ({
   };
   const variant = props.variant || "checkout";
 
-  const paymentMethods = (
-    tx.formOfPayment === FOPSchema.enum.CRYPTO ? ["crypto", "card"] : ["card", 'crypto']
-  ) as ("crypto" | "card")[];
+  // const paymentMethods = (
+  //   tx.formOfPayment === FOPSchema.enum.CRYPTO ? ["crypto"] : ["card"]
+  // ) as ("crypto" | "card")[];
+  const paymentMethods = ["crypto", "card"];
 
   const paymentCurrency =
     ((isFiatCurrency(tx.totalAmountCurrency)
@@ -357,7 +387,6 @@ const CryptoTransactionWidgetComponent = ({
               name={title}
 
               onSuccess={(data) => {
-                logWithBigInt("onSuccess - Full Data", data);
                 handleSuccessPayment({ variant: "checkout", data });
               }}
               onCancel={() => {
@@ -428,7 +457,7 @@ function getSupportedTokens(
   isSupported: boolean;
   tokens: AppTokenInfo[];
 } {
-  const acceptAll = !opts.acceptStablecoins && !opts.acceptNativeTokens;
+  const acceptAll = (!opts.acceptStablecoins && !opts.acceptNativeTokens)
 
   if (!chainId) return { isSupported: false, tokens: [] };
   const tokens = Object.values(NETWORK_TO_TOKEN_MAPPING[chainId] || {})
@@ -438,6 +467,7 @@ function getSupportedTokens(
       symbol: t.symbol,
       isNative: t.isNative,
       decimals: t.decimals,
+      isStablecoin: t.isStablecoin || t.decimals === STABLECOIN_DECIMALS,
     }))
     .filter((token) => {
       // If both flags are false, accept all tokens
@@ -445,7 +475,7 @@ function getSupportedTokens(
         return true;
       }
       // Check if token matches any of the enabled filters
-      const isStablecoin = token.decimals === STABLECOIN_DECIMALS;
+      const isStablecoin = token.isStablecoin;
       const isNative = token.isNative;
       const matchesStablecoinFilter = opts.acceptStablecoins && isStablecoin;
       const matchesNativeFilter = opts.acceptNativeTokens && isNative;

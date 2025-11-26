@@ -33,24 +33,29 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/BNB.webp",
 		},
 		["USDC"]: {
 			symbol: "USDC",
 			contract: getAddress("0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"),
 			enabled: true,
-			decimals: STABLECOIN_DECIMALS,
+			// BSC USDC (BEP-20) has 18 decimals
+			decimals: ERC20_DECIMALS,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
 			isNative: false,
+			isStablecoin: true,
 		},
 		["USDT"]: {
 			symbol: "USDT",
 			name: "Binance-Peg BSC-USD",
 			contract: getAddress("0x55d398326f99059fF775485246999027B3197955"),
 			enabled: true,
-			decimals: STABLECOIN_DECIMALS,
+			// BSC USDT (BEP-20) has 18 decimals
+			decimals: ERC20_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDT.webp",
 		},
@@ -60,6 +65,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: BTC_DECIMALS,
 			isNative: false,
+			isStablecoin: false,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/WBTC.webp",
 		},
@@ -69,6 +75,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: false,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
 	},
@@ -79,6 +86,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
 		},
@@ -88,6 +96,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
 		["WBTC"]: {
@@ -96,6 +105,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: BTC_DECIMALS,
 			isNative: false,
+			isStablecoin: false,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/WBTC.webp",
 		},
@@ -107,6 +117,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
 		},
@@ -116,6 +127,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
 		// ['WBTC']: {
@@ -132,6 +144,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
 		},
@@ -141,6 +154,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
 		// ['WBTC']: {
@@ -157,6 +171,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/BNB.webp",
 		},
 		["USDC"]: {
@@ -164,8 +179,10 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			symbol: "bUSD",
 			contract: getAddress("0x48D87A2d14De41E2308A764905B93E05c9377cE1"),
 			enabled: true,
-			decimals: STABLECOIN_DECIMALS,
+			// BSC tBNB (BEP-20) has 18 decimals
+			decimals: ERC20_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
 		},
@@ -175,6 +192,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: false,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/MJS.webp",
 		},
 		["ETH"]: {
@@ -183,6 +201,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: false,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
 		// ['WBTC']: {
@@ -199,6 +218,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
 		["USDC"]: {
@@ -207,6 +227,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
 		},
@@ -216,6 +237,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDT.webp",
 		},
@@ -225,6 +247,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: BTC_DECIMALS,
 			isNative: false,
+			isStablecoin: false,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/WBTC.webp",
 		},
@@ -236,6 +259,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
 		["USDC"]: {
@@ -244,6 +268,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
 		},
@@ -253,6 +278,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDT.webp",
 		},
@@ -262,6 +288,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: BTC_DECIMALS,
 			isNative: false,
+			isStablecoin: false,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/WBTC.webp",
 		},
@@ -273,6 +300,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: ERC20_DECIMALS,
 			isNative: true,
+			isStablecoin: false,
 			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
 		},
 		["USDC"]: {
@@ -281,6 +309,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
 		},
@@ -290,6 +319,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: STABLECOIN_DECIMALS,
 			isNative: false,
+			isStablecoin: true,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/USDT.webp",
 		},
@@ -299,6 +329,7 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			enabled: true,
 			decimals: BTC_DECIMALS,
 			isNative: false,
+			isStablecoin: false,
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/WBTC.webp",
 		},
@@ -308,5 +339,6 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 export type AppTokenInfo = Omit<TokenInfo, "icon"> & {
 	decimals: number;
 	isNative: boolean;
+	isStablecoin: boolean;
 	image?: string | null;
 };

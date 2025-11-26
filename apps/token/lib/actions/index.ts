@@ -660,6 +660,7 @@ export const confirmCryptoTransaction = authActionClient
 				})
 				.partial()
 				.optional(),
+			metadata: z.record(z.string(), z.unknown()).optional(),
 		}),
 	)
 	.action(async ({ ctx, parsedInput }) => {
@@ -673,6 +674,7 @@ export const confirmCryptoTransaction = authActionClient
 					amountPaid: parsedInput.amountPaid,
 					paymentDate: parsedInput.paymentDate,
 					...parsedInput.extraPayload,
+					...(parsedInput.metadata && { metadata: parsedInput.metadata }),
 				},
 			},
 			ctx,

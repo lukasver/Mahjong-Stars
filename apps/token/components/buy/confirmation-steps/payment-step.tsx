@@ -32,6 +32,7 @@ import { FormError } from "@/components/form-error";
 import useActiveAccount from "@/components/hooks/use-active-account";
 import { PurchaseSummaryCard } from "@/components/invest/summary";
 import { PulseLoader } from "@/components/pulse-loader";
+import { SwitchNetworkButton } from "@/components/switch-network-button";
 import {
   associateDocumentsToUser,
   confirmCryptoTransaction,
@@ -99,6 +100,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
         formOfPayment: d.formOfPayment,
         paidCurrency: d.paidCurrency,
       },
+      ...(d.metadata && { metadata: d.metadata }),
     } as Parameters<typeof execute>[0];
     execute(payload);
   };
@@ -178,8 +180,8 @@ const CryptoPayment = ({
   tx: TransactionByIdWithRelations;
   onSuccess: (d: SuccessCryptoPaymentData) => void;
 }) => {
-  const locale = useLocale();
   const { chainId } = useActiveAccount();
+
   const {
     data: cryptoTransaction,
     isLoading,
@@ -188,7 +190,7 @@ const CryptoPayment = ({
 
   return (
     <div className="py-2 text-center space-y-4">
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
@@ -206,17 +208,21 @@ const CryptoPayment = ({
           }}
           locale={locale}
         />
-      </motion.div>
+      </motion.div> */}
 
       {/* Balance Checker */}
       {error ? (
         <FormError type="custom" title="Error" message={error} />
       ) : !cryptoTransaction?.paymentToken || !cryptoTransaction?.blockchain ? (
         <FormError
-          type="custom"
+          type="switch-network"
           title="Error"
           message="Payment with this token not supported on this network, please try a different network"
-        />
+        >
+          <div className="w-full flex justify-center">
+            <SwitchNetworkButton />
+          </div>
+        </FormError>
       ) : (
         !isLoading && (
           <motion.div
@@ -224,11 +230,7 @@ const CryptoPayment = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.4 }}
           >
-            <CryptoComponent
-              transaction={tx}
-              onSuccessPayment={onSuccess}
-              showHelp
-            />
+            <CryptoComponent transaction={tx} onSuccessPayment={onSuccess} />
           </motion.div>
         )
       )}
@@ -310,9 +312,9 @@ const FiatPayment = ({
             paymentDate: new Date(),
           },
         }).then(() => {
-          const client = getQueryClient();
+          const qc = getQueryClient();
           const keys = [["transactions"], ["sales"]];
-          keys.forEach((key) => client.invalidateQueries({ queryKey: key }));
+          keys.forEach((key) => qc.invalidateQueries({ queryKey: key }));
         }),
       ]);
 
@@ -590,9 +592,14 @@ const CryptoComponent = (props: CryptoComponentProps) => {
         </div>
       )}
       <CryptoTransactionWidget {...rest} />
-      <p className='text-center'>
+      <p className="text-center">
         Need help?{" "}
-        <a className="transition-all text-secondary-300 hover:underline hover:text-secondary-500" href={`mailto:${siteConfig.supportEmail}`}>Contact support</a>
+        <a
+          className="transition-all text-secondary-300 hover:underline hover:text-secondary-500"
+          href={`mailto:${siteConfig.supportEmail}`}
+        >
+          Contact support
+        </a>
       </p>
     </div>
   ) : (

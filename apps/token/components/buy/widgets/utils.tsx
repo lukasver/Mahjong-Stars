@@ -1,5 +1,6 @@
 import ErrorBoundary from "@mjs/ui/components/error-boundary";
 import { FormError } from "@/components/form-error";
+import { SwitchNetworkButton } from '@/components/switch-network-button';
 
 export const WithErrorHandler = <P extends object>(
   Component: React.ComponentType<P>,
@@ -9,10 +10,14 @@ export const WithErrorHandler = <P extends object>(
       <ErrorBoundary
         fallback={
           <FormError
-            type="custom"
+            type="switch-network"
             title="Error"
-            message="An error occurred while processing your request"
-          />
+            message="Payment with this token not supported on this network, please try a different network"
+          >
+            <div className="w-full flex justify-center">
+              <SwitchNetworkButton />
+            </div>
+          </FormError>
         }
       >
         <Component {...props} />

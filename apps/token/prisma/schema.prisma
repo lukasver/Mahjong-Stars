@@ -440,6 +440,8 @@ model SaleTransactions {
   auditTrail         AuditTrail[]
   tokenDistributions TokenDistribution[]
 
+  metadata Json?
+
   @@map("sales_transactions")
 }
 

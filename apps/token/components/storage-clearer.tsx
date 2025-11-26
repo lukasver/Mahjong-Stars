@@ -108,8 +108,6 @@ export function StorageClearer({ deploymentId }: { deploymentId: string }) {
     }
     const currentDeploymentId = deploymentId || "unknown";
 
-    console.log("🚀 ~ storage-clearer.tsx:116 ~ currentDeploymentId:", currentDeploymentId);
-    console.log("🚀 ~ storage-clearer.tsx:119 ~ storedDeploymentId:", storedDeploymentId);
 
     if (
       storedDeploymentId === null ||

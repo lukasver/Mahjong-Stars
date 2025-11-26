@@ -1,18 +1,22 @@
 "use client";
+import {
+  AnimatedIcon,
+  AnimatedText,
+  FadeAnimation,
+  StaggeredRevealAnimation,
+} from "@mjs/ui/components/motion";
 import { Badge } from "@mjs/ui/primitives/badge";
 import { Card } from "@mjs/ui/primitives/card";
 import { Label } from "@mjs/ui/primitives/label";
 import { Switch } from "@mjs/ui/primitives/switch";
-import { StaggeredRevealAnimation, AnimatedIcon, AnimatedText, FadeAnimation } from "@mjs/ui/components/motion";
 import Decimal from "decimal.js";
 import { AlertCircle, CheckCircle, Info } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { NATIVE_TOKEN_ADDRESS } from "thirdweb";
+import useActiveAccount from "@/components/hooks/use-active-account";
 import { useBalanceChecker } from "@/components/hooks/use-balance-checker";
-import { usePrepareTransaction } from '@/components/hooks/use-prepare-transaction';
-import { NATIVE_TOKEN_ADDRESS } from 'thirdweb';
-import useActiveAccount from '@/components/hooks/use-active-account';
-import { useGasEstimation } from '@/components/hooks/use-gas-estimation';
-
+import { useGasEstimation } from "@/components/hooks/use-gas-estimation";
+import { usePrepareTransaction } from "@/components/hooks/use-prepare-transaction";
 
 type PaymentStatusIndicatorProps = {
   amount: string;
@@ -23,7 +27,6 @@ type PaymentStatusIndicatorProps = {
   onReadyToPay: () => void;
   onToggleGasFunds: (gas: string) => void;
 };
-
 
 export function PaymentStatusIndicator({
   amount,
@@ -37,19 +40,12 @@ export function PaymentStatusIndicator({
   const { activeAccount: account } = useActiveAccount();
   const [includeGasFunds, setIncludeGasFunds] = useState(false);
 
-
-
   const preparedTx = usePrepareTransaction({
     address: tokenAddress,
     value: amountToPay,
     // To simulate the cost of a transfer tx
     to: account?.address || NATIVE_TOKEN_ADDRESS,
-
   });
-
-
-
-
 
   const { balance } = useBalanceChecker({
     requiredAmount: amount || "1",
@@ -57,10 +53,10 @@ export function PaymentStatusIndicator({
     isNativeToken: isNative || false,
   });
 
-  const { gasPrice, gasCost } = useGasEstimation(amount, '0x9Eed102fB3B872A584663195612062729e6Dc497');
-
-
-
+  const { gasPrice, gasCost } = useGasEstimation(
+    amount,
+    "0x9Eed102fB3B872A584663195612062729e6Dc497",
+  );
 
   // TODO!: NEed to refactor this logic since we cannot get the estimate gas cost if the user has not enough balance...
 
@@ -87,16 +83,12 @@ export function PaymentStatusIndicator({
 
   // }, [!!preparedTx, getGasCost, gasEstimate])
 
-  const estimatedGasFee = gasCost || '0';
-
-
+  const estimatedGasFee = gasCost || "0";
 
   const handleCheckGasFunds = (checked: boolean) => {
     setIncludeGasFunds(checked);
     onToggleGasFunds?.(checked ? estimatedGasFee : "0");
   };
-
-
 
   return (
     <FadeAnimation duration={0.5} delay={0.1}>
@@ -171,7 +163,7 @@ export function PaymentStatusIndicator({
                 <span
                   className={` ${positiveDifference ? "text-green-600" : "text-red-600"}`}
                 >
-                  {fundsDifference.abs().toSignificantDigits().toFixed(8)}{" "}
+                  {fundsDifference.abs().toDecimalPlaces(8).toString()}{" "}
                   {tokenSymbol}
                 </span>
               </div>
@@ -179,18 +171,21 @@ export function PaymentStatusIndicator({
           </div>
 
           {/* Gas Funds Toggle */}
-          {estimatedGasFee !== "0" && <FadeAnimation delay={0.6}>
-            <div className="flex items-center space-x-2 mt-4 pt-4 border-t">
-              <Switch
-                id="gas-funds"
-                checked={includeGasFunds}
-                onCheckedChange={handleCheckGasFunds}
-              />
-              <Label htmlFor="gas-funds" className="text-sm">
-                Purchase extra funds for gas fees? (~{estimatedGasFee} {tokenSymbol})
-              </Label>
-            </div>
-          </FadeAnimation>}
+          {estimatedGasFee !== "0" && (
+            <FadeAnimation delay={0.6}>
+              <div className="flex items-center space-x-2 mt-4 pt-4 border-t">
+                <Switch
+                  id="gas-funds"
+                  checked={includeGasFunds}
+                  onCheckedChange={handleCheckGasFunds}
+                />
+                <Label htmlFor="gas-funds" className="text-sm">
+                  Purchase extra funds for gas fees? (~{estimatedGasFee}{" "}
+                  {tokenSymbol})
+                </Label>
+              </div>
+            </FadeAnimation>
+          )}
         </div>
       </Card>
     </FadeAnimation>
