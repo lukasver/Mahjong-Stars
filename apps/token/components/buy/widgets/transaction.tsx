@@ -358,7 +358,7 @@ const CryptoTransactionWidgetComponent = ({
   // const paymentMethods = (
   //   tx.formOfPayment === FOPSchema.enum.CRYPTO ? ["crypto"] : ["card"]
   // ) as ("crypto" | "card")[];
-  const paymentMethods = ["crypto", "card"];
+  const paymentMethods = ["crypto", "card"] as ("crypto" | "card")[];
 
   const paymentCurrency =
     ((isFiatCurrency(tx.totalAmountCurrency)

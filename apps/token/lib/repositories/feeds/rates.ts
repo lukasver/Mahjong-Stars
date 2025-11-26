@@ -3,7 +3,12 @@ import "server-only";
 import { invariant } from "@epic-web/invariant";
 import { Currency } from "@prisma/client";
 import { Cacheable } from "cacheable";
-import { Bridge, getContract, readContract } from "thirdweb";
+import {
+	Bridge,
+	getContract,
+	NATIVE_TOKEN_ADDRESS,
+	readContract,
+} from "thirdweb";
 import { base, bsc } from "thirdweb/chains";
 import { env } from "@/common/config/env";
 import { GetExchangeRate } from "@/common/schemas/dtos/rates";
@@ -17,6 +22,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 import { formatUnits, parseUnits } from "ethers";
 import { ONE_MINUTE } from "@/common/config/constants";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
+import { NETWORK_TO_TOKEN_MAPPING } from "@/lib/services/crypto/config";
 
 const cacheTTL =
 	ONE_MINUTE * (process.env.NODE_ENV === "production" ? 1 : 10 * 60);
@@ -304,26 +310,26 @@ export class RatesController {
 			invariant(token, "Token not not configured in app");
 
 			// TODO: Get receiver from Fortris
-			const receiver = env.THIRDWEB_SERVER_WALLET_ADDRESS;
-			// TODO: Get receiver from Fortris
+			const receiver = env.THIRDWEB_SERVER_WALLET_ADDRESS as `0x${string}`;
+			// TODO: Which token we are sending after briding.
 			const destinationTokenAddress =
-				"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+				NETWORK_TO_TOKEN_MAPPING[chainId]?.["USDC"]?.contract ||
+				NETWORK_TO_TOKEN_MAPPING[base.id]?.["USDT"]?.contract ||
+				NATIVE_TOKEN_ADDRESS;
 			// Define from mapping w/ fortris
 			const destinationChainId = base.id;
 			// const destinationTokenDecimals = STABLECOIN_DECIMALS;
 
 			const preparedQuote = await Bridge.Sell.prepare({
 				originChainId: chainId,
-				originTokenAddress,
+				originTokenAddress: originTokenAddress as `0x${string}`,
 				destinationChainId,
 				destinationTokenAddress,
 				amount: parseUnits(amount, token.decimals),
-				sender,
+				sender: sender as `0x${string}`,
 				receiver,
 				client: serverClient,
 			});
-
-			console.log(" rates.ts:307 ~ preparedQuote:", preparedQuote);
 
 			return Success(preparedQuote);
 		} catch (e) {
