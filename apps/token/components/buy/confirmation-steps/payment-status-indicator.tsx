@@ -65,7 +65,7 @@ export function PaymentStatusIndicator({
   }, [balance, amountToPay]);
 
   const fundsDifference =
-    balance?.minus(amountToPay).toSignificantDigits() || new Decimal(0);
+    balance?.minus(amountToPay).toDecimalPlaces() || new Decimal(0);
   const positiveDifference = fundsDifference.greaterThanOrEqualTo(0);
 
   useEffect(() => {
@@ -123,7 +123,7 @@ export function PaymentStatusIndicator({
               <div className="flex justify-between text-sm">
                 <span className="text-secondary-500">Wallet Balance:</span>
                 <span className="">
-                  {balance?.toSignificantDigits().toString()} {tokenSymbol}
+                  {balance?.toDecimalPlaces().toString()} {tokenSymbol}
                 </span>
               </div>
             </FadeAnimation>

@@ -67,7 +67,13 @@ export function FileUpload({ type = "all", label, defaultValue, ...props }: File
 
   // Convert defaultValue to FileMetadata if provided
   const initialFiles = defaultValue ? [{
-    name: decodeURIComponent(defaultValue.split('/').pop() || '') || 'default-file',
+    name: (() => {
+      try {
+        return decodeURIComponent(defaultValue.split('/').pop() || '') || 'default-file';
+      } catch {
+        return 'default-file';
+      }
+    })(),
     size: 0, // Unknown size for URL
     type: 'application/octet-stream', // Generic type
     url: defaultValue,

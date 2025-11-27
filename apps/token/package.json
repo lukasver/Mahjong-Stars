@@ -35,6 +35,7 @@
 		"vercel-build": "npx prisma generate && turbo run build",
 		"_vercel-build:prod": "npx prisma generate && npx prisma migrate deploy && next build",
 		"db:seed": "dotenv -e .env.local -- npx prisma db seed -- --environment development",
+		"db:seed:test": "dotenv -e .env.test -- npx prisma db seed -- --environment test",
 		"db:seed:stage": "dotenv -e .env.stage.local -- npx prisma db seed -- --environment stage",
 		"db:seed:prod": "dotenv -e .env.production.local -- npx prisma db seed -- --environment production",
 		"db:reset": "pnpm run db:push --force-reset && pnpm run db:seed && pnpm run db:generate",
