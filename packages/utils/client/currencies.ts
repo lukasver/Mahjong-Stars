@@ -33,6 +33,7 @@ export const formatCurrency = (
 					? {
 							minimumFractionDigits: 0,
 							maximumFractionDigits: 8,
+							roundingMode: "ceil",
 						}
 					: {
 							minimumFractionDigits: 0,
@@ -48,7 +49,7 @@ export const formatCurrency = (
 		if (Number.isNaN(toFormat)) {
 			return "NaN";
 		}
-		const fixedValue = formatToDigits(toFormat);
+		const fixedValue = formatToDigits(value);
 		const formatted = currency ? `${currency} ${fixedValue}` : fixedValue;
 
 		return formatted;
@@ -77,7 +78,7 @@ export const safeFormatCurrency = (
 };
 
 const formatToDigits = (
-	v: string | number,
+	v: string | number | Decimal,
 	_precision: "CRYPTO" | "FIAT" | number = 0,
 ) => {
 	const precision =
@@ -85,8 +86,9 @@ const formatToDigits = (
 			CRYPTO: 8,
 			FIAT: 4,
 		}[_precision] || (_precision as number);
+
 	if (!precision) {
-		return Decimal(v).toSignificantDigits().toString();
+		return Decimal(v).toDecimalPlaces().toFixed();
 	} else {
 		return Decimal(v).toFixed(precision);
 	}

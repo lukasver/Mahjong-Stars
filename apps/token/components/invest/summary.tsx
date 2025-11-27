@@ -114,7 +114,7 @@ const getTotalAmountToPay = (paid: {
   const isPayingWithCrypto = !FIAT_CURRENCIES.includes(paid.currency);
 
   if (isPayingWithCrypto) {
-    return Decimal(paid.totalAmount).toSignificantDigits().toString() + " " + paid.currency;
+    return Decimal(paid.totalAmount).toDecimalPlaces().toString() + " " + paid.currency;
   }
   return safeFormatCurrency({
     currency: paid.currency,

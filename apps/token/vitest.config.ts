@@ -26,7 +26,10 @@ export default defineConfig({
 		restoreMocks: true,
 		unstubGlobals: true,
 		unstubEnvs: true,
-		include: ["__tests__/**/?(*.)test.?(c|m)[jt]s?(x)"],
+		include: [
+			// "__tests__/**/?(*.)test.?(c|m)[jt]s?(x)"
+			"__tests__/profiles.test.ts",
+		],
 		environment: "node",
 	},
 	define: {

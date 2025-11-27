@@ -81,10 +81,10 @@ const OnRampWidgetComponent = ({
 
         setAmount((p) => ({
           ...p,
-          amount: new Decimal(result.amount).toSignificantDigits().toString(),
+          amount: new Decimal(result.amount).toDecimalPlaces().toString(),
           currency: result.currency,
           pricePerUnit: new Decimal(result.pricePerUnit)
-            .toSignificantDigits()
+            .toDecimalPlaces()
             .toString(),
         }));
       }
