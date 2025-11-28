@@ -46,6 +46,6 @@ _pagefind
 *_tsbuildinfo
 
 .wrangler
-
+playwright/.auth
 
 apps/token/components/buy/widgets/data.json
