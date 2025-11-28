@@ -13,7 +13,8 @@ const getCookieDomain = (url: string): string | undefined => {
 
 	// // For Vercel preview deployments, don't set domain to allow subdomain flexibility
 	if (hostname.includes(".vercel.app")) {
-		return `.${hostname}`; // This allows the cookie to work on the exact domain
+		// return `.${hostname}`; // This allows the cookie to work on the exact domain
+		return undefined;
 	}
 
 	// For custom domains, extract the root domain
@@ -58,12 +59,12 @@ export const setSessionCookie = async (
 	const domain = getCookieDomain(publicUrl);
 	logger("SET SESSION COOKIE domain: " + domain);
 	c.set(cookieName, jwt, {
-		domain,
+		...(domain && { domain }),
 		httpOnly: true,
 		secure: process.env.NODE_ENV === "production",
 		maxAge: 60 * 60 * 24 * 30, //TODO! 30 days. Review this
 		path: "/",
-		sameSite: "strict",
+		sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
 	});
 };
 
