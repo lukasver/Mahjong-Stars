@@ -63,6 +63,7 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
 
   return (
     <motion.div
+      data-testid="ico-phases"
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{

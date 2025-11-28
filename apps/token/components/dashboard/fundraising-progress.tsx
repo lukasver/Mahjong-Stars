@@ -31,7 +31,9 @@ const FinishedCard = ({
   const sold = total; // When finished, all tokens are sold
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto"
+      data-testid="fundraising-progress"
+    >
       {/* Main Finished Sale Card */}
       <Card className={getGlassyCardClassName("mb-6")}>
         <motion.div

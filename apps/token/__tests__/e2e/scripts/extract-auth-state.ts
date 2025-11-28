@@ -20,7 +20,14 @@ async function extractAuthState() {
 		},
 	});
 	const page = await context.newPage();
-	const outputPath = join(process.cwd(), "playwright", ".auth", "storage.json");
+	const outputPath = join(
+		process.cwd(),
+		"__tests__",
+		"e2e",
+		"playwright",
+		".auth",
+		"storage.json",
+	);
 
 	try {
 		// Navigate to your app and manually log in

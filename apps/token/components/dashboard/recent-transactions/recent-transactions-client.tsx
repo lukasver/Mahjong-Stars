@@ -42,6 +42,7 @@ export function RecentTransactions({
 }) {
   return (
     <motion.div
+      data-testid="recent-transactions"
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{
