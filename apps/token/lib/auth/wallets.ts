@@ -16,7 +16,9 @@ const WALLET_OPTIONS: InAppWalletAuth[] = [
 	// 'wallet',
 ];
 
-if (process.env.VERCEL_TARGET_ENV === "test") {
+console.debug("VERCEL_TARGET_ENV", process.env.VERCEL_TARGET_ENV);
+console.debug("VERCEL_ENV", process.env.VERCEL_ENV);
+if (process.env.VERCEL_TARGET_ENV === "tests") {
 	WALLET_OPTIONS.push("guest" as InAppWalletAuth);
 }
 

@@ -24,6 +24,8 @@ const getPublicUrl = () => {
 					: vercelUrl;
 			case "preview":
 				return process.env.NEXT_PUBLIC_DOMAIN || vercelUrl;
+			case "tests":
+				return `https://mjs-token-git-tests-smat-sa.vercel.app`;
 			default:
 				return process.env.NEXT_PUBLIC_DOMAIN || vercelUrl;
 		}
