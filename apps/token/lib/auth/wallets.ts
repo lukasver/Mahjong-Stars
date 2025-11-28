@@ -1,7 +1,24 @@
-import { createWallet, inAppWallet } from "thirdweb/wallets";
+import { createWallet, InAppWalletAuth, inAppWallet } from "thirdweb/wallets";
 import { env } from "@/common/config/env";
 import { metadata } from "@/common/config/site";
 import MahjongStarsLogo from "@/public/static/images/logo-wt.webp";
+
+const WALLET_OPTIONS: InAppWalletAuth[] = [
+	"google",
+	"coinbase",
+	"x",
+	"telegram",
+	// 'guest',
+	"email",
+	"passkey",
+	"backend",
+	// By using wallet here, we create Smart accounts even if the user logs in with a valid wallet
+	// 'wallet',
+];
+
+if (process.env.VERCEL_TARGET_ENV === "test") {
+	WALLET_OPTIONS.push("guest" as InAppWalletAuth);
+}
 
 export const wallets = [
 	inAppWallet({
@@ -9,18 +26,7 @@ export const wallets = [
 		// executionMode:
 		hidePrivateKeyExport: false,
 		auth: {
-			options: [
-				"google",
-				"coinbase",
-				"x",
-				"telegram",
-				// 'guest',
-				"email",
-				"passkey",
-				"backend",
-				// By using wallet here, we create Smart accounts even if the user logs in with a valid wallet
-				// 'wallet',
-			],
+			options: WALLET_OPTIONS,
 			redirectUrl: `${env.NEXT_PUBLIC_DOMAIN}/onboarding`,
 			// passkeyDomain: env.NEXT_PUBLIC_DOMAIN,
 			mode: "popup",
