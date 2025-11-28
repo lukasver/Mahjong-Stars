@@ -71,7 +71,7 @@ export default async function DashboardPage(_props: PageProps<"/dashboard">) {
           >
             {/* <Suspense fallback={<FundraisingProgressLoading />}> */}
             <FundraisingProgress>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4" data-testid="token-cards">
                 <Suspense fallback={<DashboardCardLoading />}>
                   <UserTokensCard />
                 </Suspense>
