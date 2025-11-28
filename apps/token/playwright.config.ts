@@ -1,5 +1,10 @@
 import { devices, PlaywrightTestConfig } from "@playwright/test";
 
+import dotenv from "dotenv";
+import { join } from "path";
+
+dotenv.config({ path: join(process.cwd(), ".env.test.local") });
+
 const project = [
 	{
 		name: "chromium",
@@ -23,9 +28,7 @@ const config: PlaywrightTestConfig = {
 	globalTimeout: 1000 * 60 * 20, // 20 mins
 	use: {
 		trace: "on-first-retry",
-		baseURL: process.env.CI
-			? process.env.PLAYWRIGHT_TEST_BASE_URL
-			: `http://localhost:${process.env.PORT || 3000}`,
+		baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL,
 		// https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation#examples
 		extraHTTPHeaders: {
 			"x-vercel-protection-bypass":
