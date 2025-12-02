@@ -13,12 +13,12 @@
     }
   },
   "Hero": {
-    "title": "<span>Tritt dem Web3</span> <span>Mahjong-Spiel bei</span>",
+    "title": "<span>Tritt dem</span> <span>Mahjong-Spiel bei</span>",
     "subtitle": "Fordere deine Freunde bei Mahjong Stars heraus, wo coole Charaktere das Spiel beherrschen!"
   },
   "About": {
     "title": "Was ist Mahjong Stars?",
-    "description": "Entdecke Mahjong Stars, eine Web3-Plattform, wo uraltes Mahjong auf modernes Spiel trifft. Fordere andere heraus, sammle einzigartige NFT-Charaktere und verdiene Belohnungen in einer dynamischen Online-Welt. Verbinde dich global durch die Kraft der Blockchain für ein revolutionäres Spielerlebnis."
+    "description": "Entdecke Mahjong Stars, eine Blockchain-Plattform, wo uraltes Mahjong auf modernes Spiel trifft. Fordere andere heraus, sammle einzigartige NFT-Charaktere und verdiene Belohnungen in einer dynamischen Online-Welt. Verbinde dich global durch die Kraft der Blockchain für ein revolutionäres Spielerlebnis."
   },
   "GameFeatures": {
     "title": "SPIEL-FEATURES",
@@ -221,11 +221,11 @@
   },
   "Faq": {
     "title": "Häufig gestellte Fragen",
-    "description": "Finde Antworten auf häufig gestellte Fragen zu unserem Web3 Mahjong-Spiel:",
+    "description": "Finde Antworten auf häufig gestellte Fragen zu unserem Mahjong-Spiel:",
     "items": {
       "0": {
         "question": "Was ist Mahjong Stars?",
-        "answer": "Mahjong Stars ist eine Web3-fähige, KI-gestützte Multiplayer-Mahjong-Plattform, die es Spielern ermöglicht, zu spielen, KI-Avatare zu trainieren und an globalen Turnieren teilzunehmen, sowohl live als auch autonom."
+        "answer": "Mahjong Stars ist eine Blockchain-fähige, KI-gestützte Multiplayer-Mahjong-Plattform, die es Spielern ermöglicht, zu spielen, KI-Avatare zu trainieren und an globalen Turnieren teilzunehmen, sowohl live als auch autonom."
       },
       "1": {
         "question": "Was macht Mahjong Stars einzigartig?",
@@ -253,11 +253,11 @@
       },
       "7": {
         "question": "Wie groß ist der potenzielle Markt?",
-        "answer": "Über 600 Millionen Mahjong-Spieler weltweit. Der Web3-Gaming-Sektor wird voraussichtlich 2025 über 30 Milliarden US-Dollar erreichen und bietet enorme Möglichkeiten."
+        "answer": "Über 600 Millionen Mahjong-Spieler weltweit. Der Blockchain-Gaming-Sektor wird voraussichtlich 2025 über 30 Milliarden US-Dollar erreichen und bietet enorme Möglichkeiten."
       },
       "8": {
         "question": "Wer steckt hinter dem Projekt?",
-        "answer": "Das Team besteht aus Experten von Mahjong Logic, PokerStars Asia und Coinbase Asia mit umfassender Erfahrung in Gaming und Web3."
+        "answer": "Das Team besteht aus Experten von Mahjong Logic, PokerStars Asia und Coinbase Asia mit umfassender Erfahrung in Gaming und Blockchain-Technologie."
       },
       "9": {
         "question": "Wie sieht der Fahrplan für 2025 aus?",
@@ -355,18 +355,18 @@
   },
   "Metadata": {
     "title": "Mahjong Stars",
-    "description": "Web3 Mahjong mit KI-Charakteren & NFT-Belohnungen. Spiele und trainiere KI-Avatare, sammle einzigartige Charaktere und verdiene $TILE. Globale Multiplayer-Plattform mit Turnieren",
+    "description": "Blockchain Mahjong mit KI-Charakteren & NFT-Belohnungen. Spiele und trainiere KI-Avatare, sammle einzigartige Charaktere und verdiene $TILE. Globale Multiplayer-Plattform mit Turnieren",
     "Privacy": {
       "title": "Datenschutzrichtlinie",
-      "description": "Ihre Privatsphäre ist uns wichtig! Erfahren Sie, wie Mahjong Stars Ihre persönlichen Daten, Spielinformationen und Wallet-Details schützt. Wir sorgen für Ihre Sicherheit, damit Sie sich auf das Gewinnen und den Ausdruck Ihrer selbst in unserer Web3-Mahjong-Welt konzentrieren können! ✨"
+      "description": "Ihre Privatsphäre ist uns wichtig! Erfahren Sie, wie Mahjong Stars Ihre persönlichen Daten, Spielinformationen und Wallet-Details schützt. Wir sorgen für Ihre Sicherheit, damit Sie sich auf das Gewinnen und den Ausdruck Ihrer selbst in unserer Blockchain-Mahjong-Welt konzentrieren können! ✨"
     },
     "Terms": {
       "title": "Nutzungsbedingungen",
-      "description": "Spielregeln und Richtlinien für Mahjong Stars! Von Fairplay-Richtlinien bis hin zu Kontoverwaltung und Datenschutz – entdecken Sie, wie Sie Teil unserer Web3-Mahjong-Community werden können. Spielen Sie clever, spielen Sie fair und halten wir dieses Spiel für alle unterhaltsam! 💯"
+      "description": "Spielregeln und Richtlinien für Mahjong Stars! Von Fairplay-Richtlinien bis hin zu Kontoverwaltung und Datenschutz – entdecken Sie, wie Sie Teil unserer Blockchain-Mahjong-Community werden können. Spielen Sie clever, spielen Sie fair und halten wir dieses Spiel für alle unterhaltsam! 💯"
     },
     "Faq": {
       "title": "Häufig gestellte Fragen (FAQ)",
-      "description": "Fragen? Wir haben Antworten! 🧋✨. Alles, was Sie über Mahjong Stars wissen müssen! Von KI-Avataren und $TILE-Token bis hin zu Gameplay-Tipps und NFT-Belohnungen – erhalten Sie stilvoll Antworten auf alle Ihre Web3-Mahjong-Fragen 💅."
+      "description": "Fragen? Wir haben Antworten! 🧋✨. Alles, was Sie über Mahjong Stars wissen müssen! Von KI-Avataren und $TILE-Token bis hin zu Gameplay-Tipps und NFT-Belohnungen – erhalten Sie stilvoll Antworten auf alle Ihre Blockchain-Mahjong-Fragen 💅."
     },
     "Contact": {
       "title": "Kontaktieren Sie uns",
@@ -378,11 +378,11 @@
     },
     "About": {
       "title": "Über Uns",
-      "description": "Entdecken Sie Mahjong Stars – die Web3-Plattform, auf der antikes Mahjong auf modernes Gaming trifft! Fordern Sie Spieler weltweit heraus, sammeln Sie einzigartige NFT-Charaktere und verdienen Sie $TILE-Token in unserer dynamischen Online-Welt. Verbinden Sie sich global durch Blockchain-Technologie für ein revolutionäres Spielerlebnis, das sowohl Spaß macht als auch belohnt! 🎮"
+      "description": "Entdecken Sie Mahjong Stars – die Blockchain-Plattform, auf der antikes Mahjong auf modernes Gaming trifft! Fordern Sie Spieler weltweit heraus, sammeln Sie einzigartige NFT-Charaktere und verdienen Sie $TILE-Token in unserer dynamischen Online-Welt. Verbinden Sie sich global durch Blockchain-Technologie für ein revolutionäres Spielerlebnis, das sowohl Spaß macht als auch belohnt! 🎮"
     },
     "Docs": {
       "title": "Dokumentation",
-      "description": "Entdecken Sie die einzigartigen Funktionen und Innovationen von Mahjong Stars! Erfahren Sie mehr über KI-gestützte Avatare, Blockchain-Integration, das Sammeln von NFT-Charakteren und Web3-Gaming-Mechaniken. Entdecken Sie, wie unsere Plattform traditionelles Mahjong mit modernster Technologie kombiniert, um ein revolutionäres Spielerlebnis zu schaffen! 🤖"
+      "description": "Entdecken Sie die einzigartigen Funktionen und Innovationen von Mahjong Stars! Erfahren Sie mehr über KI-gestützte Avatare, Blockchain-Integration, das Sammeln von NFT-Charakteren und Blockchain-Gaming-Mechaniken. Entdecken Sie, wie unsere Plattform traditionelles Mahjong mit modernster Technologie kombiniert, um ein revolutionäres Spielerlebnis zu schaffen! 🤖"
     }
   }
 }
