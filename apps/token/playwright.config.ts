@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-
-import { join } from "node:path";
-
-=======
->>>>>>> 49ebd83 (chore/test env)
-
 import { devices, PlaywrightTestConfig } from "@playwright/test";
 
 import dotenv from "dotenv";
