@@ -141,4 +141,73 @@ export class DashboardPage extends BasePage {
 			.locator('[data-testid="ico-phases"]')
 			.or(this.page.getByText(/ICO Phases|Phases/i).locator(".."));
 	}
+
+	/**
+	 * Get main content area
+	 */
+	getMainContent() {
+		return this.page.locator("main");
+	}
+
+	/**
+	 * Get dashboard heading
+	 */
+	getDashboardHeading() {
+		return this.page.getByRole("heading", { name: "Dashboard", level: 1 });
+	}
+
+	/**
+	 * Get fundraising progress section container
+	 */
+	getFundraisingProgressSection() {
+		return this.page.locator('[data-testid="fundraising-progress"]');
+	}
+
+	/**
+	 * Get progress bar element
+	 */
+	getProgressBar() {
+		return this.page.getByRole("progressbar").or(this.page.locator("progress"));
+	}
+
+	/**
+	 * Get sale name from fundraising progress
+	 */
+	getSaleName() {
+		// Sale name is in CardTitle within the fundraising progress section
+		return this.page
+			.locator('[data-testid="fundraising-progress"]')
+			.locator("h1, h2, h3")
+			.first();
+	}
+
+	/**
+	 * Get tokens sold/total tokens text
+	 */
+	getTokensSoldText() {
+		// Look for text containing token counts (e.g., "100,211 / 29,176,667 TILE")
+		return this.page
+			.locator('[data-testid="fundraising-progress"]')
+			.getByText(/\d+.*\/.*\d+.*TILE/i);
+	}
+
+	/**
+	 * Get progress percentage text
+	 */
+	getProgressPercentage() {
+		// Look for percentage text (e.g., "0%", "50%")
+		return this.page
+			.locator('[data-testid="fundraising-progress"]')
+			.getByText(/\d+%/);
+	}
+
+	/**
+	 * Get countdown timer text (if active sale)
+	 */
+	getCountdownTimer() {
+		// Look for countdown text (e.g., "Current ICO round ends in 91 days")
+		return this.page
+			.locator('[data-testid="fundraising-progress"]')
+			.getByText(/ends in|remaining|days/i);
+	}
 }

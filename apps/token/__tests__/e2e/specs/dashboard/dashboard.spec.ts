@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
-import { DashboardPage } from "../pages/dashboard-page";
-import { ROUTES } from "../utils/constants";
+import { DashboardPage } from "__tests__/e2e/pages/dashboard-page";
+import { ROUTES } from "__tests__/e2e/utils/constants";
+import { getNormalizedPageStructure } from "__tests__/e2e/utils/helpers";
 
 /**
  * Dashboard page tests
@@ -43,7 +44,7 @@ test.describe("Dashboard", () => {
 		await expect(page).toHaveURL(new RegExp(ROUTES.TRANSACTIONS));
 	});
 
-	test.only("should display fundraising progress section", async ({ page }) => {
+	test("should display fundraising progress section", async ({ page }) => {
 		const dashboardPage = new DashboardPage(page);
 
 		await dashboardPage.waitForDashboardLoaded();
@@ -68,12 +69,15 @@ test.describe("Dashboard", () => {
 
 		// Get normalized page structure (tags, roles, hierarchy)
 		// This captures the structure without dynamic content (dates, amounts, addresses)
-		const { getNormalizedPageStructure } = await import("../utils/helpers");
 		const structure = await getNormalizedPageStructure(page, "main");
+
+		// Convert to JSON string for snapshot comparison
+		// Playwright's toMatchSnapshot expects a string or Buffer
+		const structureJson = JSON.stringify(structure, null, 2);
 
 		// Compare against saved snapshot (creates snapshot on first run)
 		// This test ensures the page structure doesn't change unexpectedly
 		// The snapshot will be saved in __tests__/e2e/specs/__snapshots__/
-		expect(structure).toMatchSnapshot("dashboard-structure.json");
+		expect(structureJson).toMatchSnapshot("dashboard-structure.json");
 	});
 });
