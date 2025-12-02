@@ -1,11 +1,10 @@
-import { metadata as siteConfig } from "@/lib/site-config";
 import { Footer as AppFooter } from "@mjs/ui/components/footer";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { Footer as FooterComponent, LocaleSwitch } from "nextra-theme-docs";
 import { Suspense } from "react";
-
 import { Locale } from "@/lib/i18n";
 import { getTranslations } from "@/lib/i18n/get-dictionaries";
+import { metadata as siteConfig } from "@/lib/site-config";
 
 export const Footer = async ({ locale }: { locale: Locale }) => {
 	const t = await getTranslations(locale);
@@ -28,7 +27,7 @@ export const Footer = async ({ locale }: { locale: Locale }) => {
 const getFooterLinks = (t: (k: string) => string) => {
 	return [
 		{ href: "/web", title: t("Footer.links.home") },
-		{ href: "/", title: t("Footer.links.docs") },
+		// { href: "/", title: t("Footer.links.docs") },
 		{ href: "/web/about", title: t("Footer.links.whoWeAre") },
 		{ href: "/web/terms", title: t("Footer.links.termsAndConditions") },
 		{ href: "/web/privacy", title: t("Footer.links.privacyPolicy") },

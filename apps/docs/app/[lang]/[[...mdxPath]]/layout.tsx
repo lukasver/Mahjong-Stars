@@ -2,7 +2,6 @@ import { Search } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import { Layout } from "nextra-theme-docs";
 import { type ReactNode } from "react";
-import { Banner } from "@/components/banner";
 // import 'nextra-theme-docs/style.css';
 import "@/app/styles.css";
 import { getLocaleNames } from "@mjs/i18n";
@@ -54,7 +53,7 @@ async function layout({
 			<TranslationsProvider translations={dictionary}>
 				<Layout
 					i18n={getLocaleNames()}
-					banner={<Banner lang={lang as Locale} />}
+					// banner={<Banner lang={lang as Locale} />}
 					navbar={<Navbar lang={lang as Locale} />}
 					search={<Search placeholder={t("Global.search")} />}
 					sidebar={{

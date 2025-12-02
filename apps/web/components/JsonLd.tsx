@@ -78,7 +78,7 @@ export const createOrganizationJsonLd = (
 		},
 		areaServed: "Worldwide",
 		knowsAbout: [
-			"Web3 Gaming",
+			// "Web3 Gaming",
 			"AI Technology",
 			"Mahjong",
 			"Blockchain",
@@ -130,7 +130,7 @@ export const createSoftwareAppJsonLd = (
 		datePublished: "2025-12-31",
 		inLanguage: DEFAULT_LOCALES,
 		keywords:
-			"mahjong, web3, ai gaming, nft, blockchain, social gaming, multiplayer",
+			"mahjong, ai gaming, nft, blockchain, social gaming, multiplayer",
 	};
 };
 

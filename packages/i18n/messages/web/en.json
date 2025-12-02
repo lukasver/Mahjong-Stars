@@ -13,12 +13,12 @@
 		}
 	},
 	"Hero": {
-		"title": "<span>Join the Web3</span> <span>Mahjong Game</span>",
+		"title": "<span>Join the</span> <span>Mahjong Game</span>",
 		"subtitle": "Challenge Your Friends at Mahjong Stars Where Cool Characters Rule the Game!"
 	},
 	"About": {
 		"title": "What's Mahjong Stars?",
-		"description": "Explore Mahjong Stars, a Web3 platform where ancient Mahjong meets modern play. Challenge others, collect unique NFT characters, and earn rewards in a dynamic online world. Connect globally through the power of blockchain for a revolutionary gaming experience."
+		"description": "Explore Mahjong Stars, a platform where ancient Mahjong meets modern play. Challenge others, collect unique NFT characters, and earn rewards in a dynamic online world. Connect globally through the power of blockchain for a revolutionary gaming experience."
 	},
 	"GameFeatures": {
 		"title": "IN-GAME FEATURES",
@@ -33,7 +33,7 @@
 			},
 			"collectCharacters": {
 				"title": "Collect the Unforgettable",
-				"description": "Unlock rare characters and exclusive items with your blockchain."
+				"description": "Unlock rare characters and exclusive items with."
 			},
 			"bringFriends": {
 				"title": "Bring Your Friends to the Table",
@@ -217,11 +217,11 @@
 	},
 	"Faq": {
 		"title": "Frequently Asked Questions",
-		"description": "Find answers to common inquiries about our Web3 Mahjong Game:",
+		"description": "Find answers to common inquiries about our Mahjong Game:",
 		"items": {
 			"0": {
 				"question": "What is Mahjong Stars?",
-				"answer": "Mahjong Stars is a Web3-enabled, AI-powered multiplayer mahjong platform that allows players to play, train AI avatars, and compete in global tournaments, both live and autonomously."
+				"answer": "Mahjong Stars is an AI-powered multiplayer mahjong platform that allows players to play, train AI avatars, and compete in global tournaments, both live and autonomously."
 			},
 			"1": {
 				"question": "What makes Mahjong Stars unique?",
@@ -249,11 +249,11 @@
 			},
 			"7": {
 				"question": "How big is the potential market?",
-				"answer": "Over 600 million global mahjong players. The Web3 gaming sector is projected to surpass $30B in 2025, offering massive opportunity."
+				"answer": "Over 600 million global mahjong players. The blockchain gaming sector is projected to surpass $30B in 2025, offering massive opportunity."
 			},
 			"8": {
 				"question": "Who is behind the project?",
-				"answer": "The team includes experts from Mahjong Logic, PokerStars Asia, and Coinbase Asia, with deep experience in gaming and Web3."
+				"answer": "The team includes experts from Mahjong Logic, PokerStars Asia, and Coinbase Asia, with deep experience in gaming and blockchain technology."
 			},
 			"9": {
 				"question": "What\u2019s the roadmap for 2025?",
@@ -330,18 +330,18 @@
 	},
 	"Metadata": {
 		"title": "Mahjong Stars",
-		"description": "Web3 Mahjong with AI Characters & NFT Rewards. Play & train AI avatars, collect unique characters, and earn $TILE. Multiplayer global platform with tournaments",
+		"description": "Blockchain Mahjong with AI Characters & NFT Rewards. Play & train AI avatars, collect unique characters, and earn $TILE. Multiplayer global platform with tournaments",
 		"Privacy": {
 			"title": "Privacy Policy",
-			"description": "Your privacy matters! Learn how Mahjong Stars protects your personal data, gaming information, and wallet details. We keep you safe so you can focus on winning and expressing yourself in our Web3 mahjong world! ✨"
+			"description": "Your privacy matters! Learn how Mahjong Stars protects your personal data, gaming information, and wallet details. We keep you safe so you can focus on winning and expressing yourself in our blockchain mahjong world! ✨"
 		},
 		"Terms": {
 			"title": "Terms of Service",
-			"description": "Game rules and guidelines for Mahjong Stars! From fair play policies to account management & data protection, discover how to be part of our Web3 mahjong community. Play smart, play fair, and let's keep this game fun for everyone! 💯"
+			"description": "Game rules and guidelines for Mahjong Stars! From fair play policies to account management & data protection, discover how to be part of our blockchain mahjong community. Play smart, play fair, and let's keep this game fun for everyone! 💯"
 		},
 		"Faq": {
 			"title": "Frequently Asked Questions (FAQ)",
-			"description": "Got Questions? We've Got Answers! 🧋✨. Everything you need to know about Mahjong Stars! From AI avatars and $TILE tokens to gameplay tips and NFT rewards - get all your Web3 mahjong questions answered with style 💅."
+			"description": "Got Questions? We've Got Answers! 🧋✨. Everything you need to know about Mahjong Stars! From AI avatars and $TILE tokens to gameplay tips and NFT rewards - get all your blockchain mahjong questions answered with style 💅."
 		},
 		"Contact": {
 			"title": "Contact Us",
@@ -353,11 +353,11 @@
 		},
 		"About": {
 			"title": "About",
-			"description": "Discover Mahjong Stars - the Web3 platform where ancient Mahjong meets modern gaming! Challenge players worldwide, collect unique NFT characters, and earn $TILE tokens in our dynamic online world. Connect globally through blockchain technology for a revolutionary gaming experience that's both fun and rewarding! 🎮"
+			"description": "Discover Mahjong Stars - the blockchain platform where ancient Mahjong meets modern gaming! Challenge players worldwide, collect unique NFT characters, and earn $TILE tokens in our dynamic online world. Connect globally through blockchain technology for a revolutionary gaming experience that's both fun and rewarding! 🎮"
 		},
 		"Docs": {
 			"title": "Docs",
-			"description": "Explore Mahjong Stars unique features and innovations! Learn about AI-powered avatars, blockchain integration, NFT character collection, and Web3 gaming mechanics. Discover how our platform combines traditional Mahjong with cutting-edge technology for a revolutionary gaming experience! 🤖"
+			"description": "Explore Mahjong Stars unique features and innovations! Learn about AI-powered avatars, blockchain integration, NFT character collection, and blockchain gaming mechanics. Discover how our platform combines traditional Mahjong with cutting-edge technology for a revolutionary gaming experience! 🤖"
 		}
 	}
 }
