@@ -32,7 +32,7 @@ const FinishedCard = ({
 
   return (
     <div className="w-full max-w-6xl mx-auto"
-      data-testid="fundraising-progress"
+      data-testid="fundraising-finished-card"
     >
       {/* Main Finished Sale Card */}
       <Card className={getGlassyCardClassName("mb-6")}>
@@ -272,6 +272,7 @@ export function FundraisingProgress({
       chainId={chainId}
     >
       <motion.div
+        data-testid="fundraising-progress"
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{
