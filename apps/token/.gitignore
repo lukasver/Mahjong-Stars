@@ -35,6 +35,7 @@ playwright-report/
 
 playwright/.auth
 __tests__/e2e/playwright/.auth
+__tests__/e2e/test-results/
 __tests__/e2e/specs/__snapshots__
 __tests__/config/states/*.json
 

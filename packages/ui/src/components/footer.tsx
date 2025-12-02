@@ -22,7 +22,7 @@ export const Footer = ({
   const El = element || 'footer';
 
   return (
-    <El className={cn('mt-auto w-full', className)}>
+    <El className={cn('mt-auto w-full', className)} role={El === 'footer' ? 'contentinfo' : undefined}>
       <div
         className={cn(
           'flex flex-col gap-4 justify-between items-center w-full md:my-10 p-6'

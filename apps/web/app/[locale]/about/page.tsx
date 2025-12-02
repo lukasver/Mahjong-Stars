@@ -73,10 +73,10 @@ export default async function About({
 									"w-full h-full object-contain lg:object-cover z-1 col-start-1 col-end-2 md:col-start-1 md:col-end-7 row-start-1 row-end-4 -mt-20 animate-fade-in-down-slow 2xl:scale-75",
 									"md:scale-125",
 								)}
-							// style={{
-							//   maskImage:
-							//     'linear-gradient(to bottom, black 80%, transparent 100%)',
-							// }}
+								style={{
+									maskImage:
+										'linear-gradient(to bottom, black 80%, transparent 100%)',
+								}}
 							/>
 						</div>
 					</div>

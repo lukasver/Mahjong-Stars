@@ -21,7 +21,7 @@ export function DashboardCard({
       <div className='text-xs sm:text-sm font-medium text-zinc-400'>
         {title}
       </div>
-      <div className='text-lg sm:text-xl font-bold'>{value}</div>
+      <div className='text-lg sm:text-xl font-bold' data-testid='card-value'>{value}</div>
     </div>
   );
 }

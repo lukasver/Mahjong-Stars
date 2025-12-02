@@ -290,7 +290,7 @@ export function FundraisingProgress({
               <div className='flex items-center gap-2'>
                 <CardTitle className='flex items-center gap-2 flex-1'>
                   {chainId && <TokenIcon symbol={sale.tokenSymbol} chainId={chainId} />}
-                  {sale.name}
+                  <h2>{sale.name}</h2>
                 </CardTitle>
                 <span className='text-xs sm:text-sm font-head font-bold' >
                   {chainId && <TokenName symbol={sale.tokenSymbol} chainId={chainId} />}
@@ -299,7 +299,7 @@ export function FundraisingProgress({
               </div>
               {daysRemaining > 0 ? (
                 <CardDescription>
-                  {t("description", { days: daysRemaining })}
+                  <p>{t("description", { days: daysRemaining })}</p>
                 </CardDescription>
               ) : null}
             </CardHeader>

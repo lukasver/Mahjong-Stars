@@ -86,7 +86,7 @@ export function DashboardSidebar({
   children?: React.ReactNode;
 }) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon"  {...props}>
       <SidebarHeader>
         <ErrorBoundary fallback={null}>
           <TeamSwitcher teams={data.teams} />
