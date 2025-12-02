@@ -736,6 +736,201 @@ This plan covers end-to-end testing for the Mahjong Stars token platform deploye
 - Verify all functionality works
 - Expected: Application works in Edge
 
+## File Structure and Organization
+
+Each test category has its own folder under `specs/`, and each test case is implemented as a separate module file. Each test file includes a top comment referencing the test plan specification with line numbers.
+
+### Directory Structure
+
+```
+__tests__/e2e/specs/
+├── dashboard/
+│   ├── page-load.spec.ts                    # @test-plan.md (13-19)
+│   ├── fundraising-progress.spec.ts          # @test-plan.md (20-29)
+│   ├── token-cards.spec.ts                   # @test-plan.md (30-37)
+│   ├── recent-transactions-table.spec.ts     # @test-plan.md (38-46)
+│   ├── ico-phases.spec.ts                    # @test-plan.md (47-59)
+│   ├── navigation-to-buy.spec.ts             # @test-plan.md (60-66)
+│   ├── navigation-to-transactions.spec.ts    # @test-plan.md (67-73)
+│   ├── header-buy-button.spec.ts             # @test-plan.md (74-79)
+│   ├── sidebar-functionality.spec.ts         # @test-plan.md (80-89)
+│   ├── theme-toggle.spec.ts                  # @test-plan.md (90-96)
+│   ├── footer-links.spec.ts                  # @test-plan.md (97-104)
+│   └── responsive-layout.spec.ts             # @test-plan.md (105-112)
+├── buy/
+│   ├── page-load.spec.ts                     # @test-plan.md (117-124)
+│   ├── sale-information-tabs.spec.ts         # @test-plan.md (125-137)
+│   ├── sale-information-content.spec.ts      # @test-plan.md (138-154)
+│   ├── sale-overview.spec.ts                 # @test-plan.md (155-169)
+│   ├── invest-form-display.spec.ts           # @test-plan.md (170-180)
+│   ├── token-amount-validation.spec.ts       # @test-plan.md (181-191)
+│   ├── usd-amount-validation.spec.ts         # @test-plan.md (192-199)
+│   ├── payment-method-selection.spec.ts      # @test-plan.md (200-208)
+│   ├── form-submission-fiat.spec.ts          # @test-plan.md (209-217)
+│   ├── form-submission-crypto.spec.ts        # @test-plan.md (218-226)
+│   ├── sale-cover-image.spec.ts              # @test-plan.md (227-233)
+│   └── disabled-state-handling.spec.ts       # @test-plan.md (234-241)
+├── transaction/
+│   ├── page-load.spec.ts                     # @test-plan.md (246-252)
+│   ├── steps-display.spec.ts                 # @test-plan.md (253-264)
+│   ├── kyc-document-upload.spec.ts           # @test-plan.md (265-276)
+│   ├── kyc-document-validation.spec.ts       # @test-plan.md (277-284)
+│   ├── saft-signing.spec.ts                  # @test-plan.md (285-296)
+│   ├── payment-step-fiat.spec.ts             # @test-plan.md (297-305)
+│   ├── payment-step-crypto.spec.ts           # @test-plan.md (306-314)
+│   ├── payment-submission.spec.ts            # @test-plan.md (315-322)
+│   ├── status-success.spec.ts                # @test-plan.md (323-331)
+│   ├── status-pending.spec.ts                # @test-plan.md (332-338)
+│   ├── status-failure.spec.ts                # @test-plan.md (339-345)
+│   └── cancellation.spec.ts                  # @test-plan.md (346-355)
+├── transactions-list/
+│   ├── page-load.spec.ts                     # @test-plan.md (360-367)
+│   ├── table-display.spec.ts                 # @test-plan.md (368-380)
+│   ├── empty-state.spec.ts                   # @test-plan.md (381-386)
+│   ├── data-display.spec.ts                  # @test-plan.md (387-398)
+│   ├── search.spec.ts                        # @test-plan.md (399-407)
+│   ├── status-filter.spec.ts                 # @test-plan.md (408-418)
+│   ├── payment-type-filter.spec.ts           # @test-plan.md (419-429)
+│   ├── transaction-actions.spec.ts           # @test-plan.md (430-437)
+│   ├── pagination.spec.ts                    # @test-plan.md (438-448)
+│   ├── column-visibility.spec.ts             # @test-plan.md (449-456)
+│   ├── chain-selection.spec.ts               # @test-plan.md (457-463)
+│   └── sorting.spec.ts                       # @test-plan.md (464-472)
+├── admin/
+│   ├── dashboard-access.spec.ts              # @test-plan.md (477-483)
+│   ├── sales-list.spec.ts                    # @test-plan.md (484-491)
+│   ├── create-sale.spec.ts                   # @test-plan.md (492-507)
+│   ├── edit-sale.spec.ts                     # @test-plan.md (508-517)
+│   ├── delete-sale.spec.ts                    # @test-plan.md (518-525)
+│   ├── transactions-view.spec.ts             # @test-plan.md (526-533)
+│   ├── users-view.spec.ts                    # @test-plan.md (534-541)
+│   └── user-management-actions.spec.ts       # @test-plan.md (542-551)
+├── flow/
+│   ├── complete-fiat-purchase.spec.ts        # @test-plan.md (556-569)
+│   ├── complete-crypto-purchase.spec.ts      # @test-plan.md (570-583)
+│   ├── transaction-status-tracking.spec.ts   # @test-plan.md (584-592)
+│   └── navigation-consistency.spec.ts        # @test-plan.md (593-600)
+├── error/
+│   ├── network-error.spec.ts                 # @test-plan.md (605-613)
+│   ├── api-error.spec.ts                     # @test-plan.md (614-620)
+│   ├── invalid-transaction-id.spec.ts        # @test-plan.md (621-627)
+│   ├── expired-sale.spec.ts                  # @test-plan.md (628-634)
+│   ├── insufficient-funds.spec.ts           # @test-plan.md (635-641)
+│   └── session-expiry.spec.ts                # @test-plan.md (642-648)
+├── performance/
+│   ├── dashboard-load-time.spec.ts           # @test-plan.md (653-659)
+│   ├── buy-page-load-time.spec.ts            # @test-plan.md (660-666)
+│   ├── transactions-load-time.spec.ts        # @test-plan.md (667-673)
+│   └── large-dataset-handling.spec.ts        # @test-plan.md (674-680)
+├── accessibility/
+│   ├── keyboard-navigation.spec.ts           # @test-plan.md (685-692)
+│   ├── screen-reader-compatibility.spec.ts   # @test-plan.md (693-700)
+│   ├── color-contrast.spec.ts                # @test-plan.md (701-707)
+│   └── form-accessibility.spec.ts            # @test-plan.md (708-714)
+└── browser/
+    ├── chrome-compatibility.spec.ts           # @test-plan.md (719-723)
+    ├── firefox-compatibility.spec.ts         # @test-plan.md (724-728)
+    ├── safari-compatibility.spec.ts          # @test-plan.md (729-733)
+    └── edge-compatibility.spec.ts            # @test-plan.md (734-738)
+```
+
+### Test File Format
+
+Each test file follows this structure:
+
+```typescript
+/**
+ * @test-plan.md (13-19)
+ * TC-DASH-001: Dashboard Page Load
+ *
+ * Navigate to `/dashboard`
+ * Verify page title contains "$TILE"
+ * Verify main content area is visible
+ * Verify dashboard heading is displayed
+ * Expected: Dashboard loads within 5 seconds
+ */
+
+import { test, expect } from '@playwright/test';
+import { DashboardPage } from '../../pages/dashboard-page';
+
+test('TC-DASH-001: Dashboard Page Load', async ({ page }) => {
+  const dashboardPage = new DashboardPage(page);
+  // Test implementation using POM methods
+});
+```
+
+### Page Object Model (POM) Guidelines
+
+**Always favor using Page Object Models when possible:**
+
+1. **Use Existing POMs**: Check if a POM already exists in `pages/` directory before writing direct page interactions
+
+   - Existing POMs: `DashboardPage`, `BuyPage`, `TransactionPage`, `TransactionsListPage`, `LoginPage`
+   - All POMs extend `BasePage` which provides common functionality
+
+2. **Extend Existing POMs**: If a POM exists but lacks needed methods:
+
+   - Add new methods to the existing POM class
+   - Follow the existing naming conventions and patterns
+   - Document methods with JSDoc comments
+   - Keep methods focused and reusable
+
+3. **Create New POMs**: When testing a new page that doesn't have a POM:
+
+   - Create a new POM class in `pages/` directory
+   - Extend `BasePage` for common functionality
+   - Name the class following the pattern: `[PageName]Page` (e.g., `AdminSalesPage`)
+   - Include methods for:
+     - Navigation (`goto()`)
+     - Element locators (as getter methods)
+     - Actions (click, fill, verify)
+     - Wait conditions
+
+4. **POM Best Practices**:
+
+   - **Never use raw selectors in test files** - always use POM methods
+   - **Encapsulate page logic** - all page-specific logic belongs in POMs
+   - **Reusable methods** - create methods that can be used across multiple tests
+   - **Clear method names** - use descriptive names like `getFundraisingProgress()` instead of `getProgress()`
+   - **Return Locators** - POM methods should return Playwright Locators for flexibility
+   - **Wait strategies** - include appropriate waits in POM methods
+
+5. **Example POM Extension**:
+
+   ```typescript
+   // In pages/dashboard-page.ts
+   /**
+    * Get dashboard heading
+    */
+   getDashboardHeading() {
+     return this.page.getByRole("heading", { name: "Dashboard", level: 1 });
+   }
+   ```
+
+6. **Test File Structure with POM**:
+
+   ```typescript
+   test('TC-DASH-001: Dashboard Page Load', async ({ page }) => {
+     const dashboardPage = new DashboardPage(page);
+
+     // Use POM methods instead of direct page interactions
+     await dashboardPage.goto();
+     await dashboardPage.waitForDashboardLoaded();
+
+     // Use POM getters for locators
+     const heading = dashboardPage.getDashboardHeading();
+     await expect(heading).toBeVisible();
+   });
+   ```
+
+### File Naming Convention
+
+- Use kebab-case for file names
+- File names should end with `.spec.ts` (e.g., `page-load.spec.ts`)
+- File names should be descriptive and match the test case name
+- Each test case gets its own file
+- Group related tests in category folders
+
 ## Test Execution Strategy
 
 ### Priority Levels
