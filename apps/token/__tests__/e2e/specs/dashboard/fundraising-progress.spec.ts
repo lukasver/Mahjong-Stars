@@ -16,7 +16,7 @@ import { expect, test } from "@playwright/test";
 import { DashboardPage } from "../../pages/dashboard-page";
 import { TIMEOUTS } from "../../utils/constants";
 
-test.only("TC-DASH-002: Fundraising Progress Display", async ({ page }) => {
+test("TC-DASH-002: Fundraising Progress Display", async ({ page }) => {
 	const dashboardPage = new DashboardPage(page);
 
 	// Navigate to dashboard

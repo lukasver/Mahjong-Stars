@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Locator, Page } from "@playwright/test";
 import { ROUTES, TIMEOUTS } from "../utils/constants";
 import { BasePage } from "./base-page";
 
@@ -30,33 +30,61 @@ export class DashboardPage extends BasePage {
 	 * Get token cards container
 	 */
 	getTokenCards() {
+		return this.page.locator('[data-testid="token-cards"]');
+	}
+
+	/**
+	 * Get "Your tokens" card
+	 */
+	getYourTokensCard() {
 		return this.page
 			.locator('[data-testid="token-cards"]')
-			.or(
-				this.page.locator(
-					'div:has-text("Your tokens"), div:has-text("Token Price")',
-				),
-			);
+			.getByText("Your tokens")
+			.locator("..");
 	}
 
 	/**
-	 * Get user tokens card
+	 * Get "Tokens pending confirmation" card
 	 */
-	getUserTokensCard() {
+	getTokensPendingConfirmationCard() {
 		return this.page
-			.getByText(/User Tokens|Your Tokens/i)
-			.locator("..")
-			.first();
+			.locator('[data-testid="token-cards"]')
+			.getByText("Tokens pending confirmation")
+			.locator("..");
 	}
 
 	/**
-	 * Get token price card
+	 * Get "Token Price" card
 	 */
 	getTokenPriceCard() {
 		return this.page
-			.getByText(/Token Price|Current Price/i)
-			.locator("..")
-			.first();
+			.locator('[data-testid="token-cards"]')
+			.getByText("Token Price")
+			.locator("..");
+	}
+
+	/**
+	 * Get "Remaining Tokens" card
+	 */
+	getRemainingTokensCard() {
+		return this.page
+			.locator('[data-testid="token-cards"]')
+			.getByText("Remaining Tokens")
+			.locator("..");
+	}
+
+	/**
+	 * Get card value element (second div child contains the value)
+	 */
+	getCardValue(cardLocator: Locator): Locator {
+		return cardLocator.locator('[data-testid="card-value"]');
+	}
+
+	/**
+	 * Get user tokens card (legacy method for backward compatibility)
+	 */
+	getUserTokensCard() {
+		return this.getYourTokensCard();
 	}
 
 	/**
@@ -137,9 +165,128 @@ export class DashboardPage extends BasePage {
 	 * Get ICO phases section
 	 */
 	getIcoPhases() {
+		return this.page.locator('[data-testid="ico-phases"]');
+	}
+
+	/**
+	 * Get ICO phases title
+	 * CardTitle is a div, so we use text-based selector
+	 */
+	getIcoPhasesTitle() {
 		return this.page
 			.locator('[data-testid="ico-phases"]')
-			.or(this.page.getByText(/ICO Phases|Phases/i).locator(".."));
+			.getByText("ICO Phases")
+			.first();
+	}
+
+	/**
+	 * Get ICO phases description
+	 * CardDescription is a div, so we use text-based selector
+	 */
+	getIcoPhasesDescription() {
+		return this.page
+			.locator('[data-testid="ico-phases"]')
+			.getByText("Token sale schedule and pricing");
+	}
+
+	/**
+	 * Get all ICO phase cards
+	 */
+	getIcoPhaseCards() {
+		return this.page
+			.locator('[data-testid="ico-phases"]')
+			.locator('div[class*="relative"]:has(h3)');
+	}
+
+	/**
+	 * Get recent transactions table
+	 */
+	getRecentTransactionsTable() {
+		return this.page
+			.locator('[data-testid="recent-transactions"]')
+			.locator("table");
+	}
+
+	/**
+	 * Get recent transactions table headers
+	 */
+	getRecentTransactionsHeaders() {
+		return this.page
+			.locator('[data-testid="recent-transactions"]')
+			.locator("thead th");
+	}
+
+	/**
+	 * Get recent transactions table rows
+	 */
+	getRecentTransactionsRows() {
+		return this.page
+			.locator('[data-testid="recent-transactions"]')
+			.locator("tbody tr");
+	}
+
+	/**
+	 * Get sidebar element
+	 */
+	getSidebar() {
+		return this.page
+			.locator('aside, [role="complementary"]')
+			.or(this.page.locator('nav:has-text("Overview")'));
+	}
+
+	/**
+	 * Get sidebar logo
+	 */
+	getSidebarLogo() {
+		return this.page
+			.getByText("Mahjong Stars")
+			.or(this.page.locator('img[alt*="Mahjong Stars"], img[alt*="logo"]'));
+	}
+
+	/**
+	 * Get sidebar toggle button
+	 */
+	getSidebarToggleButton() {
+		return this.page.getByRole("button", { name: /Toggle Sidebar/i });
+	}
+
+	/**
+	 * Get theme toggle button
+	 */
+	getThemeToggleButton() {
+		return this.page.getByRole("button", { name: /Toggle theme/i });
+	}
+
+	/**
+	 * Get header "Buy TILE" button
+	 */
+	getHeaderBuyButton() {
+		return this.page
+			.getByRole("link", { name: "Buy TILE" })
+			.or(this.page.getByRole("button", { name: "Buy TILE" }));
+	}
+
+	/**
+	 * Get footer element
+	 */
+	getFooter() {
+		return this.page.locator("footer").or(this.page.getByRole("contentinfo"));
+	}
+
+	/**
+	 * Get footer navigation links
+	 */
+	getFooterLinks() {
+		return this.page.locator("footer").getByRole("link");
+	}
+
+	/**
+	 * Get footer social media links
+	 */
+	getFooterSocialLinks() {
+		return this.page
+			.locator("footer")
+			.getByRole("link", { name: /Twitter|TikTok|Discord/i });
 	}
 
 	/**
@@ -172,12 +319,14 @@ export class DashboardPage extends BasePage {
 
 	/**
 	 * Get sale name from fundraising progress
+	 * CardTitle is a div, so we look for the CardTitle div containing the sale name
 	 */
 	getSaleName() {
-		// Sale name is in CardTitle within the fundraising progress section
+		// Sale name is in CardTitle (div) within the fundraising progress section
+		// CardTitle has class "text-2xl font-semibold"
 		return this.page
 			.locator('[data-testid="fundraising-progress"]')
-			.locator("h1, h2, h3")
+			.locator('.text-2xl.font-semibold') // CardTitle div
 			.first();
 	}
 

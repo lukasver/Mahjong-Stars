@@ -50,6 +50,7 @@ const config: PlaywrightTestConfig = {
 	// workers: 1,
 	globalSetup: "./__tests__/e2e/global-setup.ts",
 	globalTeardown: "./__tests__/e2e/global-teardown.ts",
+	outputDir: "./__tests__/e2e/test-results",
 	snapshotDir: "./__tests__/e2e/specs/__snapshots__",
 	reporter: [["html", { outputFolder: "playwright-report/", open: "never" }]],
 };

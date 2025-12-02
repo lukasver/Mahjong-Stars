@@ -78,8 +78,12 @@ export function IcoPhases({ sales }: { sales: IcoPhases[] }) {
           transition={{ delay: 0.2, duration: 0.4 }}
         >
           <CardHeader>
-            <CardTitle>ICO Phases</CardTitle>
-            <CardDescription>Token sale schedule and pricing</CardDescription>
+            <CardTitle>
+              <h2>ICO Phases</h2>
+            </CardTitle>
+            <CardDescription>
+              <p>Token sale schedule and pricing</p>
+            </CardDescription>
           </CardHeader>
         </motion.div>
         <motion.div
