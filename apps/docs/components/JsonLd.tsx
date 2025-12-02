@@ -166,7 +166,7 @@ export const createSoftwareAppJsonLd = (
 		datePublished: "2025-12-31",
 		inLanguage: DEFAULT_LOCALES,
 		keywords:
-			"mahjong, web3, ai gaming, nft, blockchain, social gaming, multiplayer",
+			"mahjong, ai gaming, nft, blockchain, social gaming, multiplayer",
 	};
 };
 
@@ -318,7 +318,7 @@ export const createArticleJsonLd = (
 			"https://docs.mahjongstars.com/static/images/banner.png",
 		articleSection: "Gaming Documentation",
 		keywords:
-			"mahjong, web3, ai gaming, nft, blockchain, social gaming, multiplayer" +
+			"mahjong, ai gaming, nft, blockchain, social gaming, multiplayer" +
 				tags
 				? `, ${tags}`
 				: "",

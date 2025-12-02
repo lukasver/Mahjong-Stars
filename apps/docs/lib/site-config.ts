@@ -13,7 +13,7 @@ const siteUrl = `http${
 const metadata = {
 	title: "Mahjong Stars",
 	description:
-		"Web3 Mahjong with AI Characters & NFT Rewards. Play & train AI avatars, collect unique characters, and earn $TILE. Multiplayer global platform with tournaments",
+		"Mahjong with AI Characters & NFT Rewards. Play & train AI avatars, collect unique characters, and earn $TILE. Multiplayer global platform with tournaments",
 	domain,
 	logoTitle: "Mahjong Stars",
 	businessName: "Mahjong Stars",

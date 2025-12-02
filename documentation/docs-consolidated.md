@@ -1261,7 +1261,7 @@ The global mahjong market represents one of the largest untapped opportunities i
 
 #### Market Gaps & Opportunities
 
-- **No Major Web3 Mahjong Platform**: First-mover advantage in untapped segment
+- **No Major Mahjong Platform**: First-mover advantage in untapped segment
 - **Limited AI Integration**: Revolutionary AI-powered gameplay not available elsewhere
 - **Social Gaming Focus**: Emphasis on community and social features
 - **Cross-Platform Experience**: Seamless multi-device gaming experience

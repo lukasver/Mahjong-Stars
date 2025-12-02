@@ -261,7 +261,7 @@ export const createArticleJsonLd = (t: TFunction): WithContext<Article> => {
 		"@type": "Article",
 		headline: "Welcome to Mahjong Stars",
 		description:
-			"The next evolution of social gaming - AI-powered Web3 mahjong platform with 24/7 gameplay",
+			"The next evolution of social gaming - AI-powered mahjong platform with 24/7 gameplay",
 		author: {
 			"@type": "Organization",
 			name: "Mahjong Stars",
@@ -282,7 +282,7 @@ export const createArticleJsonLd = (t: TFunction): WithContext<Article> => {
 		},
 		image: "https://docs.mahjongstars.com/static/images/banner.png",
 		articleSection: "Gaming Documentation",
-		keywords: "introduction, overview, ai-gaming, web3, social-gaming",
+		keywords: "introduction, overview, ai-gaming, social-gaming",
 	};
 };
 
