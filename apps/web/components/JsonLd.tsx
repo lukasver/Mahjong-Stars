@@ -111,7 +111,7 @@ export const createSoftwareAppJsonLd = (
 		description:
 			t("Metadata.description"),
 		url: siteConfig.siteUrl,
-		screenshot: "https://docs.mahjongstars.com/static/images/banner.png",
+		screenshot: "https://docs.thetilescompany.io/static/images/banner.png",
 		offers: {
 			"@type": "Offer",
 			price: "0",
@@ -271,16 +271,16 @@ export const createArticleJsonLd = (t: TFunction): WithContext<Article> => {
 			name: "Mahjong Stars",
 			logo: {
 				"@type": "ImageObject",
-				url: "https://docs.mahjongstars.com/static/favicons/android-chrome-512x512.png",
+				url: "https://docs.thetilescompany.io/static/favicons/android-chrome-512x512.png",
 			},
 		},
 		datePublished: "2025-07-09",
-		dateModified: "2025-07-09",
+		dateModified: "2025-12-02",
 		mainEntityOfPage: {
 			"@type": "WebPage",
-			"@id": "https://docs.mahjongstars.com",
+			"@id": "https://docs.thetilescompany.io",
 		},
-		image: "https://docs.mahjongstars.com/static/images/banner.png",
+		image: "https://docs.thetilescompany.io/static/images/banner.png",
 		articleSection: "Gaming Documentation",
 		keywords: "introduction, overview, ai-gaming, social-gaming",
 	};

@@ -23,4 +23,4 @@ This monorepo is a Turborepo which includes the following packages/apps:
 ### Live URLs
 
 - [Mahjong Stars](https://www.mahjongstars.com) - Main website
-- [Documentation](https://docs.mahjongstars.com) - Developer documentation
+- [Documentation](https://docs.thetilescompany.io) - Company & project documentation

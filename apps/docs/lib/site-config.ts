@@ -4,7 +4,7 @@ const VERCEL_URL =
 const domain =
 	VERCEL_URL ||
 	process.env.NEXT_PUBLIC_DOMAIN?.split("://")?.[1] ||
-	"docs.mahjongstars.com";
+	"docs.thetilescompany.io";
 
 const siteUrl = `http${
 	process.env.NODE_ENV === "development" ? "" : "s"

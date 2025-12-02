@@ -1,3 +1,4 @@
+// if multiple domanis, vercel picks the shortest one
 const VERCEL_URL =
   process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
 

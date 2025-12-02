@@ -33,8 +33,10 @@ tsconfig.tsbuildinfo
 
 playwright-report/
 
+playwright/.auth
+__tests__/e2e/specs/__snapshots__
+__tests__/config/states/*.json
 
-src/__tests__/config/states/*.json
 data/*.production.json
 
 .wrangler
