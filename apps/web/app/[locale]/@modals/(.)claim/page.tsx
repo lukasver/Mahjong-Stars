@@ -16,11 +16,15 @@ export default async function ClaimModalPage({ searchParams }: PageProps) {
 		searchParams,
 	]);
 
+
+
 	if (!id) {
 		redirect("/");
 	}
 
 	const quest = await getQuestData(id?.toString());
+
+
 
 	if (!quest) {
 		redirect("/");

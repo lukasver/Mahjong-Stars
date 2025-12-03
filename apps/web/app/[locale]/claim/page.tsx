@@ -18,11 +18,13 @@ export default async function ClaimFormPage({ searchParams }: PageProps) {
 		searchParams,
 	]);
 
+
 	if (!id) {
 		redirect("/");
 	}
 
 	const quest = await getQuestData(id?.toString());
+
 
 	if (!quest) {
 		redirect("/");

@@ -18,7 +18,7 @@
   },
   "About": {
     "title": "What's Mahjong Stars?",
-    "description": "Explore Mahjong Stars, a platform where ancient Mahjong meets modern play. Challenge others, collect unique NFT characters, and earn rewards in a dynamic online world. Connect globally through the power of blockchain for a revolutionary gaming experience."
+    "description": "Explore Mahjong Stars, a platform where ancient Mahjong meets modern play. Challenge others, collect unique characters, and earn rewards in a dynamic online world. Connect globally for a revolutionary gaming experience."
   },
   "GameFeatures": {
     "title": "IN-GAME FEATURES",
@@ -209,7 +209,8 @@
       "error": {
         "title": "Something went wrong.",
         "captchaFailed": "Captcha failed",
-        "questFinalized": "Quest finalized"
+        "questFinalized": "Quest finalized",
+        "codeInvalid": "Invalid code"
       }
     },
     "followUs": "Follow us on our socials to get more codes!",
@@ -225,7 +226,7 @@
       },
       "1": {
         "question": "What makes Mahjong Stars unique?",
-        "answer": "AI avatars that learn your playstyle, 24/7 gameplay via AI bots, NFT and crypto integration, built-in social gaming mechanics, and multi-platform access through a Unity-based app."
+        "answer": "AI avatars that learn your playstyle, 24/7 gameplay via AI bots, built-in social gaming mechanics, and multi-platform access through a Unity-based app."
       },
       "2": {
         "question": "What is the role of AI in the game?",
@@ -233,31 +234,23 @@
       },
       "3": {
         "question": "What are StarsPoints and how do they work?",
-        "answer": "StarsPoints are the in-game currency:\n- Purchasable via fiat or crypto\n- Used for game access, AI bots, items, and fees\n- Have no value outside the platform\n- Drive revenue through gameplay usage"
+        "answer": "StarsPoints are the in-game currency: \n- Used for game access, AI bots, items, and fees\n- Have no value outside the platform\n- Drive revenue through gameplay usage"
       },
       "4": {
         "question": "How does Mahjong Stars generate revenue?",
-        "answer": "Revenue is generated from entry fees, premium AI services, in-game item sales, and NFT transaction fees."
+        "answer": "Revenue is generated from entry fees, premium AI services and in-game item sales"
       },
       "5": {
-        "question": "What is $TILE in this context?",
-        "answer": "$TILE is the platform’s utility token, used to buy in-game items, trade NFTs, stake for revenue share and rewards, and support the game economy."
+        "question": "How big is the potential market?",
+        "answer": "Over 600 million global mahjong players."
       },
       "6": {
-        "question": "Is there an NFT component?",
-        "answer": "Yes. Players can unlock, trade, and rent NFTs. Withdrawal NFTs allow converting in-game earnings to real-world value through third-party platforms."
+        "question": "Who is behind the project?",
+        "answer": "The team includes experts from Mahjong Logic, PokerStars Asia, and Coinbase Asia, with deep experience in the gaming industry."
       },
       "7": {
-        "question": "How big is the potential market?",
-        "answer": "Over 600 million global mahjong players. The blockchain gaming sector is projected to surpass $30B in 2025, offering massive opportunity."
-      },
-      "8": {
-        "question": "Who is behind the project?",
-        "answer": "The team includes experts from Mahjong Logic, PokerStars Asia, and Coinbase Asia, with deep experience in gaming and blockchain technology."
-      },
-      "9": {
         "question": "What’s the roadmap for 2025?",
-        "answer": "Q1: Beta build release\nQ2: Fundraising and partnerships\nQ3: V2 launch and NFT marketplace\nQ4: $TILE token launch and exchange listings"
+        "answer": "Q1: Beta build release\nQ2: Fundraising and partnerships\nMore exciting stuff coming soon!"
       }
     }
   },
@@ -304,7 +297,6 @@
         "7": "I saw the points system. It's kinda genius",
         "8": "There's a character called Jenny… she's cold",
         "9": "I think you can win stuff that actually matters…",
-        "10": "Wait… are NFTs really in this?!",
         "_character": "Nervous Sweater Guy",
         "_tone": "Don’t panic. The game’s almost here"
       },
@@ -320,7 +312,7 @@
         "9": "Special moves are fun. Unless I'm using mine on you",
         "10": "Points, perks, upgrades. All wasted if you don't play smart",
         "11": "Yes, you can play bots. They play better than most of you",
-        "12": "Earn points. Trade for NFTs. But don't get greedy",
+        "12": "Earn points. But don't get greedy",
         "13": "Sell your tile set if you want. You'll still lose to me",
         "14": "Real value, digital pain. Welcome to Mahjong Stars",
         "_character": "Granny + her cat",
@@ -330,10 +322,10 @@
   },
   "Metadata": {
     "title": "Mahjong Stars",
-    "description": "Mahjong with AI Characters & NFT Rewards. Play & train AI avatars, collect unique characters, and earn $TILE. Multiplayer global platform with tournaments",
+    "description": "Mahjong with AI Characters & Rewards. Play & train AI avatars, collect unique characters and earn rewards. Multiplayer global platform with tournaments",
     "Privacy": {
       "title": "Privacy Policy",
-      "description": "Your privacy matters! Learn how Mahjong Stars protects your personal data, gaming information, and wallet details. We keep you safe so you can focus on winning and expressing yourself in our Mahjong world! ✨"
+      "description": "Your privacy matters! Learn how Mahjong Stars protects your personal data and gaming information. We keep you safe so you can focus on winning and expressing yourself in our Mahjong world! ✨"
     },
     "Terms": {
       "title": "Terms of Service",
@@ -341,7 +333,7 @@
     },
     "Faq": {
       "title": "Frequently Asked Questions (FAQ)",
-      "description": "Got Questions? We've Got Answers! 🧋✨. Everything you need to know about Mahjong Stars! From AI avatars and $TILE tokens to gameplay tips and NFT rewards - get all your Mahjong questions answered with style 💅."
+      "description": "Got Questions? We've Got Answers! 🧋✨. Everything you need to know about Mahjong Stars! - get all your Mahjong questions answered with style 💅."
     },
     "Contact": {
       "title": "Contact Us",
@@ -349,15 +341,15 @@
     },
     "Claim": {
       "title": "Claim Your Rewards",
-      "description": "Time to cash in those codes, bestie! 💰 Found a secret code on our socials? Drop it here and let's turn that digital gold into real rewards! From $TILE tokens to exclusive items - we're basically giving away free stuff because we're that generous! No cap, just pure vibes and freebies! ✨"
+      "description": "Time to cash in those codes, bestie! 💰 Found a secret code on our socials? Drop it here and let's turn that digital gold into real rewards! - we're basically giving away free stuff because we're that generous! No cap, just pure vibes and freebies! ✨"
     },
     "About": {
       "title": "About",
-      "description": "Discover Mahjong Stars - the blockchain platform where ancient Mahjong meets modern gaming! Challenge players worldwide, collect unique NFT characters, and earn $TILE tokens in our dynamic online world. Connect globally through blockchain technology for a revolutionary gaming experience that's both fun and rewarding! 🎮"
+      "description": "Discover Mahjong Stars - the platform where ancient Mahjong meets modern gaming! Challenge players worldwide and collect unique characters in our dynamic online world. Connect globally for a revolutionary gaming experience that's both fun and rewarding! 🎮"
     },
     "Docs": {
       "title": "Docs",
-      "description": "Explore Mahjong Stars unique features and innovations! Learn about AI-powered avatars, blockchain integration, NFT character collection, and blockchain gaming mechanics. Discover how our platform combines traditional Mahjong with cutting-edge technology for a revolutionary gaming experience! 🤖"
+      "description": "Explore Mahjong Stars unique features and innovations! Learn about AI-powered avatars, character collection, and gaming mechanics. Discover how our platform combines traditional Mahjong with cutting-edge technology for a revolutionary gaming experience! 🤖"
     }
   },
   "Footer": {
@@ -378,7 +370,7 @@
     "subscribePlaceholder": "Enter your email",
     "contact": "Contact us",
     "banner": {
-      "title": "$TILE Token is coming soon 🚀"
+      "title": ""
     }
   }
 }

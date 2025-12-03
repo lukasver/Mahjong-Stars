@@ -2,9 +2,9 @@
   "Navigation": {
     "links": {
       "home": "STARTSEITE",
-      "features": "FEATURES",
+      "features": "FUNKTIONEN",
       "game": "SPIEL",
-      "character": "CHARAKTERE",
+      "character": "CHARAKTER",
       "support": "SUPPORT"
     },
     "buttons": {
@@ -13,31 +13,31 @@
     }
   },
   "Hero": {
-    "title": "<span>Tritt dem</span> <span>Mahjong-Spiel bei</span>",
+    "title": "<span>Spiele jetzt</span> <span>das Mahjong Spiel</span>",
     "subtitle": "Fordere deine Freunde bei Mahjong Stars heraus, wo coole Charaktere das Spiel beherrschen!"
   },
   "About": {
     "title": "Was ist Mahjong Stars?",
-    "description": "Entdecke Mahjong Stars, eine Blockchain-Plattform, wo uraltes Mahjong auf modernes Spiel trifft. Fordere andere heraus, sammle einzigartige NFT-Charaktere und verdiene Belohnungen in einer dynamischen Online-Welt. Verbinde dich global durch die Kraft der Blockchain für ein revolutionäres Spielerlebnis."
+    "description": "Entdecke Mahjong Stars, eine Plattform, auf der antikes Mahjong auf modernes Spielen trifft. Fordere andere heraus, sammle einzigartige Charaktere und verdiene Belohnungen in einer dynamischen Online-Welt. Verbinde dich weltweit für ein revolutionäres Spielerlebnis."
   },
   "GameFeatures": {
-    "title": "SPIEL-FEATURES",
+    "title": "SPIELFUNKTIONEN",
     "features": {
       "stayInGame": {
-        "title": "Im Spiel bleiben, ganz oben bleiben",
-        "description": "Spiele jederzeit. Steige in der Rangliste auf und verbessere deine Fähigkeiten."
+        "title": "Bleib im Spiel, bleib an der Spitze",
+        "description": "Spiele jederzeit. Klettere in der Rangliste nach oben und verbessere deine Fähigkeiten."
       },
       "trainableAI": {
-        "title": "Trainierbare KI, die nach deinem Stil spielt",
-        "description": "Passe eine KI an, die deinen Spielstil lernt und sich anpasst."
+        "title": "Trainierbare KI, die deinen Stil spielt",
+        "description": "Passe eine KI an, die deinen Spielstil lernt und sich daran anpasst."
       },
       "collectCharacters": {
         "title": "Sammle das Unvergessliche",
-        "description": "Schalte seltene Charaktere und exklusive Gegenstände mit deiner Blockchain frei."
+        "description": "Schalte seltene Charaktere und exklusive Gegenstände frei."
       },
       "bringFriends": {
-        "title": "Bring deine Freunde an den Tisch",
-        "description": "Fordere Freunde heraus, teile Lacher und kämpfe dich durch spannende Matches."
+        "title": "Bringe deine Freunde an den Tisch",
+        "description": "Fordere Freunde heraus, teile Lacher und kämpfe dich durch packende Matches."
       }
     }
   },
@@ -45,59 +45,59 @@
     "title": "DAS MAHJONG-SPIEL",
     "variants": {
       "shenzhen": {
-        "title": "Shenzhen Mahjong Regeln, auch bekannt als Hongkong",
-        "description": "Erlebe die rasante Spannung dieser Mahjong-Variante, bei der du strategisch deine Kongs bewahrst."
+        "title": "Shenzhen Mahjong Regeln, auch bekannt als Hong Kong",
+        "description": "Erlebe die rasante Spannung dieser Mahjong-Variante, bei der du deine Kongs strategisch bewahrst."
       },
       "riichi": {
         "title": "Riichi Mahjong Regeln",
-        "description": "Die spannende japanische Mahjong-Variante. Erscheint später im Jahr 2025."
+        "description": "Die aufregende japanische Mahjong-Variante. Kommt später 2025."
       }
     }
   },
   "Characters": {
     "title": "LERNE EINIGE UNSERER CHARAKTERE KENNEN",
     "tonyKong": {
-      "quote": "Ich jage kein Glück. Ich schaffe es.",
+      "quote": "Ich jage kein Glück. Ich erschaffe es.",
       "name": "Tony Kong",
-      "description": "Tony glaubt, der unbestrittene Meister von Mahjong zu sein und weiß genau, wie man eine schlechte Hand in ein gewinnendes Spiel verwandelt. Fordere ihn heraus, wenn du dich traust!"
+      "description": "Tony, der sich selbst als unangefochtenen Mahjong-Meister betrachtet, weiß genau, wie er aus einer schlechten Hand ein Gewinnspiel macht. Fordere ihn heraus, wenn du dich traust!"
     },
     "anneWan": {
-      "quote": "Stil auf der Straße, Strategie am Tisch. Beobachte, wie ich beides gewinne.",
+      "quote": "Stil auf der Straße, Strategie am Tisch. Sieh zu, wie ich beides gewinne.",
       "name": "Anne Wan",
-      "description": "Anne Wan ist mutig, verspielt und immer im Trend. Sie bringt eine frische, furchtlose Energie in die Mahjong-Welt – sie verbindet clevere Züge mit der Liebe zu Bubble Tea, Sneakern und allem Stilvollen. Anne spielt nicht nur zum Gewinnen – sie spielt, um sich auszudrücken."
+      "description": "Anne Wan ist mutig, verspielt und immer im Trend. Sie bringt eine frische, furchtlose Energie in die Mahjong-Welt – und balanciert kluge Züge mit einer Vorliebe für Bubble Tea, Sneakers und alles, was stylisch ist. Anne spielt nicht nur, um zu gewinnen – sie spielt, um sich auszudrücken."
     },
     "mrsChen": {
-      "quote": "Ich habe mehr Gewinnkarten vergessen, als du jemals gespielt hast.",
-      "name": "Mrs. Chen",
-      "description": "Mrs. Chen ist eine kompromisslose Mahjong-Veteranin, die schon Tische geknackt hat, bevor du geboren wurdest. Unglaublich strategisch und ein bisschen beängstigend, gebietet sie mit nur einem Blick Respekt – und ihre grantige Katze ist genauso urteilend. Unterschätze sie auf eigene Gefahr."
+      "quote": "Ich habe mehr gewonnene Hände vergessen, als du je gespielt hast.",
+      "name": "Frau Chen",
+      "description": "Frau Chen ist eine Mahjong-Veteranin ohne Schnörkel, die seit vor deiner Geburt Tische abgeräumt hat. Sie ist äußerst strategisch und ein wenig furchteinflößend und gebietet allein mit einem Blick Respekt – und ihre mürrische Katze ist genauso urteilend. Unterschätze sie auf eigene Gefahr."
     },
     "uncleCai": {
       "quote": "Während du die Steine zählst, zähle ich meine Siege.",
-      "name": "Uncle Cai",
-      "description": "Uncle Cai ist ein gerissener Mahjong-Meister, der alles gesehen hat – und normalerweise auch alles gewinnt. Entspannt mit scharfem Verstand, bevorzugt er es, sich zu fächeln und andere schwitzen zu lassen. Sein Old-School-Swag, seine goldene Kette und sein emotionsloser Humor machen ihn zu einer Legende sowohl am Tisch als auch auf der Straße."
+      "name": "Onkel Cai",
+      "description": "Onkel Cai ist ein gerissener Mahjong-Meister, der alles gesehen hat – und meistens auch alles gewinnt. Locker und mit scharfem Verstand, wedelt er sich lieber Luft zu und lässt andere schwitzen. Sein Old-School-Swag, die Goldkette und sein trockener Humor machen ihn sowohl am Tisch als auch auf der Straße zur Legende."
     }
   },
   "Newsletter": {
-    "title": "Verpasse kein Update!",
-    "description": "Abonniere unseren Newsletter, um die neuesten Ankündigungen, Neuigkeiten und exklusiven Angebote zu erhalten.",
+    "title": "Verpasse keine Updates mehr!",
+    "description": "Abonniere unseren Newsletter, um die neuesten Ankündigungen, Nachrichten und exklusiven Angebote zu erhalten.",
     "placeholder": "Gib deine E-Mail-Adresse ein",
     "button": "Abonnieren",
     "button2": "Jetzt abonnieren",
-    "footer": "bereits abonniert",
-    "success": "Vielen Dank für deine Anmeldung!",
+    "footer": "schon dabei",
+    "success": "Danke für dein Abonnement!",
     "errors": {
       "email": "Bitte gib eine gültige E-Mail-Adresse ein"
     },
-    "alreadySubscribed": "Du hast den Newsletter bereits abonniert.",
+    "alreadySubscribed": "Du hast den Newsletter bereits abonniert",
     "alreadySubscribedShort": "Bereits abonniert"
   },
   "CTAs": {
     "logIn": "ANMELDEN",
-    "findMoreCharacters": "um mehr Charaktere zu finden"
+    "findMoreCharacters": "um weitere Charaktere zu finden"
   },
   "ContactForm": {
     "title": "Kontaktiere uns",
-    "description": "Sende uns eine Nachricht und wir melden uns so schnell wie möglich bei dir.",
+    "description": "Sende uns eine Nachricht und wir werden uns so schnell wie möglich bei dir melden.",
     "fields": {
       "name": {
         "label": "Name",
@@ -113,7 +113,7 @@
       },
       "message": {
         "label": "Nachricht",
-        "placeholder": "Ich würde gerne mehr über euer Mahjong-Spiel und meine Beteiligungsmöglichkeiten erfahren!"
+        "placeholder": "Ich würde gerne mehr über euer Mahjong-Spiel erfahren und wie ich mich einbringen kann!"
       }
     },
     "captcha": {
@@ -127,10 +127,10 @@
     "messages": {
       "success": {
         "title": "Nachricht gesendet!",
-        "description": "Vielen Dank für deine Nachricht. Wir melden uns bald bei dir."
+        "description": "Vielen Dank für deine Nachricht. Wir werden uns bald bei dir melden."
       },
       "error": {
-        "title": "Etwas ist schief gelaufen. Bitte versuche es erneut.",
+        "title": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
         "captchaFailed": "Captcha fehlgeschlagen",
         "codeInvalid": "Ungültiger Code"
       }
@@ -160,8 +160,8 @@
     "description": "Finde Codes in unseren sozialen Medien und löse sie hier ein.",
     "fields": {
       "code": {
-        "label": "Promo-Code",
-        "placeholder": "Gib deinen Promo-Code ein"
+        "label": "Aktionscode",
+        "placeholder": "Gib deinen Aktionscode ein"
       },
       "wallet": {
         "label": "Wallet-Adresse",
@@ -189,7 +189,7 @@
       },
       "newsletter": {
         "label": "Newsletter",
-        "placeholder": "Newsletter abonnieren"
+        "placeholder": "Abonniere unseren Newsletter"
       }
     },
     "captcha": {
@@ -198,166 +198,157 @@
     },
     "buttons": {
       "cancel": "Abbrechen",
-      "claim": "Jetzt beanspruchen!",
-      "claiming": "Beanspruchung..."
+      "claim": "Jetzt anfordern!",
+      "claiming": "Anfordern..."
     },
     "messages": {
       "success": {
-        "title": "Beansprucht!",
-        "description": "Vielen Dank für deine Beanspruchung. Wir werden uns in Kürze mit dir in Verbindung setzen."
+        "title": "Angefordert!",
+        "description": "Vielen Dank für deine Anforderung. Wir werden uns in Kürze mit dir in Verbindung setzen."
       },
       "error": {
-        "title": "Etwas ist schief gelaufen.",
+        "title": "Etwas ist schiefgelaufen.",
         "captchaFailed": "Captcha fehlgeschlagen",
         "questFinalized": "Quest abgeschlossen"
       }
     },
-    "followUs": "Folge uns in den sozialen Medien, um weitere Codes zu erhalten!",
-    "notifications": "Aktiviere Benachrichtigungen in unseren sozialen Medien, um deine Codes zuerst zu erhalten!"
+    "followUs": "Folge uns auf unseren Social-Media-Kanälen, um mehr Codes zu erhalten!",
+    "notifications": "Aktiviere Benachrichtigungen in unseren sozialen Medien, um deine Codes als Erster zu erhalten!"
   },
   "Faq": {
     "title": "Häufig gestellte Fragen",
-    "description": "Finde Antworten auf häufig gestellte Fragen zu unserem Mahjong-Spiel:",
+    "description": "Finde Antworten auf häufige Fragen zu unserem Mahjong-Spiel:",
     "items": {
       "0": {
         "question": "Was ist Mahjong Stars?",
-        "answer": "Mahjong Stars ist eine Blockchain-fähige, KI-gestützte Multiplayer-Mahjong-Plattform, die es Spielern ermöglicht, zu spielen, KI-Avatare zu trainieren und an globalen Turnieren teilzunehmen, sowohl live als auch autonom."
+        "answer": "Mahjong Stars ist eine KI-gestützte Multiplayer-Mahjong-Plattform, die es Spielern ermöglicht, KI-Avatare zu spielen, zu trainieren und an globalen Turnieren teilzunehmen, sowohl live als auch autonom."
       },
       "1": {
         "question": "Was macht Mahjong Stars einzigartig?",
-        "answer": "KI-Avatare, die deinen Spielstil lernen, 24/7 Gameplay über KI-Bots, NFT- und Krypto-Integration, integrierte soziale Spielmechaniken und plattformübergreifender Zugriff über eine Unity-basierte App."
+        "answer": "KI-Avatare, die deinen Spielstil lernen, 24/7-Gameplay über KI-Bots, integrierte Social-Gaming-Mechaniken und plattformübergreifender Zugriff über eine Unity-basierte App."
       },
       "2": {
-        "question": "Welche Rolle spielt die KI im Spiel?",
-        "answer": "KI-Avatare replizieren deinen einzigartigen Spielstil, sodass du auch offline antreten kannst. Du kannst deine KI trainieren, um ihre Strategie zu verbessern und so einen personalisierten Spielassistenten zu erstellen."
+        "question": "Welche Rolle spielt KI im Spiel?",
+        "answer": "KI-Avatare replizieren deinen einzigartigen Spielstil, sodass du auch offline konkurrieren kannst. Du kannst deine KI trainieren, um ihre Strategie zu verbessern und so einen personalisierten Spielassistenten zu erstellen."
       },
       "3": {
         "question": "Was sind StarsPoints und wie funktionieren sie?",
-        "answer": "StarsPoints sind die Spielwährung:\n- Kaufbar über Fiat oder Krypto\n- Verwendet für Spielzugang, KI-Bots, Gegenstände und Gebühren\n- Haben keinen Wert außerhalb der Plattform\n- Generieren Einnahmen durch die Nutzung im Spiel"
+        "answer": "StarsPoints sind die In-Game-Währung:\n- Verwendet für Spielzugang, KI-Bots, Gegenstände und Gebühren\n- Haben keinen Wert außerhalb der Plattform\n- Treiben den Umsatz durch Spielnutzung an"
       },
       "4": {
         "question": "Wie generiert Mahjong Stars Einnahmen?",
-        "answer": "Einnahmen werden durch Teilnahmegebühren, Premium-KI-Dienste, den Verkauf von Gegenständen im Spiel und NFT-Transaktionsgebühren generiert."
+        "answer": "Einnahmen werden aus Teilnahmegebühren, Premium-KI-Diensten und dem Verkauf von In-Game-Gegenständen generiert."
       },
       "5": {
-        "question": "Was ist $TILE in diesem Zusammenhang?",
-        "answer": "$TILE ist der Utility-Token der Plattform, der zum Kauf von Gegenständen im Spiel, zum Handel mit NFTs, zum Staking für Umsatzbeteiligung und Belohnungen und zur Unterstützung der Spielökonomie verwendet wird."
+        "question": "Wie groß ist der potenzielle Markt?",
+        "answer": "Über 600 Millionen Mahjong-Spieler weltweit."
       },
       "6": {
-        "question": "Gibt es eine NFT-Komponente?",
-        "answer": "Ja. Spieler können NFTs freischalten, handeln und vermieten. Der Abzug von NFTs ermöglicht die Umwandlung von Spielerträgen in realen Wert über Drittanbieter-Plattformen."
+        "question": "Wer steckt hinter dem Projekt?",
+        "answer": "Das Team umfasst Experten von Mahjong Logic, PokerStars Asia und Coinbase Asia mit tiefgreifender Erfahrung in der Gaming-Industrie."
       },
       "7": {
-        "question": "Wie groß ist der potenzielle Markt?",
-        "answer": "Über 600 Millionen Mahjong-Spieler weltweit. Der Blockchain-Gaming-Sektor wird voraussichtlich 2025 über 30 Milliarden US-Dollar erreichen und bietet enorme Möglichkeiten."
-      },
-      "8": {
-        "question": "Wer steckt hinter dem Projekt?",
-        "answer": "Das Team besteht aus Experten von Mahjong Logic, PokerStars Asia und Coinbase Asia mit umfassender Erfahrung in Gaming und Blockchain-Technologie."
-      },
-      "9": {
-        "question": "Wie sieht der Fahrplan für 2025 aus?",
-        "answer": "Q1: Veröffentlichung des Beta-Builds\nQ2: Fundraising und Partnerschaften\nQ3: V2-Start und NFT-Marktplatz\nQ4: Start des $TILE-Tokens und Börsennotierungen"
+        "question": "Was ist der Fahrplan für 2025?",
+        "answer": "Q1: Beta-Build-Veröffentlichung\nQ2: Fundraising und Partnerschaften\nWeitere spannende Dinge kommen bald!"
       }
     }
   },
   "Bubbles": {
     "title": {
-      "1": "Mahjong <br /> Stars kommt <br /> bald!",
-      "2": "Keine Panik. Das Spiel ist fast da.",
+      "1": "Mahjong <br /> Stars <br /> kommt bald!",
+      "2": "Keine Panik. Das Spiel ist fast da",
       "3": "Sie ist bereit. Du solltest es auch sein."
     },
-    "description": "Abonniere und vielleicht, <br /> nur vielleicht, lassen wir dich es zuerst wissen.",
-    "agreeTerms": "Durch Klicken auf 'Abonnieren' stimmst du unseren <terms>Bedingungen</terms> und <privacy>Datenschutzbestimmungen</privacy> zu.",
+    "description": "Abonniere und vielleicht, <br /> nur vielleicht, lassen wir dich als Erste davon erfahren.",
+    "agreeTerms": "Durch Klicken auf 'Abonnieren' stimmst du unseren <terms>Nutzungsbedingungen</terms> und unserer <privacy>Datenschutzrichtlinie</privacy> zu.",
     "lines": {
       "1": {
-        "1": "Sheeeeeeeeeesh.",
-        "2": "Vibes – makellos.",
-        "3": "Awwww, ich bin tot.",
-        "4": "Oh Mann. Habe ich dich gerade um all deine Star Points gebracht? xoxo",
-        "5": "Versteckt besessen von diesen Hosen.",
-        "6": "IYKYK. Und wenn du es nicht weißt, abonniere. Ich habe nicht den ganzen Tag Zeit.",
-        "7": "Mamma mia… werden sie mich anhimmeln, oder?",
-        "8": "Merkur ist rückläufig und im Quadrat zu Saturn. Fühl dich nicht schlecht, weil du schrecklich gespielt hast, es war hoffnungslos.",
-        "9": "Diese Farben sind absolut der Hammer.",
-        "10": "Diese Lederjacke wirkt wie eine reiche Geschiedene und ich liebe es.",
-        "11": "Dieser Pullover-Typ strahlt null Charme aus #sorrynotsorry",
-        "12": "Man sagt, glücklich in Spielen, unglücklich in der Liebe. Es tut mir leid, dir sagen zu müssen, dass ich nur schreckliche Freunde hatte.",
+        "1": "Ohaaaaa.",
+        "2": "Vibes - makellos.",
+        "3": "Omg, ich sterbe.",
+        "4": "Oh krass. Habe ich dir gerade all deine Star Points geklaut? Kuss kuss",
+        "5": "Ich bin heimlich besessen von dieser Hose.",
+        "6": "Wer versteht, versteht. Und wenn nicht, abonniere. Ich hab nicht den ganzen Tag Zeit.",
+        "7": "Mamma Mia… sie werden doch sicher für mich schwärmen, oder?",
+        "8": "Merkur steht rückläufig und im Quadrat zu Saturn. Fühl dich nicht schlecht, wenn du schlecht spielst, es war hoffnungslos.",
+        "9": "Diese Farben sind der absolute Hammer.",
+        "10": "Diese Lederjacke hat die Ausstrahlung einer reichen Scheidungsanwältin und ich bin dafür.",
+        "11": "Dieser Pullover-Typ hat null Rizz-Energie #IstMirEgal",
+        "12": "Man sagt, wer im Spiel glücklich ist, hat im Leben Pech. Tut mir leid, dir sagen zu müssen, dass ich nur schreckliche Freunde hatte.",
         "13": "Es ist wie… totale Einheit… das ist alles.",
-        "14": "Ups. Habe ich dir gerade das Herz gebrochen?",
-        "15": "Diese Kacheln sind soooo extra.",
-        "16": "Eigentlich ist \"don't be square\" ein abwertender Begriff und ich denke, wir sollten unsere Worte bewusst wählen.",
-        "17": "Sag nichts mehr, ich habe genug gesehen. Ich glaube, ich bin verliebt.",
-        "18": "Das ist heißer als das aktuelle geopolitische Klima. Kein Witz.",
-        "19": "KI dies, KI das. Was ist mit süßen, manipulativen Freundinnen passiert?",
-        "20": "Wenn du nur sehen könntest, was meine schönen digitalen Augen sehen können…",
+        "14": "Hoppla. Hab ich dir gerade das Herz gebrochen?",
+        "15": "Diese Steine sind SO extra.",
+        "16": "Eigentlich ist \"sei nicht langweilig\" ein abfälliger Begriff und ich finde, wir sollten auf unsere Worte achten.",
+        "17": "Sag nichts mehr, ich hab genug gesehen. Ich glaube, ich hab mich verliebt.",
+        "18": "Das ist heißer als das aktuelle geopolitische Klima. Kein Scherz.",
+        "19": "KI dies, KI das. Was ist aus süßen manipulativen Freundinnen geworden?",
+        "20": "Wenn ihr nur sehen könntet, was meine wunderschönen digitalen Augen können...",
         "_character": "Bubble Girl",
-        "_tone": "Stylish, kokett, neugierig. Sie sieht geheime Dinge auf ihrem Handy und reagiert mit Hype, aber ohne Details"
+        "_tone": "Stylisch, flirty, neugierig. Sie sieht geheime Dinge auf ihrem Handy und reagiert begeistert, aber ohne Details"
       },
       "2": {
         "1": "Es heißt Bang Bang Mahjong. Ich schwöre, es ist echt!",
-        "2": "Oma ist in diesem Spiel. Ich habe schon Angst.",
-        "3": "Sie sagten, man kann Spezialzüge freischalten?!?",
-        "4": "Man kann auch gegen KI spielen… sie sind schnell.",
-        "5": "Ist es komisch, dass ich einen digitalen Hausschuh kaufen möchte?",
+        "2": "Omi ist in diesem Spiel. Ich hab schon Angst",
+        "3": "Sie sagten, man kann Spezialzüge freischalten!?!",
+        "4": "Man kann auch gegen KI spielen… sie sind schnell",
+        "5": "Ist es komisch, dass ich eine digitale Hausschuhe kaufen will?",
         "6": "Alter… ich glaube, der Shop hat Tische??",
-        "7": "Ich habe das Punktesystem gesehen. Es ist irgendwie genial.",
-        "8": "Es gibt einen Charakter namens Jenny… sie ist kalt.",
-        "9": "Ich glaube, man kann Sachen gewinnen, die wirklich wichtig sind…",
-        "10": "Warte… sind NFTs wirklich dabei?!",
+        "7": "Ich habe das Punktesystem gesehen. Es ist ziemlich genial",
+        "8": "Es gibt einen Charakter namens Jenny… sie ist cool",
+        "9": "Ich glaube, man kann Dinge gewinnen, die wirklich wichtig sind…",
         "_character": "Nervöser Pullover-Typ",
-        "_tone": "Keine Panik. Das Spiel ist fast da."
+        "_tone": "Keine Panik. Das Spiel ist fast da"
       },
       "3": {
-        "1": "Schnelle Hände gewinnen. Deine zittern.",
-        "2": "Bang Bang Mahjong. Du schlägst dir den Kopf, wenn du versuchst, mitzuhalten.",
-        "3": "Kein Glück hier. Nur Können. Was du nicht hast.",
-        "4": "Nicht nur passen. Denk nach. Wenn du kannst.",
-        "5": "Geschwindigkeit zählt. Aber nicht, wenn du dumm bist.",
-        "6": "Du kannst Effekte kaufen, aber kein Talent.",
-        "7": "Skins sind süß. Siege sind besser.",
-        "8": "Gib Geld für einen Tisch aus, wenn es dir hilft, dich zu konzentrieren. Du wirst es brauchen.",
-        "9": "Spezialzüge machen Spaß. Außer ich benutze meine gegen dich.",
-        "10": "Punkte, Vorteile, Upgrades. Alles verschwendet, wenn du nicht klug spielst.",
-        "11": "Ja, du kannst gegen Bots spielen. Sie spielen besser als die meisten von euch.",
-        "12": "Verdiene Punkte. Tausche sie gegen NFTs. Aber werde nicht gierig.",
-        "13": "Verkaufe dein Fliesenset, wenn du willst. Du wirst trotzdem gegen mich verlieren.",
-        "14": "Echter Wert, digitaler Schmerz. Willkommen bei Mahjong Stars.",
-        "_character": "Oma + ihre Katze",
-        "_tone": "Grantig. Weise. Rücksichtslos ehrlich."
+        "1": "Schnelle Hände gewinnen. Deine zittern",
+        "2": "Bang Bang Mahjong. Du wirst dir den Kopf schlagen, wenn du versuchst, Schritt zu halten",
+        "3": "Kein Glück hier. Nur Können. Das du nicht hast",
+        "4": "Nicht nur matchen. Denken. Wenn du kannst",
+        "5": "Geschwindigkeit ist wichtig. Aber nicht, wenn du dumm bist",
+        "6": "Man kann Effekte kaufen, aber keine Talente",
+        "7": "Skins sind süß. Siege sind besser",
+        "8": "Gib Geld für einen Tisch aus, wenn es dir hilft, dich zu konzentrieren. Das wirst du brauchen",
+        "9": "Spezialzüge machen Spaß. Es sei denn, ich benutze meine gegen dich",
+        "10": "Punkte, Vergünstigungen, Upgrades. Alles verschwendet, wenn du nicht klug spielst",
+        "11": "Ja, du kannst gegen Bots spielen. Sie spielen besser als die meisten von euch",
+        "12": "Verdiene Punkte. Aber werde nicht gierig",
+        "13": "Verkaufe dein Steine-Set, wenn du willst. Du wirst trotzdem gegen mich verlieren",
+        "14": "Echter Wert, digitaler Schmerz. Willkommen bei Mahjong Stars",
+        "_character": "Omi + ihre Katze",
+        "_tone": "Mürrisch. Weise. Schonungslos ehrlich"
       }
     }
   },
   "Metadata": {
     "title": "Mahjong Stars",
-    "description": "Mahjong mit KI-Charakteren & NFT-Belohnungen. Spiele und trainiere KI-Avatare, sammle einzigartige Charaktere und verdiene $TILE. Globale Multiplayer-Plattform mit Turnieren",
+    "description": "Mahjong mit KI-Charakteren & Belohnungen. Spiele & trainiere KI-Avatare, sammle einzigartige Charaktere und verdiene Belohnungen. Multiplayer-Globalplattform mit Turnieren",
     "Privacy": {
       "title": "Datenschutzrichtlinie",
-      "description": "Ihre Privatsphäre ist uns wichtig! Erfahren Sie, wie Mahjong Stars Ihre persönlichen Daten, Spielinformationen und Wallet-Details schützt. Wir sorgen für Ihre Sicherheit, damit Sie sich auf das Gewinnen und den Ausdruck Ihrer selbst in unserer Blockchain-Mahjong-Welt konzentrieren können! ✨"
+      "description": "Deine Privatsphäre ist uns wichtig! Erfahre, wie Mahjong Stars deine persönlichen Daten und Spielinformationen schützt. Wir halten dich sicher, damit du dich aufs Gewinnen und dich in unserer Mahjong-Welt ausdrücken kannst! ✨"
     },
     "Terms": {
       "title": "Nutzungsbedingungen",
-      "description": "Spielregeln und Richtlinien für Mahjong Stars! Von Fairplay-Richtlinien bis hin zu Kontoverwaltung und Datenschutz – entdecken Sie, wie Sie Teil unserer Blockchain-Mahjong-Community werden können. Spielen Sie clever, spielen Sie fair und halten wir dieses Spiel für alle unterhaltsam! 💯"
+      "description": "Spielregeln und Richtlinien für Mahjong Stars! Von Fair-Play-Richtlinien bis hin zu Kontoverwaltung und Datenschutz – entdecke, wie du Teil unserer Mahjong-Community werden kannst. Spiele klug, spiele fair und lass uns dieses Spiel für alle unterhaltsam halten! 💯"
     },
     "Faq": {
       "title": "Häufig gestellte Fragen (FAQ)",
-      "description": "Fragen? Wir haben Antworten! 🧋✨. Alles, was Sie über Mahjong Stars wissen müssen! Von KI-Avataren und $TILE-Token bis hin zu Gameplay-Tipps und NFT-Belohnungen – erhalten Sie stilvoll Antworten auf alle Ihre Blockchain-Mahjong-Fragen 💅."
+      "description": "Hast du Fragen? Wir haben Antworten! 🧋✨. Alles, was du über Mahjong Stars wissen musst! – Beantworte alle deine Mahjong-Fragen mit Stil 💅."
     },
     "Contact": {
-      "title": "Kontaktieren Sie uns",
-      "description": "Melden Sie sich bei uns, Liebling! 💬 Haben Sie Fragen zu Mahjong Stars? Möchten Sie zusammenarbeiten? Haben Sie einfach Lust zu plaudern? Wir sind dafür da! Hinterlassen Sie uns eine Nachricht und wir melden uns schneller bei Ihnen, als Sie 'Bubble Tea' sagen können! Kein Scherz, wir lesen jede Nachricht (und beurteilen wahrscheinlich Ihr Emoji-Spiel). ✨"
+      "title": "Kontaktiere uns",
+      "description": "Melde dich bei uns, Liebes! 💬 Hast du Fragen zu Mahjong Stars? Willst du zusammenarbeiten? Bist du einfach nur gesprächig? Wir sind dafür da! Schick uns eine Nachricht und wir melden uns schneller zurück, als du \"Bubble Tea\" sagen kannst! Kein Scherz, wir lesen wirklich jede Nachricht (und beurteilen wahrscheinlich dein Emoji-Spiel). ✨"
     },
     "Claim": {
-      "title": "Beanspruchen Sie Ihre Belohnungen",
-      "description": "Zeit, diese Codes einzulösen, Liebling! 💰 Haben Sie einen geheimen Code in unseren sozialen Medien gefunden? Geben Sie ihn hier ein und lassen Sie uns dieses digitale Gold in echte Belohnungen verwandeln! Von $TILE-Token bis hin zu exklusiven Gegenständen – wir verschenken quasi Zeug, weil wir so großzügig sind! Kein Scherz, nur reine Vibes und Gratisgeschenke! ✨"
+      "title": "Fordere deine Belohnungen an",
+      "description": "Zeit, diese Codes einzulösen, Liebes! 💰 Einen geheimen Code in unseren sozialen Medien gefunden? Gib ihn hier ein und lass uns dieses digitale Gold in echte Belohnungen verwandeln! – Wir verschenken im Grunde kostenlose Sachen, weil wir so großzügig sind! Kein Scherz, nur reine Vibes und Gratisgeschenke! ✨"
     },
     "About": {
-      "title": "Über Uns",
-      "description": "Entdecken Sie Mahjong Stars – die Blockchain-Plattform, auf der antikes Mahjong auf modernes Gaming trifft! Fordern Sie Spieler weltweit heraus, sammeln Sie einzigartige NFT-Charaktere und verdienen Sie $TILE-Token in unserer dynamischen Online-Welt. Verbinden Sie sich global durch Blockchain-Technologie für ein revolutionäres Spielerlebnis, das sowohl Spaß macht als auch belohnt! 🎮"
+      "title": "Über uns",
+      "description": "Entdecke Mahjong Stars – die Plattform, auf der antikes Mahjong auf modernes Gaming trifft! Fordere Spieler weltweit heraus und sammle einzigartige Charaktere in unserer dynamischen Online-Welt. Verbinde dich global für ein revolutionäres Spielerlebnis, das sowohl Spaß macht als auch lohnend ist! 🎮"
     },
     "Docs": {
       "title": "Dokumentation",
-      "description": "Entdecken Sie die einzigartigen Funktionen und Innovationen von Mahjong Stars! Erfahren Sie mehr über KI-gestützte Avatare, Blockchain-Integration, das Sammeln von NFT-Charakteren und Blockchain-Gaming-Mechaniken. Entdecken Sie, wie unsere Plattform traditionelles Mahjong mit modernster Technologie kombiniert, um ein revolutionäres Spielerlebnis zu schaffen! 🤖"
+      "description": "Entdecke die einzigartigen Funktionen und Innovationen von Mahjong Stars! Erfahre mehr über KI-gestützte Avatare, Charakterkollektionen und Spielmechaniken. Entdecke, wie unsere Plattform traditionelles Mahjong mit modernster Technologie für ein revolutionäres Spielerlebnis kombiniert! 🤖"
     }
   }
 }

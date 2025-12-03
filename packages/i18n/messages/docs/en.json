@@ -31,7 +31,7 @@
 					{
 						"id": "how-different-from-other-platforms",
 						"question": "How is Mahjong Stars different from other mahjong platforms?",
-						"answer": "Key Differentiators: AI Training - Create and train AI avatars that learn your playing style; 24/7 Gameplay - Your AI continues playing and earning while you're away; Web3 Integration - NFT marketplace, crypto wallet integration, and $TILE token utility; Social Features - Advanced community features and friend systems; Proven Expertise - Built by a team with 10+ years of mahjong gaming experience"
+						"answer": "Key Differentiators: AI Training - Create and train AI avatars that learn your playing style; 24/7 Gameplay - Your AI continues playing and earning while you're away; Social Features - Advanced community features and friend systems; Proven Expertise - Built by a team with 10+ years of mahjong gaming experience"
 					},
 					{
 						"id": "available-worldwide",
@@ -47,7 +47,7 @@
 					{
 						"id": "what-need-to-start",
 						"question": "What do I need to start playing?",
-						"answer": "Device - Any modern smartphone, tablet, or computer; Internet - Stable internet connection; StarsPoints - In-game currency purchased with fiat or crypto; Account - Simple social login setup"
+						"answer": "Device - Any modern smartphone, tablet, or computer; Internet - Stable internet connection; StarsPoints - In-game currency; Account - Simple social login setup"
 					},
 					{
 						"id": "cost-to-start",
@@ -84,27 +84,12 @@
 			},
 			{
 				"id": "economy-tokens",
-				"title": "Economy & Tokens",
+				"title": "Economy",
 				"questions": [
 					{
 						"id": "what-are-starspoints",
 						"question": "What are StarsPoints?",
-						"answer": "StarsPoints are the primary in-game currency used for: Entry fees for tables and tournaments; AI service access and premium features; In-game purchases (avatars, items, decorations); Transaction fees for platform activities. Important: StarsPoints have no value outside the game and are for in-game use only."
-					},
-					{
-						"id": "what-is-tile-token",
-						"question": "What is the $TILE token?",
-						"answer": "$TILE is our utility token with multiple uses: Governance Rights - Vote on platform updates and features; Staking Rewards - Earn additional tokens through staking; Premium Features - Access exclusive tournaments and AI capabilities; NFT Marketplace - Primary currency for trading in-game assets; Revenue Sharing - Participate in platform revenue distribution"
-					},
-					{
-						"id": "withdrawal-rewards",
-						"question": "How do Withdrawal Rewards work?",
-						"answer": "Withdrawal Rewards are an optional premium feature: Purchase Required - Buy withdrawal capability as an optional add-on; Third-Party Trading - Enables selling in-game assets on external platforms; 1:1 Rate - Convert virtual gains to real-world value; Additional Revenue - Platform earns commission on withdrawal reward purchases"
-					},
-					{
-						"id": "tile-token-launch",
-						"question": "When will the $TILE token launch?",
-						"answer": "The $TILE token is scheduled to launch in Q4 2025 following our platform launch and initial user acquisition. This will include: Token Generation Event (TGE); Major DEX listings; Exchange partnerships; Staking mechanism launch"
+						"answer": "StarsPoints are the in-game currency used for: Entry fees for tables and tournaments; AI service access and premium features; In-game purchases (avatars, items, decorations); Transaction fees for platform activities. Important: StarsPoints have no value outside the game and are for in-game use only."
 					}
 				]
 			},
@@ -115,12 +100,12 @@
 					{
 						"id": "ensure-fair-gameplay",
 						"question": "How do you ensure fair gameplay?",
-						"answer": "Comprehensive Fair Play Systems: Advanced Anti-Cheat - AI-powered detection of cheating attempts; Random Number Generation - Cryptographically secure randomness; Real-Time Monitoring - Continuous gameplay analysis; Community Reporting - Player-driven fairness enforcement; Third-Party Audits - Independent verification of game fairness"
+						"answer": "Comprehensive Fair Play Systems: Advanced Anti-Cheat - AI-powered detection of cheating attempts; Random Number Generation -  Real-Time Monitoring - Continuous gameplay analysis; Community Reporting - Player-driven fairness enforcement; Third-Party Audits - Independent verification of game fairness"
 					},
 					{
 						"id": "personal-financial-security",
-						"question": "Is my personal and financial information secure?",
-						"answer": "Enterprise-Grade Security: Military-Grade Encryption - All data encrypted at highest levels; GDPR Compliance - Full European data protection compliance; Multi-Signature Wallets - Enhanced security for all funds; Regular Audits - Comprehensive third-party security assessments; 24/7 Monitoring - Continuous security threat monitoring"
+						"question": "Is my personal information secure?",
+						"answer": "Enterprise-Grade Security: Military-Grade Encryption - All data encrypted at highest levels; GDPR Compliance - Full European data protection compliance; Regular Audits - Comprehensive third-party security assessments; 24/7 Monitoring - Continuous security threat monitoring"
 					},
 					{
 						"id": "suspect-cheating",
@@ -178,7 +163,7 @@
 					{
 						"id": "partnership-opportunities",
 						"question": "Do you have partnership opportunities?",
-						"answer": "We actively seek strategic partnerships in: Gaming Platforms - Integration and cross-promotion opportunities; Crypto Services - Wallet and exchange partnerships; Content Creators - Influencer and streamer collaborations; Technology Providers - Infrastructure and service partnerships. Contact: For partnership inquiries, reach out through our business development channels."
+						"answer": "We actively seek strategic partnerships in: Gaming Platforms - Integration and cross-promotion opportunities; Content Creators - Influencer and streamer collaborations; Technology Providers - Infrastructure and service partnerships. Contact: For partnership inquiries, reach out through our business development channels."
 					},
 					{
 						"id": "stay-updated",
