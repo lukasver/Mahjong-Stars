@@ -45,8 +45,9 @@ export class Sheets {
 	};
 
 	private getSheetsClient = () => {
+		const credentials = this.getCredentials();
 		const client = new auth.GoogleAuth({
-			credentials: this.getCredentials(),
+			credentials,
 			scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 		});
 		invariant(client, "Failed to create client");

@@ -1,19 +1,22 @@
 {
-	"$schema": "https://ui.shadcn.com/schema.json",
-	"style": "default",
-	"rsc": true,
-	"tsx": true,
-	"iconLibrary": "lucide",
-	"tailwind": {
-		"config": "tailwind.config.ts",
-		"css": "src/globals.css",
-		"baseColor": "slate",
-		"cssVariables": true
-	},
-	"aliases": {
-		"components": "@mjs/ui/components",
-		"utils": "@mjs/ui/lib/utils",
-		"hooks": "@mjs/ui/hooks",
-		"ui": "@mjs/ui/primitives"
-	}
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "src/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@mjs/ui/components",
+    "utils": "@mjs/ui/lib/utils",
+    "ui": "@mjs/ui/primitives",
+    "hooks": "@mjs/ui/hooks"
+  },
+  "registries": {
+    "@magicui": "https://magicui.design/r/{name}.json"
+  }
 }

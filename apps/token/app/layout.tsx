@@ -5,6 +5,7 @@ import { Toaster } from "@mjs/ui/primitives/sonner";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 import { metadata as siteConfig } from "@/common/config/site";
 import packageJson from "../package.json";
 import { Providers } from "./providers";
@@ -63,17 +64,24 @@ export default async function RootLayout({
   const deploymentId =
     process.env.VERCEL_GIT_COMMIT_SHA || packageJson.version || "unknown";
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${fontClash.variable} ${fontTeachers.variable} antialiased`}
       >
-        <NextIntlClientProvider messages={messages}>
-          <Providers deploymentId={deploymentId}>
-            {children}
-            <Toaster />
-            {process.env.NODE_ENV === "production" && <VercelAnalytics />}
-          </Providers>
-        </NextIntlClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme={siteConfig.theme}
+          enableColorScheme
+          enableSystem
+        >
+          <NextIntlClientProvider messages={messages}>
+            <Providers deploymentId={deploymentId}>
+              {children}
+              <Toaster />
+              {process.env.NODE_ENV === "production" && <VercelAnalytics />}
+            </Providers>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

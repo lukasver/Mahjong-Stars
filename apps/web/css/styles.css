@@ -1,58 +1,68 @@
-@import "@mjs/ui/globals.css";
+@import '@mjs/ui/globals.css';
+@import 'tw-animate-css';
 
 /* Root level overrides from the shared config styles*/
 
 body {
-	background: var(--primary);
-	color: var(--primary-foreground);
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 @layer utilities {
-	.prose {
-		--tw-prose-body: var(--primary-foreground);
-		--tw-prose-headings: var(--primary-foreground);
-		--tw-prose-lead: oklch(44.6% 0.03 256.802);
-		--tw-prose-bold: var(--color-secondary-300);
-	}
+  .prose {
+    --tw-prose-body: var(--primary-foreground);
+    --tw-prose-headings: var(--primary-foreground);
+    --tw-prose-lead: oklch(44.6% 0.03 256.802);
+    --tw-prose-bold: var(--color-secondary-300);
+  }
 
-	.gradient-y-primary {
-	}
+  .gradient-y-primary {
+  }
 
-	.gradient-y-primary::before {
-		content: " ";
-		width: 100%;
-		height: 100%;
-		position: absolute;
-		z-index: -1;
-		top: 0;
-		left: 0;
-		background: linear-gradient(
-			to bottom,
-			var(--primary) 0%,
-			transparent 10%,
-			transparent 80%,
-			var(--primary) 100%
-		);
-	}
+  .gradient-y-primary::before {
+    content: ' ';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    background: linear-gradient(
+      to bottom,
+      var(--primary) 0%,
+      transparent 10%,
+      transparent 80%,
+      var(--primary) 100%
+    );
+  }
 
-	.cool-shadow {
-		position: relative;
-	}
-	.cool-shadow::after {
-		background: inherit;
-		position: absolute;
-		content: " ";
-		filter: blur(25px) saturate(1.5);
-		width: 100%;
-		height: 100%;
-		scale: 1.5;
-		z-index: -1;
-	}
+  .cool-shadow {
+    position: relative;
+  }
+  .cool-shadow::after {
+    background: inherit;
+    position: absolute;
+    content: ' ';
+    filter: blur(25px) saturate(1.5);
+    width: 100%;
+    height: 100%;
+    scale: 1.5;
+    z-index: -1;
+  }
 
-	.hide-play-button {
-		video::-webkit-media-controls-start-playback-button {
-			display: none !important;
-			-webkit-appearance: none;
-		}
-	}
+  .hide-play-button {
+    video::-webkit-media-controls-start-playback-button {
+      display: none !important;
+      -webkit-appearance: none;
+    }
+  }
+}
+
+@keyframes rainbow {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 200%;
+  }
 }

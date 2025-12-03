@@ -1,4 +1,4 @@
-import { IntlErrorCode, hasLocale } from "next-intl";
+import { hasLocale, IntlErrorCode } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
 import { routing } from "./routing";
 
@@ -14,9 +14,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
 		onError(error) {
 			if (error.code === IntlErrorCode.MISSING_MESSAGE) {
 				// Missing translations are expected and should only log an error
-				if (process.env.NODE_ENV === "development") {
-					console.error(error);
-				}
+				// if (process.env.NODE_ENV === "development") {
+				// 	console.error(error);
+				// }
 			}
 		},
 	};

@@ -1,4 +1,5 @@
 @import '@mjs/tailwind-config';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 @config "../tailwind.config.js";
@@ -52,6 +53,12 @@
   --color-card-foreground: var(--card-foreground);
   --color-background: var(--background);
   --animate-aurora: aurora 8s ease-in-out infinite alternate;
+  --color-color-5: var(--color-5);
+  --color-color-4: var(--color-4);
+  --color-color-3: var(--color-3);
+  --color-color-2: var(--color-2);
+  --color-color-1: var(--color-1);
+
   @keyframes aurora {
     0% {
       background-position: 0% 50%;
@@ -74,14 +81,13 @@
       transform: rotate(-5deg) scale(0.9);
     }
   }
-}
-
-@keyframes rainbow {
-  0% {
-    background-position: 0%;
-  }
-  100% {
-    background-position: 200%;
+  @keyframes rainbow {
+    0% {
+      background-position: 0%;
+    }
+    100% {
+      background-position: 200%;
+    }
   }
 }
 

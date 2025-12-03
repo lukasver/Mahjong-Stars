@@ -1,9 +1,11 @@
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import AccountProvider from "@/components/thirdweb/account-provider";
 import AutoConnect from "@/components/thirdweb/autoconnect";
-import { TestClientComponent } from './component';
+import { TestClientComponent } from "./component";
 
-export default function Page() {
+export default async function Page() {
+
+
   // const [selectedValue, setSelectedValue] = useState<string>("");
 
   // // Example options with grouping
@@ -44,8 +46,6 @@ export default function Page() {
   // if (!tx?.transaction) {
   //   return <div>Transaction not found</div>;
   // }
-
-
 
   return (
     <NuqsAdapter>

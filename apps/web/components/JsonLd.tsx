@@ -78,12 +78,8 @@ export const createOrganizationJsonLd = (
 		},
 		areaServed: "Worldwide",
 		knowsAbout: [
-			// "Web3 Gaming",
 			"AI Technology",
 			"Mahjong",
-			"Blockchain",
-			"NFTs",
-			"Cryptocurrency",
 		],
 	};
 };

@@ -246,7 +246,6 @@ export default function ClaimForm({
           scale
         >
           <RainbowButton
-            variant="outline"
             className="w-full h-12 rounded-full text-base font-medium"
             type="submit"
             disabled={isPending}

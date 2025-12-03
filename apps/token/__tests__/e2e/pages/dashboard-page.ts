@@ -259,11 +259,13 @@ export class DashboardPage extends BasePage {
 
 	/**
 	 * Get header "Buy TILE" button
+	 * Prefer button over link, and use first() to avoid strict mode violations
 	 */
 	getHeaderBuyButton() {
 		return this.page
-			.getByRole("link", { name: "Buy TILE" })
-			.or(this.page.getByRole("button", { name: "Buy TILE" }));
+			.getByRole("button", { name: "Buy TILE" })
+			.or(this.page.getByRole("link", { name: "Buy TILE" }))
+			.first();
 	}
 
 	/**
@@ -326,7 +328,7 @@ export class DashboardPage extends BasePage {
 		// CardTitle has class "text-2xl font-semibold"
 		return this.page
 			.locator('[data-testid="fundraising-progress"]')
-			.locator('.text-2xl.font-semibold') // CardTitle div
+			.locator(".text-2xl.font-semibold") // CardTitle div
 			.first();
 	}
 

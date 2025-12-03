@@ -69,14 +69,20 @@ test("TC-DASH-005: ICO Phases Section", async ({ page }) => {
 			}
 
 			// Verify status badge is displayed (Active/Upcoming/Completed)
+			// The badge is next to the h3 with the sale name
 			const statusBadge = card
-				.locator('span, [class*="badge"], [class*="status"]')
+				.locator("h3")
+				.first()
+				.locator("..")
+				.locator('[class*="badge"], [data-testid*="badge"]')
 				.first();
 			const isBadgeVisible = await statusBadge.isVisible().catch(() => false);
 			if (isBadgeVisible) {
 				await expect(statusBadge).toBeVisible({ timeout: TIMEOUTS.SHORT });
 				const badgeText = await statusBadge.textContent();
-				expect(badgeText).toMatch(/Active|Upcoming|Completed|Finished/i);
+				expect(badgeText).toMatch(
+					/Active|Upcoming|Completed|Finished|Open|Created/i,
+				);
 			}
 
 			// Verify date range is displayed
