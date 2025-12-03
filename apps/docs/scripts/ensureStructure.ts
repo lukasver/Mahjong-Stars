@@ -1,12 +1,11 @@
-import { createHash } from 'crypto';
-import { join, relative } from 'path';
-import { getPrompt, translateAndSave } from '@mjs/utils';
-import { copyFile, mkdir, readdir, rm, stat } from 'fs/promises';
-import mime from 'mime-types';
-import { DEFAULT_LOCALES } from '@mjs/i18n';
+import { DEFAULT_LOCALES } from "@mjs/i18n";
+import { getPrompt, translateAndSave } from "@mjs/utils";
+import { createHash } from "crypto";
+import dotenv from "dotenv";
+import { copyFile, mkdir, readdir, rm, stat } from "fs/promises";
+import { join, relative } from "path";
 
-import dotenv from 'dotenv';
-dotenv.config({ path: join(import.meta.dirname, '..', '.env.local') });
+dotenv.config({ path: join(import.meta.dirname, "..", ".env.local") });
 
 /**
  * Environment Variables:
@@ -23,21 +22,21 @@ dotenv.config({ path: join(import.meta.dirname, '..', '.env.local') });
  */
 
 const [mdxTranslationPrompt, metaTranslationPrompt] = await Promise.all([
-  getPrompt(join(import.meta.dirname, 'mdx-translation.md')),
-  getPrompt(join(import.meta.dirname, '_meta-translation.md')),
+  getPrompt(join(import.meta.dirname, "mdx-translation.md")),
+  getPrompt(join(import.meta.dirname, "_meta-translation.md")),
 ]);
 
 const getTranslationPrompt = (fileExtension: string) => {
   if (!fileExtension) {
-    return '';
+    return "";
   }
   switch (fileExtension) {
-    case 'mdx':
+    case "mdx":
       return mdxTranslationPrompt;
-    case 'tsx':
+    case "tsx":
       return metaTranslationPrompt;
     default:
-      return '';
+      return "";
   }
 };
 
@@ -47,7 +46,7 @@ const getTranslationPrompt = (fileExtension: string) => {
 async function getDirectoryStructureHash(dirPath: string): Promise<string> {
   const items: string[] = [];
 
-  async function traverse(currentPath: string, relativePath = '') {
+  async function traverse(currentPath: string, relativePath = "") {
     try {
       const entries = await readdir(currentPath);
 
@@ -72,8 +71,8 @@ async function getDirectoryStructureHash(dirPath: string): Promise<string> {
   }
 
   await traverse(dirPath);
-  const structureString = items.join('\n');
-  return createHash('sha256').update(structureString).digest('hex');
+  const structureString = items.join("\n");
+  return createHash("sha256").update(structureString).digest("hex");
 }
 
 function sleep(ms: number) {
@@ -136,7 +135,7 @@ async function translateAndSaveRecursive(
   locale: string,
   localeDir: string,
   extensions: string[],
-  options: { perf?: boolean; batchSize?: number } = {}
+  options: { perf?: boolean; batchSize?: number } = {},
 ): Promise<void> {
   const { perf = true, batchSize = 5 } = options;
 
@@ -159,7 +158,7 @@ async function translateAndSaveRecursive(
         if (stats.isDirectory()) {
           await collectTranslationTasks(fullPath);
         } else {
-          const fileExtension = entry.split('.').pop()?.toLowerCase();
+          const fileExtension = entry.split(".").pop()?.toLowerCase();
           if (fileExtension && extensions.includes(fileExtension)) {
             const relativePath = relative(localeDir, fullPath);
             translationTasks.push({
@@ -174,7 +173,7 @@ async function translateAndSaveRecursive(
     } catch (error) {
       console.error(
         `Error collecting tasks from directory ${currentPath}:`,
-        error
+        error,
       );
     }
   }
@@ -183,7 +182,7 @@ async function translateAndSaveRecursive(
   await collectTranslationTasks(localeDir);
 
   if (translationTasks.length === 0) {
-    console.log('No files found to translate');
+    console.log("No files found to translate");
     return;
   }
 
@@ -196,8 +195,8 @@ async function translateAndSaveRecursive(
     const batch = translationTasks.slice(i, i + batchSize);
     console.group(
       `Processing batch ${i / batchSize + 1} of ${Math.ceil(
-        translationTasks.length / batchSize
-      )}`
+        translationTasks.length / batchSize,
+      )}`,
     );
 
     const batchPromises = batch.map(
@@ -211,14 +210,14 @@ async function translateAndSaveRecursive(
             targetFile,
             {
               perf: true,
-              mimeType: mime.lookup(fileExtension) || 'text/plain',
-            }
+              mimeType: "text/plain",
+            },
           );
           return { relativePath, success: true };
         } catch (error) {
           return { relativePath, success: false, error };
         }
-      }
+      },
     );
     const batchResults = await Promise.allSettled(batchPromises);
     results.push(...batchResults);
@@ -232,27 +231,27 @@ async function translateAndSaveRecursive(
 
   // Log results summary
   const successful = results.filter(
-    (r) => r.status === 'fulfilled' && r.value.success
+    (r) => r.status === "fulfilled" && r.value.success,
   ).length;
   const failed = results.filter(
     (r) =>
-      r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)
+      r.status === "rejected" || (r.status === "fulfilled" && !r.value.success),
   ).length;
 
-  console.log('\n📊 Translation Results:');
+  console.log("\n📊 Translation Results:");
   console.log(`✅ Successfully translated: ${successful} files`);
   console.log(`❌ Failed to translate: ${failed} files`);
 
   // Log failed files if any
   if (failed > 0) {
-    console.log('\nFailed translations:');
+    console.log("\nFailed translations:");
     results.forEach((result, index) => {
       const task = translationTasks[index];
       if (!task) return;
 
-      if (result.status === 'rejected') {
+      if (result.status === "rejected") {
         console.error(`❌ ${task.relativePath}: ${result.reason}`);
-      } else if (result.status === 'fulfilled' && !result.value.success) {
+      } else if (result.status === "fulfilled" && !result.value.success) {
         console.error(`❌ ${result.value.relativePath}: ${result.value.error}`);
       }
     });
@@ -260,8 +259,8 @@ async function translateAndSaveRecursive(
 }
 
 async function main() {
-  const contentDir = join(import.meta.dirname, '..', 'content');
-  const referenceDir = join(contentDir, 'en');
+  const contentDir = join(import.meta.dirname, "..", "content");
+  const referenceDir = join(contentDir, "en");
 
   // Get all available locales from the content directory
   const allLocales = await readdir(contentDir);
@@ -278,50 +277,50 @@ async function main() {
   DEFAULT_LOCALES.forEach((locale) => {
     if (!locales.includes(locale)) {
       console.log(
-        `Locale ${locale} not found in content directory, adding it since its in defaults`
+        `Locale ${locale} not found in content directory, adding it since its in defaults`,
       );
       locales.push(locale);
     }
   });
 
-  console.log(`Found locales: ${locales.join(', ')}`);
+  console.log(`Found locales: ${locales.join(", ")}`);
 
   // Get reference structure hash
   const referenceHash = await getDirectoryStructureHash(referenceDir);
   console.log(
-    `Reference structure hash (en): ${referenceHash.substring(0, 8)}...`
+    `Reference structure hash (en): ${referenceHash.substring(0, 8)}...`,
   );
 
   // Filter out the reference locale
-  const targetLocales = locales.filter((locale) => locale !== 'en');
+  const targetLocales = locales.filter((locale) => locale !== "en");
 
   if (targetLocales.length === 0) {
-    console.log('No target locales found to process');
+    console.log("No target locales found to process");
     return;
   }
 
   // Get structure hashes for all target locales in parallel
-  console.log('\nAnalyzing locale structures...');
+  console.log("\nAnalyzing locale structures...");
   const hashPromises = targetLocales.map(async (locale) => {
     const localeDir = join(contentDir, locale);
 
     // If we need to renew ALL locales, then renew
-    if (process.env.RENEW === 'all') {
+    if (process.env.RENEW === "all") {
       return {
         locale,
         localeDir,
-        localeHash: 'all',
+        localeHash: "all",
         needsUpdate: true,
       };
     }
 
     // If we need to renew a specific locale, then renew
-    const renewLocales = process.env.RENEW?.split(',') || [];
+    const renewLocales = process.env.RENEW?.split(",") || [];
     if (renewLocales.includes(locale)) {
       return {
         locale,
         localeDir,
-        localeHash: 'all',
+        localeHash: "all",
         needsUpdate: true,
       };
     }
@@ -350,12 +349,11 @@ async function main() {
     const locale = targetLocales[index];
     if (!locale) return;
 
-    if (result.status === 'fulfilled') {
+    if (result.status === "fulfilled") {
       const { localeHash, needsUpdate } = result.value;
       console.log(
-        `${locale}: ${localeHash.substring(0, 8)}... ${
-          needsUpdate ? '✗ needs update' : '✓ up to date'
-        }`
+        `${locale}: ${localeHash.substring(0, 8)}... ${needsUpdate ? "✗ needs update" : "✓ up to date"
+        }`,
       );
       localeAnalysis.push(result.value);
     } else {
@@ -364,7 +362,7 @@ async function main() {
       localeAnalysis.push({
         locale,
         localeDir: join(contentDir, locale),
-        localeHash: 'error',
+        localeHash: "error",
         needsUpdate: true,
       });
     }
@@ -372,11 +370,11 @@ async function main() {
 
   // Filter locales that need updates
   const localesNeedingUpdate = localeAnalysis.filter(
-    (analysis) => analysis.needsUpdate
+    (analysis) => analysis.needsUpdate,
   );
 
   if (localesNeedingUpdate.length === 0) {
-    console.log('\n✅ All locales are up to date');
+    console.log("\n✅ All locales are up to date");
     return;
   }
 
@@ -387,24 +385,24 @@ async function main() {
     async ({ locale, localeDir }) => {
       console.log(`\nStarting update for ${locale}...`);
       await copyDirectoryStructure(referenceDir, localeDir);
-      await translateAndSaveRecursive(locale, localeDir, ['mdx', 'tsx']);
+      await translateAndSaveRecursive(locale, localeDir, ["mdx", "tsx"]);
       // timer to avoid rate limiting
       await sleep(500);
       return { locale, success: true };
-    }
+    },
   );
 
   const copyResults = await Promise.allSettled(copyPromises);
 
   // Report results
-  console.log('\n📋 Update Results:');
+  console.log("\n📋 Update Results:");
   copyResults.forEach((result, index) => {
     const localeInfo = localesNeedingUpdate[index];
     if (!localeInfo) return;
 
     const locale = localeInfo.locale;
 
-    if (result.status === 'fulfilled') {
+    if (result.status === "fulfilled") {
       console.log(`✅ ${locale}: Successfully updated`);
     } else {
       console.error(`❌ ${locale}: Failed to update -`, result.reason);
@@ -412,12 +410,12 @@ async function main() {
   });
 
   const successCount = copyResults.filter(
-    (r) => r.status === 'fulfilled'
+    (r) => r.status === "fulfilled",
   ).length;
   const totalCount = copyResults.length;
 
   console.log(
-    `\n🎉 Translation structure synchronization completed: ${successCount}/${totalCount} locales updated successfully`
+    `\n🎉 Translation structure synchronization completed: ${successCount}/${totalCount} locales updated successfully`,
   );
 }
 

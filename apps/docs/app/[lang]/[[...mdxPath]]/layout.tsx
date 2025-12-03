@@ -51,8 +51,10 @@ async function layout({
 			dir={getDirection(lang) || "ltr"}
 		>
 			<TranslationsProvider translations={dictionary}>
+
 				<Layout
 					i18n={getLocaleNames()}
+					docsRepositoryBase='https://github.com/lukasver/the-tiles-company'
 					// banner={<Banner lang={lang as Locale} />}
 					navbar={<Navbar lang={lang as Locale} />}
 					search={<Search placeholder={t("Global.search")} />}
@@ -62,7 +64,6 @@ async function layout({
 					}}
 					pageMap={pageMap}
 					editLink={false}
-					docsRepositoryBase="https://github.com/mahjongstars/docs"
 					footer={<Footer locale={lang as Locale} />}
 					navigation={true}
 				>

@@ -11,19 +11,19 @@ const siteUrl = `http${
 }://${domain}`;
 
 const metadata = {
-	title: "Mahjong Stars",
+	title: "The Tiles Company",
 	description:
 		"Mahjong with AI Characters & NFT Rewards. Play & train AI avatars, collect unique characters, and earn $TILE. Multiplayer global platform with tournaments",
 	domain,
-	logoTitle: "Mahjong Stars",
-	businessName: "Mahjong Stars",
+	logoTitle: "The Tiles Company",
+	businessName: "The Tiles Company",
 	siteUrl,
 	siteRepo: "",
 	socialBanner: "/api/og",
 	tokenSymbol: "TILE",
 	tokenName: "TILES",
 	supportEmail:
-		process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@mahjongstars.com",
+		process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "info@thetilescompany.io",
 	twitter: process.env.NEXT_PUBLIC_TWITTER_HANDLE || "",
 	instagram: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "",
 	tiktok: process.env.NEXT_PUBLIC_TIKTOK_HANDLE || "",

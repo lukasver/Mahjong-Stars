@@ -25,17 +25,17 @@
 				"questions": [
 					{
 						"id": "what-is-mahjong-stars",
-						"question": "What is Mahjong Stars?",
-						"answer": "Mahjong Stars is the world's first AI-powered Web3 social mahjong gaming platform. We combine traditional mahjong gameplay with cutting-edge AI technology and Web3 features, allowing players to train AI avatars that can play 24/7, even when they're offline."
+						"question": "What is The Tiles Company?",
+						"answer": "The Tiles Company is the organization behind MJS, the world's first AI-powered Web3 social mahjong gaming platform. We combine traditional mahjong gameplay with cutting-edge AI technology and Web3 features, allowing players to train AI avatars that can play 24/7, even when they're offline."
 					},
 					{
 						"id": "how-different-from-other-platforms",
-						"question": "How is Mahjong Stars different from other mahjong platforms?",
+						"question": "How is The Tiles Company different from other mahjong platforms?",
 						"answer": "Key Differentiators: AI Training - Create and train AI avatars that learn your playing style; 24/7 Gameplay - Your AI continues playing and earning while you're away; Social Features - Advanced community features and friend systems; Proven Expertise - Built by a team with 10+ years of mahjong gaming experience"
 					},
 					{
 						"id": "available-worldwide",
-						"question": "Is Mahjong Stars available worldwide?",
+						"question": "Is MJS platform available worldwide?",
 						"answer": "We're launching globally with multi-platform support across iOS, Android, and Web. Our Unity-based platform ensures consistent gameplay experience across all devices and regions."
 					}
 				]
@@ -47,12 +47,12 @@
 					{
 						"id": "what-need-to-start",
 						"question": "What do I need to start playing?",
-						"answer": "Device - Any modern smartphone, tablet, or computer; Internet - Stable internet connection; StarsPoints - In-game currency; Account - Simple social login setup"
+						"answer": "Device - Any modern smartphone, tablet, or computer; Internet - Stable internet connection; Account - Simple social login setup"
 					},
 					{
 						"id": "cost-to-start",
 						"question": "How much does it cost to start playing?",
-						"answer": "There's no cost to download and create an account. You'll need to purchase StarsPoints to participate in games. Entry fees vary by table stakes, starting from small amounts suitable for beginners."
+						"answer": "There's no cost to download and create an account. Entry fees vary by table stakes, starting from small amounts suitable for beginners."
 					}
 				]
 			},
@@ -68,7 +68,7 @@
 					{
 						"id": "ai-play-offline",
 						"question": "Can my AI play while I'm offline?",
-						"answer": "Yes! This is one of our core features. Your AI can: Play Continuously - Participate in games 24/7; Earn StarsPoints - Generate income while you're away; Follow Limits - Respect your pre-set spending and earning limits; Provide Updates - Send notifications about performance and results"
+						"answer": "Yes! This is one of our core features. Your AI can: Play Continuously - Participate in games 24/7; Follow Limits - Respect your pre-set spending and earning limits; Provide Updates - Send notifications about performance and results"
 					},
 					{
 						"id": "ai-accuracy",
@@ -85,13 +85,7 @@
 			{
 				"id": "economy-tokens",
 				"title": "Economy",
-				"questions": [
-					{
-						"id": "what-are-starspoints",
-						"question": "What are StarsPoints?",
-						"answer": "StarsPoints are the in-game currency used for: Entry fees for tables and tournaments; AI service access and premium features; In-game purchases (avatars, items, decorations); Transaction fees for platform activities. Important: StarsPoints have no value outside the game and are for in-game use only."
-					}
-				]
+				"questions": []
 			},
 			{
 				"id": "security-fair-play",

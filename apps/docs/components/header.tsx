@@ -1,29 +1,24 @@
-import { Locale } from "@/lib/i18n";
-import { getTranslations } from "@/lib/i18n/get-dictionaries";
-import { applyUTM } from "@/lib/utm";
-import { Icons } from "@mjs/ui/components/icons";
 // import { RainbowButton } from '@mjs/ui/components/rainbow-button';
-import { ShinyButton } from "@mjs/ui/components/shiny-button";
-import Link from "next/link";
 import {
 	LocaleSwitch,
 	Navbar as NavbarComponent,
 	ThemeSwitch,
 } from "nextra-theme-docs";
+import { Locale } from "@/lib/i18n";
 import { Logo } from "./logo";
 
 export const Navbar = async ({ lang }: { lang: Locale }) => {
-	const t = await getTranslations(lang);
+	// const t = await getTranslations(lang);
 	return (
 		<NavbarComponent
 			className="bg-primary dark:bg-primary"
-			// projectLink='https://github.com/mahjongstars/docs'
+			projectLink='https://github.com/the-tiles-company/docs'
 			logo={<Logo />}
-			// chatIcon={<Icons.discord className='w-5 h-5' />}
-			// projectIcon={<Icons.boxes className='w-5 h-5' />}
-			// ... Your additional navbar options
+		// chatIcon={<Icons.discord className='w-5 h-5' />}
+		// projectIcon={<Icons.boxes className='w-5 h-5' />}
+		// ... Your additional navbar options
 		>
-			<Link
+			{/* <Link
 				href={applyUTM(
 					`/web/${lang && lang !== "en" ? `${lang}/` : ""}#newsletter`,
 					{
@@ -38,7 +33,7 @@ export const Navbar = async ({ lang }: { lang: Locale }) => {
 					<span className="hidden md:block">{t("Global.subscribe")}</span>
 					<Icons.subscribe className="md:hidden size-5!" />
 				</ShinyButton>
-			</Link>
+			</Link> */}
 			<LocaleSwitch lite className="text-white!" />
 			<ThemeSwitch lite className="text-white!" />
 		</NavbarComponent>

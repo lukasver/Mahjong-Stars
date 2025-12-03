@@ -59,7 +59,7 @@ const meta: MetaRecord = {
     }),
   },
   subscribe: {
-    title: 'Abonnez-vous',
+    title: 'S\'abonner',
     href: applyUTM('/web/#newsletter', {
       source: 'docs',
       medium: 'sidebar',

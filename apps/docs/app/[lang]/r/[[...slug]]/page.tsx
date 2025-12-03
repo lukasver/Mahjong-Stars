@@ -5,8 +5,8 @@ import { compileMdx } from "nextra/compile";
 import { Callout, Tabs } from "nextra/components";
 import { evaluate } from "nextra/evaluate";
 
-//raw.githubusercontent.com/mahjongstars/docs/refs/heads/main/test/index.mdx
-const user = process.env.GITHUB_USER || "mahjongstars";
+//raw.githubusercontent.com/thetilescompany/docs/refs/heads/main/test/index.mdx
+const user = process.env.GITHUB_USER || "thetilescompany";
 const repo = process.env.GITHUB_REPO || "docs";
 const branch = process.env.GITHUB_BRANCH || "refs/heads/main";
 const docsPath = process.env.GITHUB_DOCS_PATH || "test/";

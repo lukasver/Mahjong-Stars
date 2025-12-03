@@ -1,11 +1,11 @@
-import path from "path";
 import { ImageResponse } from "@vercel/og";
 import { readFile } from "fs/promises";
 import sizeOf from "image-size";
 import mime from "mime-types";
+import path from "path";
 import sharp from "sharp";
 
-export const alt = "Mahjong Stars";
+export const alt = "The Tiles Company";
 export const size = {
 	width: 1200,
 	height: 630,
@@ -69,29 +69,25 @@ async function loadGoogleFont(font: string, text: string) {
 }
 
 export default async function Image() {
-	const imagePath = path.join(
-		process.cwd(),
-		"/public/static/favicons/android-chrome-512x512.png",
-	);
-	const bgPath = path.join(process.cwd(), "/public/static/images/bg2.png");
+	const imagePath = path.join(process.cwd(), "/public/icon.png");
+
 
 	const title = "Documentation";
-	const description = "Mahjong Stars";
+	const description = "The Tiles Company";
 
-	const [logo, bg, teachersTitle, teachersDescription] = await Promise.all([
+	const [logo, teachersTitle, teachersDescription] = await Promise.all([
 		readFile(imagePath),
-		readFile(bgPath),
 		loadGoogleFont("Teachers:wght@700", title),
 		loadGoogleFont("Teachers", description),
 	]);
 
 	const mimeType = mime.lookup(imagePath);
-	const bgMimeType = mime.lookup(bgPath);
+	// const bgMimeType = mime.lookup(bgPath);
 	const dimensions = sizeOf(logo) as { width: number; height: number };
 
 	const { logoWidth, logoHeight } = getLogoSize(dimensions);
 	const logoImage = `data:${mimeType};base64,${logo.toString("base64")}`;
-	const bgImage = `data:${bgMimeType};base64,${bg.toString("base64")}`;
+	// const bgImage = `data:${bgMimeType};base64,${bg.toString("base64")}`;
 
 	const imageResponse = new ImageResponse(
 		<div
@@ -103,7 +99,8 @@ export default async function Image() {
 				justifyContent: "center",
 				flexDirection: "column",
 				// background: '#4a0000',
-				backgroundImage: `url(${bgImage})`,
+				// backgroundImage: `url(${bgImage})`,
+				background: "linear-gradient(to bottom right, #FFFBEB, #FEF3C7)",
 				position: "relative",
 			}}
 		>

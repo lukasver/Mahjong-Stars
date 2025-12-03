@@ -54,7 +54,7 @@ export const createOrganizationJsonLd = (
 		"@type": "Organization",
 		name: t("Metadata.title"),
 		legalName: "WASABI GAMES DMCC",
-		alternateName: "Mahjong Stars",
+		alternateName: "The Tiles Company",
 		url: siteConfig.siteUrl,
 		email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
 		description: t("Metadata.description"),
@@ -209,7 +209,7 @@ export const createVideoGameJsonLd = (t: TFunction): WithContext<VideoGame> => {
 			{
 				"@type": "Person",
 				name: "Bubble Girl",
-				description: "AI Character in Mahjong Stars",
+				description: "AI Character in MJS",
 			},
 		],
 		gameItem: {
@@ -232,20 +232,20 @@ export const createNewsletterSubscribeJsonLd = (
 		},
 		object: {
 			"@type": "Service",
-			name: "Mahjong Stars Newsletter",
+			name: "The Tiles Company Newsletter",
 			description:
 				"Weekly newsletter with game updates, AI tips, tournament announcements, and exclusive rewards",
 			provider: {
 				"@type": "Organization",
-				name: "Mahjong Stars",
-				url: "https://www.mahjongstars.com",
+				name: "The Tiles Company",
+				url: "https://www.thetilescompany.io",
 			},
 			serviceType: "Newsletter Service",
 			areaServed: "Worldwide",
 		},
 		target: {
 			"@type": "EntryPoint",
-			url: `https://www.mahjongstars.com/#newsletter`,
+			url: `https://www.thetilescompany.io`,
 			actionPlatform: "Web",
 		},
 		actionStatus: "https://schema.org/ActiveActionStatus",
@@ -257,7 +257,7 @@ export const createNewsletterSubscribeJsonLd = (
 			"@type": "Thing",
 			name: "Newsletter Subscription",
 			description:
-				"Successfully subscribed to Mahjong Stars newsletter for game updates and rewards",
+				"Successfully subscribed to The Tiles Company newsletter for game updates and rewards",
 		},
 	};
 };
@@ -291,7 +291,7 @@ export const createArticleJsonLd = (
 		},
 		publisher: {
 			"@type": "Organization",
-			name: "Mahjong Stars",
+			name: "The Tiles Company",
 			logo: [
 				{
 					"@type": "ImageObject",

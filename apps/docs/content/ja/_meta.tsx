@@ -59,7 +59,7 @@ const meta: MetaRecord = {
     }),
   },
   subscribe: {
-    title: '購読する',
+    title: '購読',
     href: applyUTM('/web/#newsletter', {
       source: 'docs',
       medium: 'sidebar',

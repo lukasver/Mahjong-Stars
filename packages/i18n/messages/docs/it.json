@@ -1,192 +1,171 @@
 {
-	"Footer": {
-		"links": {
-			"home": "Home",
-			"docs": "Documenti",
-			"whoWeAre": "Chi Siamo",
-			"termsAndConditions": "Termini e Condizioni",
-			"privacyPolicy": "Informativa sulla Privacy",
-			"contact": "Contatti"
-		},
-		"copyright": "©{year} WASABI GAMES DMCC"
-	},
-	"Global": {
-		"soon": "Prossimamente",
-		"search": "Cerca...",
-		"subscribe": "Iscriviti ora"
-	},
-	"FAQ": {
-		"title": "Domande Frequenti",
-		"description": "FAQ complete che coprono le funzionalità della piattaforma, l'addestramento dell'IA, i token, la sicurezza e gli argomenti di supporto",
-		"sections": [
-			{
-				"id": "general-platform",
-				"title": "Domande Generali sulla Piattaforma",
-				"questions": [
-					{
-						"id": "what-is-mahjong-stars",
-						"question": "Cos'è Mahjong Stars?",
-						"answer": "Mahjong Stars è la prima piattaforma di gioco di mahjong sociale Web3 al mondo alimentata dall'intelligenza artificiale. Combiniamo il gameplay tradizionale del mahjong con la tecnologia AI all'avanguardia e le funzionalità Web3, consentendo ai giocatori di addestrare avatar AI che possono giocare 24 ore su 24, 7 giorni su 7, anche quando sono offline."
-					},
-					{
-						"id": "how-different-from-other-platforms",
-						"question": "In che modo Mahjong Stars si differenzia dalle altre piattaforme di mahjong?",
-						"answer": "Differenze Chiave: Addestramento AI - Crea e addestra avatar AI che imparano il tuo stile di gioco; Gameplay 24/7 - La tua IA continua a giocare e guadagnare mentre sei assente; Integrazione Web3 - Mercato NFT, integrazione di portafogli crittografici e utilità del token $TILE; Funzionalità Social - Funzionalità di community avanzate e sistemi di amicizia; Esperienza Compressa - Creato da un team con oltre 10 anni di esperienza nel gioco del mahjong"
-					},
-					{
-						"id": "available-worldwide",
-						"question": "Mahjong Stars è disponibile in tutto il mondo?",
-						"answer": "Stiamo lanciando a livello globale con supporto multipiattaforma su iOS, Android e Web. La nostra piattaforma basata su Unity garantisce un'esperienza di gioco coerente su tutti i dispositivi e le regioni."
-					}
-				]
-			},
-			{
-				"id": "getting-started",
-				"title": "Introduzione",
-				"questions": [
-					{
-						"id": "what-need-to-start",
-						"question": "Di cosa ho bisogno per iniziare a giocare?",
-						"answer": "Dispositivo - Qualsiasi smartphone, tablet o computer moderno; Internet - Connessione internet stabile; StarsPoints - Valuta di gioco acquistabile con valuta tradizionale o criptovaluta; Account - Semplice configurazione di accesso social"
-					},
-					{
-						"id": "cost-to-start",
-						"question": "Quanto costa iniziare a giocare?",
-						"answer": "Non c'è alcun costo per scaricare e creare un account. Dovrai acquistare StarsPoints per partecipare alle partite. Le quote di iscrizione variano in base alle puntate al tavolo, a partire da piccole somme adatte ai principianti."
-					}
-				]
-			},
-			{
-				"id": "ai-gameplay",
-				"title": "IA e Gameplay",
-				"questions": [
-					{
-						"id": "how-ai-training-works",
-						"question": "Come funziona l'addestramento dell'IA?",
-						"answer": "Processo di Addestramento: 1. Gioca Manualmente - Le tue partite iniziali forniscono dati di addestramento; 2. Apprendimento degli Schemi - L'IA analizza i tuoi schemi decisionali; 3. Replica della Strategia - L'IA impara a imitare il tuo stile di gioco; 4. Miglioramento Continuo - L'IA perfeziona il suo approccio in base al gameplay in corso"
-					},
-					{
-						"id": "ai-play-offline",
-						"question": "La mia IA può giocare mentre sono offline?",
-						"answer": "Sì! Questa è una delle nostre funzionalità principali. La tua IA può: Giocare Continuamente - Partecipare alle partite 24 ore su 24, 7 giorni su 7; Guadagnare StarsPoints - Generare entrate mentre sei assente; Rispettare i Limiti - Rispettare i limiti di spesa e guadagno preimpostati; Fornire Aggiornamenti - Inviare notifiche sulle prestazioni e sui risultati"
-					},
-					{
-						"id": "ai-accuracy",
-						"question": "Quanto è accurata l'IA nel replicare il mio stile di gioco?",
-						"answer": "La nostra IA utilizza algoritmi avanzati di apprendimento automatico per analizzare migliaia di punti decisionali. Più giochi, meglio la tua IA diventa nel replicare le tue strategie. La maggior parte dei giocatori vede un'accuratezza significativa entro 20-30 partite di addestramento."
-					},
-					{
-						"id": "take-control-from-ai",
-						"question": "Posso prendere il controllo dalla mia IA durante una partita?",
-						"answer": "Assolutamente! La nostra Modalità di Gioco Ibrida ti consente di: Passaggio Semplice - Prendi il controllo in qualsiasi momento durante il gameplay dell'IA; Sovra scrittura Manuale - Prendi decisioni cruciali da solo; Integrazione dell'Apprendimento - Le tue giocate manuali allenano ulteriormente la tua IA; Gioco Flessibile - Equilibrio perfetto tra automazione e controllo personale"
-					}
-				]
-			},
-			{
-				"id": "economy-tokens",
-				"title": "Economia e Token",
-				"questions": [
-					{
-						"id": "what-are-starspoints",
-						"question": "Cosa sono gli StarsPoints?",
-						"answer": "StarsPoints è la valuta principale di gioco utilizzata per: Quote di iscrizione per tavoli e tornei; Accesso al servizio AI e funzionalità premium; Acquisti in gioco (avatar, oggetti, decorazioni); Commissioni di transazione per le attività della piattaforma. Importante: Gli StarsPoints non hanno valore al di fuori del gioco e sono solo per uso interno al gioco."
-					},
-					{
-						"id": "what-is-tile-token",
-						"question": "Cos'è il token $TILE?",
-						"answer": "$TILE è il nostro token di utilità con molteplici usi: Diritti di Governance - Votare sugli aggiornamenti e le funzionalità della piattaforma; Ricompense di Staking - Guadagnare token aggiuntivi tramite staking; Funzionalità Premium - Accesso a tornei esclusivi e capacità AI; Mercato NFT - Valuta principale per il trading di asset di gioco; Condivisione dei Ricavi - Partecipare alla distribuzione dei ricavi della piattaforma"
-					},
-					{
-						"id": "withdrawal-rewards",
-						"question": "Come funzionano le Ricompense di Prelievo?",
-						"answer": "Le Ricompense di Prelievo sono una funzionalità premium opzionale: Acquisto Necessario - Acquista la possibilità di prelievo come componente aggiuntivo opzionale; Trading di Terze Parti - Consente la vendita di asset di gioco su piattaforme esterne; Tasso 1:1 - Converti i guadagni virtuali in valore reale; Ricavi Aggiuntivi - La piattaforma guadagna una commissione sugli acquisti di ricompense di prelievo"
-					},
-					{
-						"id": "tile-token-launch",
-						"question": "Quando verrà lanciato il token $TILE?",
-						"answer": "Il token $TILE è previsto per il lancio nel Q4 2025 a seguito del lancio della nostra piattaforma e dell'acquisizione iniziale di utenti. Ciò includerà: Evento di Generazione di Token (TGE); Elenchi principali DEX; Partnership di scambio; Lancio del meccanismo di staking"
-					}
-				]
-			},
-			{
-				"id": "security-fair-play",
-				"title": "Sicurezza e Gioco Leale",
-				"questions": [
-					{
-						"id": "ensure-fair-gameplay",
-						"question": "Come garantite un gioco leale?",
-						"answer": "Sistemi Completi di Gioco Leale: Anti-Cheat Avanzato - Rilevazione AI-powered di tentativi di imbroglio; Generazione di Numeri Casuali - Casualità crittograficamente sicura; Monitoraggio in Tempo Reale - Analisi continua del gameplay; Segnalazione della Community - Applicazione della correttezza guidata dal giocatore; Audit di Terze Parti - Verifica indipendente dell'equità del gioco"
-					},
-					{
-						"id": "personal-financial-security",
-						"question": "Le mie informazioni personali e finanziarie sono al sicuro?",
-						"answer": "Sicurezza di Grado Enterprise: Crittografia di Grado Militare - Tutti i dati crittografati ai massimi livelli; Conformità GDPR - Piena conformità alla protezione dei dati europei; Portafogli Multi-Firma - Sicurezza migliorata per tutti i fondi; Audit Regolari - Valutazioni di sicurezza complete di terze parti; Monitoraggio 24/7 - Monitoraggio continuo delle minacce alla sicurezza"
-					},
-					{
-						"id": "suspect-cheating",
-						"question": "Cosa succede se sospetto un imbroglio?",
-						"answer": "Processo di Segnalazione: 1. Segnalazione nel Gioco - Utilizzare gli strumenti di segnalazione integrati; 2. Indagine Automatica - I nostri sistemi AI analizzano il comportamento segnalato; 3. Revisione Umana - Casi complessi esaminati da moderatori umani; 4. Azioni Intraprese - Penalità appropriate applicate alle violazioni confermate; 5. Feedback - Aggiornamenti forniti sui risultati dell'indagine"
-					}
-				]
-			},
-			{
-				"id": "technical-support",
-				"title": "Supporto Tecnico",
-				"questions": [
-					{
-						"id": "supported-platforms",
-						"question": "Quali piattaforme sono supportate?",
-						"answer": "Disponibilità Multipiattaforma: iOS - App native per iPhone e iPad; Android - App native per smartphone e tablet Android; Web - Accesso basato su browser su desktop e mobile; Motore Unity - Esperienza coerente su tutte le piattaforme"
-					},
-					{
-						"id": "technical-issues",
-						"question": "Cosa succede se riscontro problemi tecnici?",
-						"answer": "Opzioni di Supporto: Supporto Clienti 24/7 - Aiuto sempre disponibile tramite più canali; Aiuto nell'App - Strumenti e tutorial di supporto integrati; Forum della Community - Assistenza della community di giocatori; Tutorial Video - Guide dettagliate per tutte le funzionalità; Supporto E-mail - Team di supporto tecnico dedicato"
-					},
-					{
-						"id": "recover-account",
-						"question": "Come recupero il mio account se perdo l'accesso?",
-						"answer": "Recupero dell'Account: 1. Contatta il Supporto - Contattaci tramite i nostri canali di supporto; 2. Verifica dell'Identità - Fornisci informazioni di verifica dell'account; 3. Controllo di Sicurezza - Completa il processo di verifica di sicurezza; 4. Ripristino dell'Account - Ripristino sicuro dell'accesso; 5. Revisione della Sicurezza - Valutazione di sicurezza opzionale per prevenire problemi futuri"
-					}
-				]
-			},
-			{
-				"id": "community-social",
-				"title": "Community e Funzionalità Social",
-				"questions": [
-					{
-						"id": "friend-systems",
-						"question": "Come funzionano i sistemi di amicizia?",
-						"answer": "Funzionalità di Gioco Sociale: Inviti Amici - Invia e accetta richieste di amicizia; Tavoli Privati - Organizza partite esclusive con la tua rete; Chat Sociale - Comunicazione in tempo reale durante il gameplay; Eventi della Community - Partecipa a tornei e competizioni di gruppo"
-					},
-					{
-						"id": "private-tournaments",
-						"question": "Posso creare tornei privati?",
-						"answer": "Sì! Puoi: Organizzare Eventi Privati - Crea tornei per il tuo gruppo di amici; Regole Personalizzate - Imposta le tue quote di iscrizione e la struttura del torneo; Gioco Sociale - Invita giocatori specifici ad unirsi; Gestione di Gruppo - Gestisci la tua community di gioco privata"
-					},
-					{
-						"id": "community-guidelines",
-						"question": "Esistono linee guida della community?",
-						"answer": "Standard della Community: Comportamento Rispettoso - Tratta tutti i giocatori con cortesia; Gioco Leale - Nessun imbroglio, collusione o comportamento antisportivo; Comunicazione Appropriata - Mantieni la chat amichevole e appropriata; Segnala Problemi - Aiuta a mantenere gli standard della community segnalando i problemi"
-					}
-				]
-			},
-			{
-				"id": "partnership-business",
-				"title": "Partnership e Business",
-				"questions": [
-					{
-						"id": "partnership-opportunities",
-						"question": "Avete opportunità di partnership?",
-						"answer": "Cerchiamo attivamente partnership strategiche in: Piattaforme di Gioco - Opportunità di integrazione e promozione incrociata; Servizi Cripto - Partnership con portafogli e exchange; Creatori di Contenuti - Collaborazioni con influencer e streamer; Provider di Tecnologia - Partnership infrastrutturali e di servizi. Contatto: Per richieste di partnership, contattaci tramite i nostri canali di sviluppo aziendale."
-					},
-					{
-						"id": "stay-updated",
-						"question": "Come posso rimanere aggiornato sugli sviluppi?",
-						"answer": "Rimani Connesso: Sito Web Ufficiale - Aggiornamenti e annunci regolari; Social Media - Segui i nostri canali ufficiali sui social media; Discord della Community - Unisciti alla nostra community attiva; Newsletter - Iscriviti per ricevere aggiornamenti sullo sviluppo; Comunicati Stampa - Annunci ufficiali dell'azienda"
-					}
-				]
-			}
-		]
-	}
+  "Footer": {
+    "links": {
+      "home": "Home",
+      "docs": "Docs",
+      "whoWeAre": "Chi Siamo",
+      "termsAndConditions": "Termini e Condizioni",
+      "privacyPolicy": "Informativa sulla Privacy",
+      "contact": "Contatti"
+    },
+    "copyright": "©{year} WASABI GAMES DMCC"
+  },
+  "Global": {
+    "soon": "Prossimamente",
+    "search": "Cerca...",
+    "subscribe": "Iscriviti ora"
+  },
+  "FAQ": {
+    "title": "Domande Frequenti",
+    "description": "FAQ complete che coprono le funzionalità della piattaforma, l'allenamento dell'IA, i token, la sicurezza e gli argomenti di supporto",
+    "sections": [
+      {
+        "id": "general-platform",
+        "title": "Domande Generali sulla Piattaforma",
+        "questions": [
+          {
+            "id": "what-is-mahjong-stars",
+            "question": "Cos'è The Tiles Company?",
+            "answer": "The Tiles Company è l'organizzazione dietro MJS, la prima piattaforma di gioco di mahjong social Web3 potenziata dall'IA al mondo. Combiniamo il gameplay tradizionale del mahjong con la tecnologia IA all'avanguardia e le funzionalità Web3, consentendo ai giocatori di addestrare avatar IA che possono giocare 24 ore su 24, 7 giorni su 7, anche quando sono offline."
+          },
+          {
+            "id": "how-different-from-other-platforms",
+            "question": "In cosa si differenzia The Tiles Company dalle altre piattaforme di mahjong?",
+            "answer": "Differenziatori Chiave: Allenamento IA - Crea e allena avatar IA che apprendono il tuo stile di gioco; Gameplay 24/7 - La tua IA continua a giocare e guadagnare mentre sei via; Funzionalità Social - Funzionalità di community avanzate e sistemi di amici; Competenza Provata - Costruito da un team con oltre 10 anni di esperienza nel gioco del mahjong."
+          },
+          {
+            "id": "available-worldwide",
+            "question": "La piattaforma MJS è disponibile in tutto il mondo?",
+            "answer": "Stiamo lanciando a livello globale con supporto multi-piattaforma su iOS, Android e Web. La nostra piattaforma basata su Unity garantisce un'esperienza di gioco coerente su tutti i dispositivi e le regioni."
+          }
+        ]
+      },
+      {
+        "id": "getting-started",
+        "title": "Iniziare",
+        "questions": [
+          {
+            "id": "what-need-to-start",
+            "question": "Di cosa ho bisogno per iniziare a giocare?",
+            "answer": "Dispositivo - Qualsiasi smartphone, tablet o computer moderno; Internet - Connessione internet stabile; Account - Semplice configurazione di accesso social."
+          },
+          {
+            "id": "cost-to-start",
+            "question": "Quanto costa iniziare a giocare?",
+            "answer": "Non ci sono costi per scaricare e creare un account. Le quote d'iscrizione variano in base alle poste in gioco al tavolo, partendo da piccole cifre adatte ai principianti."
+          }
+        ]
+      },
+      {
+        "id": "ai-gameplay",
+        "title": "IA e Gameplay",
+        "questions": [
+          {
+            "id": "how-ai-training-works",
+            "question": "Come funziona l'allenamento dell'IA?",
+            "answer": "Processo di Allenamento: 1. Gioca Manualmente - Le tue partite iniziali forniscono dati di allenamento; 2. Apprendimento dei Modelli - L'IA analizza i tuoi schemi decisionali; 3. Replicazione della Strategia - L'IA impara a imitare il tuo stile di gioco; 4. Miglioramento Continuo - L'IA affina il suo approccio in base al gameplay in corso."
+          },
+          {
+            "id": "ai-play-offline",
+            "question": "La mia IA può giocare mentre sono offline?",
+            "answer": "Sì! Questa è una delle nostre funzionalità principali. La tua IA può: Giocare Continuamente - Partecipare a partite 24 ore su 24, 7 giorni su 7; Seguire i Limiti - Rispettare i tuoi limiti predefiniti di spesa e guadagno; Fornire Aggiornamenti - Inviare notifiche sulle prestazioni e sui risultati."
+          },
+          {
+            "id": "ai-accuracy",
+            "question": "Quanto è accurata l'IA nel replicare il mio stile di gioco?",
+            "answer": "La nostra IA utilizza algoritmi avanzati di machine learning per analizzare migliaia di punti decisionali. Più giochi, migliore sarà la tua IA nel replicare le tue strategie. La maggior parte dei giocatori riscontra una precisione significativa entro 20-30 partite di allenamento."
+          },
+          {
+            "id": "take-control-from-ai",
+            "question": "Posso prendere il controllo dalla mia IA durante una partita?",
+            "answer": "Assolutamente! La nostra Modalità di Gioco Ibrida ti consente di: Passaggio Fluido - Assumi il controllo in qualsiasi momento durante il gioco dell'IA; Override Manuale - Prendi decisioni cruciali da solo; Integrazione dell'Apprendimento - Le tue giocate manuali allenano ulteriormente la tua IA; Gioco Flessibile - Equilibrio perfetto tra automazione e controllo personale."
+          }
+        ]
+      },
+      {
+        "id": "economy-tokens",
+        "title": "Economia",
+        "questions": []
+      },
+      {
+        "id": "security-fair-play",
+        "title": "Sicurezza e Fair Play",
+        "questions": [
+          {
+            "id": "ensure-fair-gameplay",
+            "question": "Come garantite un gameplay equo?",
+            "answer": "Sistemi di Fair Play Completi: Anti-Cheat Avanzato - Rilevamento basato sull'IA di tentativi di imbroglio; Generazione Casuale di Numeri - Monitoraggio in Tempo Reale - Analisi continua del gameplay; Segnalazione della Community - Applicazione della correttezza da parte dei giocatori; Audit di Terze Parti - Verifica indipendente della correttezza del gioco."
+          },
+          {
+            "id": "personal-financial-security",
+            "question": "Le mie informazioni personali sono al sicuro?",
+            "answer": "Sicurezza di Livello Aziendale: Crittografia di Livello Militare - Tutti i dati crittografati ai massimi livelli; Conformità GDPR - Conformità completa alla protezione dei dati europea; Audit Regolari - Valutazioni complete della sicurezza da parte di terzi; Monitoraggio 24/7 - Monitoraggio continuo delle minacce alla sicurezza."
+          },
+          {
+            "id": "suspect-cheating",
+            "question": "Cosa succede se sospetto un imbroglio?",
+            "answer": "Processo di Segnalazione: 1. Segnalazione in Gioco - Utilizza gli strumenti di segnalazione integrati; 2. Indagine Automatica - I nostri sistemi IA analizzano il comportamento segnalato; 3. Revisione Umana - Casi complessi esaminati da moderatori umani; 4. Azione Intrapresa - Sanzioni appropriate applicate alle violazioni confermate; 5. Feedback - Aggiornamenti forniti sugli esiti delle indagini."
+          }
+        ]
+      },
+      {
+        "id": "technical-support",
+        "title": "Supporto Tecnico",
+        "questions": [
+          {
+            "id": "supported-platforms",
+            "question": "Quali piattaforme sono supportate?",
+            "answer": "Disponibilità Multi-Piattaforma: iOS - App native per iPhone e iPad; Android - App native per smartphone e tablet Android; Web - Accesso tramite browser su desktop e mobile; Motore Unity - Esperienza coerente su tutte le piattaforme."
+          },
+          {
+            "id": "technical-issues",
+            "question": "Cosa devo fare in caso di problemi tecnici?",
+            "answer": "Opzioni di Supporto: Supporto Clienti 24/7 - Aiuto sempre disponibile tramite molteplici canali; Aiuto in App - Strumenti di supporto e tutorial integrati; Forum della Community - Assistenza dalla community dei giocatori; Tutorial Video - Guide passo-passo per tutte le funzionalità; Supporto via Email - Team di supporto tecnico dedicato."
+          },
+          {
+            "id": "recover-account",
+            "question": "Come recupero il mio account se perdo l'accesso?",
+            "answer": "Recupero Account: 1. Contatta il Supporto - Raggiungici tramite i nostri canali di supporto; 2. Verifica dell'Identità - Fornisci le informazioni di verifica dell'account; 3. Controllo di Sicurezza - Completa il processo di verifica di sicurezza; 4. Ripristino dell'Account - Ripristino sicuro dell'accesso; 5. Revisione della Sicurezza - Valutazione di sicurezza opzionale per prevenire problemi futuri."
+          }
+        ]
+      },
+      {
+        "id": "community-social",
+        "title": "Community e Funzionalità Social",
+        "questions": [
+          {
+            "id": "friend-systems",
+            "question": "Come funzionano i sistemi di amicizia?",
+            "answer": "Funzionalità di Gioco Sociale: Inviti Amici - Invia e accetta richieste di amicizia; Tavoli Privati - Ospita partite esclusive con la tua rete; Chat Sociale - Comunicazione in tempo reale durante il gioco; Eventi della Community - Partecipa a tornei e competizioni di gruppo."
+          },
+          {
+            "id": "private-tournaments",
+            "question": "Posso creare tornei privati?",
+            "answer": "Sì! Puoi: Ospitare Eventi Privati - Crea tornei per il tuo gruppo di amici; Regole Personalizzate - Imposta le tue quote d'iscrizione e struttura del torneo; Gioco Sociale - Invita giocatori specifici a partecipare; Gestione del Gruppo - Gestisci la tua community di gioco privata."
+          },
+          {
+            "id": "community-guidelines",
+            "question": "Ci sono linee guida per la community?",
+            "answer": "Standard della Community: Comportamento Rispettoso - Tratta tutti i giocatori con cortesia; Fair Play - Niente imbrogli, collusione o comportamenti antisportivi; Comunicazione Appropriata - Mantieni la chat amichevole e appropriata; Segnala Problemi - Aiuta a mantenere gli standard della community segnalando problemi."
+          }
+        ]
+      },
+      {
+        "id": "partnership-business",
+        "title": "Partnership e Business",
+        "questions": [
+          {
+            "id": "partnership-opportunities",
+            "question": "Ci sono opportunità di partnership?",
+            "answer": "Cerchiamo attivamente partnership strategiche in: Piattaforme di Gioco - Opportunità di integrazione e cross-promotion; Creatori di Contenuti - Collaborazioni con influencer e streamer; Fornitori di Tecnologia - Partnership di infrastrutture e servizi. Contatti: Per richieste di partnership, contattaci tramite i nostri canali di sviluppo aziendale."
+          },
+          {
+            "id": "stay-updated",
+            "question": "Come posso rimanere aggiornato sugli sviluppi?",
+            "answer": "Rimani Connesso: Sito Web Ufficiale - Aggiornamenti e annunci regolari; Social Media - Segui i nostri canali social ufficiali; Discord della Community - Unisciti alla nostra community attiva; Newsletter - Iscriviti per aggiornamenti sullo sviluppo; Comunicati Stampa - Annunci ufficiali dell'azienda."
+          }
+        ]
+      }
+    ]
+  }
 }

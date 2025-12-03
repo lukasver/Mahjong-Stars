@@ -50,7 +50,7 @@ const meta: MetaRecord = {
     type: 'separator',
   },
   contact: {
-    title: 'Contate-nos',
+    title: 'Entre em Contato',
     href: applyUTM('/web/contact', {
       source: 'docs',
       medium: 'sidebar',
@@ -59,7 +59,7 @@ const meta: MetaRecord = {
     }),
   },
   subscribe: {
-    title: 'Inscreva-se',
+    title: 'Assinar',
     href: applyUTM('/web/#newsletter', {
       source: 'docs',
       medium: 'sidebar',

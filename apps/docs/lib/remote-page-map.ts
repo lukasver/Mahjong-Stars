@@ -21,7 +21,7 @@ const getRemotePageMap = async () => {
 
 	// Get only english filepath
 	const files = await getRemoteFilePaths(
-		"mahjongstars/docs/contents/test/en?ref=main",
+		"thetilescompany/docs/contents/test/en?ref=main",
 	);
 
 	const filePaths = files
@@ -71,7 +71,7 @@ const generateRemotePageMap = async () => {
 
 const generateRemoteLocales = async () => {
 	const files = await getRemoteFilePaths(
-		"mahjongstars/docs/contents/test?ref=main",
+		"thetilescompany/docs/contents/test?ref=main",
 	);
 
 	const fileNames = files

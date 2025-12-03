@@ -123,7 +123,7 @@ export class Translator {
 					content.push({
 						type: "file",
 						data: file,
-						mediaType: mimeType || `text/plain`,
+						mediaType: `text/plain`,
 					});
 				}
 			}
