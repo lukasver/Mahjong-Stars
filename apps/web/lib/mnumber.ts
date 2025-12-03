@@ -8,5 +8,7 @@ export function getMNumber(date: Date = new Date()): 1 | 2 | 3 {
 	// Get number 1-3 based on week number
 	const weekMod = (weekNumber % 3) + 1;
 
-	return weekMod as 1 | 2 | 3;
+	// TODO: temporary until assets are fixed
+	return 1;
+	weekMod as 1 | 2 | 3;
 }
