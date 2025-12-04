@@ -12,8 +12,9 @@ export const Navbar = async ({ lang }: { lang: Locale }) => {
 	return (
 		<NavbarComponent
 			className="bg-primary dark:bg-primary"
-			projectLink='https://github.com/the-tiles-company/docs'
+			// projectLink='https://github.com/mahjongstars/docs'
 			logo={<Logo />}
+
 		// chatIcon={<Icons.discord className='w-5 h-5' />}
 		// projectIcon={<Icons.boxes className='w-5 h-5' />}
 		// ... Your additional navbar options
