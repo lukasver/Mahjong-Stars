@@ -43,7 +43,7 @@
 		"contentlayer2": "0.5.7",
 		"date-fns": "^3.6.0",
 		"esbuild": "^0.25.3",
-		"framer-motion": "^12.12.1",
+		"framer-motion": "12.12.1",
 		"github-slugger": "^2.0.0",
 		"image-size": "^2.0.2",
 		"js-yaml": "^4.1.0",
