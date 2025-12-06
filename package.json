@@ -18,8 +18,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",
 		"@types/mdx": "^2.0.13",
-		"turbo": "^2.5.3",
-		"typescript": "^5.8.3"
+		"turbo": "^2.6.3",
+		"typescript": "5.8.3"
 	},
 	"pnpm": {
 		"overrides": {
