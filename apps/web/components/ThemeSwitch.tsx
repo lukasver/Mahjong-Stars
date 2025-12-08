@@ -1,9 +1,9 @@
 "use client";
 
-import { useThemeSwitch } from "@/components/useThemeSwitch";
-import { motion } from "framer-motion";
 import { MoonIcon, SunIcon } from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useThemeSwitch } from "@/components/useThemeSwitch";
 
 const ThemeSwitch = () => {
 	const [mounted, setMounted] = useState(false);

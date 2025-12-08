@@ -2,6 +2,7 @@
 
 import {
   AnimatePresence,
+  Easing,
   motion,
   type UseInViewOptions,
   useInView,
@@ -47,7 +48,7 @@ export function FadeAnimation({
   delay?: number;
   className?: string;
   duration?: number;
-  ease?: string;
+  ease?: Easing | Easing[] | undefined;
   scale?: boolean;
 }) {
   return (
@@ -120,11 +121,13 @@ export function RevealAnimation({
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
-      animate={isVisible ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
+      animate={
+        isVisible ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }
+      }
       transition={{
         duration,
         ease: [0.4, 0, 0.2, 1],
-        opacity: { duration: duration * 0.75 }
+        opacity: { duration: duration * 0.75 },
       }}
       className={`overflow-hidden ${className || ""}`}
     >
@@ -135,7 +138,7 @@ export function RevealAnimation({
           transition={{
             delay: staggerDelay,
             duration: duration * 0.75,
-            ease: [0.4, 0, 0.2, 1]
+            ease: [0.4, 0, 0.2, 1],
           }}
         >
           {children}
@@ -161,11 +164,13 @@ export function StaggeredRevealAnimation({
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
-      animate={isVisible ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
+      animate={
+        isVisible ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }
+      }
       transition={{
         duration,
         ease: [0.4, 0, 0.2, 1],
-        opacity: { duration: duration * 0.75 }
+        opacity: { duration: duration * 0.75 },
       }}
       className={`overflow-hidden ${className || ""}`}
     >
@@ -176,7 +181,7 @@ export function StaggeredRevealAnimation({
           transition={{
             delay: staggerDelay,
             duration: duration * 0.75,
-            ease: [0.4, 0, 0.2, 1]
+            ease: [0.4, 0, 0.2, 1],
           }}
         >
           {children}
@@ -204,7 +209,7 @@ export function AnimatedIcon({
       transition={{
         delay,
         duration,
-        ease: [0.34, 1.56, 0.64, 1]
+        ease: [0.34, 1.56, 0.64, 1],
       }}
       className={className}
     >
@@ -231,7 +236,7 @@ export function AnimatedText({
       transition={{
         delay,
         duration,
-        ease: [0.4, 0, 0.2, 1]
+        ease: [0.4, 0, 0.2, 1],
       }}
       className={className}
     >

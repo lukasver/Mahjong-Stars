@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@mjs/ui/lib/utils';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useVideoPlayer } from '../use-video-player';
 import SpeechBubble from './speech-bubble';

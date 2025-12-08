@@ -3,7 +3,7 @@
 // import { siteConfig } from "@/config/site"
 // import { Icons } from "@/components/icons"
 import { cn } from "@mjs/ui/lib/utils";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 function VideoBackground({

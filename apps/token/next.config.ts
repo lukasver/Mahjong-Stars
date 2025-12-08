@@ -109,10 +109,10 @@ const config: NextConfig = () => {
 			// Automatically remove console.* other than 'error' & 'info' in production,
 			...(process.env.NODE_ENV !== "development" &&
 				!!process.env.VERCEL && {
-					removeConsole: {
-						exclude: ["error", "info", "debug", "warn"],
-					},
-				}),
+				removeConsole: {
+					exclude: ["error", "info", "debug", "warn"],
+				},
+			}),
 		},
 		logging: {
 			fetches: {
