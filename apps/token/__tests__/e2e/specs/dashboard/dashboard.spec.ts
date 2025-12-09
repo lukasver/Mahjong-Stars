@@ -69,6 +69,7 @@ test.describe("Dashboard", () => {
 
 		// Get normalized page structure (tags, roles, hierarchy)
 		// This captures the structure without dynamic content (dates, amounts, addresses)
+		// text nodes are removed and we only check for the nodes structure
 		const structure = await getNormalizedPageStructure(page, "main");
 
 		// Convert to JSON string for snapshot comparison

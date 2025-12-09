@@ -166,6 +166,11 @@ export const UserTransactionNotification = ({
 
           <Section style={styles.nextStepsSection}>
             <Heading style={styles.h3}>What Happens Next?</Heading>
+            {paymentMethod === 'TRANSFER' && (
+              <Text style={styles.listItem}>
+                • Once your bank transfer is confirmed and amount is verified, your transaction will be marked as elegible for token distribution.
+              </Text>
+            )}
             <Text style={styles.listItem}>
               • You'll receive updates on token distribution timeline
             </Text>

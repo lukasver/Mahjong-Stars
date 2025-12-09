@@ -38,44 +38,7 @@ export async function getNormalizedPageStructure(
 				normalized.testId = testId;
 			}
 
-			// Get aria-label if available (normalized)
-			const ariaLabel = element.getAttribute("aria-label");
-			if (ariaLabel) {
-				// Normalize dynamic content
-				const normalizedLabel = ariaLabel
-					.replace(/0x[a-fA-F0-9]{4,}/g, "0x...")
-					.replace(
-						/\d+\s+(day|days|hour|hours|minute|minutes)\s+ago/g,
-						"X time ago",
-					)
-					.replace(/\$[\d,]+/g, "$X")
-					.replace(/[\d,]+ TILE/g, "X TILE")
-					.replace(/[\d,]+%/g, "X%")
-					.replace(/[\d,]+ BNB/g, "X BNB");
-				normalized.ariaLabel = normalizedLabel;
-			}
-
-			// Get text content (normalized) if element has direct text
-			const textContent =
-				element.childNodes[0]?.nodeType === Node.TEXT_NODE
-					? element.childNodes[0].textContent?.trim()
-					: null;
-			if (textContent && textContent.length > 0 && textContent.length < 100) {
-				// Only include short text nodes, normalize dynamic content
-				const normalizedText = textContent
-					.replace(/0x[a-fA-F0-9]{4,}/g, "0x...")
-					.replace(
-						/\d+\s+(day|days|hour|hours|minute|minutes)\s+ago/g,
-						"X time ago",
-					)
-					.replace(/\$[\d,]+/g, "$X")
-					.replace(/[\d,]+ TILE/g, "X TILE")
-					.replace(/[\d,]+%/g, "X%")
-					.replace(/[\d,]+ BNB/g, "X BNB");
-				normalized.text = normalizedText;
-			}
-
-			// Recursively process children
+			// Recursively process children (only element children, not text nodes)
 			const children = Array.from(element.children);
 			if (children.length > 0) {
 				normalized.children = children.map(normalize).filter(Boolean);
@@ -84,7 +47,31 @@ export async function getNormalizedPageStructure(
 			return normalized;
 		};
 
-		return normalize(root);
+		// Remove all "text" keys from the structure recursively
+		const removeTextKeys = (obj: unknown): unknown => {
+			if (obj === null || typeof obj !== "object") {
+				return obj;
+			}
+
+			if (Array.isArray(obj)) {
+				return obj.map(removeTextKeys);
+			}
+
+			const cleaned: Record<string, unknown> = {};
+			for (const [key, value] of Object.entries(obj)) {
+				// Skip "text" keys
+				if (key === "text") {
+					continue;
+				}
+				// Recursively clean nested objects
+				cleaned[key] = removeTextKeys(value);
+			}
+
+			return cleaned;
+		};
+
+		const normalizedStructure = normalize(root);
+		return removeTextKeys(normalizedStructure);
 	}, rootSelector);
 
 	return structure;

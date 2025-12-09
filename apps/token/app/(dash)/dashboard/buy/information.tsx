@@ -127,17 +127,18 @@ const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
     <div className="sm:mt-4">
       <Accordion
         type="multiple"
+        data-testid="information-accordion"
         className="w-full"
         defaultValue={
           information[0]?.label ? [information[0]?.label] : undefined
         }
       >
-        {information?.map((key) => {
+        {information?.map((key, index) => {
           if (key.type === "file") {
             return null;
           }
           return (
-            <AccordionItem value={key.label} key={key.label}>
+            <AccordionItem value={key.label} key={key.label} data-testid={`information-accordion-item-${index}`}>
               <AccordionTrigger className={"text-secondary"}>
                 {key.label}
               </AccordionTrigger>
@@ -172,7 +173,7 @@ const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
   );
 
   return (
-    <div className="space-y-3 min-h-[185px]">
+    <div className="space-y-3 min-h-[185px]" data-testid="documents-tab-content">
       {docs.map((document, index) => (
         <a
           href={document.url}
@@ -238,7 +239,7 @@ const GalleryTab = ({ sale }: { sale: SaleWithToken }) => {
     );
 
   return (
-    <div className="max-w-lg mx-auto min-h-[185px]">
+    <div className="max-w-lg mx-auto min-h-[185px]" data-testid="gallery-tab-content">
       <ImagesSection
         images={docs.images.map((image) => ({
           src: getBucketUrl(image.url),
