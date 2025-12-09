@@ -396,10 +396,11 @@ class TransactionsController {
 					kycTier =
 						result.result === "FAILURE"
 							? // Default tier to apply if failed to check KYC
-								KycTierSchema.enum.ENHANCED
+							KycTierSchema.enum.ENHANCED
 							: result.result;
 				}
 			}
+
 
 			return Success({
 				transaction: decimalsToString(tx) as TransactionByIdWithRelations,

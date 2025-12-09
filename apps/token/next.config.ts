@@ -16,7 +16,7 @@ const CRYPTO_NODES = {
 const CRYPTO_NODES_CSP = Object.values(CRYPTO_NODES).join(" ");
 const WALLETS_CSP = `wss://*.walletconnect.org wss://*.walletconnect.com https://*.walletconnect.org https://*.walletconnect.com https://*.thirdweb.com`;
 const EXTERNAL_PROVIDERS = `min-api.cryptocompare.com`;
-const ANALYTICS_PROVIDERS = `eu.posthog.com`;
+const ANALYTICS_PROVIDERS = `https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.posthog.com`;
 const GOOGLE_CSP = `https://fonts.googleapis.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha https://www.google.com/recaptcha/enterprise.js https://www.gstatic.com/recaptcha/releases/`;
 const STORAGE_CSP = `https://storage.googleapis.com`;
 const VERCEL_LIVE_CSP = `https://vercel.live`;
@@ -157,6 +157,20 @@ const config: NextConfig = () => {
 			};
 			return config;
 		},
+		async rewrites() {
+			return [
+				{
+					source: '/ingest/static/:path*',
+					destination: 'https://eu-assets.i.posthog.com/static/:path*',
+				},
+				{
+					source: '/ingest/:path*',
+					destination: 'https://eu.i.posthog.com/:path*',
+				},
+			]
+		},
+		skipTrailingSlashRedirect: true,
+
 	} as NextConfig);
 };
 

@@ -74,8 +74,6 @@ export default async function TransactionConfiramationPage({
     queryFn: () => getTransactionById({ id: p.tx }),
   });
 
-  console.log("🚀 ~ page.tsx:77 ~ tx:", tx);
-
 
   if (!tx?.data) {
     notFound();
