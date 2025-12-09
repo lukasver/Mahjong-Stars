@@ -31,7 +31,8 @@
 		"next-env.d.ts",
 		"next.config.ts",
 		".next/types/**/*.ts",
-		"reset.d.ts"
+		"reset.d.ts",
+		"common/types/prisma-decimal.d.ts"
 	],
 	"exclude": ["node_modules"]
 }

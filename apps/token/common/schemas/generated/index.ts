@@ -1,5 +1,6 @@
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
+import { z } from 'zod';
+import { Prisma } from '@prisma/client';
+import Decimal from 'decimal.js';
 
 /////////////////////////////////////////
 // HELPER FUNCTIONS
@@ -8,17 +9,11 @@ import { z } from "zod";
 // JSON
 //------------------------------------------------------
 
-export type NullableJsonInput =
-  | Prisma.JsonValue
-  | null
-  | "JsonNull"
-  | "DbNull"
-  | Prisma.NullTypes.DbNull
-  | Prisma.NullTypes.JsonNull;
+export type NullableJsonInput = Prisma.JsonValue | null | 'JsonNull' | 'DbNull' | Prisma.NullTypes.DbNull | Prisma.NullTypes.JsonNull;
 
 export const transformJsonNull = (v?: NullableJsonInput) => {
-  if (!v || v === "DbNull") return Prisma.NullTypes.DbNull;
-  if (v === "JsonNull") return Prisma.NullTypes.JsonNull;
+  if (!v || v === 'DbNull') return Prisma.NullTypes.DbNull;
+  if (v === 'JsonNull') return Prisma.NullTypes.JsonNull;
   return v;
 };
 
@@ -28,36 +23,29 @@ export const JsonValueSchema: z.ZodType<Prisma.JsonValue> = z.lazy(() =>
     z.number(),
     z.boolean(),
     z.literal(null),
-    z.record(
-      z.string(),
-      z.lazy(() => JsonValueSchema.optional()),
-    ),
+    z.record(z.string(), z.lazy(() => JsonValueSchema.optional())),
     z.array(z.lazy(() => JsonValueSchema)),
-  ]),
+  ])
 );
 
 export type JsonValueType = z.infer<typeof JsonValueSchema>;
 
 export const NullableJsonValue = z
-  .union([JsonValueSchema, z.literal("DbNull"), z.literal("JsonNull")])
+  .union([JsonValueSchema, z.literal('DbNull'), z.literal('JsonNull')])
   .nullable()
   .transform((v) => transformJsonNull(v));
 
 export type NullableJsonValueType = z.infer<typeof NullableJsonValue>;
 
-export const InputJsonValueSchema: z.ZodType<Prisma.InputJsonValue> = z.lazy(
-  () =>
-    z.union([
-      z.string(),
-      z.number(),
-      z.boolean(),
-      z.object({ toJSON: z.any() }),
-      z.record(
-        z.string(),
-        z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)])),
-      ),
-      z.array(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
-    ]),
+export const InputJsonValueSchema: z.ZodType<Prisma.InputJsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.object({ toJSON: z.any() }),
+    z.record(z.string(), z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
+    z.array(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
+  ])
 );
 
 export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
@@ -65,488 +53,132 @@ export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
 // DECIMAL
 //------------------------------------------------------
 
-// @ts-expect-error toFixed is not defined in the Prisma.DecimalJsLike type
 export const DecimalJsLikeSchema: z.ZodType<Prisma.DecimalJsLike> = z.object({
   d: z.array(z.number()),
   e: z.number(),
   s: z.number(),
   toFixed: z.any(),
-});
+})
 
-export const DECIMAL_STRING_REGEX =
-  /^(?:-?Infinity|NaN|-?(?:0[bB][01]+(?:\.[01]+)?(?:[pP][-+]?\d+)?|0[oO][0-7]+(?:\.[0-7]+)?(?:[pP][-+]?\d+)?|0[xX][\da-fA-F]+(?:\.[\da-fA-F]+)?(?:[pP][-+]?\d+)?|(?:\d+|\d*\.\d+)(?:[eE][-+]?\d+)?))$/;
+export const DECIMAL_STRING_REGEX = /^(?:-?Infinity|NaN|-?(?:0[bB][01]+(?:\.[01]+)?(?:[pP][-+]?\d+)?|0[oO][0-7]+(?:\.[0-7]+)?(?:[pP][-+]?\d+)?|0[xX][\da-fA-F]+(?:\.[\da-fA-F]+)?(?:[pP][-+]?\d+)?|(?:\d+|\d*\.\d+)(?:[eE][-+]?\d+)?))$/;
 
-export const isValidDecimalInput = (
-  v?: null | string | number | Prisma.DecimalJsLike,
-): v is string | number | Prisma.DecimalJsLike => {
-  if (v === undefined || v === null) return false;
-  return (
-    (typeof v === "object" &&
-      "d" in v &&
-      "e" in v &&
-      "s" in v &&
-      "toFixed" in v) ||
-    (typeof v === "string" && DECIMAL_STRING_REGEX.test(v)) ||
-    typeof v === "number"
-  );
-};
+export const isValidDecimalInput =
+  (v?: null | string | number | Prisma.DecimalJsLike): v is string | number | Prisma.DecimalJsLike => {
+    if (v === undefined || v === null) return false;
+    return (
+      (typeof v === 'object' && 'd' in v && 'e' in v && 's' in v && 'toFixed' in v) ||
+      (typeof v === 'string' && DECIMAL_STRING_REGEX.test(v)) ||
+      typeof v === 'number'
+    )
+  };
 
 /////////////////////////////////////////
 // ENUMS
 /////////////////////////////////////////
 
-export const TransactionIsolationLevelSchema = z.enum([
-  "ReadUncommitted",
-  "ReadCommitted",
-  "RepeatableRead",
-  "Serializable",
-]);
+export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCommitted','RepeatableRead','Serializable']);
 
-export const UserScalarFieldEnumSchema = z.enum([
-  "id",
-  "externalId",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "name",
-  "walletAddress",
-  "email",
-  "emailVerified",
-  "image",
-  "isSiwe",
-]);
+export const UserScalarFieldEnumSchema = z.enum(['id','externalId','createdAt','updatedAt','deletedAt','name','walletAddress','email','emailVerified','image','isSiwe']);
 
-export const EmailVerificationScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "expiredAt",
-  "email",
-  "token",
-  "userId",
-]);
+export const EmailVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','expiredAt','email','token','userId']);
 
-export const SessionScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "expiresAt",
-  "token",
-  "ipAddress",
-  "userAgent",
-  "userId",
-]);
+export const SessionScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','expiresAt','token','ipAddress','userAgent','userId']);
 
-export const VerificationScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "expiresAt",
-  "identifier",
-  "value",
-]);
+export const VerificationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','expiresAt','identifier','value']);
 
-export const ProfileScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "firstName",
-  "lastName",
-  "userId",
-  "phoneNumber",
-  "dateOfBirth",
-]);
+export const ProfileScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','firstName','lastName','userId','phoneNumber','dateOfBirth']);
 
-export const AddressScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "userId",
-  "city",
-  "zipCode",
-  "country",
-  "state",
-  "street",
-  "formattedAddress",
-  "latitude",
-  "longitude",
-]);
+export const AddressScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','city','zipCode','country','state','street','formattedAddress','latitude','longitude']);
 
-export const SaleScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "name",
-  "catchPhrase",
-  "bannerId",
-  "status",
-  "currency",
-  "initialTokenQuantity",
-  "availableTokenQuantity",
-  "maximumTokenBuyPerUser",
-  "minimumTokenBuyPerUser",
-  "saleStartDate",
-  "tokenContractAddress",
-  "tokenContractChainId",
-  "tokenId",
-  "tokenName",
-  "tokenSymbol",
-  "tokenTotalSupply",
-  "tokenPricePerUnit",
-  "comparisonPricePerUnit",
-  "toWalletsAddress",
-  "saleClosingDate",
-  "createdBy",
-  "saftCheckbox",
-  "requiresKYC",
-  "information",
-]);
+export const SaleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','catchPhrase','bannerId','status','currency','initialTokenQuantity','availableTokenQuantity','maximumTokenBuyPerUser','minimumTokenBuyPerUser','saleStartDate','tokenContractAddress','tokenContractChainId','tokenId','tokenName','tokenSymbol','tokenTotalSupply','tokenPricePerUnit','comparisonPricePerUnit','toWalletsAddress','saleClosingDate','createdBy','saftCheckbox','requiresKYC','information']);
 
-export const SaftContractScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "name",
-  "description",
-  "url",
-  "content",
-  "variables",
-  "approverId",
-  "version",
-  "parentId",
-  "isCurrent",
-  "saleId",
-]);
+export const SaftContractScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description','url','content','variables','approverId','version','parentId','isCurrent','saleId']);
 
-export const DocumentRecipientScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "fullname",
-  "email",
-  "role",
-  "status",
-  "signatureUrl",
-  "externalId",
-  "storageKey",
-  "address",
-  "saftContractId",
-]);
+export const DocumentRecipientScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','fullname','email','role','status','signatureUrl','externalId','storageKey','address','saftContractId']);
 
-export const DocumentScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "name",
-  "fileName",
-  "url",
-  "type",
-  "userId",
-  "saleId",
-  "kycVerificationId",
-]);
+export const DocumentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','fileName','url','type','userId','saleId','kycVerificationId']);
 
-export const VestingScheduleScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "saleId",
-  "name",
-  "cliffPeriod",
-  "vestingPeriod",
-  "releaseFrequency",
-  "initialRelease",
-  "isEnabled",
-]);
+export const VestingScheduleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','saleId','name','cliffPeriod','vestingPeriod','releaseFrequency','initialRelease','isEnabled']);
 
-export const TokenDistributionScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "transactionId",
-  "amount",
-  "distributionDate",
-  "txHash",
-  "status",
-]);
+export const TokenDistributionScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','amount','distributionDate','txHash','status']);
 
-export const SaleTransactionsScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "tokenSymbol",
-  "quantity",
-  "price",
-  "totalAmount",
-  "totalAmountCurrency",
-  "formOfPayment",
-  "receivingWallet",
-  "status",
-  "userId",
-  "saleId",
-  "comment",
-  "amountPaid",
-  "paidCurrency",
-  "txHash",
-  "blockchainId",
-  "agreementId",
-  "approvedBy",
-  "rejectionReason",
-  "paymentEvidenceId",
-  "paymentDate",
-  "metadata",
-]);
+export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','price','totalAmount','totalAmountCurrency','formOfPayment','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidenceId','paymentDate','metadata']);
 
-export const BlockchainScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "name",
-  "chainId",
-  "rpcUrl",
-  "explorerUrl",
-  "isTestnet",
-  "isEnabled",
-]);
+export const BlockchainScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','chainId','rpcUrl','explorerUrl','isTestnet','isEnabled']);
 
-export const ContractStatusScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "userId",
-  "saleId",
-  "contractId",
-  "status",
-]);
+export const ContractStatusScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','saleId','contractId','status']);
 
-export const AuditTrailScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "transactionId",
-  "actionType",
-  "performerAddress",
-  "content",
-  "comment",
-]);
+export const AuditTrailScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','actionType','performerAddress','content','comment']);
 
-export const KycVerificationScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "userId",
-  "status",
-  "verifiedAt",
-  "rejectionReason",
-  "version",
-  "questionnaire",
-  "tier",
-]);
+export const KycVerificationScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','userId','status','verifiedAt','rejectionReason','version','questionnaire','tier']);
 
-export const RoleScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "name",
-  "description",
-]);
+export const RoleScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','description']);
 
-export const BankDetailsScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "bankName",
-  "accountName",
-  "iban",
-  "swift",
-  "address",
-  "memo",
-  "currencyId",
-]);
+export const BankDetailsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','bankName','accountName','iban','swift','address','memo','currencyId']);
 
-export const UserRoleScalarFieldEnumSchema = z.enum([
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "userId",
-  "roleId",
-]);
+export const UserRoleScalarFieldEnumSchema = z.enum(['createdAt','updatedAt','deletedAt','userId','roleId']);
 
-export const TokenScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "symbol",
-  "totalSupply",
-  "image",
-]);
+export const TokenScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','symbol','totalSupply','image']);
 
-export const TokensOnBlockchainsScalarFieldEnumSchema = z.enum([
-  "id",
-  "tokenId",
-  "tokenSymbol",
-  "chainId",
-  "name",
-  "isNative",
-  "decimals",
-  "contractAddress",
-]);
+export const TokensOnBlockchainsScalarFieldEnumSchema = z.enum(['id','tokenId','tokenSymbol','chainId','name','isNative','decimals','contractAddress']);
 
-export const CurrencyScalarFieldEnumSchema = z.enum([
-  "id",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "name",
-  "symbol",
-  "type",
-  "image",
-]);
+export const CurrencyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','symbol','type','image']);
 
-export const ExchangeRatesScalarFieldEnumSchema = z.enum([
-  "id",
-  "fromCurrency",
-  "toCurrency",
-  "rate",
-  "createdAt",
-  "updatedAt",
-]);
+export const ExchangeRatesScalarFieldEnumSchema = z.enum(['id','fromCurrency','toCurrency','rate','createdAt','updatedAt']);
 
-export const SortOrderSchema = z.enum(["asc", "desc"]);
+export const SortOrderSchema = z.enum(['asc','desc']);
 
-export const NullableJsonNullValueInputSchema = z
-  .enum(["DbNull", "JsonNull"])
-  .transform((value) =>
-    value === "JsonNull"
-      ? Prisma.JsonNull
-      : value === "DbNull"
-        ? Prisma.DbNull
-        : value,
-  );
+export const NullableJsonNullValueInputSchema = z.enum(['DbNull','JsonNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value);
 
-export const QueryModeSchema = z.enum(["default", "insensitive"]);
+export const QueryModeSchema = z.enum(['default','insensitive']);
 
-export const NullsOrderSchema = z.enum(["first", "last"]);
+export const NullsOrderSchema = z.enum(['first','last']);
 
-export const JsonNullValueFilterSchema = z
-  .enum(["DbNull", "JsonNull", "AnyNull"])
-  .transform((value) =>
-    value === "JsonNull"
-      ? Prisma.JsonNull
-      : value === "DbNull"
-        ? Prisma.DbNull
-        : value === "AnyNull"
-          ? Prisma.AnyNull
-          : value,
-  );
+export const JsonNullValueFilterSchema = z.enum(['DbNull','JsonNull','AnyNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value === 'AnyNull' ? Prisma.AnyNull : value);
 
-export const SignableDocumentRoleSchema = z.enum([
-  "CC",
-  "SIGNER",
-  "VIEWER",
-  "APPROVER",
-]);
+export const SignableDocumentRoleSchema = z.enum(['CC','SIGNER','VIEWER','APPROVER']);
 
-export type SignableDocumentRoleType =
-  `${z.infer<typeof SignableDocumentRoleSchema>}`;
+export type SignableDocumentRoleType = `${z.infer<typeof SignableDocumentRoleSchema>}`
 
-export const DocumentSignatureStatusSchema = z.enum([
-  "CREATED",
-  "SENT_FOR_SIGNATURE",
-  "WAITING_FOR_COUNTERPARTY",
-  "SIGNED",
-  "EXPIRED",
-  "REJECTED",
-  "OPENED",
-  "ERROR",
-]);
+export const DocumentSignatureStatusSchema = z.enum(['CREATED','SENT_FOR_SIGNATURE','WAITING_FOR_COUNTERPARTY','SIGNED','EXPIRED','REJECTED','OPENED','ERROR']);
 
-export type DocumentSignatureStatusType =
-  `${z.infer<typeof DocumentSignatureStatusSchema>}`;
+export type DocumentSignatureStatusType = `${z.infer<typeof DocumentSignatureStatusSchema>}`
 
-export const KycTierSchema = z.enum(["SIMPLIFIED", "STANDARD", "ENHANCED"]);
+export const KycTierSchema = z.enum(['SIMPLIFIED','STANDARD','ENHANCED']);
 
-export type KycTierType = `${z.infer<typeof KycTierSchema>}`;
+export type KycTierType = `${z.infer<typeof KycTierSchema>}`
 
-export const RegistrationStepSchema = z.enum([
-  "REGISTRATION_NEW_ACCOUNT",
-  "REGISTRATION_PERSONAL_DETAIL",
-  "REGISTRATION_DOCUMENT_DETAIL",
-  "REGISTRATION_COMPLETED",
-]);
+export const RegistrationStepSchema = z.enum(['REGISTRATION_NEW_ACCOUNT','REGISTRATION_PERSONAL_DETAIL','REGISTRATION_DOCUMENT_DETAIL','REGISTRATION_COMPLETED']);
 
-export type RegistrationStepType = `${z.infer<typeof RegistrationStepSchema>}`;
+export type RegistrationStepType = `${z.infer<typeof RegistrationStepSchema>}`
 
-export const FOPSchema = z.enum(["CRYPTO", "TRANSFER", "CARD"]);
+export const FOPSchema = z.enum(['CRYPTO','TRANSFER','CARD']);
 
-export type FOPType = `${z.infer<typeof FOPSchema>}`;
+export type FOPType = `${z.infer<typeof FOPSchema>}`
 
-export const SaleStatusSchema = z.enum([
-  "CREATED",
-  "OPEN",
-  "CLOSED",
-  "FINISHED",
-]);
+export const SaleStatusSchema = z.enum(['CREATED','OPEN','CLOSED','FINISHED']);
 
-export type SaleStatusType = `${z.infer<typeof SaleStatusSchema>}`;
+export type SaleStatusType = `${z.infer<typeof SaleStatusSchema>}`
 
-export const CurrencyTypeSchema = z.enum(["CRYPTO", "FIAT"]);
+export const CurrencyTypeSchema = z.enum(['CRYPTO','FIAT']);
 
-export type CurrencyTypeType = `${z.infer<typeof CurrencyTypeSchema>}`;
+export type CurrencyTypeType = `${z.infer<typeof CurrencyTypeSchema>}`
 
-export const TransactionStatusSchema = z.enum([
-  "PENDING",
-  "AWAITING_PAYMENT",
-  "PAYMENT_SUBMITTED",
-  "PAYMENT_VERIFIED",
-  "REJECTED",
-  "CANCELLED",
-  "TOKENS_DISTRIBUTED",
-  "COMPLETED",
-  "REFUNDED",
-]);
+export const TransactionStatusSchema = z.enum(['PENDING','AWAITING_PAYMENT','PAYMENT_SUBMITTED','PAYMENT_VERIFIED','REJECTED','CANCELLED','TOKENS_DISTRIBUTED','COMPLETED','REFUNDED']);
 
-export type TransactionStatusType =
-  `${z.infer<typeof TransactionStatusSchema>}`;
+export type TransactionStatusType = `${z.infer<typeof TransactionStatusSchema>}`
 
-export const ContractSignatureStatusSchema = z.enum(["PENDING", "SIGNED"]);
+export const ContractSignatureStatusSchema = z.enum(['PENDING','SIGNED']);
 
-export type ContractSignatureStatusType =
-  `${z.infer<typeof ContractSignatureStatusSchema>}`;
+export type ContractSignatureStatusType = `${z.infer<typeof ContractSignatureStatusSchema>}`
 
-export const EmailVerificationStatusSchema = z.enum([
-  "VERIFIED",
-  "PENDING",
-  "NOTVERIFIED",
-]);
+export const EmailVerificationStatusSchema = z.enum(['VERIFIED','PENDING','NOTVERIFIED']);
 
-export type EmailVerificationStatusType =
-  `${z.infer<typeof EmailVerificationStatusSchema>}`;
+export type EmailVerificationStatusType = `${z.infer<typeof EmailVerificationStatusSchema>}`
 
-export const KycStatusSchema = z.enum([
-  "NOT_STARTED",
-  "SUBMITTED",
-  "VERIFIED",
-  "REJECTED",
-]);
+export const KycStatusSchema = z.enum(['NOT_STARTED','SUBMITTED','VERIFIED','REJECTED']);
 
-export type KycStatusType = `${z.infer<typeof KycStatusSchema>}`;
+export type KycStatusType = `${z.infer<typeof KycStatusSchema>}`
 
 /////////////////////////////////////////
 // MODELS
@@ -571,9 +203,9 @@ export const UserSchema = z.object({
   emailVerified: z.boolean(),
   image: z.string().nullable(),
   isSiwe: z.boolean().nullable(),
-});
+})
 
-export type User = z.infer<typeof UserSchema>;
+export type User = z.infer<typeof UserSchema>
 
 /////////////////////////////////////////
 // EMAIL VERIFICATION SCHEMA
@@ -587,9 +219,9 @@ export const EmailVerificationSchema = z.object({
   email: z.string(),
   token: z.string(),
   userId: z.string(),
-});
+})
 
-export type EmailVerification = z.infer<typeof EmailVerificationSchema>;
+export type EmailVerification = z.infer<typeof EmailVerificationSchema>
 
 /////////////////////////////////////////
 // SESSION SCHEMA
@@ -604,9 +236,9 @@ export const SessionSchema = z.object({
   ipAddress: z.string().nullable(),
   userAgent: z.string().nullable(),
   userId: z.string(),
-});
+})
 
-export type Session = z.infer<typeof SessionSchema>;
+export type Session = z.infer<typeof SessionSchema>
 
 /////////////////////////////////////////
 // VERIFICATION SCHEMA
@@ -619,9 +251,9 @@ export const VerificationSchema = z.object({
   expiresAt: z.coerce.date(),
   identifier: z.string(),
   value: z.string(),
-});
+})
 
-export type Verification = z.infer<typeof VerificationSchema>;
+export type Verification = z.infer<typeof VerificationSchema>
 
 /////////////////////////////////////////
 // PROFILE SCHEMA
@@ -637,9 +269,9 @@ export const ProfileSchema = z.object({
   userId: z.string(),
   phoneNumber: z.string().nullable(),
   dateOfBirth: z.coerce.date().nullable(),
-});
+})
 
-export type Profile = z.infer<typeof ProfileSchema>;
+export type Profile = z.infer<typeof ProfileSchema>
 
 /////////////////////////////////////////
 // ADDRESS SCHEMA
@@ -659,9 +291,9 @@ export const AddressSchema = z.object({
   formattedAddress: z.string().nullable(),
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
-});
+})
 
-export type Address = z.infer<typeof AddressSchema>;
+export type Address = z.infer<typeof AddressSchema>
 
 /////////////////////////////////////////
 // SALE SCHEMA
@@ -688,19 +320,11 @@ export const SaleSchema = z.object({
   tokenName: z.string(),
   tokenSymbol: z.string(),
   tokenTotalSupply: z.string().nullable(),
-  tokenPricePerUnit: z.instanceof(Prisma.Decimal, {
-    message:
-      "Field 'tokenPricePerUnit' must be a Decimal. Location: ['Models', 'Sale']",
-  }),
+  tokenPricePerUnit: z.instanceof(Prisma.Decimal, { message: "Field 'tokenPricePerUnit' must be a Decimal. Location: ['Models', 'Sale']"}),
   /**
    * Used to compare calculate bonus gains comparing tokenPPU against this value
    */
-  comparisonPricePerUnit: z
-    .instanceof(Prisma.Decimal, {
-      message:
-        "Field 'comparisonPricePerUnit' must be a Decimal. Location: ['Models', 'Sale']",
-    })
-    .nullable(),
+  comparisonPricePerUnit: z.instanceof(Prisma.Decimal, { message: "Field 'comparisonPricePerUnit' must be a Decimal. Location: ['Models', 'Sale']"}).nullable(),
   toWalletsAddress: z.string(),
   saleClosingDate: z.coerce.date(),
   createdBy: z.string(),
@@ -710,9 +334,9 @@ export const SaleSchema = z.object({
    */
   requiresKYC: z.boolean(),
   information: JsonValueSchema.nullable(),
-});
+})
 
-export type Sale = z.infer<typeof SaleSchema>;
+export type Sale = z.infer<typeof SaleSchema>
 
 /////////////////////////////////////////
 // SAFT CONTRACT SCHEMA
@@ -750,9 +374,9 @@ export const SaftContractSchema = z.object({
   parentId: z.string().nullable(),
   isCurrent: z.boolean(),
   saleId: z.string().nullable(),
-});
+})
 
-export type SaftContract = z.infer<typeof SaftContractSchema>;
+export type SaftContract = z.infer<typeof SaftContractSchema>
 
 /////////////////////////////////////////
 // DOCUMENT RECIPIENT SCHEMA
@@ -775,9 +399,9 @@ export const DocumentRecipientSchema = z.object({
   storageKey: z.string().nullable(),
   address: z.string().nullable(),
   saftContractId: z.string().nullable(),
-});
+})
 
-export type DocumentRecipient = z.infer<typeof DocumentRecipientSchema>;
+export type DocumentRecipient = z.infer<typeof DocumentRecipientSchema>
 
 /////////////////////////////////////////
 // DOCUMENT SCHEMA
@@ -798,9 +422,9 @@ export const DocumentSchema = z.object({
   userId: z.string().nullable(),
   saleId: z.string().nullable(),
   kycVerificationId: z.string().nullable(),
-});
+})
 
-export type Document = z.infer<typeof DocumentSchema>;
+export type Document = z.infer<typeof DocumentSchema>
 
 /////////////////////////////////////////
 // VESTING SCHEDULE SCHEMA
@@ -818,9 +442,9 @@ export const VestingScheduleSchema = z.object({
   releaseFrequency: z.number().int(),
   initialRelease: z.number(),
   isEnabled: z.boolean(),
-});
+})
 
-export type VestingSchedule = z.infer<typeof VestingScheduleSchema>;
+export type VestingSchedule = z.infer<typeof VestingScheduleSchema>
 
 /////////////////////////////////////////
 // TOKEN DISTRIBUTION SCHEMA
@@ -836,9 +460,9 @@ export const TokenDistributionSchema = z.object({
   distributionDate: z.coerce.date(),
   txHash: z.string().nullable(),
   status: z.string(),
-});
+})
 
-export type TokenDistribution = z.infer<typeof TokenDistributionSchema>;
+export type TokenDistribution = z.infer<typeof TokenDistributionSchema>
 
 /////////////////////////////////////////
 // SALE TRANSACTIONS SCHEMA
@@ -855,24 +479,15 @@ export const SaleTransactionsSchema = z.object({
   /**
    * Number of tokens purchased in the transaction
    */
-  quantity: z.instanceof(Prisma.Decimal, {
-    message:
-      "Field 'quantity' must be a Decimal. Location: ['Models', 'SaleTransactions']",
-  }),
+  quantity: z.instanceof(Prisma.Decimal, { message: "Field 'quantity' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
   /**
    * Price per unit of the token as Decimal (Optimized for crypto)
    */
-  price: z.instanceof(Prisma.Decimal, {
-    message:
-      "Field 'price' must be a Decimal. Location: ['Models', 'SaleTransactions']",
-  }),
+  price: z.instanceof(Prisma.Decimal, { message: "Field 'price' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
   /**
    * Total amount to be paid by the user (Is derived from the price * quantity)
    */
-  totalAmount: z.instanceof(Prisma.Decimal, {
-    message:
-      "Field 'totalAmount' must be a Decimal. Location: ['Models', 'SaleTransactions']",
-  }),
+  totalAmount: z.instanceof(Prisma.Decimal, { message: "Field 'totalAmount' must be a Decimal. Location: ['Models', 'SaleTransactions']"}),
   /**
    * Currency of the total amount (For historical uses only, to be able to know which currency was used for calculating the total amount)
    */
@@ -897,9 +512,9 @@ export const SaleTransactionsSchema = z.object({
   paymentEvidenceId: z.string().nullable(),
   paymentDate: z.coerce.date().nullable(),
   metadata: JsonValueSchema.nullable(),
-});
+})
 
-export type SaleTransactions = z.infer<typeof SaleTransactionsSchema>;
+export type SaleTransactions = z.infer<typeof SaleTransactionsSchema>
 
 /////////////////////////////////////////
 // BLOCKCHAIN SCHEMA
@@ -916,9 +531,9 @@ export const BlockchainSchema = z.object({
   explorerUrl: z.string().nullable(),
   isTestnet: z.boolean(),
   isEnabled: z.boolean(),
-});
+})
 
-export type Blockchain = z.infer<typeof BlockchainSchema>;
+export type Blockchain = z.infer<typeof BlockchainSchema>
 
 /////////////////////////////////////////
 // CONTRACT STATUS SCHEMA
@@ -933,9 +548,9 @@ export const ContractStatusSchema = z.object({
   userId: z.string(),
   saleId: z.string(),
   contractId: z.string(),
-});
+})
 
-export type ContractStatus = z.infer<typeof ContractStatusSchema>;
+export type ContractStatus = z.infer<typeof ContractStatusSchema>
 
 /////////////////////////////////////////
 // AUDIT TRAIL SCHEMA
@@ -954,9 +569,9 @@ export const AuditTrailSchema = z.object({
   performerAddress: z.string(),
   content: JsonValueSchema.nullable(),
   comment: z.string().nullable(),
-});
+})
 
-export type AuditTrail = z.infer<typeof AuditTrailSchema>;
+export type AuditTrail = z.infer<typeof AuditTrailSchema>
 
 /////////////////////////////////////////
 // KYC VERIFICATION SCHEMA
@@ -974,9 +589,9 @@ export const KycVerificationSchema = z.object({
   rejectionReason: z.string().nullable(),
   version: z.number().int(),
   questionnaire: JsonValueSchema.nullable(),
-});
+})
 
-export type KycVerification = z.infer<typeof KycVerificationSchema>;
+export type KycVerification = z.infer<typeof KycVerificationSchema>
 
 /////////////////////////////////////////
 // ROLE SCHEMA
@@ -989,9 +604,9 @@ export const RoleSchema = z.object({
   deletedAt: z.coerce.date().nullable(),
   name: z.string(),
   description: z.string().nullable(),
-});
+})
 
-export type Role = z.infer<typeof RoleSchema>;
+export type Role = z.infer<typeof RoleSchema>
 
 /////////////////////////////////////////
 // BANK DETAILS SCHEMA
@@ -1009,9 +624,9 @@ export const BankDetailsSchema = z.object({
   address: z.string().nullable(),
   memo: z.string().nullable(),
   currencyId: z.string().nullable(),
-});
+})
 
-export type BankDetails = z.infer<typeof BankDetailsSchema>;
+export type BankDetails = z.infer<typeof BankDetailsSchema>
 
 /////////////////////////////////////////
 // USER ROLE SCHEMA
@@ -1023,9 +638,9 @@ export const UserRoleSchema = z.object({
   deletedAt: z.coerce.date().nullable(),
   userId: z.string(),
   roleId: z.string(),
-});
+})
 
-export type UserRole = z.infer<typeof UserRoleSchema>;
+export type UserRole = z.infer<typeof UserRoleSchema>
 
 /////////////////////////////////////////
 // TOKEN SCHEMA
@@ -1039,9 +654,9 @@ export const TokenSchema = z.object({
   symbol: z.string(),
   totalSupply: z.string().nullable(),
   image: z.string().nullable(),
-});
+})
 
-export type Token = z.infer<typeof TokenSchema>;
+export type Token = z.infer<typeof TokenSchema>
 
 /////////////////////////////////////////
 // TOKENS ON BLOCKCHAINS SCHEMA
@@ -1056,9 +671,9 @@ export const TokensOnBlockchainsSchema = z.object({
   isNative: z.boolean(),
   decimals: z.number().int(),
   contractAddress: z.string().nullable(),
-});
+})
 
-export type TokensOnBlockchains = z.infer<typeof TokensOnBlockchainsSchema>;
+export type TokensOnBlockchains = z.infer<typeof TokensOnBlockchainsSchema>
 
 /////////////////////////////////////////
 // CURRENCY SCHEMA
@@ -1073,9 +688,9 @@ export const CurrencySchema = z.object({
   name: z.string(),
   symbol: z.string(),
   image: z.string().nullable(),
-});
+})
 
-export type Currency = z.infer<typeof CurrencySchema>;
+export type Currency = z.infer<typeof CurrencySchema>
 
 /////////////////////////////////////////
 // EXCHANGE RATES SCHEMA
@@ -1085,12 +700,9 @@ export const ExchangeRatesSchema = z.object({
   id: z.string().cuid(),
   fromCurrency: z.string(),
   toCurrency: z.string(),
-  rate: z.instanceof(Prisma.Decimal, {
-    message:
-      "Field 'rate' must be a Decimal. Location: ['Models', 'ExchangeRates']",
-  }),
+  rate: z.instanceof(Prisma.Decimal, { message: "Field 'rate' must be a Decimal. Location: ['Models', 'ExchangeRates']"}),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-});
+})
 
-export type ExchangeRates = z.infer<typeof ExchangeRatesSchema>;
+export type ExchangeRates = z.infer<typeof ExchangeRatesSchema>
