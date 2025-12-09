@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { metadata as siteConfig } from "@/common/config/site";
+import { CookieConsent } from "@/components/cookie-consent";
 import packageJson from "../package.json";
 import { Providers } from "./providers";
 
@@ -85,6 +86,7 @@ export default async function RootLayout({
               <Toaster />
               {process.env.NODE_ENV === "production" && <VercelAnalytics />}
             </Providers>
+            <CookieConsent />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
