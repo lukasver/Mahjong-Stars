@@ -26,7 +26,7 @@ const metadata = {
 	mastodon: process.env.NEXT_PUBLIC_MASTODON_URL || "",
 	author: "WASABI GAMES DMCC",
 	language: "en",
-	theme: "system",
+	theme: "light",
 	locale: "en",
 };
 

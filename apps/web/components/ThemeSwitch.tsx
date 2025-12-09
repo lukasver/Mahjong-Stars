@@ -20,7 +20,7 @@ const ThemeSwitch = () => {
 			ease: "easeInOut",
 		},
 		exit: { opacity: 0, translateY: -10 },
-	};
+	} as const;
 
 	if (!mounted) {
 		return <div className="w-6 h-6"></div>;

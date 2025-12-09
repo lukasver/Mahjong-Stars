@@ -8,7 +8,7 @@ import {
 } from "@/components/connect-wallet";
 
 //TODO: implement
-const ENABLE_THEME_SWITCHER = true;
+const ENABLE_THEME_SWITCHER = false;
 
 export function DashboardHeader({ children }: { children: React.ReactNode }) {
   return (

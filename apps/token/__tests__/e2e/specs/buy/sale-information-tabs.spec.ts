@@ -19,7 +19,7 @@ import { expect, test } from "@playwright/test";
 import { BuyPage } from "../../pages/buy-page";
 import { TIMEOUTS } from "../../utils/constants";
 
-test.only("TC-BUY-002: Sale Information Tabs", async ({ page }) => {
+test("TC-BUY-002: Sale Information Tabs", async ({ page }) => {
   const buyPage = new BuyPage(page);
   await buyPage.goto();
   await buyPage.waitForBuyPageLoaded();

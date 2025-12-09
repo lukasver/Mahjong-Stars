@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Locator, Page } from "@playwright/test";
 import { ROUTES, TIMEOUTS } from "../utils/constants";
 import { BasePage } from "./base-page";
 
@@ -91,9 +91,20 @@ export class BuyPage extends BasePage {
 
 	/**
 	 * Get all information accordion items
+	 * Scoped to the accordion container for better reliability
 	 */
 	getInformationAccordionItems() {
-		return this.page.locator('[data-testid^="information-accordion-item-"]');
+		return this.page
+			.locator('[data-testid="information-accordion"]')
+			.locator('[data-testid^="information-accordion-item-"]');
+	}
+
+	/**
+	 * Get accordion trigger button for a specific accordion item
+	 * @param accordionItem - The accordion item locator
+	 */
+	getAccordionTrigger(accordionItem: Locator) {
+		return accordionItem.locator('h3 button[role="button"]').first();
 	}
 
 	/**
@@ -135,22 +146,30 @@ export class BuyPage extends BasePage {
 	 * Get Overview section
 	 */
 	getOverviewSection() {
-		return this.page.locator("#overview, section#overview");
+		return this.page.locator("#overview, section#overview").or(
+			this.page.locator('main').locator('[data-testid="overview-card"]').filter({ hasText: /Overview|Tokens available/i })
+		).or(
+			this.page.locator('main').locator('[data-testid="overview-section"]').filter({ hasText: /Overview|Tokens available/i })
+		);
 	}
 
 	/**
 	 * Get Overview card title
 	 */
 	getOverviewTitle() {
-		return this.page.getByRole("heading", { name: "Overview", level: 2 });
+		// Find "Overview" text in main content area, excluding sidebar/nav/buttons
+		// The text appears as a DIV element, not a heading
+		return this.getOverviewSection()
+			.getByText("Overview", { exact: true })
+			.filter({ hasNot: this.page.locator('nav, aside, [role="complementary"], button') })
+			.first();
 	}
 
 	/**
 	 * Get overview row by title
 	 */
 	getOverviewRow(title: string) {
-		return this.page
-			.locator("#overview")
+		return this.getOverviewSection()
 			.getByText(title, { exact: false })
 			.locator("..")
 			.locator("..");
@@ -174,8 +193,8 @@ export class BuyPage extends BasePage {
 	 * Get progress bar
 	 */
 	getProgressBar() {
-		return this.page.locator(
-			"#overview [class*='progress'], #overview [role='progressbar']",
+		return this.getOverviewSection().locator(
+			"[class*='progress'], [role='progressbar']",
 		);
 	}
 

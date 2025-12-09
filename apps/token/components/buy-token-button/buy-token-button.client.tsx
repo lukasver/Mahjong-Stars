@@ -17,7 +17,7 @@ export function BuyTokenButtonClient({ className, symbol }: { className?: string
     >
       <RainbowButton
         className={cn(
-          "font-head px-4 py-2 border-2 shadow-sm border-solid bg-accent rounded-xl h-full hover:bg-accent/80 transition-all duration-300 hover:scale-105 hover:animate-pulse",
+          "font-head px-4 py-2 border-2 shadow-sm border-solid bg-accent rounded-xl h-full hover:bg-accent/80 transition-all duration-300 hover:scale-105 hover:animate-pulse whitespace-nowrap",
           className,
         )}
       >

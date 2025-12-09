@@ -27,7 +27,7 @@ export const OverviewProject = ({ sale }: { sale: SaleWithToken }) => {
   const availableTokenQuantity = sale?.availableTokenQuantity || 0;
   const locale = useLocale();
   return (
-    <Card className={getGlassyCardClassName("w-full shadow-lg rounded-xl p-6")}>
+    <Card className={getGlassyCardClassName("w-full shadow-lg rounded-xl p-6")} data-testid="overview-card">
       <CardHeader className="pb-2 gap-4 p-0 mb-4">
         <CardTitle className="text-secondary">Overview</CardTitle>
         <Separator className="bg-secondary" orientation="horizontal" />

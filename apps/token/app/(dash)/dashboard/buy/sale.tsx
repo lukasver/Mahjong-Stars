@@ -59,7 +59,7 @@ export const TokenSale = () => {
 
 const OverviewFormInvest = ({ sale }: { sale: SaleWithToken }) => {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4" data-testid="overview-section">
       <div className="sm:hidden">
         <BuyTokenButtonClient symbol={sale.tokenSymbol}
           className='w-full'

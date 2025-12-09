@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { fontClash, fontTeachers } from "./fonts";
 import "./styles.css";
 import { Toaster } from "@mjs/ui/primitives/sonner";
@@ -55,6 +55,11 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#4a0000",
+  colorScheme: "light",
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -72,7 +77,7 @@ export default async function RootLayout({
           attribute="class"
           defaultTheme={siteConfig.theme}
           enableColorScheme
-          enableSystem
+          enableSystem={false}
         >
           <NextIntlClientProvider messages={messages}>
             <Providers deploymentId={deploymentId}>

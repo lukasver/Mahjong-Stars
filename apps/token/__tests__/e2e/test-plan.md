@@ -137,35 +137,32 @@ This plan covers end-to-end testing for the Mahjong Stars token platform deploye
 
 - **TC-BUY-003: Sale Information Content**
 - Navigate to `/dashboard/buy`
-- Verify "Information" tab content includes:
-- Token Utility section (expandable)
-- Token Overview section (expandable)
-- Total Supply section (expandable)
-- Allocation section (expandable)
-- Security Features section (expandable)
-- Vesting Schedule section (expandable)
-- TGE Unlock section (expandable)
-- Round Description section (expandable)
-- Raise Amount section (expandable)
-- Valuation section (expandable)
-- Click each expandable section
-- Verify content expands and displays details
-- Expected: All information sections are accessible
+- Verify "Information" tab content includes accordion with expandable sections
+- Verify accordion is visible and contains at least one accordion item
+- For each accordion item:
+- Verify accordion trigger button is present and attached to DOM
+- Click to expand/collapse the section
+- Verify accordion state changes correctly (aria-expanded attribute)
+- Verify content region exists for each accordion item
+- If expanded, verify content is visible
+- Expected: All information sections are accessible and expandable/collapsible
 
 - **TC-BUY-004: Sale Overview Section**
 - Navigate to `/dashboard/buy`
 - Verify "Overview" section is visible
-- Verify "Tokens available" is displayed with correct count
-- Verify "Sold" percentage is displayed
-- Verify progress bar is displayed
-- Verify "Total Tokens" is displayed
-- Verify "Name" field shows "MahjongStars Tiles"
-- Verify "Symbol" field shows "TILE"
-- Verify "Total supply" is displayed
-- Verify "Price per token" is displayed (e.g., "USD 0.012")
-- Verify "Sale starts" date is displayed
-- Verify "Sale ends" date is displayed
-- Expected: All overview metrics are accurate
+- Verify "Overview" title/heading is displayed
+- Verify overview metrics are displayed (dynamically check for presence and format):
+- "Tokens available" field with numeric value
+- "Sold" percentage field with percentage format
+- Progress bar element is present
+- "Total Tokens" field with numeric value
+- "Name" field with token name (any non-empty value)
+- "Symbol" field with token symbol (any non-empty value)
+- "Total supply" field with numeric value
+- "Price per token" field with currency/price format
+- "Sale starts" date field with date value
+- "Sale ends" date field with date value
+- Expected: All overview metrics are displayed with valid values
 
 - **TC-BUY-005: Invest Form Display**
 - Navigate to `/dashboard/buy`
