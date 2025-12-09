@@ -154,7 +154,6 @@ const pageBreak = PageBreak.configure({
 });
 
 export const defaultExtensions: AnyExtension[] = [
-	// @ts-expect-error - TODO: fix this
 	starterKit,
 	textAlign,
 	hardBreak,
