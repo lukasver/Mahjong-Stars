@@ -102,9 +102,9 @@ export const env = createEnv({
 		NEXT_PUBLIC_CLEAR_STORAGE_ON_DEPLOYMENT:
 			process.env.NEXT_PUBLIC_CLEAR_STORAGE_ON_DEPLOYMENT,
 		NEXT_PUBLIC_DEPLOYMENT_ID: process.env.NEXT_PUBLIC_DEPLOYMENT_ID,
-		IS_PRODUCTION: process.env.NODE_ENV === "production",
+		IS_PRODUCTION: process.env.NODE_ENV === "production" || VERCEL_TARGET_ENV === "production",
 		IS_DEV: process.env.NODE_ENV === "development",
-		IS_TEST: process.env.NODE_ENV === "test",
+		IS_TEST: process.env.NODE_ENV === "test" || VERCEL_TARGET_ENV === "tests",
 		DEBUG: process.env.DEBUG,
 		EMAIL_API_KEY: process.env.EMAIL_API_KEY,
 		EMAIL_FROM: process.env.EMAIL_FROM,

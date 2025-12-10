@@ -25,9 +25,9 @@ test("TC-DASH-002: Fundraising Progress Display", async ({ page }) => {
 
 	// Verify fundraising progress section is visible
 	const progressSection = dashboardPage.getFundraisingProgressSection();
-	const isSectionVisible = await progressSection.isVisible().catch(() => false);
+	const progressSectionCount = await progressSection.count();
 
-	if (isSectionVisible) {
+	if (progressSectionCount > 0) {
 		// Verify fundraising progress section is visible
 		await expect(progressSection).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
@@ -44,10 +44,8 @@ test("TC-DASH-002: Fundraising Progress Display", async ({ page }) => {
 
 		// Verify progress percentage is displayed
 		const progressPercentage = dashboardPage.getProgressPercentage();
-		const isPercentageVisible = await progressPercentage
-			.isVisible()
-			.catch(() => false);
-		if (isPercentageVisible) {
+		const progressPercentageCount = await progressPercentage.count();
+		if (progressPercentageCount > 0) {
 			await expect(progressPercentage).toBeVisible({
 				timeout: TIMEOUTS.SHORT,
 			});
@@ -57,10 +55,8 @@ test("TC-DASH-002: Fundraising Progress Display", async ({ page }) => {
 
 		// Verify tokens sold/total tokens are displayed
 		const tokensSoldText = dashboardPage.getTokensSoldText();
-		const isTokensTextVisible = await tokensSoldText
-			.isVisible()
-			.catch(() => false);
-		if (isTokensTextVisible) {
+		const tokensSoldTextCount = await tokensSoldText.count();
+		if (tokensSoldTextCount > 0) {
 			await expect(tokensSoldText).toBeVisible({ timeout: TIMEOUTS.SHORT });
 			const tokensText = await tokensSoldText.textContent();
 			expect(tokensText).toMatch(/\d+.*\/.*\d+/);
@@ -68,10 +64,8 @@ test("TC-DASH-002: Fundraising Progress Display", async ({ page }) => {
 
 		// Verify countdown timer is displayed (if active sale)
 		const countdownTimer = dashboardPage.getCountdownTimer();
-		const isCountdownVisible = await countdownTimer
-			.isVisible()
-			.catch(() => false);
-		if (isCountdownVisible) {
+		const countdownTimerCount = await countdownTimer.count();
+		if (countdownTimerCount > 0) {
 			await expect(countdownTimer).toBeVisible({ timeout: TIMEOUTS.SHORT });
 			const countdownText = await countdownTimer.textContent();
 			expect(countdownText).toMatch(/ends in|remaining|days/i);

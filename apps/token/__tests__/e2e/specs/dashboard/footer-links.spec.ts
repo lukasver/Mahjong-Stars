@@ -46,8 +46,8 @@ test("TC-DASH-011: Footer Links", async ({ page }) => {
 
 	for (const linkName of expectedLinks) {
 		const link = footer.getByRole("link", { name: new RegExp(linkName, "i") });
-		const isLinkVisible = await link.isVisible().catch(() => false);
-		if (isLinkVisible) {
+		const linkCount = await link.count();
+		if (linkCount > 0) {
 			await expect(link).toBeVisible({ timeout: TIMEOUTS.SHORT });
 		}
 	}
@@ -62,18 +62,19 @@ test("TC-DASH-011: Footer Links", async ({ page }) => {
 	const tiktokLink = footer.getByRole("link", { name: /TikTok/i });
 	const discordLink = footer.getByRole("link", { name: /Discord/i });
 
-	const hasTwitter = await twitterLink.isVisible().catch(() => false);
-	const hasTikTok = await tiktokLink.isVisible().catch(() => false);
-	const hasDiscord = await discordLink.isVisible().catch(() => false);
+	const twitterLinkCount = await twitterLink.count();
+	const tiktokLinkCount = await tiktokLink.count();
+	const discordLinkCount = await discordLink.count();
 
-	expect(hasTwitter || hasTikTok || hasDiscord).toBe(true);
+	expect(twitterLinkCount > 0 || tiktokLinkCount > 0 || discordLinkCount > 0).toBe(true);
 
 	// Click a non-external footer link to verify navigation (if available)
 	// We'll test with "Home" link if it's internal
 	const homeLink = footer.getByRole("link", { name: /Home/i });
-	const isHomeLinkVisible = await homeLink.isVisible().catch(() => false);
+	const homeLinkCount = await homeLink.count();
 
-	if (isHomeLinkVisible) {
+	if (homeLinkCount > 0) {
+		await expect(homeLink).toBeVisible({ timeout: TIMEOUTS.SHORT });
 		const href = await homeLink.getAttribute("href");
 		if (href && !href.startsWith("http") && !href.startsWith("//")) {
 			// Internal link - test navigation

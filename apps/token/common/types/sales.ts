@@ -1,5 +1,5 @@
-import { TOKEN_QUERY } from '@/lib/repositories/sales/queries';
-import { Prisma } from '@prisma/client';
+import { Blockchain, Prisma } from "@prisma/client";
+import { TOKEN_QUERY } from "@/lib/repositories/sales/queries";
 
 const saleWithRelations = Prisma.validator<Prisma.SaleDefaultArgs>()({
   include: { token: TOKEN_QUERY, banner: { select: { url: true } } },
@@ -7,7 +7,7 @@ const saleWithRelations = Prisma.validator<Prisma.SaleDefaultArgs>()({
 
 export type SaleWithRelations = Prisma.SaleGetPayload<typeof saleWithRelations>;
 
-export interface SaleWithToken extends Omit<SaleWithRelations, 'token'> {
+export interface SaleWithToken extends Omit<SaleWithRelations, "token"> {
   token: {
     chainId: number | undefined;
     contractAddress: string | undefined | null;
@@ -16,3 +16,27 @@ export interface SaleWithToken extends Omit<SaleWithRelations, 'token'> {
     image: string | undefined | null;
   };
 }
+
+export type SaleInvestInfo = {
+  sale: Pick<
+    SaleWithToken,
+    | "id"
+    | "tokenPricePerUnit"
+    | "tokenContractAddress"
+    | "status"
+    | "initialTokenQuantity"
+    | "availableTokenQuantity"
+    | "maximumTokenBuyPerUser"
+    | "minimumTokenBuyPerUser"
+    | "saleStartDate"
+    | "saleClosingDate"
+    | "saftCheckbox"
+    | "currency"
+    | "token"
+    | "requiresKYC"
+    | "tokenSymbol"
+    | "comparisonPricePerUnit"
+  > & {
+    blockchain: Pick<Blockchain, "chainId" | "name">;
+  }
+};

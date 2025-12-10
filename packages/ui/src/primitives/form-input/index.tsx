@@ -41,6 +41,7 @@ export type FormInputProps = {
   inputProps?: Partial<InputUnionProps> & {
     required?: boolean;
   };
+  dataTestId?: string;
   listeners?: React.ComponentProps<UseAppForm["AppField"]>["listeners"];
   validators?: React.ComponentProps<UseAppForm["AppField"]>["validators"];
 };
@@ -103,6 +104,7 @@ export function FormInput({
   listeners,
   validators,
   descriptionClassName,
+  dataTestId,
   ...props
 }: FormInputProps) {
   const form = useFormContext() as unknown as UseAppForm;
@@ -113,7 +115,7 @@ export function FormInput({
   return (
     <form.AppField name={name} listeners={listeners} validators={validators}>
       {(field) => (
-        <field.FormItem className={className}>
+        <field.FormItem className={className} data-testid={dataTestId}>
           <div
             className={cn(
               type === "checkbox" &&

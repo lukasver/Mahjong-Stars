@@ -28,11 +28,9 @@ test("TC-DASH-005: ICO Phases Section", async ({ page }) => {
 
 	// Verify "ICO Phases" section is visible
 	const icoPhasesSection = dashboardPage.getIcoPhases();
-	const isSectionVisible = await icoPhasesSection
-		.isVisible()
-		.catch(() => false);
+	const icoPhasesSectionCount = await icoPhasesSection.count();
 
-	if (isSectionVisible) {
+	if (icoPhasesSectionCount > 0) {
 		await expect(icoPhasesSection).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
 		// Verify section title is displayed
@@ -60,8 +58,8 @@ test("TC-DASH-005: ICO Phases Section", async ({ page }) => {
 
 			// Verify phase name is displayed (h3 heading)
 			const phaseName = card.locator("h3").first();
-			const isNameVisible = await phaseName.isVisible().catch(() => false);
-			if (isNameVisible) {
+			const phaseNameCount = await phaseName.count();
+			if (phaseNameCount > 0) {
 				await expect(phaseName).toBeVisible({ timeout: TIMEOUTS.SHORT });
 				const nameText = await phaseName.textContent();
 				expect(nameText).toBeTruthy();
@@ -76,8 +74,8 @@ test("TC-DASH-005: ICO Phases Section", async ({ page }) => {
 				.locator("..")
 				.locator('[class*="badge"], [data-testid*="badge"]')
 				.first();
-			const isBadgeVisible = await statusBadge.isVisible().catch(() => false);
-			if (isBadgeVisible) {
+			const statusBadgeCount = await statusBadge.count();
+			if (statusBadgeCount > 0) {
 				await expect(statusBadge).toBeVisible({ timeout: TIMEOUTS.SHORT });
 				const badgeText = await statusBadge.textContent();
 				expect(badgeText).toMatch(
@@ -87,8 +85,9 @@ test("TC-DASH-005: ICO Phases Section", async ({ page }) => {
 
 			// Verify date range is displayed
 			const dateRange = card.locator("p").first();
-			const isDateVisible = await dateRange.isVisible().catch(() => false);
-			if (isDateVisible) {
+			const dateRangeCount = await dateRange.count();
+			if (dateRangeCount > 0) {
+				await expect(dateRange).toBeVisible({ timeout: TIMEOUTS.SHORT });
 				const dateText = await dateRange.textContent();
 				// Date range should contain dates or date separators
 				expect(dateText).toBeTruthy();

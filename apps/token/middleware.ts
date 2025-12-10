@@ -54,6 +54,6 @@ export default async (req: NextRequest) => {
 
 export const config = {
 	matcher: [
-		"/((?!api|in|static|sitemap|ingest|robots|manifest.webmanifest|opengraph-image|_next/static|_next/image|favicon.ico|icon*|apple-touch-*|public|static|workers|.well-known).*)",
+		"/((?!api|in|_vercel|static|sitemap|ingest|robots|manifest.webmanifest|opengraph-image|_next/static|_next/image|favicon.ico|icon*|apple-touch-*|public|static|workers|.well-known).*)",
 	],
 };

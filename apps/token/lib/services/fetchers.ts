@@ -23,7 +23,7 @@ import {
 	TransactionStatusSchema,
 	User,
 } from "@/common/schemas/generated";
-import { SaleWithToken } from "@/common/types/sales";
+import { SaleInvestInfo, SaleWithToken } from "@/common/types/sales";
 import { TokenWithRelations } from "@/common/types/tokens";
 import {
 	TransactionByIdWithRelations,
@@ -35,14 +35,14 @@ export type FetcherOptions = Omit<RequestInit, "body"> & {
 	token?: string;
 } & (
 		| {
-				rawBody: true;
-				body?: RequestInit["body"];
-		  }
+			rawBody: true;
+			body?: RequestInit["body"];
+		}
 		| {
-				rawBody?: false | never;
-				// biome-ignore lint/suspicious/noExplicitAny: needed for request body
-				body?: any;
-		  }
+			rawBody?: false | never;
+			// biome-ignore lint/suspicious/noExplicitAny: needed for request body
+			body?: any;
+		}
 	);
 
 type JsonPrimitive = string | number | boolean | null;
@@ -210,29 +210,7 @@ export const getSaleInformation = async (id: string) => {
 
 export const getSaleInvestInfo = async (id: string) => {
 	try {
-		const data = await fetcher<{
-			sale: Pick<
-				SaleWithToken,
-				| "id"
-				| "tokenPricePerUnit"
-				| "tokenContractAddress"
-				| "status"
-				| "initialTokenQuantity"
-				| "availableTokenQuantity"
-				| "maximumTokenBuyPerUser"
-				| "minimumTokenBuyPerUser"
-				| "saleStartDate"
-				| "saleClosingDate"
-				| "saftCheckbox"
-				| "currency"
-				| "token"
-				| "requiresKYC"
-				| "tokenSymbol"
-				| "comparisonPricePerUnit"
-			> & {
-				blockchain: Pick<Blockchain, "chainId" | "name">;
-			};
-		}>(`/sales/${id}/invest`);
+		const data = await fetcher<SaleInvestInfo>(`/sales/${id}/invest`);
 
 		return { data: data, error: null };
 	} catch (e) {

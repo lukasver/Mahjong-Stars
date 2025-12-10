@@ -261,7 +261,7 @@ const PendingTransactionModal = ({
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogDescription className="text-foreground">
                   Are you sure you want to delete this transaction? This action
                   cannot be undone.
                 </AlertDialogDescription>

@@ -27,47 +27,65 @@ test("TC-BUY-005: Invest Form Display", async ({ page }) => {
   await investSection.scrollIntoViewIfNeeded();
   await expect(investSection).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Verify "Invest" heading is displayed
+  // Verify "Invest" heading is displayed (required)
   const investHeading = buyPage.getInvestHeading();
-  const isHeadingVisible = await investHeading.isVisible().catch(() => false);
-  if (isHeadingVisible) {
-    await expect(investHeading).toBeVisible({ timeout: TIMEOUTS.SHORT });
-  }
+  await expect(investHeading).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
   // Verify countdown timer is displayed (if sale is active)
+  // Note: Countdown may not be present if sale is not active, so we check conditionally
   const countdownTimer = buyPage.getCountdownTimer();
-  const isCountdownVisible = await countdownTimer.isVisible().catch(() => false);
-  if (isCountdownVisible) {
+  const countdownCount = await countdownTimer.count();
+  if (countdownCount > 0) {
     await expect(countdownTimer).toBeVisible({ timeout: TIMEOUTS.SHORT });
   }
 
-  // Verify token amount input field is visible
+  // Verify token amount input field is visible (required)
   const tokenInput = buyPage.getTokenAmountInput();
-  const isTokenInputVisible = await tokenInput.isVisible().catch(() => false);
-  if (isTokenInputVisible) {
-    await expect(tokenInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
-  }
+  await expect(tokenInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Verify USD amount input field is visible
+  // Verify USD amount input field is visible (required)
   const usdInput = buyPage.getUsdAmountInput();
-  const isUsdInputVisible = await usdInput.isVisible().catch(() => false);
-  if (isUsdInputVisible) {
-    await expect(usdInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
-  }
+  await expect(usdInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Verify payment method selector is visible
+  // Verify payment method selector is visible (required)
   const paymentSelector = buyPage.getPaymentMethodSelector();
-  const isPaymentSelectorVisible = await paymentSelector.isVisible().catch(() => false);
-  if (isPaymentSelectorVisible) {
-    await expect(paymentSelector).toBeVisible({ timeout: TIMEOUTS.SHORT });
+  await expect(paymentSelector).toBeVisible({ timeout: TIMEOUTS.SHORT });
+
+  // Verify currency options are available when clicking the combobox
+  await paymentSelector.click();
+
+  // Wait for dropdown to open
+  await page.waitForTimeout(300);
+
+  // Verify FIAT section header is visible
+  const fiatHeader = buyPage.getFiatSectionHeader();
+  await expect(fiatHeader).toBeVisible({ timeout: TIMEOUTS.SHORT });
+
+  // Verify CRYPTO section header is visible
+  const cryptoHeader = buyPage.getCryptoSectionHeader();
+  await expect(cryptoHeader).toBeVisible({ timeout: TIMEOUTS.SHORT });
+
+  // Verify all FIAT currencies are present
+  const fiatCurrencies = ["CHF", "EUR", "USD", "GBP"];
+  for (const currency of fiatCurrencies) {
+    const currencyOption = buyPage.getCurrencyOption(currency);
+    await expect(currencyOption).toBeVisible({ timeout: TIMEOUTS.SHORT });
   }
 
-  // Verify "Continue" or "Invest" button is visible
-  const continueButton = buyPage.getContinueButton();
-  const isButtonVisible = await continueButton.isVisible().catch(() => false);
-  if (isButtonVisible) {
-    await expect(continueButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
+  // Verify all CRYPTO currencies are present
+  const cryptoCurrencies = ["ETH", "BTC", "USDC", "BNB", "USDT"];
+  for (const currency of cryptoCurrencies) {
+    const currencyOption = buyPage.getCurrencyOption(currency);
+    await expect(currencyOption).toBeVisible({ timeout: TIMEOUTS.SHORT });
   }
+
+  // Close the dropdown by clicking outside or pressing Escape
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(200);
+
+  // Verify "Continue" or "Invest" button is visible (required)
+  const continueButton = buyPage.getContinueButton();
+  await expect(continueButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
   await page.screenshot({
     path: "./__tests__/e2e/specs/__screenshots__/buy/invest-form-display.png",

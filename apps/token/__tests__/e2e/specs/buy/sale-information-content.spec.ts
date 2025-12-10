@@ -79,8 +79,7 @@ test("TC-BUY-003: Sale Information Content", async ({ page }) => {
 
     // If expanded, verify content is visible
     if (isExpanded) {
-      const isContentVisible = await content.first().isVisible().catch(() => false);
-      expect(isContentVisible).toBe(true);
+      await expect(content.first()).toBeVisible({ timeout: TIMEOUTS.SHORT });
     }
   }
 

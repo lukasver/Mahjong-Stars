@@ -25,15 +25,15 @@ test("TC-DASH-009: Sidebar Functionality", async ({ page }) => {
 
 	// Verify sidebar is visible
 	const sidebar = dashboardPage.getSidebar();
-	const isSidebarVisible = await sidebar.isVisible().catch(() => false);
+	const sidebarCount = await sidebar.count();
 
-	if (isSidebarVisible) {
+	if (sidebarCount > 0) {
 		await expect(sidebar).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
 		// Verify "Mahjong Stars" logo is displayed
 		const logo = dashboardPage.getSidebarLogo();
-		const isLogoVisible = await logo.isVisible().catch(() => false);
-		if (isLogoVisible) {
+		const logoCount = await logo.count();
+		if (logoCount > 0) {
 			await expect(logo).toBeVisible({ timeout: TIMEOUTS.SHORT });
 		}
 
@@ -41,10 +41,8 @@ test("TC-DASH-009: Sidebar Functionality", async ({ page }) => {
 		const overviewSection = page
 			.getByRole("button", { name: /Overview/i })
 			.or(page.getByText("Overview").locator(".."));
-		const isOverviewVisible = await overviewSection
-			.isVisible()
-			.catch(() => false);
-		if (isOverviewVisible) {
+		const overviewSectionCount = await overviewSection.count();
+		if (overviewSectionCount > 0) {
 			await expect(overviewSection).toBeVisible({ timeout: TIMEOUTS.SHORT });
 		}
 
@@ -61,9 +59,9 @@ test("TC-DASH-009: Sidebar Functionality", async ({ page }) => {
 
 		// Click "Toggle Sidebar" button
 		const toggleButton = dashboardPage.getSidebarToggleButton();
-		const isToggleVisible = await toggleButton.isVisible().catch(() => false);
+		const toggleButtonCount = await toggleButton.count();
 
-		if (isToggleVisible) {
+		if (toggleButtonCount > 0) {
 			await expect(toggleButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
 			// Get initial sidebar state (width or visibility)

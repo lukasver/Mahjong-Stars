@@ -38,7 +38,7 @@ export function FiatPaymentSelector({
 
   return (
     <>
-      <div className="border-t border-secondary-300 pt-4 space-y-4">
+      <div className="border-t border-secondary-300 pt-4 space-y-4" data-testid="fiat-payment-radio-selector">
         <h3 className="text-lg font-semibold text-white">
           Select Payment Method
         </h3>

@@ -370,6 +370,7 @@ export const InvestForm = ({
               className="shrink-0"
               name="paid.currency"
               label={""}
+              dataTestId="currency-selector"
               type="select"
               listeners={{
                 onChange: ({ value }) => {
@@ -385,6 +386,7 @@ export const InvestForm = ({
                 ],
                 groupBy: "type",
                 withImage: true,
+
               }}
             />
           </div>

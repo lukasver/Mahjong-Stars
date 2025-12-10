@@ -45,6 +45,7 @@ export function Invest({ sale }: { sale: SaleWithToken }) {
 
   return (
     <CardContainer
+      data-testid="invest-section"
       header={
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Invest</CardTitle>

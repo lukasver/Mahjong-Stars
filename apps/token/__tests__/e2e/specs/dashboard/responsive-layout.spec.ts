@@ -57,9 +57,9 @@ for (const viewport of viewports) {
 
 		// Verify token cards container is visible (may be in different layout)
 		const tokenCards = dashboardPage.getTokenCards();
-		const isTokenCardsVisible = await tokenCards.isVisible().catch(() => false);
+		const tokenCardsCount = await tokenCards.count();
 
-		if (isTokenCardsVisible) {
+		if (tokenCardsCount > 0) {
 			await expect(tokenCards).toBeVisible({ timeout: TIMEOUTS.SHORT });
 		}
 
@@ -67,9 +67,10 @@ for (const viewport of viewports) {
 		// On tablet/desktop, sidebar should be visible
 		if (viewport.name === "desktop" || viewport.name === "tablet") {
 			const sidebar = dashboardPage.getSidebar();
-			const isSidebarVisible = await sidebar.isVisible().catch(() => false);
-			// Sidebar might be visible or hidden depending on implementation
-			// Just verify page structure is intact
+			const sidebarCount = await sidebar.count();
+			if (sidebarCount > 0) {
+				await expect(sidebar).toBeVisible({ timeout: TIMEOUTS.SHORT });
+			}
 		}
 
 		// Verify page is scrollable if content exceeds viewport

@@ -24,20 +24,18 @@ test("TC-DASH-004: Recent Transactions Table", async ({ page }) => {
 
 	// Verify "Recent Transactions" section is visible
 	const recentTransactionsSection = dashboardPage.getRecentTransactions();
-	const isSectionVisible = await recentTransactionsSection
-		.isVisible()
-		.catch(() => false);
+	const recentTransactionsSectionCount = await recentTransactionsSection.count();
 
-	if (isSectionVisible) {
+	if (recentTransactionsSectionCount > 0) {
 		await expect(recentTransactionsSection).toBeVisible({
 			timeout: TIMEOUTS.SHORT,
 		});
 
 		// Verify table is visible
 		const table = dashboardPage.getRecentTransactionsTable();
-		const isTableVisible = await table.isVisible().catch(() => false);
+		const tableCount = await table.count();
 
-		if (isTableVisible) {
+		if (tableCount > 0) {
 			await expect(table).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
 			// Verify table headers: Tokens, Amount, Wallet, Time

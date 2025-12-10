@@ -32,7 +32,7 @@
 		"e2e:debug": "PWDEBUG=1 playwright test",
 		"e2e:console": "PWDEBUG='console' playwright test",
 		"e2e:renew": " RENEW_STATE=true NODE_ENV=test playwright test --project=chromium",
-		"e2e:codegen": "npx playwright codegen",
+		"e2e:codegen": "npx playwright codegen --load-storage=__tests__/e2e/playwright/.auth/storage.json",
 		"e2e:ci": "RENEW_STATE=true NODE_ENV=test playwright test --project=chromium",
 		"e2e:extract-auth-state": "tsx ./__tests__/e2e/scripts/extract-auth-state.ts",
 		"vercel-build": "npx prisma generate && turbo run build",

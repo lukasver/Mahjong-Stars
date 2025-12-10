@@ -3,6 +3,11 @@ import { execSync } from "child_process";
 import { existsSync, readFileSync, statSync } from "fs";
 import { join } from "path";
 
+const currentOrigin = process.env.PLAYWRIGHT_TEST_BASE_URL;
+
+if (!currentOrigin) {
+	throw new Error("PLAYWRIGHT_TEST_BASE_URL is not set");
+}
 /**
  * Global setup function that validates and prepares the authentication state.
  * This runs once before all tests.
@@ -38,19 +43,7 @@ async function globalSetup(config: FullConfig) {
 
 	// Run auth extraction if needed
 	if (shouldExtractAuth) {
-		console.log("🔄 Running authentication state extraction...");
-		try {
-			execSync("pnpm run e2e:extract-auth-state", {
-				stdio: "inherit",
-				cwd: process.cwd(),
-			});
-			console.log("✅ Authentication state extraction completed");
-		} catch (error) {
-			console.error("❌ Failed to extract authentication state:");
-			console.error(error instanceof Error ? error.message : String(error));
-			console.warn("   Tests will continue but may run unauthenticated");
-			return;
-		}
+		extractAuthState();
 	}
 
 	try {
@@ -78,6 +71,12 @@ async function globalSetup(config: FullConfig) {
 			throw new Error("Invalid storage state format: cookies must be an array");
 		}
 
+		if (!storageState?.origins?.length || !storageState.cookies.length) {
+			console.log(`   No origins/cookies found in storage state, extracting new auth state`);
+			extractAuthState();
+		}
+
+
 		// Validate cookie structure
 		for (const cookie of storageState.cookies) {
 			if (!cookie.name || !cookie.value || !cookie.domain) {
@@ -87,6 +86,7 @@ async function globalSetup(config: FullConfig) {
 			}
 		}
 
+
 		console.log(`✅ Authentication state loaded from ${storagePath}`);
 		console.log(`   Found ${storageState.cookies.length} cookies`);
 
@@ -94,6 +94,10 @@ async function globalSetup(config: FullConfig) {
 			console.log(
 				`   Found ${storageState.origins.length} origin(s) with localStorage`,
 			);
+			if (!storageState.origins.some(origin => origin.origin === currentOrigin)) {
+				console.log(`   Origin ${currentOrigin} not found in storage state, extracting new auth state`);
+				extractAuthState();
+			}
 		}
 	} catch (error) {
 		console.error(`❌ Error validating storage state at ${storagePath}:`);
@@ -102,4 +106,21 @@ async function globalSetup(config: FullConfig) {
 	}
 }
 
+const extractAuthState = () => {
+	console.log("🔄 Running authentication state extraction...");
+	try {
+		execSync("pnpm run e2e:extract-auth-state", {
+			stdio: "inherit",
+			cwd: process.cwd(),
+		});
+		console.log("✅ Authentication state extraction completed");
+	} catch (error) {
+		console.error("❌ Failed to extract authentication state:");
+		console.error(error instanceof Error ? error.message : String(error));
+		console.warn("   Tests will continue but may run unauthenticated");
+		return;
+	}
+}
+
 export default globalSetup;
+

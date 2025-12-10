@@ -51,10 +51,12 @@ test("TC-BUY-002: Sale Information Tabs", async ({ page }) => {
   await expect(documentsContent).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
   // Check if it's the placeholder or actual content
-  const hasDocuments = await page.locator('[data-testid="documents-tab-content"]').isVisible().catch(() => false);
-  if (hasDocuments) {
+  const documentsTabContent = page.locator('[data-testid="documents-tab-content"]');
+  const documentsTabContentCount = await documentsTabContent.count();
+  if (documentsTabContentCount > 0) {
     // Verify documents are listed
-    const documentCards = page.locator('[data-testid="documents-tab-content"] a, [data-testid="documents-tab-content"] [class*="card"]');
+    await expect(documentsTabContent).toBeVisible({ timeout: TIMEOUTS.SHORT });
+    const documentCards = documentsTabContent.locator('a, [class*="card"]');
     const documentCount = await documentCards.count();
     expect(documentCount).toBeGreaterThan(0);
   } else {
@@ -72,10 +74,12 @@ test("TC-BUY-002: Sale Information Tabs", async ({ page }) => {
   await expect(galleryContent).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
   // Check if it's the placeholder or actual content
-  const hasImages = await page.locator('[data-testid="gallery-tab-content"]').isVisible().catch(() => false);
-  if (hasImages) {
+  const galleryTabContent = page.locator('[data-testid="gallery-tab-content"]');
+  const galleryTabContentCount = await galleryTabContent.count();
+  if (galleryTabContentCount > 0) {
     // Verify images are displayed
-    const images = page.locator('[data-testid="gallery-tab-content"] img');
+    await expect(galleryTabContent).toBeVisible({ timeout: TIMEOUTS.SHORT });
+    const images = galleryTabContent.locator('img');
     const imageCount = await images.count();
     expect(imageCount).toBeGreaterThan(0);
   } else {

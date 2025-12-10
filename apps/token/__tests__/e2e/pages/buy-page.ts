@@ -1,4 +1,4 @@
-import { Locator, Page } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
 import { ROUTES, TIMEOUTS } from "../utils/constants";
 import { BasePage } from "./base-page";
 
@@ -150,7 +150,7 @@ export class BuyPage extends BasePage {
 			this.page.locator('main').locator('[data-testid="overview-card"]').filter({ hasText: /Overview|Tokens available/i })
 		).or(
 			this.page.locator('main').locator('[data-testid="overview-section"]').filter({ hasText: /Overview|Tokens available/i })
-		);
+		).first();
 	}
 
 	/**
@@ -166,13 +166,20 @@ export class BuyPage extends BasePage {
 	}
 
 	/**
-	 * Get overview row by title
+	 * Get overview row value by title
+	 * Finds the label, then gets the value element (sibling after the label)
+	 * Structure: parent DIV contains label SPAN and value SPAN
 	 */
 	getOverviewRow(title: string) {
-		return this.getOverviewSection()
-			.getByText(title, { exact: false })
-			.locator("..")
-			.locator("..");
+		const label = this.getOverviewSection()
+			.getByText(title, { exact: false });
+
+		// Get the parent container that holds both label and value
+		const rowContainer = label.locator("..");
+
+		// The value is typically the last child (second child) of the parent
+		// This works because the structure is: [label, value]
+		return rowContainer.locator("> *").last();
 	}
 
 	/**
@@ -249,93 +256,119 @@ export class BuyPage extends BasePage {
 
 	/**
 	 * Get Invest section
+	 * Prioritizes data-testid (visible section), excludes hidden anchor elements
 	 */
 	getInvestSection() {
-		return this.page.locator("#invest-component, [id*='invest']");
+		return this.page
+			.locator('[data-testid="invest-section"]')
 	}
 
 	/**
 	 * Get Invest heading
+	 * Note: "Invest" is not a heading element, it's a DIV with heading-like styling
 	 */
 	getInvestHeading() {
-		return this.page
-			.locator("#invest-component, [id*='invest']")
-			.getByRole("heading", { name: /Invest/i });
+		return this.getInvestSection()
+			.getByText("Invest", { exact: true })
+			.first();
 	}
 
 	/**
 	 * Get countdown timer
 	 */
 	getCountdownTimer() {
-		return this.page
-			.locator("#invest-component, [id*='invest']")
+		return this.getInvestSection()
 			.locator("text=/ends in|remaining|days|hours|minutes/i");
 	}
 
 	/**
 	 * Get token amount input field
+	 * Note: Uses spinbutton role with aria-label containing token symbol
 	 */
 	getTokenAmountInput() {
-		return this.page
-			.locator("#invest-component, [id*='invest']")
-			.locator('input[name*="quantity"], input[name*="paid.quantity"]')
+		return this.getInvestSection()
+			.getByRole("spinbutton", { name: /TILE Tokens/i })
+			.or(this.getInvestSection().locator('input[name*="quantity"], input[name*="paid.quantity"]'))
 			.first();
 	}
 
 	/**
 	 * Get USD amount input field
+	 * Note: Uses textbox role near "To pay" label
 	 */
-	getUsdAmountInput() {
-		return this.page
-			.locator("#invest-component, [id*='invest']")
-			.locator('input[name*="amount"], input[name*="paid.amount"]')
+	getTotalAmountInput() {
+		return this.getInvestSection()
+			.getByRole("textbox", { name: /To pay/i })
+			.or(this.getInvestSection().locator('input[name*="amount"], input[name*="paid.amount"]'))
 			.first();
 	}
 
 	/**
 	 * Get payment method selector
+	 * Note: Finds the visible combobox that contains "USD" text, located near "To pay" label
 	 */
 	getPaymentMethodSelector() {
-		return this.page
-			.locator("#invest-component, [id*='invest']")
-			.locator(
-				'select, [role="combobox"], button:has-text("FIAT"), button:has-text("CRYPTO")',
-			);
+		// Find combobox that contains "USD" - most reliable selector
+		// It's in the same flex container as "To pay" text
+		return this.page.locator('[data-testid="currency-selector"]')
+			.getByRole("combobox")
 	}
 
 	/**
-	 * Get FIAT payment option
+	 * Get the currency dropdown content wrapper
+	 * Note: Radix UI uses this attribute for dropdown content
 	 */
-	getFiatPaymentOption() {
-		return this.page
-			.getByRole("option", { name: /FIAT/i })
-			.or(this.page.getByText("FIAT"));
+	getCurrencyDropdownContent() {
+		return this.page.locator('[data-radix-popper-content-wrapper]');
 	}
 
 	/**
-	 * Get CRYPTO payment option
+	 * Get FIAT section header in currency dropdown
 	 */
-	getCryptoPaymentOption() {
-		return this.page
-			.getByRole("option", { name: /CRYPTO/i })
-			.or(this.page.getByText("CRYPTO"));
+	getFiatSectionHeader() {
+		return this.getCurrencyDropdownContent()
+			.getByText("FIAT", { exact: true });
+	}
+
+	/**
+	 * Get CRYPTO section header in currency dropdown
+	 */
+	getCryptoSectionHeader() {
+		return this.getCurrencyDropdownContent()
+			.getByText("CRYPTO", { exact: true });
+	}
+
+	/**
+	 * Get a specific currency option by code (e.g., "USD", "EUR", "BTC", "ETH")
+	 */
+	getCurrencyOption(currencyCode: string) {
+		return this.getCurrencyDropdownContent()
+			.getByRole("option", { name: new RegExp(`^${currencyCode}$`, "i") })
+			.or(this.getCurrencyDropdownContent().getByText(new RegExp(`^${currencyCode}$`, "i"))).first();
+	}
+
+	/**
+	 * Get all currency options in the dropdown
+	 * Note: Should be called after opening the combobox
+	 */
+	getAllCurrencyOptions() {
+		return this.getCurrencyDropdownContent()
+			.getByRole("option");
 	}
 
 	/**
 	 * Get Continue/Invest button
 	 */
 	getContinueButton() {
-		return this.page
-			.locator("#invest-component, [id*='invest']")
-			.getByRole("button", { name: /Continue|Invest|Submit/i });
+		return this.getInvestSection()
+			.getByRole("button", { name: /Continue|Invest|Submit|Purchase Tokens/i });
 	}
 
 	/**
 	 * Get error message
 	 */
 	getErrorMessage() {
-		return this.page
-			.locator("#invest-component, [id*='invest']")
+		return this.getInvestSection()
 			.locator('[role="alert"], .error, [class*="error"]');
 	}
 
@@ -352,8 +385,259 @@ export class BuyPage extends BasePage {
 	 * Get disabled message
 	 */
 	getDisabledMessage() {
-		return this.page
-			.locator("#invest-component, [id*='invest']")
+		return this.getInvestSection()
 			.locator("text=/sale.*ended|not.*active|disabled/i");
 	}
+
+
+	/**
+	 * Get the summary modal dialog
+	 * Note: This is the confirmation modal that appears after clicking "Purchase Tokens"
+	 */
+	getSummaryModal() {
+		return this.page.getByRole("dialog", { name: /Review your purchase/i });
+	}
+
+	/**
+	 * Get KYC Required indicator in the summary modal
+	 * Note: This is an alert that appears when KYC verification is required
+	 */
+	getSummaryKYCRequiredIndicator() {
+		return this.getSummaryModal()
+			.getByRole("alert")
+			.filter({ hasText: /KYC Required/i });
+	}
+
+	/**
+	 * Get SAFT Required indicator in the summary modal
+	 * Note: This is an alert that appears when SAFT agreement signing is required
+	 */
+	getSummarySAFTRequiredIndicator() {
+		return this.getSummaryModal()
+			.getByRole("alert")
+			.filter({ hasText: /SAFT Agreement/i });
+	}
+
+	/**
+	 * Get summary modal details section
+	 * Contains: TILE Tokens, Bonus Tokens, Total Tokens, Total amount to pay
+	 * Note: The values are dynamic and depend on the actual purchase values.
+	 * Structure:
+	 * - title: Summary
+	 * - TILE Tokens: [quantity]
+	 * - Bonus Tokens: [+bonus]
+	 * - Total Tokens: [total] TILE
+	 * - Total amount to pay: $[amount]
+	 */
+	getSummaryModalDetails() {
+		// Find the container within the modal that contains all summary details
+		// It should contain both "TILE Tokens" and "Total amount to pay" text
+		return this.getSummaryModal()
+			.locator('div')
+			.filter({ hasText: /TILE Tokens/i })
+			.filter({ hasText: /Total amount to pay/i })
+			.first();
+	}
+
+	/**
+	 * Get payment method section in the summary modal
+	 * Note: Returns the container with payment method selection (Credit/Debit Card, Bank Transfer)
+	 */
+	getSummaryModalPaymentMethod() {
+		return this.getSummaryModal()
+			.locator('[data-testid="fiat-payment-radio-selector"]')
+	}
+
+	getCreditCardPaymentMethodRadioButton() {
+		return this.getSummaryModalPaymentMethod()
+			.getByRole("radio", { name: /Credit\/Debit Card/i });
+	}
+
+	getBankTransferPaymentMethodRadioButton() {
+		return this.getSummaryModalPaymentMethod()
+			.getByRole("radio", { name: /Bank Transfer/i });
+	}
+
+	/**
+	 * Get Continue button in the summary modal
+	 * Note: Button text may vary (e.g., "Continue with Card", "Continue")
+	 */
+	getSummaryModalContinueButton() {
+		return this.getSummaryModal()
+			.getByRole("button", { name: /Continue|Proceed/i });
+	}
+
+	/**
+	 * Get Cancel button in the summary modal
+	 */
+	getSummaryModalCancelButton() {
+		return this.getSummaryModal()
+			.getByRole("button", { name: /Cancel/i });
+	}
+
+
+	/**
+	 * Intercept POST requests to the buy route and inspect the request body
+	 * @returns Promise that resolves when the route is set up
+	 */
+	async interceptBuyRequest() {
+		return this.page.route('**/dashboard/buy', async (route) => {
+			const request = route.request();
+
+			// Only intercept POST requests
+			if (request.method() !== 'POST') {
+				await route.continue();
+				return;
+			}
+
+			const postDataJSON = request.postDataJSON();
+			// Build the transaction data
+			const transactionData = {
+				id: postDataJSON?.id ?? "cmiywwang00038o4rid0jd6xf",
+				tokenSymbol: postDataJSON?.tokenSymbol ?? "TILE",
+				quantity: postDataJSON?.quantity ?? "1",
+				formOfPayment: postDataJSON?.formOfPayment ?? "TRANSFER",
+				amountPaid: postDataJSON?.amountPaid ?? null,
+				paidCurrency: postDataJSON?.paidCurrency ?? "USD",
+				receivingWallet: postDataJSON?.receivingWallet ?? "0x161F6D1895bE66Fc6b5dD2FDEF94afB4810D776b",
+				comment: postDataJSON?.comment ?? null,
+				status: postDataJSON?.status ?? "PENDING",
+				price: postDataJSON?.price ?? "0.012",
+				totalAmount: postDataJSON?.totalAmount ?? "0.012",
+				createdAt: postDataJSON?.createdAt ?? new Date().toISOString(),
+				updatedAt: postDataJSON?.updatedAt ?? new Date().toISOString(),
+				user: postDataJSON?.user ?? {
+					email: "lucas+tg@smat.io",
+					walletAddress: "0x161F6D1895bE66Fc6b5dD2FDEF94afB4810D776b",
+					id: "cmhewa4ml0000ju04pmpoe2ve"
+				},
+				sale: postDataJSON?.sale ?? {
+					id: "cmfmgtu86000fky04l5zgrs4d",
+					name: "Test Sale",
+					tokenSymbol: "TILE"
+				}
+			};
+
+
+			await route.fulfill({
+				status: 200,
+				headers: mockServerActionHeaders(),
+				contentType: 'text/x-component',
+				body: getServerActionBody({
+					data: {
+						transaction: transactionData,
+						saft: true,
+						kyc: true,
+						paymentMethod: postDataJSON?.formOfPayment ?? "TRANSFER"
+					}
+				}),
+			});
+		});
+	}
+
+
+	getContinueTransactionButton() {
+		return this.page.getByRole("button", { name: /Continue pending Transaction/i });
+	}
+
+	async cancelExistingTransactionIfExists() {
+		const btn = this.getContinueTransactionButton()
+
+
+
+		// If button was not found, no pending transaction exists
+		if (await btn.count() === 0) {
+			console.debug("No pending transaction found");
+			return;
+		}
+		console.debug("Pending transaction found, proceeding to cancel");
+
+		await btn.click();
+		const dialog = this.page.getByRole("dialog").filter({ hasText: /You have a pending transaction/i });
+		expect(dialog).toBeVisible({ timeout: TIMEOUTS.SHORT });
+		expect(dialog.getByRole('alert').filter({ hasText: /Action required:/i })).toBeVisible({ timeout: TIMEOUTS.SHORT });
+
+		const deleteButton = dialog.getByRole("button", { name: /Delete/i });
+		expect(deleteButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
+		await deleteButton.click();
+
+		// Alert dialog
+		const alertDialog = dialog.getByRole("alertdialog").filter({ hasText: /Delete Transaction/i });
+		expect(alertDialog).toBeVisible({ timeout: TIMEOUTS.SHORT });
+
+		// Set up promise to wait for POST request BEFORE clicking delete
+		const deleteRequestPromise = this.page.waitForResponse(
+			(response) =>
+				response.url().endsWith("/dashboard/buy") &&
+				response.status() === 200 &&
+				response.request().method() === "POST",
+			{ timeout: TIMEOUTS.MEDIUM },
+		);
+
+		// Click the final delete button in the alert dialog
+		await alertDialog.getByRole("button", { name: /Delete/i }).click();
+
+		// Wait for the POST request to complete
+		const deleteResponse = await deleteRequestPromise;
+		expect(deleteResponse.status()).toBe(200);
+
+		// Wait for both dialogs to be closed
+		await Promise.all([
+			expect(dialog).not.toBeVisible({ timeout: TIMEOUTS.SHORT }),
+			expect(alertDialog).not.toBeVisible({ timeout: TIMEOUTS.SHORT }),
+		]);
+
+		return true;
+	}
+
 }
+
+
+const mockServerActionHeaders = (obj?: Record<string, unknown>) => {
+	return {
+		"Content-Security-Policy": "default-src 'self' https://*.mahjongstars.com http://localhost:3000;    connect-src 'self' https://api.hel.io/v1/ https://tiplink.io/api/wallet_adapter_ancestors/ https://quaint-convincing-choice.base-mainnet.quiknode.pro/c2ba2df1f23952da94da9e0cd0a5f8d8d028a91a/ https://*.mahjongstars.com http://localhost:3000 https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.posthog.com min-api.cryptocompare.com wss://*.walletconnect.org wss://*.walletconnect.com https://*.walletconnect.org https://*.walletconnect.com https://*.thirdweb.com wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com wss://eth-goerli.g.alchemy.com https://eth-goerli.g.alchemy.com wss://polygon-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com wss://polygon-mumbai.g.alchemy.com https://polygon-mumbai.g.alchemy.com https://*.documenso.com/ https://storage.googleapis.com https://ipfscdn.io https://*.ipfscdn.io https://vercel.live;    frame-src 'self' https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.adobesign.com https://*.thirdweb.com/;    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.posthog.com https://fonts.googleapis.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha https://www.google.com/recaptcha/enterprise.js https://www.gstatic.com/recaptcha/releases/ https://*.documenso.com/ https://vercel.live https://embed.hel.io/assets/index-v1.js;    worker-src 'self' blob:;    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.hel.io/assets/index-v1.css;    font-src 'self' https://fonts.gstatic.com;    img-src 'self' data: blob: https://*.mahjongstars.com http://localhost:3000 https://rainbowme-res.cloudinary.com/ https://*.ipfscdn.io https://*.walletconnect.org https://*.walletconnect.com https://storage.googleapis.com https://i.ibb.co https://embed.hel.io/assets/index-v1.js https://helio-assets.s3.eu-west-1.amazonaws.com/;    object-src 'none';    base-uri 'self';    form-action 'self';    frame-ancestors 'self' *.thirdweb.com;    block-all-mixed-content;    upgrade-insecure-requests;",
+		"Vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+		"Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+		"x-action-revalidated": "[[],0,0]",
+		"Content-Type": "text/x-component",
+		"Content-Encoding": "gzip",
+		"Date": new Date().toUTCString(),
+		"Connection": "keep-alive",
+		"Keep-Alive": "timeout=5",
+		"Transfer-Encoding": "chunked",
+		...obj
+	}
+}
+
+const getServerActionBody = (data?: Record<string, unknown>) => {
+	const serverActionBoundary = "dXLSbo6yd5ln25bAPRNgS";
+	// Serialize with RSC format (adds $D prefix to dates)
+	const serializedData = serializeForRSC(data);
+	const mockResponse = `0:{"a":"$@1","f":"","b":"${serverActionBoundary}"}` +
+		'\n' +
+		`1:${JSON.stringify(serializedData)}` +
+		// Server Action expect empty line at the end
+		'\n';
+
+	return mockResponse;
+}
+
+// Helper function to serialize dates with $D prefix for Next.js RSC format
+const serializeForRSC = (obj: unknown): unknown => {
+	if (obj === null || obj === undefined) return obj;
+	if (typeof obj === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(obj)) {
+		// Date string - add $D prefix
+		return `$D${obj}`;
+	}
+	if (Array.isArray(obj)) {
+		return obj.map(serializeForRSC);
+	}
+	if (typeof obj === "object") {
+		const result: Record<string, unknown> = {};
+		for (const [key, value] of Object.entries(obj)) {
+			result[key] = serializeForRSC(value);
+		}
+		return result;
+	}
+	return obj;
+};

@@ -123,7 +123,7 @@ export class DashboardPage extends BasePage {
 				this.page
 					.getByText(/Recent Transactions|Transaction History/i)
 					.locator(".."),
-			);
+			).first();
 	}
 
 	/**
@@ -231,23 +231,26 @@ export class DashboardPage extends BasePage {
 	getSidebar() {
 		return this.page
 			.locator('aside, [role="complementary"]')
-			.or(this.page.locator('nav:has-text("Overview")'));
+			.or(this.page.locator('div[data-slot="sidebar-container"]')).first();
+	}
+
+	getSidebarHeader() {
+		return this.page.locator('div[data-slot="sidebar-header"][data-sidebar="header"]');
 	}
 
 	/**
 	 * Get sidebar logo
 	 */
 	getSidebarLogo() {
-		return this.page
-			.getByText("Mahjong Stars")
-			.or(this.page.locator('img[alt*="Mahjong Stars"], img[alt*="logo"]'));
+		return this.getSidebarHeader()
+			.locator('figure > img[alt="Mahjong Stars Logo"]')
 	}
 
 	/**
 	 * Get sidebar toggle button
 	 */
 	getSidebarToggleButton() {
-		return this.page.getByRole("button", { name: /Toggle Sidebar/i });
+		return this.page.getByRole("button", { name: /Toggle Sidebar/i }).first();
 	}
 
 	/**
@@ -357,8 +360,11 @@ export class DashboardPage extends BasePage {
 	 */
 	getCountdownTimer() {
 		// Look for countdown text (e.g., "Current ICO round ends in 91 days")
+		// More specific pattern to avoid matching "Remaining Tokens"
 		return this.page
 			.locator('[data-testid="fundraising-progress"]')
-			.getByText(/ends in|remaining|days/i);
+			.getByText(/ends in.*days|remaining.*days/i)
+			.filter({ hasNot: this.page.getByText("Remaining Tokens", { exact: true }) })
+			.first();
 	}
 }

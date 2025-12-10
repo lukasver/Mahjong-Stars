@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "@mjs/ui/components/motion";
+import { cn } from '@mjs/ui/lib/utils';
 import {
   Card,
   CardContent,
@@ -77,23 +78,26 @@ export function RecentTransactions({
                 className="rounded-md border border-zinc-800"
               >
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className={cn("w-full text-sm",
+                    "[&_th]:px-2 [&_th]:py-1 [&_th]:md:px-4 [&_th]:md:py-3",
+                    "[&_td]:px-2 [&_td]:py-1 [&_td]:md:px-4 [&_td]:md:py-3 [&_td]:md:text-sm [&_td]:text-xs"
+                  )} data-testid='recent-transactions-table'>
                     <motion.thead
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.8, duration: 0.4 }}
                     >
                       <tr className="border-b border-zinc-800 bg-zinc-950/50">
-                        <th className="px-4 py-3 text-left font-medium">
+                        <th className="text-left font-medium">
                           Tokens
                         </th>
-                        <th className="px-4 py-3 text-left font-medium">
+                        <th className="text-left font-medium">
                           Amount
                         </th>
-                        <th className="px-4 py-3 text-left font-medium">
+                        <th className="text-left font-medium">
                           Wallet
                         </th>
-                        <th className="px-4 py-3 text-left font-medium">
+                        <th className="text-left font-medium">
                           Time
                         </th>
                       </tr>
@@ -115,19 +119,19 @@ export function RecentTransactions({
                           }}
                           className="border-b border-zinc-800 last:border-0"
                         >
-                          <td className="px-4 py-3 font-medium">
+                          <td className="font-medium">
                             {formatAmount(
                               tx.quantity.toString(),
                               tx.sale.tokenSymbol,
                             )}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="">
                             {formatValue(tx.totalAmount.toString())}
                           </td>
-                          <td className="px-4 py-3 font-mono text-xs">
+                          <td className="font-mono text-xs">
                             {formatWalletAddress(tx.user.walletAddress)}
                           </td>
-                          <td className="px-4 py-3 text-zinc-400">
+                          <td className="text-zinc-400">
                             {formatTimeAgo(tx.createdAt)}
                           </td>
                         </motion.tr>

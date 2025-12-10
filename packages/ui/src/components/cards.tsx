@@ -90,16 +90,8 @@ export function getGlassyCardClassName(className?: string) {
   return cn('glassy text-foreground', className);
 }
 
-export const CardContainer = ({
-  children,
-  title,
-  description,
-  className,
-  header,
-  contentClassName,
-  glassy = true,
-  id,
-}: {
+
+interface CardContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   id?: string;
   children?: React.ReactNode;
   title?: string;
@@ -108,11 +100,23 @@ export const CardContainer = ({
   header?: React.ReactNode;
   contentClassName?: string;
   glassy?: boolean;
-}) => {
+}
+
+export const CardContainer = ({
+  children,
+  title,
+  description,
+  className,
+  header,
+  contentClassName,
+  glassy = true,
+  ...rest
+}: CardContainerProps) => {
+
   return (
     <CardPrimitive
-      id={id}
       className={cn(glassy ? getGlassyCardClassName(className) : className)}
+      {...rest}
     >
       {header ? (
         header

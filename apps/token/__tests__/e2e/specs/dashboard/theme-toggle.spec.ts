@@ -22,9 +22,9 @@ test("TC-DASH-010: Theme Toggle", async ({ page }) => {
 
 	// Get theme toggle button
 	const themeToggle = dashboardPage.getThemeToggleButton();
-	const isToggleVisible = await themeToggle.isVisible().catch(() => false);
+	const themeToggleCount = await themeToggle.count();
 
-	if (isToggleVisible) {
+	if (themeToggleCount > 0) {
 		await expect(themeToggle).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
 		// Get initial theme (check html or body class)
@@ -68,10 +68,9 @@ test("TC-DASH-010: Theme Toggle", async ({ page }) => {
 		// Click again to verify toggle back
 		// Re-find the button in case it was re-rendered
 		const themeToggleAgain = dashboardPage.getThemeToggleButton();
-		const isToggleStillVisible = await themeToggleAgain
-			.isVisible()
-			.catch(() => false);
-		if (isToggleStillVisible) {
+		const themeToggleAgainCount = await themeToggleAgain.count();
+		if (themeToggleAgainCount > 0) {
+			await expect(themeToggleAgain).toBeVisible({ timeout: TIMEOUTS.SHORT });
 			await themeToggleAgain.click({ timeout: TIMEOUTS.SHORT });
 			await page.waitForTimeout(1000); // Wait for theme transition
 

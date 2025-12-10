@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { DashboardPage } from "__tests__/e2e/pages/dashboard-page";
-import { ROUTES } from "__tests__/e2e/utils/constants";
+import { ROUTES, TIMEOUTS } from "__tests__/e2e/utils/constants";
 import { getNormalizedPageStructure } from "__tests__/e2e/utils/helpers";
 
 /**
@@ -54,11 +54,11 @@ test.describe("Dashboard", () => {
 
 		// Check if fundraising progress section exists (may not be visible depending on sale status)
 		const progressSection = await dashboardPage.getFundraisingProgress();
-		const isVisible = await progressSection.isVisible().catch(() => false);
+		const progressSectionCount = await progressSection.count();
 
 		// If progress section exists, verify it's properly displayed
-		if (isVisible) {
-			await expect(progressSection).toBeVisible();
+		if (progressSectionCount > 0) {
+			await expect(progressSection).toBeVisible({ timeout: TIMEOUTS.SHORT });
 		}
 		// If it doesn't exist, that's also acceptable - just verify page structure is intact
 	});

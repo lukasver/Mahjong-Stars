@@ -113,6 +113,11 @@ const config: NextConfig = () => {
 					exclude: ["error", "info", "debug", "warn"],
 				},
 			}),
+			// Only remove for vercel deployments that are not tests environment
+			reactRemoveProperties: !!process.env.VERCEL && process.env.NODE_ENV === 'production' &&
+				process.env.VERCEL_TARGET_ENV !== 'tests' && {
+				properties: ["^data-testid$"],
+			}
 		},
 		logging: {
 			fetches: {
@@ -170,6 +175,7 @@ const config: NextConfig = () => {
 			]
 		},
 		skipTrailingSlashRedirect: true,
+
 
 	} as NextConfig);
 };
