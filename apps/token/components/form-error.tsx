@@ -87,7 +87,7 @@ export const FormError = ({
         return {
           title: "Switch Network",
           message:
-            "Please switch to the correct network to continue with the transaction.",
+            "Please switch to another network to continue with the transaction.",
           icon: <AlertCircle className="h-4 w-4 text-primary!" />,
           className:
             "border-yellow-200 bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950/50",

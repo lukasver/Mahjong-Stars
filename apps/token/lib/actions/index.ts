@@ -26,6 +26,7 @@ import {
 	FOPSchema,
 	KycVerificationSchema,
 	ProfileSchema,
+	TransactionFeeTypeSchema,
 	TransactionStatusSchema,
 	UserSchema,
 } from "@/common/schemas/generated";
@@ -372,6 +373,15 @@ export const createTransaction = authActionClient
 				totalAmount: parsedInput.paid.amount as unknown as Decimal,
 				paidCurrency: parsedInput.paid.currency,
 				comment: null,
+				...(parsedInput.paid.fees && {
+					fees: [
+						{
+							type: TransactionFeeTypeSchema.enum.PROCESSING,
+							amount: new Prisma.Decimal(parsedInput.paid.fees),
+							currencySymbol: parsedInput.paid.currency,
+						}
+					]
+				}),
 			},
 			ctx,
 		);

@@ -94,8 +94,6 @@ export const InvestForm = ({
   const action = useActionListener(useAction(createTransaction), {
     onSuccess: (d) => {
 
-      console.log("🚀 ~ form.tsx:97 ~ d:", d);
-
       const result = d as unknown as InferSafeActionFnResult<
         typeof createTransaction
       >["data"];
@@ -116,6 +114,7 @@ export const InvestForm = ({
     validators: { onSubmit: InvestFormSchema },
     defaultValues: getDefaultValues(props.sale, activeAccount),
     onSubmit: ({ value }) => {
+
       // Create transaction in API, book amount of tokens etc etc...
       // has KYC, ask user to upload documents, etc etc...
       // if

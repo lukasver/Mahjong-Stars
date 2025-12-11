@@ -102,6 +102,8 @@ export const VestingScheduleScalarFieldEnumSchema = z.enum(['id','createdAt','up
 
 export const TokenDistributionScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','amount','distributionDate','txHash','status']);
 
+export const TransactionFeeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','transactionId','type','amount','currencySymbol','description','metadata']);
+
 export const SaleTransactionsScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','tokenSymbol','quantity','price','totalAmount','totalAmountCurrency','formOfPayment','receivingWallet','status','userId','saleId','comment','amountPaid','paidCurrency','txHash','blockchainId','agreementId','approvedBy','rejectionReason','paymentEvidenceId','paymentDate','metadata']);
 
 export const BlockchainScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','deletedAt','name','chainId','rpcUrl','explorerUrl','isTestnet','isEnabled']);
@@ -179,6 +181,10 @@ export type EmailVerificationStatusType = `${z.infer<typeof EmailVerificationSta
 export const KycStatusSchema = z.enum(['NOT_STARTED','SUBMITTED','VERIFIED','REJECTED']);
 
 export type KycStatusType = `${z.infer<typeof KycStatusSchema>}`
+
+export const TransactionFeeTypeSchema = z.enum(['PROCESSING','NETWORK','PLATFORM','PAYMENT_GATEWAY','EXCHANGE','THIRD_PARTY','REGULATORY','OTHER']);
+
+export type TransactionFeeTypeType = `${z.infer<typeof TransactionFeeTypeSchema>}`
 
 /////////////////////////////////////////
 // MODELS
@@ -463,6 +469,40 @@ export const TokenDistributionSchema = z.object({
 })
 
 export type TokenDistribution = z.infer<typeof TokenDistributionSchema>
+
+/////////////////////////////////////////
+// TRANSACTION FEE SCHEMA
+/////////////////////////////////////////
+
+export const TransactionFeeSchema = z.object({
+  /**
+   * Type of fee (e.g., PROCESSING, NETWORK, PLATFORM, PAYMENT_GATEWAY, etc.)
+   */
+  type: TransactionFeeTypeSchema,
+  id: z.string().cuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  deletedAt: z.coerce.date().nullable(),
+  transactionId: z.string(),
+  /**
+   * Fee amount in the specified currency
+   */
+  amount: z.instanceof(Prisma.Decimal, { message: "Field 'amount' must be a Decimal. Location: ['Models', 'TransactionFee']"}),
+  /**
+   * Currency symbol in which the fee is denominated (e.g., "USD", "ETH", "BTC")
+   */
+  currencySymbol: z.string(),
+  /**
+   * Optional description or notes about the fee
+   */
+  description: z.string().nullable(),
+  /**
+   * Optional metadata for additional fee information (e.g., fee calculation details, provider info)
+   */
+  metadata: JsonValueSchema.nullable(),
+})
+
+export type TransactionFee = z.infer<typeof TransactionFeeSchema>
 
 /////////////////////////////////////////
 // SALE TRANSACTIONS SCHEMA

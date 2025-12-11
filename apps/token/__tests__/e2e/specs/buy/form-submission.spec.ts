@@ -553,6 +553,7 @@ function getInputTrimmedValue(
   const decimalScale = FIAT_CURRENCIES.includes(currency) ? 2 : 8;
 
   const { intlConfig = getDefaultIntlConfig(currency) } = opts || {};
+
   const formattedValue = formatValue({
     value: amount,
     decimalScale,
@@ -560,5 +561,66 @@ function getInputTrimmedValue(
   });
 
 
-  return Number(formattedValue.replace(/[^0-9.]/g, "")).toFixed(decimalScale);
+  // Parse the formatted value using locale-aware parsing
+  const locale = intlConfig.locale || "en-US";
+
+  const cleanNumericValue = parseFormattedCurrencyValue(
+    formattedValue,
+    locale,
+    currency,
+  );
+
+  return Number(cleanNumericValue).toFixed(decimalScale);
+
+}
+
+
+/**
+ * Parses a formatted currency value to a numeric string, handling locale-specific
+ * decimal and group separators correctly.
+ * 
+ * @param formattedValue - The formatted currency string (e.g., "1.234,56" or "1,234.56")
+ * @param locale - The locale string (e.g., "en-US", "de-DE")
+ * @param currency - The currency code (e.g., "USD", "EUR")
+ * @returns Clean numeric string with dot as decimal separator
+ */
+function parseFormattedCurrencyValue(
+  formattedValue: string,
+  locale: string,
+  currency: string,
+): string {
+  // Get the format parts to understand the locale's number formatting
+  const parts = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+  }).formatToParts(12345.67);
+
+  // Extract the decimal and group separators used in this locale
+  const decimalSeparator =
+    parts.find((part) => part.type === "decimal")?.value || ".";
+  const groupSeparator =
+    parts.find((part) => part.type === "group")?.value || ",";
+
+  // Remove currency symbols, letters, and spaces
+  let cleanValue = formattedValue
+    .replace(/[^0-9\-,.\s]/g, "") // Remove currency symbols and letters
+    .replace(/\s/g, ""); // Remove spaces
+
+  // Remove group separators (thousands separators)
+  if (groupSeparator) {
+    cleanValue = cleanValue.replace(
+      new RegExp(`\\${groupSeparator.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "g"),
+      "",
+    );
+  }
+
+  // Replace the locale-specific decimal separator with a period
+  if (decimalSeparator !== ".") {
+    cleanValue = cleanValue.replace(
+      new RegExp(`\\${decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "g"),
+      ".",
+    );
+  }
+
+  return cleanValue;
 }

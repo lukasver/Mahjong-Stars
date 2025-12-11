@@ -383,6 +383,35 @@ model TokenDistribution {
   @@map("token_distributions")
 }
 
+model TransactionFee {
+  id        String    @id @default(cuid()) @db.Text
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+
+  transactionId String
+  transaction   SaleTransactions @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  /// Type of fee (e.g., PROCESSING, NETWORK, PLATFORM, PAYMENT_GATEWAY, etc.)
+  type TransactionFeeType
+
+  /// Fee amount in the specified currency
+  amount Decimal @db.Decimal(36, 18)
+
+  /// Currency symbol in which the fee is denominated (e.g., "USD", "ETH", "BTC")
+  currencySymbol String
+
+  /// Optional description or notes about the fee
+  description String?
+
+  /// Optional metadata for additional fee information (e.g., fee calculation details, provider info)
+  metadata Json?
+
+  @@index([transactionId])
+  @@index([type])
+  @@map("transaction_fees")
+}
+
 model SaleTransactions {
   id        String    @id @default(cuid()) @db.Text
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
@@ -439,6 +468,7 @@ model SaleTransactions {
 
   auditTrail         AuditTrail[]
   tokenDistributions TokenDistribution[]
+  fees               TransactionFee[]
 
   metadata Json?
 
@@ -698,6 +728,25 @@ enum KycStatus {
   SUBMITTED
   VERIFIED
   REJECTED
+}
+
+enum TransactionFeeType {
+  /// Processing fee charged by payment processors
+  PROCESSING
+  /// Network/blockchain transaction fee (gas fees, etc.)
+  NETWORK
+  /// Platform fee charged by the platform
+  PLATFORM
+  /// Payment gateway fee
+  PAYMENT_GATEWAY
+  /// Exchange rate conversion fee
+  EXCHANGE
+  /// Third-party service fee
+  THIRD_PARTY
+  /// Regulatory or compliance fee
+  REGULATORY
+  /// Other or custom fee type
+  OTHER
 }
 
 // model Passkey {

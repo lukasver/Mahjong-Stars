@@ -1,5 +1,8 @@
-import { SaleTransactionsSchema } from '@/common/schemas/generated';
-import { z } from 'zod';
+import { z } from "zod";
+import {
+  SaleTransactionsSchema,
+  TransactionFeeSchema,
+} from "@/common/schemas/generated";
 
 export const CreateTransactionDto = SaleTransactionsSchema.pick({
   tokenSymbol: true,
@@ -10,6 +13,22 @@ export const CreateTransactionDto = SaleTransactionsSchema.pick({
   comment: true,
   totalAmount: true,
   paidCurrency: true,
+}).extend({
+  fees: z.array(
+    TransactionFeeSchema.partial()
+      .pick({
+        type: true,
+        amount: true,
+        currencySymbol: true,
+        description: true,
+        metadata: true,
+      })
+      .required({
+        amount: true,
+        currencySymbol: true,
+        type: true,
+      }),
+  ).optional(),
 });
 
 export type CreateTransactionDto = z.infer<typeof CreateTransactionDto>;

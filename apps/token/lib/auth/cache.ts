@@ -1,10 +1,10 @@
-import 'server-only';
-import { ONE_MINUTE, ROLES } from '@/common/config/constants';
-import { Prisma } from '@prisma/client';
-import { Cacheable } from 'cacheable';
-import { prisma } from '../db/prisma';
-import { deleteSessionCookie } from './cookies';
-import { redirect } from 'next/navigation';
+import "server-only";
+import { Prisma } from "@prisma/client";
+import { Cacheable } from "cacheable";
+import { redirect } from "next/navigation";
+import { ONE_MINUTE, ROLES } from "@/common/config/constants";
+import { prisma } from "../db/prisma";
+import { deleteSessionCookie } from "./cookies";
 
 const UserWithRoles = Prisma.validator<Prisma.UserDefaultArgs>()({
   select: {
@@ -20,21 +20,21 @@ export type UserWithRoles = Prisma.UserGetPayload<typeof UserWithRoles> & {
 const cacheTTL = ONE_MINUTE * 2;
 
 export const authCache = new Cacheable({
-  namespace: 'auth::action:',
+  namespace: "auth::action:",
   // 2 minutes
   ttl: cacheTTL,
 });
 
 export const adminCache = new Cacheable({
-  namespace: 'admin::action:',
+  namespace: "admin::action:",
   // 2 minutes
   ttl: cacheTTL,
 });
 
 export const agreementCache = new Cacheable({
-  namespace: 'agreement::action:',
+  namespace: "agreement::action:",
   // 2 minutes
-  ttl: '1d',
+  ttl: "1d",
 });
 
 /**
@@ -66,8 +66,9 @@ export const getUserFromCache = async (address: string) => {
         },
       })) || undefined;
     if (!_user) {
+      console.debug("No user found in database, deleting session cookie");
       deleteSessionCookie();
-      redirect('/in?error=invalid_session');
+      redirect("/api/auth/logout?error=invalid_session");
     }
     const { userRole, ...rest } = _user;
     const roles = userRole.reduce(
@@ -75,7 +76,7 @@ export const getUserFromCache = async (address: string) => {
         acc[role.role.name as keyof typeof ROLES] = role.role.id;
         return acc;
       },
-      {} as Record<keyof typeof ROLES, string>
+      {} as Record<keyof typeof ROLES, string>,
     );
     user = { ...rest, roles };
     await authCache.set(address, user);

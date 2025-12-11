@@ -430,6 +430,7 @@ class TransactionsController {
 				comment,
 				totalAmount,
 				paidCurrency,
+				fees,
 			} = dto;
 
 			const userId = ctx.userId;
@@ -505,8 +506,27 @@ class TransactionsController {
 							},
 						},
 					},
-				}),
+				})
 			]);
+
+			if (transaction && fees && fees.length > 0) {
+				// Create fees in the background
+				waitUntil(prisma.transactionFee.createMany({
+					data: fees.map(({ metadata, ...f }) => ({
+						...f,
+						transactionId: transaction.id,
+						...(metadata && {
+							metadata: {
+								toJSON() {
+									return metadata;
+								},
+							}
+						}),
+					})),
+				}).catch((e) => {
+					logger(e);
+				}))
+			}
 
 			return Success({
 				transaction: decimalsToString(transaction),
