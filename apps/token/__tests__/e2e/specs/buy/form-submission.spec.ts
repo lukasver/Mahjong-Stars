@@ -12,9 +12,12 @@
  */
 
 import { invariant } from "@epic-web/invariant";
+import { faker } from "@faker-js/faker";
+import { formatValue } from "@mjs/ui/primitives/form-input/currency-input";
 import { expect, test } from "@playwright/test";
 import { mockExchangeRates } from "__tests__/mocks/helpers";
 import Decimal from "decimal.js";
+import { FIAT_CURRENCIES } from "@/common/config/constants";
 import { SaleInvestInfo } from "@/common/types/sales";
 import { AmountCalculatorService } from "@/lib/services/pricefeeds/amount.service";
 import { BuyPage } from "../../pages/buy-page";
@@ -28,8 +31,8 @@ const service = new AmountCalculatorService(getExchangeRate);
 
 invariant(service, "Amount calculator service is required");
 
-test.describe
-  .serial.only("Invest Form Submission ", () => {
+test.describe.serial
+  .only("Invest Form Submission ", () => {
     test.beforeEach(async ({ page, context }) => {
       // Intercept all requests to the exchange rates endpoint, regardless of query parameters
       // This matches requests like: /api/proxy/feeds/rates?from=USD&to=ETH
@@ -129,7 +132,12 @@ test.describe
       // Enter valid token amount
       const tokenInput = buyPage.getTokenAmountInput();
       await expect(tokenInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
-      const quantity = "1000";
+      const maxBuyPerUser = Number(saleData.data.sale.maximumTokenBuyPerUser);
+      const maxQ = Math.min(
+        Number(saleData.data.sale.availableTokenQuantity),
+        maxBuyPerUser || 10000,
+      );
+      const quantity = `${faker.number.int({ min: 1, max: maxQ })}`;
       await tokenInput.fill(quantity);
       await page.waitForTimeout(300); // Wait for USD calculation
 
@@ -154,7 +162,11 @@ test.describe
       expect(usdValue).toBeTruthy();
       expect(parseFloat(usdNumericValue)).toBeGreaterThan(0);
       expect(decimalValue.toDecimalPlaces().toString()).toBe(
-        decimalPPU.mul(new Decimal(quantity)).toDecimalPlaces().toString(),
+        // We use 2 here because frontend shows 2 decimal places for FIAT currencies.
+        decimalPPU
+          .mul(new Decimal(quantity))
+          .toDecimalPlaces()
+          .toFixed(2, Decimal.ROUND_DOWN),
       );
 
       // Math check from internal calculations. Ensure the total amount to pay is calculated correctly
@@ -172,7 +184,7 @@ test.describe
 
       // The value should be the same as the result of the calculation service.
       expect(decimalValue.toDecimalPlaces().toString()).toBe(
-        new Decimal(amount).toDecimalPlaces().toString(),
+        getInputTrimmedValue(amount, saleData.data.sale.currency)
       );
 
       // Verify "Continue" or "Invest" button is visible and enabled
@@ -346,14 +358,22 @@ test.describe
       await page.waitForTimeout(500); // Wait for form update
 
       // Verify ETH is now displayed in the combobox
-      await expect(paymentSelector).toHaveText(new RegExp(`^${PURCHASE_CRYPTO_CURRENCY}$`, "i"), {
-        timeout: TIMEOUTS.SHORT,
-      });
+      await expect(paymentSelector).toHaveText(
+        new RegExp(`^${PURCHASE_CRYPTO_CURRENCY}$`, "i"),
+        {
+          timeout: TIMEOUTS.SHORT,
+        },
+      );
 
       // Enter valid token amount
       const tokenInput = buyPage.getTokenAmountInput();
       await expect(tokenInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
-      const quantity = "1000";
+      const maxBuyPerUser = Number(saleData.data.sale.maximumTokenBuyPerUser);
+      const maxQ = Math.min(
+        Number(saleData.data.sale.availableTokenQuantity),
+        maxBuyPerUser || 10000,
+      );
+      const quantity = `${faker.number.int({ min: 1, max: maxQ })}`;
       await tokenInput.fill(quantity);
       await page.waitForTimeout(1000); // Wait for crypto calculation
 
@@ -364,6 +384,7 @@ test.describe
 
       // Verify the crypto amount is displayed and is greater than 0
       const cryptoValue = await cryptoInput.inputValue();
+
       const cryptoNumericValue = cryptoValue.replace(/[^0-9.]/g, "");
       expect(cryptoValue).toBeTruthy();
       expect(parseFloat(cryptoNumericValue)).toBeGreaterThan(0);
@@ -386,37 +407,48 @@ test.describe
         expect(summaryDetails).toBeVisible({ timeout: TIMEOUTS.SHORT }),
       ]);
 
-
       // Math check from internal calculations. Ensure the total amount to pay is calculated correctly
       const shouldAddFee = !Number.isNaN(
         Number(process.env.NEXT_PUBLIC_FEE_BPS),
       );
 
-      const conversion = await service.convertCurrency({
-        amount: new Decimal(quantity).mul(saleData.data.sale.tokenPricePerUnit).toDecimalPlaces().toString(),
+      const conversion = await service.convertToCurrency({
+        amount: new Decimal(quantity)
+          .mul(saleData.data.sale.tokenPricePerUnit)
+          .toDecimalPlaces()
+          .toString(),
         fromCurrency: saleData.data.sale.currency,
         toCurrency: PURCHASE_CRYPTO_CURRENCY,
-        precision: 18,
+        precision: 8,
       });
 
-      console.log("🚀 ~ form-submission.spec.ts:402 ~ conversion:", conversion);
+      const newPPU = new Decimal(conversion.exchangeRate)
+        .mul(saleData.data.sale.tokenPricePerUnit)
+        .toDecimalPlaces()
+        .toString();
 
       const inputCryptoDecimalAmount = new Decimal(cryptoNumericValue);
-      console.log("🚀 ~ form-submission.spec.ts:405 ~ inputCryptoDecimalAmount:", inputCryptoDecimalAmount.toDecimalPlaces().toString());
+
       const { amount, fees } = service.getTotalAmount({
-        pricePerUnit: conversion.pricePerUnit,
+        pricePerUnit: newPPU,
         quantity: quantity,
         addFee: shouldAddFee,
+        precision: 8,
       });
-      console.log("🚀 ~ form-submission.spec.ts:408 ~  amount, fees:", amount, fees);
-
 
       expect(new Decimal(amount).isZero()).toBe(false);
       expect(new Decimal(fees).isZero()).toBe(shouldAddFee);
 
+      console.debug(
+        "Q HAY ACA???",
+        getInputTrimmedValue(conversion.amount, PURCHASE_CRYPTO_CURRENCY)
+      );
+
       // The value should be the same as the result of the calculation service.
-      expect(inputCryptoDecimalAmount).toBe(
-        new Decimal(conversion.amount).toDecimalPlaces().toString(),
+      expect(inputCryptoDecimalAmount.toString()).toBe(
+        // Input shows a maximum of 8 decimal places for crypto currencies.
+        // new Decimal(conversion.amount).toDecimalPlaces(8).toString(),
+        getInputTrimmedValue(conversion.amount, PURCHASE_CRYPTO_CURRENCY)
       );
 
       // Check KYC indicator visibility based on sale data
@@ -487,3 +519,46 @@ test.describe
       });
     });
   });
+
+const getDefaultIntlConfig = (currency: string) =>
+  ({
+    locale: faker.helpers.arrayElement([
+      "en-US",
+      "de-DE",
+      "fr-FR",
+      "es-ES",
+      "it-IT",
+      "ja-JP",
+      "ko-KR",
+      "zh-CN",
+      "zh-TW",
+    ]),
+    currency,
+    maximumFractionDigits: FIAT_CURRENCIES.includes(currency) ? 2 : 8,
+    minimumFractionDigits: 3,
+  }) satisfies Parameters<typeof formatValue>[0]["intlConfig"];
+
+
+
+/**
+ * Currenty Currency input configuration trims the value to be displayed in the input
+ * to the decimalScale value. This helper function is needed to ensure same comparison
+ */
+function getInputTrimmedValue(
+  amount: string,
+  currency: string,
+  opts?: Partial<Omit<Parameters<typeof formatValue>[0], "value">>,
+) {
+
+  const decimalScale = FIAT_CURRENCIES.includes(currency) ? 2 : 8;
+
+  const { intlConfig = getDefaultIntlConfig(currency) } = opts || {};
+  const formattedValue = formatValue({
+    value: amount,
+    decimalScale,
+    intlConfig,
+  });
+
+
+  return Number(formattedValue.replace(/[^0-9.]/g, "")).toFixed(decimalScale);
+}

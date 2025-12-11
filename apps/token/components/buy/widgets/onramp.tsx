@@ -72,20 +72,20 @@ const OnRampWidgetComponent = ({
       async function getEquivalentAmountInCrypto() {
         const newPaidCurrency = paymentToken?.symbol;
         // We should not add fee here but probably add an extra for the gas??
-        const result = await calculator.convertCurrency({
+        const result = await calculator.convertToCurrency({
           amount: tx.totalAmount.toString(),
           fromCurrency: tx.paidCurrency,
           toCurrency: newPaidCurrency,
           precision: 18,
         });
 
+        const newPPU = new Decimal(result.exchangeRate).mul(tx.sale.tokenPricePerUnit).toDecimalPlaces().toString();
+
         setAmount((p) => ({
           ...p,
           amount: new Decimal(result.amount).toDecimalPlaces().toString(),
           currency: result.currency,
-          pricePerUnit: new Decimal(result.pricePerUnit)
-            .toDecimalPlaces()
-            .toString(),
+          pricePerUnit: newPPU
         }));
       }
       getEquivalentAmountInCrypto().catch((error) => {

@@ -109,9 +109,6 @@ const CryptoTransactionWidgetComponent = ({
     },
   );
 
-  console.log("🚀 ~ transaction.tsx:106 ~ upportedTokens, isSupported:", supportedTokens, isSupported);
-  console.log("🚀 ~ transaction.tsx:106 ~ acceptStablecoins:", acceptStablecoins);
-  console.log("🚀 ~ transaction.tsx:106 ~ acceptNativeTokens:", acceptNativeTokens);
   // If user is paying in FIAT, we default to native currency of connected chain.
   const paymentToken = supportedTokens.find((token) =>
     isFiatCurrency(tx.totalAmountCurrency)
@@ -137,20 +134,19 @@ const CryptoTransactionWidgetComponent = ({
 
         invariant(newPaidCurrency, "New paid currency couldn't be derived");
         // We should not add fee here but probably add an extra for the gas??
-        const result = await calculator.convertCurrency({
+        const result = await calculator.convertToCurrency({
           amount: tx.totalAmount.toString(),
           fromCurrency: tx.paidCurrency,
           toCurrency: newPaidCurrency!,
           precision: 18,
         });
+        const newPPU = new Decimal(result.exchangeRate).mul(tx.sale.tokenPricePerUnit).toDecimalPlaces().toString();
 
         setAmount((p) => ({
           ...p,
           amount: new Decimal(result.amount).toDecimalPlaces().toString(),
           currency: result.currency,
-          pricePerUnit: new Decimal(result.pricePerUnit)
-            .toDecimalPlaces()
-            .toString(),
+          pricePerUnit: newPPU,
         }));
       }
       getEquivalentAmountInCrypto().catch((error) => {

@@ -93,6 +93,9 @@ export const InvestForm = ({
   const [isPending, startTransition] = useTransition();
   const action = useActionListener(useAction(createTransaction), {
     onSuccess: (d) => {
+
+      console.log("🚀 ~ form.tsx:97 ~ d:", d);
+
       const result = d as unknown as InferSafeActionFnResult<
         typeof createTransaction
       >["data"];
@@ -152,22 +155,29 @@ export const InvestForm = ({
       return;
     }
     try {
-      const { amount } = await calculator.calculateAmountToPay({
+
+      const { amount, fees } = await calculator.calculateAmountToPay({
         currency: form.state.values.paid.currency,
         quantity: v,
         sale: sale,
         pricePerUnit: form.state.values.paid.ppu,
-        tokenDecimals: sale?.token?.decimals || 18,
         // Add fee if we have a BPS fee configured
         addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
       });
+
+
 
       if (!amount) {
         throw new Error(
           "Error calculating amount, please refresh and try again",
         );
       }
+
+
       form.setFieldValue("paid.amount", amount);
+      if (fees) {
+        form.setFieldValue("paid.fees", fees);
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Unknown error");
     }
@@ -190,7 +200,7 @@ export const InvestForm = ({
         "paid.amount",
         new Decimal(q)
           .mul(sale.tokenPricePerUnit)
-          .toFixed(calculator.FIAT_PRECISION),
+          .toFixed(calculator.getPrecision(sale.currency)),
       );
     } else {
       setBlockForm({ type: "maintenance" });
@@ -216,6 +226,8 @@ export const InvestForm = ({
         invariant(q, "Quantity is required");
         invariant(currency, "Currency is required");
         invariant(decimals, "Decimals are required");
+
+
         const { pricePerUnit, amount, fees } =
           await calculator.calculateAmountToPay({
             quantity: String(q),
@@ -223,13 +235,14 @@ export const InvestForm = ({
             currency,
             // Add fee if we have a BPS fee configured
             addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
-            // tokenDecimals: decimals,
           });
-        // form.reset({})
+
         form.setFieldValue("paid.amount", amount);
         form.setFieldValue("paid.ppu", pricePerUnit);
         form.setFieldValue("paid.currency", currency);
         form.setFieldValue("paid.quantity", q);
+        form.setFieldValue("paid.fees", fees);
+
       } catch (e) {
         const message = e instanceof Error ? e.message : "Unknown error";
         toast.error(message);
@@ -290,7 +303,14 @@ export const InvestForm = ({
   return (
     <form.AppForm>
       <form className="space-y-4" onSubmit={handleSubmit}>
-
+        <form.AppField name="paid.fees" >
+          {(field) => (
+            <field.FormItem
+            >
+              <input type="hidden" name={field.name} value={field.state.value as string} />
+            </field.FormItem>
+          )}
+        </form.AppField>
         {/* Wallet */}
         <FormInput
           name="receivingWallet"
@@ -361,7 +381,7 @@ export const InvestForm = ({
                     paidCurrency && FIAT_CURRENCIES.includes(paidCurrency)
                       ? paidCurrency
                       : undefined,
-                  maximumFractionDigits: calculator.CRYPTO_PRECISION,
+                  maximumFractionDigits: paidCurrency ? calculator.getPrecision(paidCurrency) : 8,
                   minimumFractionDigits: 3,
                 },
               }}
@@ -576,14 +596,7 @@ const SecurityNotice = () => {
   );
 };
 
-// const getFormOfPaymentOptions = (t: (option: string) => string) => {
-//   return FOPSchema.options.map((option) => ({
-//     id: option,
-//     label: option,
-//     value: t(option),
-//     disabled: false,
-//   }));
-// };
+
 
 const getDefaultValues = (
   sale: SaleWithToken,
@@ -598,6 +611,7 @@ const getDefaultValues = (
       currency: sale.currency,
       quantity: initialQ,
       ppu: sale.tokenPricePerUnit.toString(),
+      fees: undefined as string | undefined,
     },
     base: {
       ppu: sale.tokenPricePerUnit.toString(),
@@ -634,11 +648,15 @@ const getAmountDescription = (
   return base;
 };
 
+/*
+ * This is used to get the decimal scale for the input field for visual purposes (no calculations).
+ */
 const getDecimalScale = (currency: string | undefined) => {
   if (currency && FIAT_CURRENCIES.includes(currency)) {
     return 2;
   }
-  return calculator.CRYPTO_PRECISION;
+  // todo: revise, we might want to only show 8 places in the input instead of 18
+  return 8;
 };
 
 const InvestSkeleton = () => {

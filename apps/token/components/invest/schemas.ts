@@ -11,6 +11,7 @@ export const InvestFormSchema = z
 			currency: z.string().min(1, "Currency is required"),
 			quantity: z.coerce.string(),
 			ppu: z.string(),
+			fees: z.string().optional(),
 		}),
 		base: z.object({
 			ppu: z.string(),

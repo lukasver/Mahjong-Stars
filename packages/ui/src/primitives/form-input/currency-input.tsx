@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import { cn } from '@mjs/ui/lib/utils';
-import * as React from 'react';
+import { cn } from "@mjs/ui/lib/utils";
+import * as React from "react";
 import CurrencyInputField, {
   CurrencyInputOnChangeValues,
-} from 'react-currency-input-field';
-import { z } from 'zod';
-import { useFormContext } from '../form/tanstack-form';
-import { UseAppForm } from '../form';
-import { Label } from '../label';
-
-import { getInputClass } from '../input';
-import { Skeleton } from '../skeleton';
+  formatValue,
+} from "react-currency-input-field";
+import { z } from "zod";
+import { UseAppForm } from "../form";
+import { useFormContext } from "../form/tanstack-form";
+import { getInputClass } from "../input";
+import { Label } from "../label";
+import { Skeleton } from "../skeleton";
 
 export interface CurrencyInputProps
   extends Omit<
     React.ComponentProps<typeof CurrencyInputField>,
-    'value' | 'onChange'
+    "value" | "onChange"
   > {
-  type: 'currency';
+  type: "currency";
   value?: CurrencyInputOnChangeValues | string | undefined;
   options?: never;
   onChange?: (value: CurrencyInputOnChangeValues | undefined) => void;
@@ -28,9 +28,9 @@ export interface CurrencyInputProps
 const CurrencyInputValidator = z.coerce.string().max(21).trim();
 
 const isCurrencyInputOnChangeValues = (
-  value: unknown
+  value: unknown,
 ): value is CurrencyInputOnChangeValues => {
-  return Boolean(value && typeof value === 'object' && 'value' in value);
+  return Boolean(value && typeof value === "object" && "value" in value);
 };
 
 const CurrencyInput = ({
@@ -45,13 +45,13 @@ const CurrencyInput = ({
   const parsedValue: string | undefined = isCurrencyInputOnChangeValues(value)
     ? value.value
     : value
-    ? String(value)
-    : undefined;
+      ? String(value)
+      : undefined;
 
   if (loading) {
     return (
       <div className={cn(getInputClass(), className)}>
-        <Skeleton className='w-1/6 h-6 bg-secondary-100' />
+        <Skeleton className="w-1/6 h-6 bg-secondary-100" />
       </div>
     );
   }
@@ -69,7 +69,7 @@ const CurrencyInput = ({
   );
 };
 
-CurrencyInput.displayName = 'CurrencyInput';
+CurrencyInput.displayName = "CurrencyInput";
 
 const CurrencyFormInput = ({
   name,
@@ -93,17 +93,17 @@ const CurrencyFormInput = ({
       children={(field) => (
         <>
           {label && (
-            <Label htmlFor={`${name}-${uniqueId}`} className='mb-1'>
+            <Label htmlFor={`${name}-${uniqueId}`} className="mb-1">
               {label}
             </Label>
           )}
           <CurrencyInput
-            type='currency'
+            type="currency"
             id={`${name}-${uniqueId}`}
             defaultValue={defaultValue}
             onChange={(v) => {
               field.handleChange(v);
-              onChange?.(v?.value ?? '');
+              onChange?.(v?.value ?? "");
             }}
             onBlur={field.handleBlur}
             {...props}
@@ -117,14 +117,14 @@ const CurrencyFormInput = ({
 export interface SelectableCurrencyInputProps
   extends Omit<
     React.ComponentProps<typeof CurrencyInput>,
-    'onChange' | 'value'
+    "onChange" | "value"
   > {
   options?: never;
-  type: 'currency';
+  type: "currency";
   // intlConfig?: IntlConfig;
   onChange?: (value: CurrencyInputOnChangeValues | undefined) => void;
   value?: CurrencyInputOnChangeValues;
   onChangeCurrency?: (currency: string | null) => void;
 }
 
-export { CurrencyFormInput, CurrencyInput };
+export { CurrencyFormInput, CurrencyInput, formatValue };

@@ -234,6 +234,8 @@ export const getExchangeRate = async (from: string, to: string) => {
 	}
 };
 
+
+
 export const getCurrencies = async () => {
 	try {
 		const data = await fetcher<{

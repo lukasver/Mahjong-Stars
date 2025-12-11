@@ -1,7 +1,3 @@
-// import { Currency } from '@prisma/client';
-// // import { constants } from 'ethers';
-// // import { getAddress } from 'ethers/lib/utils';
-
 import { getAddress, NATIVE_TOKEN_ADDRESS } from "thirdweb";
 
 import * as c from "thirdweb/chains";
@@ -11,15 +7,15 @@ export const ALLOWED_CHAINS =
 	process.env.NODE_ENV === "production"
 		? [c.bsc, c.base, c.optimism, c.arbitrum, c.ethereum]
 		: [
-				c.bscTestnet,
-				c.sepolia,
-				c.baseSepolia,
-				c.base,
-				c.bsc,
-				c.optimism,
-				c.arbitrum,
-				c.ethereum,
-			];
+			c.bscTestnet,
+			c.sepolia,
+			c.baseSepolia,
+			c.base,
+			c.bsc,
+			c.optimism,
+			c.arbitrum,
+			c.ethereum,
+		];
 
 const STABLECOIN_DECIMALS = 6;
 const ERC20_DECIMALS = 18;

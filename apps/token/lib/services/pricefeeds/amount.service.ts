@@ -1,8 +1,9 @@
-import { Prisma } from '@prisma/client';
-import { BigNumberish, parseUnits } from 'ethers';
-import { FIAT_CURRENCIES } from '@/common/config/constants';
-import { GetExchangeRate } from '@/common/schemas/dtos/rates';
-import { Sale } from '@/common/schemas/generated';
+import { invariant } from "@epic-web/invariant";
+import { Prisma } from "@prisma/client";
+import { BigNumberish, parseUnits } from "ethers";
+import { FIAT_CURRENCIES } from "@/common/config/constants";
+import { GetExchangeRate } from "@/common/schemas/dtos/rates";
+import { Sale } from "@/common/schemas/generated";
 
 const Decimal = Prisma.Decimal;
 
@@ -25,27 +26,25 @@ type getAmountAndPricePerUnitReturn = {
 
 type GetRateFetcher = (
   from: string,
-  to: string
+  to: string,
 ) => Promise<
   | {
-      data: GetExchangeRate;
-      error: null;
-    }
+    data: GetExchangeRate;
+    error: null;
+  }
   | {
-      data: null;
-      error: unknown;
-    }
+    data: null;
+    error: unknown;
+  }
 >;
 
 export class AmountCalculatorService {
-  public FIAT_PRECISION: number = 4;
-  public CRYPTO_PRECISION: number = 8;
+  private FIAT_PRECISION: number = 8;
+  private CRYPTO_PRECISION: number = 18;
   // 2 BPS or 0.02% or 0.0002 in decimal format
-  public BASIS_POINTS: number = new Decimal(
-    process.env.NEXT_PUBLIC_FEE_BPS || 2
-  )
-    .div(10000)
-    .toNumber();
+  private BASIS_POINTS: number = !process.env.NEXT_PUBLIC_FEE_BPS
+    ? 0
+    : new Decimal(process.env.NEXT_PUBLIC_FEE_BPS).div(10000).toNumber();
   private getRateFetcher: GetRateFetcher;
 
   constructor(fetcher: GetRateFetcher) {
@@ -58,6 +57,10 @@ export class AmountCalculatorService {
       return this.FIAT_PRECISION;
     }
     return this.CRYPTO_PRECISION;
+  }
+
+  getBasisPoints() {
+    return this.BASIS_POINTS;
   }
 
   getPricePerUnit({
@@ -90,7 +93,7 @@ export class AmountCalculatorService {
     precision?: number;
   }) {
     let ppu: Prisma.Decimal;
-    if (typeof pricePerUnit === 'string') {
+    if (typeof pricePerUnit === "string") {
       ppu = new Decimal(pricePerUnit);
     } else {
       ppu = pricePerUnit;
@@ -117,20 +120,22 @@ export class AmountCalculatorService {
   }: {
     amount: string;
     decimals: number;
-  }): BigNumberish {
+  }): { bigNumber: BigNumberish, decimals: number } {
     // Regular expression to match only the necessary number of decimal places
     const regex = new RegExp(`^(\\d+\\.?\\d{0,${decimals}})`);
     const match = amount.match(regex);
 
-    // TODO! esto es necesario para evitar un underflow en el caso que los decimals del token
-    // TODO! sean menores a los decimales recibido tras el cálculo del amount:
-    // TODO! Ejemplo: "123.12345678" -> parseUnits("123.12345678, 6") -> daría error
-    // TODO! por lo que se re-formatea el amount a la cantidad de decimales del token
+    //! This is necessary to avoid an underflow in cases where the token's decimals
+    //! are less than the number of decimal places present in the calculated amount:
+    //! Example: "123.12345678" -> parseUnits("123.12345678", 6) -> would throw an error
+    //! So we reformat the amount to match the token's decimal places
     const formattedAmount = match
       ? new Decimal(amount).toFixed(decimals)
       : amount;
-    return parseUnits(formattedAmount, decimals);
+    return { bigNumber: parseUnits(formattedAmount, decimals), decimals };
   }
+
+
 
   async getAmountAndPricePerUnit({
     initialCurrency,
@@ -144,11 +149,11 @@ export class AmountCalculatorService {
 
     const res = await this.getRateFetcher(initialCurrency, currency);
     if (res.error) {
-      throw new Error('Error fetching exchange rate');
+      throw new Error("Error fetching exchange rate");
     }
     const exchangeRate = res.data?.[initialCurrency]?.[currency];
     if (!exchangeRate) {
-      throw new Error('Cannot calculate exchange rate');
+      throw new Error("Cannot calculate exchange rate");
     }
     const pricePerUnit = this.getPricePerUnit({
       base,
@@ -163,7 +168,7 @@ export class AmountCalculatorService {
     });
 
     return {
-      fees: amountToPay.fees || '0',
+      fees: amountToPay.fees || "0",
       amount: amountToPay.amount.toString(), // Total amount to pay in currency B
       pricePerUnit: pricePerUnit.toString(), // Price per single unit in currency B
       exchangeRate, // Exchange rate of currency B in terms of currency A
@@ -171,13 +176,13 @@ export class AmountCalculatorService {
     };
   }
 
+
   /**
    * Main function to calculate the amount to pay by the user based on the bought token quantity.
    * If PricePerUnit is not passed, then it will be fetched from the pricefeeds endpoint.
    * Is an abstraction to use easily in frontend
    * @param boughtTokenQuantity
    * @param boughtTokenCurrency {Currency}
-   * @param tokenDecimals {number} amount of decimals of the token if is crypto payment
    * @param activeSale
    * @param addFee {boolean} if true, the amount will be calculated with the management fee. By default addFee is true if sale currency is different from payment currency
    * @returns
@@ -185,15 +190,18 @@ export class AmountCalculatorService {
   calculateAmountToPay = async (args: {
     quantity: string | number;
     currency: string;
-    sale: Pick<Sale, 'currency' | 'tokenPricePerUnit'>;
+    sale: Pick<Sale, "currency" | "tokenPricePerUnit">;
     pricePerUnit?: string | null;
-    tokenDecimals?: number;
     addFee?: boolean;
   }) => {
-    const { quantity, currency, sale, pricePerUnit, tokenDecimals } = args;
+    const { quantity, currency, sale, pricePerUnit } = args;
 
+    invariant(quantity, "Quantity is required");
+    invariant(currency, "Currency is required");
+    invariant(sale, "Sale is required");
     let finalPPU: string | null | undefined = pricePerUnit;
     let amountToPay: { amount: string; fees: string } | undefined;
+    const precision = this.getPrecision(currency);
 
     // If we don't have a rate we need to fetch it
     if (!finalPPU) {
@@ -207,7 +215,7 @@ export class AmountCalculatorService {
         base: sale.tokenPricePerUnit?.toString(),
         quantity: Number(quantity) || 1,
         addFee: args.addFee || sale?.currency !== currency,
-        precision: tokenDecimals,
+        precision,
       });
 
       finalPPU = newPPU;
@@ -216,33 +224,19 @@ export class AmountCalculatorService {
     } else {
       amountToPay = this.getTotalAmount({
         pricePerUnit: finalPPU,
-        quantity: quantity || '0',
+        quantity,
         addFee: args.addFee || sale?.currency !== currency,
-        precision: tokenDecimals,
+        precision,
       });
     }
 
-    if (tokenDecimals) {
-      const bigNumber = this.getTotalAmountCrypto({
-        amount: amountToPay.amount!,
-        decimals: tokenDecimals,
-      });
-      return {
-        pricePerUnit: finalPPU,
-        amount: amountToPay.amount,
-        fees: amountToPay.fees,
-        currency,
-        decimals: tokenDecimals,
-        bigNumber: bigNumber,
-      };
-    } else {
-      return {
-        pricePerUnit: finalPPU,
-        amount: amountToPay.amount,
-        fees: amountToPay.fees,
-        currency,
-      };
-    }
+    return {
+      pricePerUnit: finalPPU,
+      amount: amountToPay.amount,
+      fees: amountToPay.fees,
+      currency,
+    };
+
   };
 
   /**
@@ -253,7 +247,7 @@ export class AmountCalculatorService {
    * @param precision - Optional precision for the result (defaults to currency-specific precision)
    * @returns Object containing the converted amount, currency, and price per unit
    */
-  convertCurrency = async (args: {
+  convertToCurrency = async (args: {
     amount: string | number;
     fromCurrency: string;
     toCurrency: string;
@@ -263,33 +257,36 @@ export class AmountCalculatorService {
 
     // Get exchange rate from source to target currency
     const res = await this.getRateFetcher(fromCurrency, toCurrency);
+
     if (res.error) {
-      throw new Error('Error fetching exchange rate for currency conversion');
+      throw new Error("Error fetching exchange rate for currency conversion");
     }
 
     const exchangeRate = res.data?.[fromCurrency]?.[toCurrency];
+
     if (!exchangeRate) {
       throw new Error(
-        `Cannot get exchange rate from ${fromCurrency} to ${toCurrency}`
+        `Cannot get exchange rate from ${fromCurrency} to ${toCurrency}`,
       );
     }
 
     // Calculate the converted amount
     const convertedAmount = new Decimal(amount).mul(exchangeRate);
 
+
     // Get appropriate precision for the target currency
     const targetPrecision = this.getPrecision(toCurrency, precision);
+
 
     // Format the converted amount
     const formattedAmount = convertedAmount.toFixed(targetPrecision);
 
-    // Calculate price per unit (1 unit of source currency in target currency)
-    const pricePerUnit = new Decimal(exchangeRate).toFixed(targetPrecision);
+    // // Calculate price per unit (1 unit of source currency in target currency)
+    // const pricePerUnit = new Decimal(exchangeRate).toFixed(targetPrecision);
 
     return {
       amount: formattedAmount,
       currency: toCurrency,
-      pricePerUnit: pricePerUnit,
       exchangeRate: exchangeRate,
     };
   };
