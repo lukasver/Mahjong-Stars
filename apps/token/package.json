@@ -20,6 +20,7 @@
 		"db:studio": "dotenv -e .env.local -- npx prisma studio",
 		"db:migrate:dev": "dotenv -e .env.local -- npx prisma migrate dev",
 		"db:migrate:reset": "dotenv -e .env.local -- npx prisma migrate reset",
+		"db:migrate:stage": "dotenv -e .env.stage.local -- npx prisma migrate deploy",
 		"db:migrate:prod": "dotenv -e .env.production.local -- npx prisma migrate deploy",
 		"db:push": "dotenv -e .env.local -- npx prisma db push",
 		"db:push:stage": "dotenv -e .env.stage.local -- npx prisma db push",
