@@ -154,24 +154,21 @@ test.describe.serial("Invest Form Submission ", () => {
     invariant(ppu, "Price per token is required");
 
     // Math checks from inputs and visible information
-    const decimalPPU = new Decimal(ppu);
-    const usdValue = await usdInput.inputValue();
-    const usdNumericValue = usdValue.replace(/[^0-9.]/g, "");
-    const decimalValue = new Decimal(usdNumericValue);
-    expect(usdValue).toBeTruthy();
-    expect(parseFloat(usdNumericValue)).toBeGreaterThan(0);
-    expect(decimalValue.toDecimalPlaces().toString()).toBe(
-      // We use 2 here because frontend shows 2 decimal places for FIAT currencies.
-      decimalPPU
-        .mul(new Decimal(quantity))
-        .toDecimalPlaces()
-        .toFixed(2, Decimal.ROUND_DOWN),
-    );
-
-    // Math check from internal calculations. Ensure the total amount to pay is calculated correctly
     const shouldAddFee = !Number.isNaN(
       Number(process.env.NEXT_PUBLIC_FEE_BPS),
     );
+    const decimalPPU = new Decimal(ppu);
+    const usdValue = await usdInput.inputValue();
+    const usdNumericValue = usdValue.replace(/[^0-9.]/g, "");
+    expect(usdValue).toBeTruthy();
+    expect(parseFloat(usdNumericValue)).toBeGreaterThan(0);
+    const controlValue = decimalPPU.mul(new Decimal(quantity)).mul(shouldAddFee ? 1 + service.getBasisPoints() : 1)
+    expect(usdNumericValue.toString()).toBe(
+      getInputTrimmedValue(controlValue, saleData.data.sale.currency)
+
+    );
+
+    // Math check from internal calculations. Ensure the total amount to pay is calculated correctly
     const { amount, fees } = service.getTotalAmount({
       pricePerUnit: decimalPPU,
       quantity: quantity,
@@ -179,10 +176,10 @@ test.describe.serial("Invest Form Submission ", () => {
     });
 
     expect(new Decimal(amount).isZero()).toBe(false);
-    expect(new Decimal(fees).isZero()).toBe(shouldAddFee);
+    expect(new Decimal(fees).isZero()).toBe(!shouldAddFee);
 
     // The value should be the same as the result of the calculation service.
-    expect(decimalValue.toDecimalPlaces().toString()).toBe(
+    expect(usdNumericValue).toBe(
       getInputTrimmedValue(amount, saleData.data.sale.currency)
     );
 
@@ -423,10 +420,7 @@ test.describe.serial("Invest Form Submission ", () => {
 
     const newPPU = new Decimal(conversion.exchangeRate)
       .mul(saleData.data.sale.tokenPricePerUnit)
-      .toDecimalPlaces()
-      .toString();
 
-    const inputCryptoDecimalAmount = new Decimal(cryptoNumericValue);
 
     const { amount, fees } = service.getTotalAmount({
       pricePerUnit: newPPU,
@@ -436,18 +430,19 @@ test.describe.serial("Invest Form Submission ", () => {
     });
 
     expect(new Decimal(amount).isZero()).toBe(false);
-    expect(new Decimal(fees).isZero()).toBe(shouldAddFee);
+    expect(new Decimal(fees).isZero()).toBe(!shouldAddFee);
 
-    console.debug(
-      "Q HAY ACA???",
-      getInputTrimmedValue(conversion.amount, PURCHASE_CRYPTO_CURRENCY)
-    );
+    if (shouldAddFee) {
+      expect(new Decimal(conversion.amount).toNumber()).toBeLessThan(new Decimal(amount).toNumber());
+    } else {
+      expect(new Decimal(conversion.amount).toNumber()).toBe(new Decimal(amount).toNumber());
+    }
 
-    // The value should be the same as the result of the calculation service.
-    expect(inputCryptoDecimalAmount.toString()).toBe(
+    const CRYPTO_DECIMAL_PLACES = 8;
+    // The value should be the same as the result of the calculation service. Round up to the latest decimal for test comparison
+    expect(new Decimal(cryptoNumericValue).toFixed(CRYPTO_DECIMAL_PLACES - 1, 0)).toBe(
       // Input shows a maximum of 8 decimal places for crypto currencies.
-      // new Decimal(conversion.amount).toDecimalPlaces(8).toString(),
-      getInputTrimmedValue(conversion.amount, PURCHASE_CRYPTO_CURRENCY)
+      new Decimal(amount).toFixed(CRYPTO_DECIMAL_PLACES - 1, 0).toString()
     );
 
     // Check KYC indicator visibility based on sale data
@@ -544,7 +539,7 @@ const getDefaultIntlConfig = (currency: string) =>
  * to the decimalScale value. This helper function is needed to ensure same comparison
  */
 function getInputTrimmedValue(
-  amount: string,
+  amount: string | Decimal,
   currency: string,
   opts?: Partial<Omit<Parameters<typeof formatValue>[0], "value">>,
 ) {
@@ -554,10 +549,12 @@ function getInputTrimmedValue(
   const { intlConfig = getDefaultIntlConfig(currency) } = opts || {};
 
   const formattedValue = formatValue({
-    value: amount,
+    value: amount.toString(),
     decimalScale,
     intlConfig,
   });
+
+
 
 
   // Parse the formatted value using locale-aware parsing
@@ -568,6 +565,8 @@ function getInputTrimmedValue(
     locale,
     currency,
   );
+  console.log("🚀 ~ form-submission.spec.ts:564 ~ formattedValue:", amount, formattedValue, Number(cleanNumericValue).toFixed(decimalScale));
+
 
   return Number(cleanNumericValue).toFixed(decimalScale);
 

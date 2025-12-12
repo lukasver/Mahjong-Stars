@@ -283,11 +283,14 @@ export class BuyPage extends BasePage {
 
 	/**
 	 * Get token amount input field
-	 * Note: Uses spinbutton role with aria-label containing token symbol
+	 * Note: Uses spinbutton role with aria-label containing token symbol (e.g., "tMJS Tokens", "TILE Tokens")
+	 * Token symbol is dynamic based on the active sale
 	 */
 	getTokenAmountInput() {
+		// Match any token symbol followed by "Tokens" (e.g., "tMJS Tokens", "TILE Tokens")
+		const tokenLabelPattern = /\w+ Tokens/i;
 		return this.getInvestSection()
-			.getByRole("spinbutton", { name: /TILE Tokens/i })
+			.getByRole("spinbutton", { name: tokenLabelPattern })
 			.or(this.getInvestSection().locator('input[name*="quantity"], input[name*="paid.quantity"]'))
 			.first();
 	}
@@ -366,10 +369,15 @@ export class BuyPage extends BasePage {
 
 	/**
 	 * Get error message
+	 * Note: Error messages are rendered as <p> elements with data-slot="form-message"
+	 * or paragraphs with text-destructive class. This excludes form labels with error styling.
 	 */
 	getErrorMessage() {
+		// Target actual error message paragraphs, not form labels
+		// FormMessage renders as <p data-slot="form-message" className="text-destructive">
 		return this.getInvestSection()
-			.locator('[role="alert"], .error, [class*="error"]');
+			.locator('p[data-slot="form-message"], p.text-destructive')
+			.filter({ hasNot: this.page.locator('label') }); // Exclude any labels that might match
 	}
 
 	/**
@@ -399,6 +407,31 @@ export class BuyPage extends BasePage {
 	}
 
 	/**
+	 * Get the token symbol from the current sale
+	 * This is a helper method to get the dynamic token symbol for use in other methods
+	 * Note: Token symbol is dynamic (e.g., "tMJS", "TILE") based on the active sale
+	 */
+	async getTokenSymbol(): Promise<string> {
+		// Try to get token symbol from the overview section
+		const symbolField = this.getSymbolField();
+		const symbolText = await symbolField.textContent().catch(() => null);
+		if (symbolText) {
+			return symbolText.trim();
+		}
+		// Fallback: try to extract from token amount input label
+		const tokenInput = this.getTokenAmountInput();
+		const label = await tokenInput.getAttribute("aria-label").catch(() => null);
+		if (label) {
+			const match = label.match(/^(\w+)\s+Tokens/i);
+			if (match && match[1]) {
+				return match[1];
+			}
+		}
+		// Last resort: return empty string (caller should handle)
+		return "";
+	}
+
+	/**
 	 * Get KYC Required indicator in the summary modal
 	 * Note: This is an alert that appears when KYC verification is required
 	 */
@@ -420,21 +453,23 @@ export class BuyPage extends BasePage {
 
 	/**
 	 * Get summary modal details section
-	 * Contains: TILE Tokens, Bonus Tokens, Total Tokens, Total amount to pay
+	 * Contains: {tokenSymbol} Tokens, Bonus Tokens, Total Tokens, Total amount to pay
 	 * Note: The values are dynamic and depend on the actual purchase values.
+	 * Token symbol is dynamic (e.g., "tMJS", "TILE") based on the active sale.
 	 * Structure:
 	 * - title: Summary
-	 * - TILE Tokens: [quantity]
+	 * - {tokenSymbol} Tokens: [quantity]
 	 * - Bonus Tokens: [+bonus]
-	 * - Total Tokens: [total] TILE
+	 * - Total Tokens: [total] {tokenSymbol}
 	 * - Total amount to pay: $[amount]
 	 */
 	getSummaryModalDetails() {
 		// Find the container within the modal that contains all summary details
-		// It should contain both "TILE Tokens" and "Total amount to pay" text
+		// It should contain both "{tokenSymbol} Tokens" and "Total amount to pay" text
+		// Token symbol is dynamic, so we match any word followed by "Tokens"
 		return this.getSummaryModal()
 			.locator('div')
-			.filter({ hasText: /TILE Tokens/i })
+			.filter({ hasText: /\w+ Tokens/i })
 			.filter({ hasText: /Total amount to pay/i })
 			.first();
 	}

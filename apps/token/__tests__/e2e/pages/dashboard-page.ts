@@ -261,13 +261,16 @@ export class DashboardPage extends BasePage {
 	}
 
 	/**
-	 * Get header "Buy TILE" button
+	 * Get header "Buy {tokenSymbol}" button
+	 * Token symbol is dynamic based on the active sale (e.g., "Buy tMJS", "Buy TILE")
 	 * Prefer button over link, and use first() to avoid strict mode violations
 	 */
 	getHeaderBuyButton() {
+		// Match "Buy" followed by any token symbol (e.g., "Buy tMJS", "Buy TILE")
+		const buyButtonPattern = /^Buy \w+$/;
 		return this.page
-			.getByRole("button", { name: "Buy TILE" })
-			.or(this.page.getByRole("link", { name: "Buy TILE" }))
+			.getByRole("button", { name: buyButtonPattern })
+			.or(this.page.getByRole("link", { name: buyButtonPattern }))
 			.first();
 	}
 
@@ -337,12 +340,14 @@ export class DashboardPage extends BasePage {
 
 	/**
 	 * Get tokens sold/total tokens text
+	 * Token symbol is dynamic (e.g., "tMJS", "TILE") based on the active sale
 	 */
 	getTokensSoldText() {
-		// Look for text containing token counts (e.g., "100,211 / 29,176,667 TILE")
+		// Look for text containing token counts (e.g., "100,211 / 29,176,667 tMJS" or "100,211 / 29,176,667 TILE")
+		// Pattern matches: numbers / numbers followed by any word (token symbol)
 		return this.page
 			.locator('[data-testid="fundraising-progress"]')
-			.getByText(/\d+.*\/.*\d+.*TILE/i);
+			.getByText(/\d+.*\/.*\d+.*\w+/i);
 	}
 
 	/**

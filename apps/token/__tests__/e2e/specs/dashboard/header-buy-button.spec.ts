@@ -3,7 +3,7 @@
  * TC-DASH-008: Header Buy Button Navigation
  *
  * Navigate to `/dashboard`
- * Click "Buy TILE" button in header
+ * Click "Buy {tokenSymbol}" button in header (token symbol is dynamic, e.g., "Buy tMJS", "Buy TILE")
  * Verify navigation to buy page or scroll to invest component
  * Expected: Header button navigates correctly
  */
@@ -19,7 +19,7 @@ test("TC-DASH-008: Header Buy Button Navigation", async ({ page }) => {
 	await dashboardPage.goto();
 	await dashboardPage.waitForDashboardLoaded();
 
-	// Click "Buy TILE" button in header
+	// Click "Buy {tokenSymbol}" button in header (token symbol is dynamic)
 	const headerBuyButton = dashboardPage.getHeaderBuyButton();
 	await expect(headerBuyButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
 

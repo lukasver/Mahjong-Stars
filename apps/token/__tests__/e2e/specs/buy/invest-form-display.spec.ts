@@ -44,7 +44,7 @@ test("TC-BUY-005: Invest Form Display", async ({ page }) => {
   await expect(tokenInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
   // Verify USD amount input field is visible (required)
-  const usdInput = buyPage.getUsdAmountInput();
+  const usdInput = buyPage.getTotalAmountInput();
   await expect(usdInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
   // Verify payment method selector is visible (required)

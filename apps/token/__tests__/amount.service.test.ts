@@ -604,7 +604,7 @@ describe("Amount Calculator service", () => {
         );
         // When addFee is true and we have setted the NEXT_PUBLIC_FEE_BPS, the "amount" includes the fee, is the TOTAL to pay.
         // The differnece is that "fees" key is zero or includes the amount of the fee.
-        const BPS = process.env.NEXT_PUBLIC_FEE_BPS || 0;
+        const BPS = process.env.NEXT_PUBLIC_FEE_BPS ? Number(process.env.NEXT_PUBLIC_FEE_BPS) : 0;
         const shouldCheckAddFee = payload.addFee && !Number.isNaN(BPS) && BPS > 0;
         if (payload.addFee && shouldCheckAddFee) {
           const { amount: amountWithoutFeeStr } = service.getTotalAmount({

@@ -25,54 +25,60 @@ test("TC-BUY-006: Token Amount Input Validation", async ({ page }) => {
   // Scroll to invest section
   const investSection = buyPage.getInvestSection();
   await investSection.scrollIntoViewIfNeeded();
+  await expect(investSection).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Get token input
+  // Get token input (required field)
   const tokenInput = buyPage.getTokenAmountInput();
-  const isTokenInputVisible = await tokenInput.isVisible().catch(() => false);
-
-  if (!isTokenInputVisible) {
-    // Form might be disabled or not available
-    test.skip();
-    return;
-  }
-
   await expect(tokenInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
+
+  // Get error message locator (may or may not be present)
+  const errorMessage = buyPage.getErrorMessage();
 
   // Enter invalid token amount (negative number)
   await tokenInput.fill("-100");
-  await page.waitForTimeout(500); // Wait for validation
+  // Wait for validation to process (wait for input value to be set)
+  await expect(tokenInput).toHaveValue("-100", { timeout: TIMEOUTS.SHORT });
 
   // Verify error message is displayed (if validation is active)
-  const errorMessage = buyPage.getErrorMessage();
-  const hasError = await errorMessage.isVisible().catch(() => false);
   // Note: Some forms may prevent negative input, so error might not appear
+  const errorCount = await errorMessage.count();
+  if (errorCount > 0) {
+    await expect(errorMessage).toBeVisible({ timeout: TIMEOUTS.SHORT });
+  }
 
   // Clear and enter a very large number (exceeding available tokens)
   await tokenInput.fill("");
   await tokenInput.fill("999999999999");
-  await page.waitForTimeout(500); // Wait for validation
+  // Wait for input value to be set
+  await expect(tokenInput).toHaveValue("999999999999", { timeout: TIMEOUTS.SHORT });
 
   // Verify error message or warning is displayed
-  const hasLargeNumberError = await errorMessage.isVisible().catch(() => false);
   // Note: Validation may prevent this or show an error
+  const largeNumberErrorCount = await errorMessage.count();
+  if (largeNumberErrorCount > 0) {
+    await expect(errorMessage).toBeVisible({ timeout: TIMEOUTS.SHORT });
+  }
 
   // Enter valid token amount
   await tokenInput.fill("");
   await tokenInput.fill("1000");
-  await page.waitForTimeout(1000); // Wait for USD calculation
+  // Wait for input value to be set
+  await expect(tokenInput).toHaveValue("1000", { timeout: TIMEOUTS.SHORT });
 
   // Verify USD amount updates automatically
-  const usdInput = buyPage.getUsdAmountInput();
-  const isUsdInputVisible = await usdInput.isVisible().catch(() => false);
-  if (isUsdInputVisible) {
-    const usdValue = await usdInput.inputValue();
-    // USD value should be calculated (not empty if form is working)
-    expect(usdValue).toBeTruthy();
-  }
+  const usdInput = buyPage.getTotalAmountInput();
+  await expect(usdInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
+  // Wait for USD value to be calculated (wait for non-empty value)
+  await expect(usdInput).not.toHaveValue("", { timeout: TIMEOUTS.MEDIUM });
+  const usdValue = await usdInput.inputValue();
+  // USD value should be calculated (not empty if form is working)
+  expect(usdValue).toBeTruthy();
 
   // Verify no error messages are displayed (for valid input)
-  const hasErrorAfterValid = await errorMessage.isVisible().catch(() => false);
-  // Error should not be visible for valid input
+  const finalErrorCount = await errorMessage.count();
+  if (finalErrorCount > 0) {
+    await expect(errorMessage).not.toBeVisible({ timeout: TIMEOUTS.SHORT });
+  }
 
   await page.screenshot({
     path: "./__tests__/e2e/specs/__screenshots__/buy/token-amount-validation.png",

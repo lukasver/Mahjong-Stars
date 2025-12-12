@@ -3,7 +3,7 @@
  * TC-DASH-001: Dashboard Page Load
  *
  * Navigate to `/dashboard`
- * Verify page title contains "$TILE"
+ * Verify page title contains token symbol (e.g., "$tMJS", "$TILE")
  * Verify main content area is visible
  * Verify dashboard heading is displayed
  * Expected: Dashboard loads within 5 seconds
@@ -19,9 +19,10 @@ test("TC-DASH-001: Dashboard Page Load", async ({ page }) => {
 	// Navigate to dashboard
 	await dashboardPage.goto();
 
-	// Verify page title contains "$TILE"
+	// Verify page title contains token symbol (e.g., "$tMJS", "$TILE")
+	// Token symbol is dynamic based on the active sale
 	const title = await dashboardPage.getTitle();
-	expect(title).toContain("$TILE");
+	expect(title).toMatch(/\$\w+/); // Matches "$" followed by any token symbol
 
 	// Verify dashboard loads within 5 seconds (using timeout)
 	await dashboardPage.waitForDashboardLoaded();

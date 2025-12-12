@@ -3,7 +3,7 @@
  * TC-BUY-001: Buy Page Load
  *
  * Navigate to `/dashboard/buy`
- * Verify page title contains "$TILE"
+ * Verify page title contains token symbol (e.g., "$tMJS", "$TILE")
  * Verify sale name is displayed (e.g., "Test Sale")
  * Verify sale description is displayed
  * Verify main content area is visible
@@ -20,9 +20,10 @@ test("TC-BUY-001: Buy Page Load", async ({ page }) => {
   // Navigate to buy page
   await buyPage.goto();
 
-  // Verify page title contains "$TILE"
+  // Verify page title contains token symbol (e.g., "$tMJS", "$TILE")
+  // Token symbol is dynamic based on the active sale
   const title = await buyPage.getTitle();
-  expect(title).toContain("$TILE");
+  expect(title).toMatch(/\$\w+/); // Matches "$" followed by any token symbol
 
   // Verify buy page loads within timeout
   await buyPage.waitForBuyPageLoaded();

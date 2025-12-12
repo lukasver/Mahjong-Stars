@@ -24,7 +24,7 @@ test("TC-BUY-007: USD Amount Input Validation", async ({ page }) => {
   await investSection.scrollIntoViewIfNeeded();
 
   // Get USD input
-  const usdInput = buyPage.getUsdAmountInput();
+  const usdInput = buyPage.getTotalAmountInput();
   const isUsdInputVisible = await usdInput.isVisible().catch(() => false);
 
   if (!isUsdInputVisible) {

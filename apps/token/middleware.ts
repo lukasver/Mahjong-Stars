@@ -7,9 +7,12 @@ const PUBLIC_ROUTES: string[] = ["/", "/onboarding", "/test", "/in"];
 const _PRIVATE_ROUTES: string[] = ["/dashboard"];
 
 const isE2ETest = process.env.E2E_TEST_MODE === "true";
+const DEBUG = process.env.DEBUG === "true" || process.env.NODE_ENV === "development" || process.env.VERCEL_TARGET_ENV === "tests";
 
 export default async (req: NextRequest) => {
-	log(`[MIDDLEWARE]: ${req.nextUrl.pathname}`);
+	if (DEBUG) {
+		log(`[MIDDLEWARE]: ${req.nextUrl.pathname}`);
+	}
 
 	if (isE2ETest) {
 		return NextResponse.next();

@@ -34,7 +34,7 @@ test("TC-BUY-012: Disabled State Handling", async ({ page }) => {
       await expect(tokenInput).toBeDisabled({ timeout: TIMEOUTS.SHORT });
     }
 
-    const usdInput = buyPage.getUsdAmountInput();
+    const usdInput = buyPage.getTotalAmountInput();
     const isUsdInputVisible = await usdInput.isVisible().catch(() => false);
     if (isUsdInputVisible) {
       await expect(usdInput).toBeDisabled({ timeout: TIMEOUTS.SHORT });
