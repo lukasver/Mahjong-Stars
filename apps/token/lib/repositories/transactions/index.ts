@@ -49,6 +49,7 @@ import logger from "@/lib/services/logger.server";
 import documentsController from "../documents";
 import rates from "../feeds/rates";
 import notificatorService, { Notificator } from "../notifications";
+import { emailEventHelpers } from "../notifications/email-events";
 import { TransactionValidator } from "./validator";
 
 class TransactionsController {
@@ -165,6 +166,7 @@ class TransactionsController {
 					txHash: true,
 					paymentDate: true,
 					rejectionReason: true,
+					blockchainId: true,
 					user: {
 						select: {
 							id: true,
@@ -238,6 +240,50 @@ class TransactionsController {
 						supportEmail: siteMetadata.supportEmail,
 						paidCurrency: tx.paidCurrency,
 					},
+				});
+			}
+
+			// Send email notifications for token distribution and refunds
+			if (dto.status === TransactionStatus.TOKENS_DISTRIBUTED) {
+				const transactionHash = tx.txHash;
+				const blockchain = await prisma.blockchain.findUnique({
+					where: { id: tx.blockchainId || undefined },
+					select: { explorerUrl: true },
+				});
+
+				emailEventHelpers.tokensDistributed({
+					userName: tx.user.name,
+					userEmail: tx.user.email,
+					tokenName: tx.sale.name,
+					tokenSymbol: tx.sale.tokenSymbol,
+					tokenAmount: tx.quantity.toString(),
+					walletAddress: tx.receivingWallet || tx.user.walletAddress,
+					transactionHash: transactionHash || undefined,
+					transactionUrl: transactionHash && blockchain?.explorerUrl
+						? `${blockchain.explorerUrl}/tx/${transactionHash}`
+						: undefined,
+					distributionDate: new Date().toISOString(),
+					dashboardUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
+					supportEmail: siteMetadata.supportEmail,
+				}).catch((error) => {
+					logger("Failed to send tokens distributed email:", error);
+				});
+			}
+
+			if (dto.status === TransactionStatus.REFUNDED) {
+				emailEventHelpers.refundProcessed({
+					userName: tx.user.name,
+					userEmail: tx.user.email,
+					refundAmount: tx.amountPaid || "0",
+					refundCurrency: tx.paidCurrency,
+					transactionId: tx.id,
+					refundMethod: "Original Payment Method",
+					refundReason: tx.rejectionReason || dto.comment,
+					dashboardUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
+					supportEmail: siteMetadata.supportEmail,
+					tokenName: siteMetadata.businessName,
+				}).catch((error) => {
+					logger("Failed to send refund processed email:", error);
 				});
 			}
 

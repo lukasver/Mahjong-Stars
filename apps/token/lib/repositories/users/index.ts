@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import { headers } from "next/headers";
 import { JWT_EXPIRATION_TIME, ONE_DAY, ROLES } from "@/common/config/constants";
 import { env, publicUrl } from "@/common/config/env";
+import { metadata as siteMetadata } from "@/common/config/site";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
 import {
 	CreateUserDto,
@@ -24,6 +25,7 @@ import { getIpAddress, getUserAgent } from "@/lib/geo";
 import { hashJwt } from "@/lib/utils/jwt-hash";
 import logger from "@/services/logger.server";
 import { EmailVerificationService } from "../emails";
+import { emailEventHelpers } from "../notifications/email-events";
 
 class UsersController {
 	private readonly emailVerification: EmailVerificationService;
@@ -624,8 +626,44 @@ class UsersController {
 					rejectionReason: true,
 					tier: true,
 					updatedAt: true,
+					user: {
+						select: {
+							name: true,
+							email: true,
+						},
+					},
 				},
 			});
+
+			// Send KYC status email
+			if (status === "VERIFIED") {
+				emailEventHelpers
+					.kycVerified({
+						userName: kyc.user.name,
+						userEmail: kyc.user.email,
+						kycTier: kyc.tier || "Standard",
+						dashboardUrl: `${publicUrl}/dashboard`,
+						salesUrl: `${publicUrl}/dashboard/sales`,
+						supportEmail: siteMetadata.supportEmail,
+						tokenName: siteMetadata.businessName,
+					})
+					.catch((error) => {
+						logger("Failed to send KYC verified email:", error);
+					});
+			} else if (status === "REJECTED") {
+				emailEventHelpers
+					.kycRejected({
+						userName: kyc.user.name,
+						userEmail: kyc.user.email,
+						rejectionReason: rejectionReason,
+						resubmitUrl: `${publicUrl}/dashboard/kyc`,
+						supportEmail: siteMetadata.supportEmail,
+						tokenName: siteMetadata.businessName,
+					})
+					.catch((error) => {
+						logger("Failed to send KYC rejected email:", error);
+					});
+			}
 
 			return Success({ kyc });
 		} catch (error) {
@@ -646,10 +684,10 @@ class UsersController {
 					where:
 						type === "expired"
 							? {
-									expiresAt: {
-										lte: DateTime.now().toJSDate(),
-									},
-								}
+								expiresAt: {
+									lte: DateTime.now().toJSDate(),
+								},
+							}
 							: {},
 				})
 				.then((res) => {

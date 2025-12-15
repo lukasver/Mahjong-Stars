@@ -1,11 +1,13 @@
 import "server-only";
 import { invariant } from "@epic-web/invariant";
 import { env, publicUrl } from "@/common/config/env";
+import { metadata as siteMetadata } from "@/common/config/site";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
 import { Failure, Success } from "@/common/schemas/dtos/utils";
 import { prisma } from "@/db";
 import { IEmailService } from "@/lib/email";
 import logger from "@/lib/services/logger.server";
+import { emailEventHelpers } from "../notifications/email-events";
 
 export class EmailVerificationService {
 	private readonly sender: IEmailService;
@@ -46,19 +48,36 @@ export class EmailVerificationService {
 				);
 			}
 
-			await prisma.$transaction(async (tx) => {
-				return Promise.all([
-					tx.user.update({
-						where: { id: user.id },
-						data: {
-							emailVerified: true,
-						},
-					}),
-					this.daleteToken(token, ctx).catch((e) => {
-						logger(e);
-					}),
-				]);
+			const verifiedUser = await prisma.$transaction(async (tx) => {
+				const updatedUser = await tx.user.update({
+					where: { id: user.id },
+					data: {
+						emailVerified: true,
+					},
+					select: {
+						id: true,
+						name: true,
+						email: true,
+					},
+				});
+				await this.daleteToken(token, ctx).catch((e) => {
+					logger(e);
+				});
+				return updatedUser;
 			});
+
+			// Send welcome email after verification
+			emailEventHelpers
+				.userEmailVerified({
+					userName: verifiedUser.name,
+					userEmail: verifiedUser.email,
+					dashboardUrl: `${publicUrl}/dashboard`,
+					supportEmail: siteMetadata.supportEmail,
+					companyName: siteMetadata.businessName,
+				})
+				.catch((error) => {
+					logger(error);
+				});
 
 			return Success({
 				message: "Email verified successfully",
