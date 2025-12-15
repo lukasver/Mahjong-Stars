@@ -1,4 +1,3 @@
-import { Footer } from "@mjs/ui/components/footer";
 import {
   dehydrate,
   HydrationBoundary,
@@ -10,9 +9,9 @@ import React, { Suspense } from "react";
 import AdminSidebar from "@/app/(dash)/dashboard/admin-sidebar";
 import { DashboardHeader } from "@/app/(dash)/dashboard/header";
 import { PagesProviders } from "@/app/providers";
-import { getFooterLinks, metadata } from "@/common/config/site";
 import BackgroundWrapper from "@/components/bg-wrapper";
 import { BuyTokenButton } from "@/components/buy-token-button";
+import { Footer } from "@/components/footer";
 import { InputOptionsProvider } from "@/components/hooks/use-input-options";
 import { DashboardSidebar } from "@/components/sidebar";
 import {
@@ -68,13 +67,17 @@ export default async function AdminLayout({
                 </BackgroundWrapper>
               </InputOptionsProvider>
               <Footer
+                title={'The Tiles Company'}
+                description={'Empowering MJS with Web3'}
+              />
+              {/* <Footer
                 siteConfig={metadata}
                 links={getFooterLinks(t)}
                 copyright={t("Footer.copyright", {
                   year: new Date().getFullYear(),
                 })}
                 className="bg-black"
-              />
+              /> */}
             </section>
           </>
         </PagesProviders>

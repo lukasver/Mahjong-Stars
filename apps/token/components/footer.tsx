@@ -1,13 +1,11 @@
 import { Icons } from "@mjs/ui/components/icons";
 import { cn } from "@mjs/ui/lib/utils";
 import { Button } from "@mjs/ui/primitives/button";
-import {
-  BoxesIcon, MailIcon
-} from "lucide-react";
+import { BoxesIcon, MailIcon } from "lucide-react";
+import { Route } from "next";
 import Image from "next/image";
 import { metadata as siteConfig } from "@/common/config/site";
-import Logo from "@/public/assets/icon.png";
-import ActiveLink from "./ActiveLink";
+import Logo from "@/public/static/images/logos/isologo-min.webp";
 import FooterSupportButton from "./FooterSupportButton";
 import AppLink from "./link";
 
@@ -36,13 +34,13 @@ export const footerLinks: Array<{
     },
   ];
 
-export const Footer = ({ className }: { className?: string }) => {
+export const Footer = ({ className, title, description }: { className?: string, title?: string, description?: string }) => {
   const columnNumber = footerLinks.filter(({ links }) => links.length).length;
 
   return (
     <footer
       className={cn(
-        "mt-auto w-full bg-linear-to-r from-white/5 via-white/60 to-white/5 backdrop-blur-xs dark:from-slate-700/5 dark:via-slate-700/60 dark:to-slate-700/5",
+        "mt-auto w-full bg-linear-to-t from-[#060912] via-#060912/60 to-#060912/5 backdrop-blur-xs dark:from-slate-700/5 dark:via-slate-700/60 dark:to-slate-700/5",
         className,
       )}
     >
@@ -65,12 +63,12 @@ export const Footer = ({ className }: { className?: string }) => {
               </div>
             </AppLink>
 
-            {typeof siteConfig.title === "string" ? (
-              <div className="text-lg font-semibold">{siteConfig.title}</div>
+            {typeof title === "string" ? (
+              <div className="text-lg font-semibold">{title}</div>
             ) : null}
 
-            {siteConfig.description ? (
-              <p className="text-sm opacity-70">{siteConfig.description}</p>
+            {typeof description === "string" ? (
+              <p className="text-sm opacity-70">{description}</p>
             ) : null}
 
             <p className="text-xs">Copyright © {siteConfig.businessName}</p>
@@ -95,7 +93,7 @@ export const Footer = ({ className }: { className?: string }) => {
                   >
                     {column.columnName ? (
                       <li>
-                        <p className="text-slate-900 dark:text-slate-100 font-light text-base">
+                        <p className="text-secondary-300 font-thin text-base">
                           {column.columnName}
                         </p>
                       </li>
@@ -108,21 +106,17 @@ export const Footer = ({ className }: { className?: string }) => {
 
                       if (link.href === "#support") {
                         return (
-                          <li key={index}>
+                          <li key={index} className="text-base">
                             <FooterSupportButton />
                           </li>
                         );
                       }
 
                       return (
-                        <li key={index}>
-                          <ActiveLink
-                            href={link.href}
-                            className={"nav-link"}
-                            activeClassName={"nav-link-active"}
-                          >
+                        <li key={index} className="text-base">
+                          <AppLink href={link.href as Route<string>}>
                             <span>{link.title}</span>
-                          </ActiveLink>
+                          </AppLink>
                         </li>
                       );
                     })}
@@ -235,5 +229,3 @@ export const Footer = ({ className }: { className?: string }) => {
     </footer>
   );
 };
-
-export default Footer;

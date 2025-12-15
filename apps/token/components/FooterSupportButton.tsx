@@ -45,7 +45,7 @@ export const FooterSupportButton = () => {
   };
 
   return (
-    <a href="#" onClick={openSupport} className={'nav-link'}>
+    <a href="#" onClick={openSupport}>
       Contact Support
     </a>
   );
