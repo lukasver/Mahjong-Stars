@@ -11,20 +11,23 @@ import { PulseLoader } from "@/components/pulse-loader";
 import { OnRampSkeleton } from "./skeletons";
 import { WithErrorHandler } from "./utils";
 
+export type SuccessInstaxchangePaymentData = {
+  id: string;
+  comment?: string;
+  transactionHash: string;
+  amountPaid: string;
+  paidCurrency: string;
+  formOfPayment: 'CARD';
+  paymentDate: Date;
+  metadata?: Record<string, unknown>;
+};
+
 /**
  * Instaxchange payment widget component props
  */
 interface InstaxchangeWidgetProps {
   transaction: TransactionByIdWithRelations;
-  onSuccess: (data: {
-    id: string;
-    txHash: string;
-    amountPaid: string;
-    paidCurrency: string;
-    formOfPayment: 'CARD';
-    paymentDate: Date;
-    metadata?: Record<string, unknown>;
-  }) => void;
+  onSuccess: (data: SuccessInstaxchangePaymentData) => void;
   onError?: (error: string) => void;
 }
 
@@ -97,7 +100,7 @@ const InstaxchangeWidgetComponent = ({
           // Call onSuccess with payment data
           onSuccess({
             id: tx.id,
-            txHash: message.transactionHash || "",
+            transactionHash: message.transactionHash || "",
             amountPaid: message.amount?.toString() || tx.totalAmount.toString(),
             // Check the paid currency from instaxchange docs
             paidCurrency: message.currency || tx.paidCurrency,

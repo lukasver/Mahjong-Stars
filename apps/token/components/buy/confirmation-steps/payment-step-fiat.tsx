@@ -29,7 +29,7 @@ import {
 } from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
-import { InstaxchangeWidget } from "../widgets/instaxchange";
+import { InstaxchangeWidget, SuccessInstaxchangePaymentData } from "../widgets/instaxchange";
 import {
   SuccessCryptoPaymentData
 } from "../widgets/transaction";
@@ -45,7 +45,7 @@ export const FiatPayment = ({
   tx: TransactionByIdWithRelations;
   onSuccess: () => void;
   onSuccessCrypto: (d: SuccessCryptoPaymentData) => void;
-  onSuccessInstaxchange: (d: SuccessCryptoPaymentData) => void;
+  onSuccessInstaxchange: (d: SuccessInstaxchangePaymentData) => void;
 }) => {
   const { data: banks, isLoading: isBanksLoading } = useSaleBanks(
     tx?.sale?.id || "",

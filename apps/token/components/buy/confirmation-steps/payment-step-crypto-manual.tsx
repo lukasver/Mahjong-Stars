@@ -88,6 +88,7 @@ export function CryptoManualPaymentForm({
       paidCurrency: transaction.totalAmountCurrency,
       formOfPayment: FOPSchema.enum.CRYPTO,
       paymentDate: new Date(),
+      comment: "REQUIRES RECONCILIATION",
       metadata: {
         paymentMethod: "manual",
         provider: "manual",

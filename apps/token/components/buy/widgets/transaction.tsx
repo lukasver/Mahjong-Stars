@@ -56,6 +56,7 @@ export type SuccessCryptoPaymentData = {
   paidCurrency: string;
   formOfPayment: FOP;
   paymentDate: Date;
+  comment?: string;
   metadata?: Record<string, unknown>;
 };
 

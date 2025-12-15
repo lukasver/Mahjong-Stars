@@ -83,6 +83,40 @@ export const successMessage = {
   lineHeight: '20px',
 };
 
+// Status box styles for AWAITING_PAYMENT (blue)
+export const awaitingPaymentBox = {
+  backgroundColor: '#eff6ff',
+  border: '1px solid #bfdbfe',
+  borderRadius: '8px',
+  padding: '16px',
+  margin: '24px 0',
+};
+
+export const awaitingPaymentMessage = {
+  color: '#1e40af',
+  fontSize: '16px',
+  fontWeight: '600',
+  margin: '0',
+  lineHeight: '20px',
+};
+
+// Status box styles for PAYMENT_SUBMITTED (purple)
+export const paymentSubmittedBox = {
+  backgroundColor: '#faf5ff',
+  border: '1px solid #e9d5ff',
+  borderRadius: '8px',
+  padding: '16px',
+  margin: '24px 0',
+};
+
+export const paymentSubmittedMessage = {
+  color: '#6b21a8',
+  fontSize: '16px',
+  fontWeight: '600',
+  margin: '0',
+  lineHeight: '20px',
+};
+
 export const detailsSection = {
   margin: '24px 0',
 };

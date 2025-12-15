@@ -1,5 +1,6 @@
 "use client";
 
+import { JsonViewer } from "@mjs/ui/components/json-viewer";
 import { Badge } from "@mjs/ui/primitives/badge";
 import { Button } from "@mjs/ui/primitives/button";
 import {
@@ -32,6 +33,7 @@ interface TransactionDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   id: string;
+  isAdmin?: boolean;
 }
 
 const statusColors: Record<TransactionStatus, string> = {
@@ -148,6 +150,7 @@ export function TransactionDetailsModal({
   open,
   onOpenChange,
   id,
+  isAdmin,
 }: TransactionDetailsModalProps) {
   const { data, isLoading, error } = useTransactionById(id);
   const { data: user } = useUser();
@@ -155,6 +158,7 @@ export function TransactionDetailsModal({
 
   if (!id) return null;
   const tx = data?.transaction;
+
 
   // If error, Error boundary should handle
   if (error) {
@@ -500,6 +504,17 @@ export function TransactionDetailsModal({
             </>
           )}
 
+          {isAdmin && tx.metadata && (
+            <>
+              <Separator />
+              <div>
+                <JsonViewer
+                  title="Metadata"
+                  defaultExpanded
+                  data={tx.metadata} />
+              </div>
+            </>
+          )}
           <Separator />
         </div>
 

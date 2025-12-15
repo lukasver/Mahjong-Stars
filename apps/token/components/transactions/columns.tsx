@@ -453,6 +453,7 @@ const ActionButtons = ({
           open={showDetails}
           onOpenChange={setShowDetails}
           id={row.id}
+          isAdmin={isAdmin}
         />
       </Suspense>
 

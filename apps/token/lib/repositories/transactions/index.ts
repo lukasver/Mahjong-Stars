@@ -1,5 +1,6 @@
 import "server-only";
 import { invariant } from "@epic-web/invariant";
+import { formatDate } from "@mjs/utils/client";
 import {
 	DocumentSignatureStatus,
 	FOP,
@@ -402,7 +403,6 @@ class TransactionsController {
 				}
 			}
 
-
 			return Success({
 				transaction: decimalsToString(tx) as TransactionByIdWithRelations,
 				requiresKYC: kycTier,
@@ -507,26 +507,30 @@ class TransactionsController {
 							},
 						},
 					},
-				})
+				}),
 			]);
 
 			if (transaction && fees && fees.length > 0) {
 				// Create fees in the background
-				waitUntil(prisma.transactionFee.createMany({
-					data: fees.map(({ metadata, ...f }) => ({
-						...f,
-						transactionId: transaction.id,
-						...(metadata && {
-							metadata: {
-								toJSON() {
-									return metadata;
-								},
-							}
+				waitUntil(
+					prisma.transactionFee
+						.createMany({
+							data: fees.map(({ metadata, ...f }) => ({
+								...f,
+								transactionId: transaction.id,
+								...(metadata && {
+									metadata: {
+										toJSON() {
+											return metadata;
+										},
+									},
+								}),
+							})),
+						})
+						.catch((e) => {
+							logger(e);
 						}),
-					})),
-				}).catch((e) => {
-					logger(e);
-				}))
+				);
 			}
 
 			return Success({
@@ -985,7 +989,6 @@ class TransactionsController {
 		},
 		ctx: ActionCtx,
 	) {
-
 		console.log("🚀 ~ index.ts:989 ~ payload:", payload);
 
 		try {
@@ -1120,6 +1123,33 @@ class TransactionsController {
 				}),
 			]);
 
+			function getEmailStatus(
+				tx: SaleTransactions,
+			): "RECONCILIATION_PENDING" | "AWAITING_PAYMENT" | "CONFIRMED" {
+				if (tx.formOfPayment === FOP.TRANSFER) {
+					return "RECONCILIATION_PENDING";
+				}
+				if (tx.formOfPayment === FOP.CARD) {
+					return "CONFIRMED";
+				}
+				if (
+					tx.formOfPayment === FOP.CRYPTO &&
+					((tx.metadata as Record<string, unknown>)?.provider === "manual" ||
+						(tx.metadata as Record<string, unknown>)?.paymentMethod ===
+						"manual")
+				) {
+					return "RECONCILIATION_PENDING";
+				}
+				if (tx.status === TransactionStatus.COMPLETED) {
+					return "CONFIRMED";
+				}
+
+				return "RECONCILIATION_PENDING";
+			}
+
+			const processingTime = formatDate(DateTime.now(), {
+				format: DateTime.DATETIME_MED,
+			});
 			await Promise.allSettled([
 				// Notify admin
 				this.notificator.send({
@@ -1151,10 +1181,11 @@ class TransactionsController {
 							transactionHash: tx.id,
 							transactionUrl: `${publicUrl}/admin/transactions?txId=${tx.id}`,
 						}),
-						transactionTime: new Date().toISOString(),
+						transactionTime: processingTime,
 						supportEmail: siteMetadata.supportEmail,
 					},
 				}),
+
 				// Notify user
 				this.notificator.send({
 					template: "userTransactionConfirmed",
@@ -1174,7 +1205,7 @@ class TransactionsController {
 						),
 						tokenAmount: updatedTx.quantity.toString(),
 						paidCurrency: updatedTx.paidCurrency,
-						transactionTime: new Date().toISOString(),
+						transactionTime: processingTime,
 						paymentMethod: updatedTx.formOfPayment,
 						walletAddress: updatedTx.receivingWallet || "",
 						transactionId: updatedTx.id,
@@ -1191,6 +1222,7 @@ class TransactionsController {
 							transactionUrl: `${publicUrl}/dashboard/transactions?txId=${updatedTx.id}`,
 						}),
 						supportEmail: siteMetadata.supportEmail,
+						status: getEmailStatus(updatedTx),
 					},
 				}),
 			]);
@@ -1281,7 +1313,6 @@ class TransactionsController {
 					: tx.paidCurrency === "BTC"
 						? "WBTC"
 						: tx.paidCurrency;
-
 
 			const paymentToken = await prisma.tokensOnBlockchains.findUnique({
 				where: {

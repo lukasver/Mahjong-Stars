@@ -13,21 +13,16 @@ import { TransactionStatus } from "@prisma/client";
 import { notFound, useParams } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
-import {
-  BankDetailsSkeleton
-} from "@/components/bank-details";
+import { BankDetailsSkeleton } from "@/components/bank-details";
 import {
   confirmCryptoTransaction,
-  confirmInstaxchangeTransaction
+  confirmInstaxchangeTransaction,
 } from "@/lib/actions";
-import {
-  useTransactionById
-} from "@/lib/services/api";
-import {
-  SuccessCryptoPaymentData
-} from "../widgets/transaction";
+import { useTransactionById } from "@/lib/services/api";
+import { SuccessInstaxchangePaymentData } from "../widgets/instaxchange";
+import { SuccessCryptoPaymentData } from "../widgets/transaction";
 import { CryptoPayment } from "./payment-step-crypto";
-import { FiatPayment } from './payment-step-fiat';
+import { FiatPayment } from "./payment-step-fiat";
 
 interface PaymentStepProps {
   onSuccess: () => void;
@@ -41,15 +36,18 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
   const { tx: txId } = useParams();
   const { data: tx, isLoading } = useTransactionById(txId as string);
 
-  const { execute, isPending } = useActionListener(useAction(confirmCryptoTransaction), {
-    onSuccess: () => {
-      onSuccess();
+  const { execute, isPending } = useActionListener(
+    useAction(confirmCryptoTransaction),
+    {
+      onSuccess: () => {
+        onSuccess();
+      },
+      onError: (error) => {
+        console.error("Transaction error", error);
+        toast.error(error);
+      },
     },
-    onError: (error) => {
-      console.error("Transaction error", error);
-      toast.error(error);
-    },
-  });
+  );
 
   useEffect(() => {
     const status = tx?.transaction?.status;
@@ -71,6 +69,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
       chainId: d.chainId,
       amountPaid: d.amountPaid,
       paymentDate: d.paymentDate || new Date(),
+      comment: d.comment,
       extraPayload: {
         formOfPayment: d.formOfPayment,
         paidCurrency: d.paidCurrency,
@@ -93,7 +92,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
     },
   );
 
-  const handleInstaxchangeSuccess = (d: SuccessCryptoPaymentData) => {
+  const handleInstaxchangeSuccess = (d: SuccessInstaxchangePaymentData) => {
     const payload = {
       txId: txId as string,
       sessionId: d.metadata?.sessionId as string,
@@ -179,4 +178,3 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
     </>
   );
 }
-
