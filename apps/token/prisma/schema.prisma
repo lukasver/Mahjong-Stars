@@ -437,7 +437,7 @@ model SaleTransactions {
   user   User              @relation("UserTransactions", fields: [userId], references: [id])
   userId String
 
-  sale   Sale   @relation(fields: [saleId], references: [id])
+  sale   Sale   @relation(fields: [saleId], references: [id], onDelete: SetNull)
   saleId String
 
   comment String?

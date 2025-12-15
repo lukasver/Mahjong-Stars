@@ -110,7 +110,7 @@ export const upsertSale = adminClient
 			| Awaited<ReturnType<typeof salesController.createSale>>
 			| null = null;
 		if (parsedInput.id) {
-			const { id, signature, ...rest } = parsedInput;
+			const { id, signature, toWalletsAddress: _, ...rest } = parsedInput;
 
 			sale = await salesController.updateSale(
 				{

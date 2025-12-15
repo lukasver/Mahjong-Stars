@@ -3,7 +3,7 @@
 import { StaggeredRevealAnimation } from "@mjs/ui/components/motion";
 import PaymentMethodSelector, { PaymentMethod } from "@mjs/ui/components/payment-options";
 import { toast } from "@mjs/ui/primitives/sonner";
-import { Activity, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FOPSchema } from "@/common/schemas/generated";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { useInstaxchangeSession } from "@/components/hooks/use-instaxchange-session";
@@ -202,56 +202,56 @@ const InstaxchangeWidgetComponent = ({
   }
 
   return (
-    <Activity mode={!sessionUrl ? "visible" : "hidden"}>
-      <StaggeredRevealAnimation isVisible={!!sessionUrl}>
-        <div className="space-y-4">
-          <div className="rounded-lg border border-border bg-card p-4">
-            <div className="space-y-3">
-              <h3 className="font-semibold">Complete Payment</h3>
-              <p className="text-sm text-muted-foreground">
-                Use Apple Pay or Google Pay to complete your payment securely.
-              </p>
-            </div>
-          </div>
-
-          <div className="relative w-full" style={{ minHeight: "600px" }}>
-            {isProcessing && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                <div className="text-center">
-                  <div className="mb-2 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-                  <p className="text-sm font-medium">Processing payment...</p>
-                </div>
-              </div>
-            )}
-
-            <iframe
-              ref={iframeRef}
-              src={sessionUrl}
-              title="Instaxchange Payment"
-              className="h-full w-full rounded-lg border border-border"
-              style={{ minHeight: "600px" }}
-              allow="payment"
-              allowFullScreen
-              onError={handleIframeError}
-              onLoad={handleIframeLoad}
-            />
-
-            {paymentError && (
-              <div className="mt-4 rounded-lg border border-destructive bg-destructive/10 p-4">
-                <p className="text-sm text-destructive">{paymentError}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-lg border border-muted bg-muted/10 p-4">
-            <p className="text-xs text-muted-foreground">
-              Your payment is processed securely by Instaxchange. Only Apple Pay
-              and Google Pay are supported for this transaction.
+    // <Activity mode={!sessionUrl ? "visible" : "hidden"}>
+    <StaggeredRevealAnimation isVisible={!!sessionUrl}>
+      <div className="space-y-4">
+        <div className="rounded-lg border border-border bg-card p-4">
+          <div className="space-y-3">
+            <h3 className="font-semibold">Complete Payment</h3>
+            <p className="text-sm text-muted-foreground">
+              Use Apple Pay or Google Pay to complete your payment securely.
             </p>
           </div>
         </div>
-      </StaggeredRevealAnimation>
-    </Activity>
+
+        <div className="relative w-full" style={{ minHeight: "600px" }}>
+          {isProcessing && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+              <div className="text-center">
+                <div className="mb-2 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
+                <p className="text-sm font-medium">Processing payment...</p>
+              </div>
+            </div>
+          )}
+
+          <iframe
+            ref={iframeRef}
+            src={sessionUrl}
+            title="Instaxchange Payment"
+            className="h-full w-full rounded-lg border border-border"
+            style={{ minHeight: "600px" }}
+            allow="payment"
+            allowFullScreen
+            onError={handleIframeError}
+            onLoad={handleIframeLoad}
+          />
+
+          {paymentError && (
+            <div className="mt-4 rounded-lg border border-destructive bg-destructive/10 p-4">
+              <p className="text-sm text-destructive">{paymentError}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-muted bg-muted/10 p-4">
+          <p className="text-xs text-muted-foreground">
+            Your payment is processed securely by Instaxchange. Only Apple Pay
+            and Google Pay are supported for this transaction.
+          </p>
+        </div>
+      </div>
+    </StaggeredRevealAnimation>
+    // </Activity>
   );
 };
 

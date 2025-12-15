@@ -60,9 +60,9 @@ class SalesController {
 		_ctx?: ActionCtx,
 	): Promise<
 		| Success<{
-				sales: SaleWithToken[];
-				quantity: number;
-		  }>
+			sales: SaleWithToken[];
+			quantity: number;
+		}>
 		| Failure
 	> {
 		const isActiveSaleReq = active;
@@ -116,14 +116,14 @@ class SalesController {
 				sale.information =
 					sale.information && Array.isArray(sale.information)
 						? (sale.information as SaleInformationItem[]).map((info) => {
-								if (info.type === "file") {
-									info.value = this.storage.getFileUrl(
-										"public",
-										info.value as string,
-									);
-								}
-								return info;
-							})
+							if (info.type === "file") {
+								info.value = this.storage.getFileUrl(
+									"public",
+									info.value as string,
+								);
+							}
+							return info;
+						})
 						: sale.information;
 			});
 
@@ -184,8 +184,8 @@ class SalesController {
 		_ctx: ActionCtx,
 	): Promise<
 		| Success<{
-				sale: SaleWithToken;
-		  }>
+			sale: SaleWithToken;
+		}>
 		| Failure
 	> {
 		if (!id) {
@@ -442,6 +442,7 @@ class SalesController {
 			tokenSymbol,
 			createdBy: __,
 			information,
+			toWalletsAddress: ___,
 			...rest
 		} = data;
 
@@ -683,25 +684,25 @@ class SalesController {
 					individualPromises.concat([
 						docs.images?.length
 							? tx.document.createMany({
-									data: docs.images.map((image) => ({
-										name: image.label,
-										url: image.value as string,
-										type: image.mimeType,
-										fileName: image.fileName,
-										saleId: sale.id,
-									})),
-								})
+								data: docs.images.map((image) => ({
+									name: image.label,
+									url: image.value as string,
+									type: image.mimeType,
+									fileName: image.fileName,
+									saleId: sale.id,
+								})),
+							})
 							: Promise.resolve(),
 						docs.documents?.length
 							? tx.document.createMany({
-									data: docs.documents.map((doc) => ({
-										name: doc.label,
-										url: doc.value as string,
-										type: doc.mimeType,
-										fileName: doc.fileName,
-										saleId: sale.id,
-									})),
-								})
+								data: docs.documents.map((doc) => ({
+									name: doc.label,
+									url: doc.value as string,
+									type: doc.mimeType,
+									fileName: doc.fileName,
+									saleId: sale.id,
+								})),
+							})
 							: Promise.resolve(),
 					]),
 				);

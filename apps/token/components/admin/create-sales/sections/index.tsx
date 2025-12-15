@@ -153,6 +153,11 @@ export const TokenInformation = ({
               props.options = options[optionKey as keyof typeof options];
             }
 
+            // Disable toWalletsAddress field when editing an existing sale
+            const isDisabled = saleId && name === "toWalletsAddress";
+            const disabledMessage = isDisabled ? "This field cannot be edited after the sale is created" : undefined;
+            const finalProps = isDisabled ? { ...props, disabled: true } : props;
+
             return (
               <li key={key} className="">
                 <FormInput
@@ -160,9 +165,9 @@ export const TokenInformation = ({
                   name={name}
                   type={type}
                   label={label}
-                  description={description}
+                  description={disabledMessage ?? description}
                   message={true}
-                  inputProps={props}
+                  inputProps={finalProps}
                   descriptionClassName={"text-secondary"}
                 />
               </li>

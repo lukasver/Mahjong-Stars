@@ -31,6 +31,7 @@ import {
   ImagesIcon,
   Info,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { InformationSchemaAsStrings } from "@/common/schemas/dtos/sales/information";
 import { Document } from "@/common/schemas/generated";
 import { SaleWithToken } from "@/common/types/sales";
@@ -46,7 +47,7 @@ export const ProjectInformation = ({
   children,
 }: {
   sale: SaleWithToken;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) => {
   const { data: docs, isLoading } = useSaleDocuments(sale.id);
 
@@ -138,7 +139,11 @@ const ProjectInfoTab = ({ sale }: { sale: SaleWithToken }) => {
             return null;
           }
           return (
-            <AccordionItem value={key.label} key={key.label} data-testid={`information-accordion-item-${index}`}>
+            <AccordionItem
+              value={key.label}
+              key={key.label}
+              data-testid={`information-accordion-item-${index}`}
+            >
               <AccordionTrigger className={"text-secondary"}>
                 {key.label}
               </AccordionTrigger>
@@ -173,7 +178,10 @@ const DocumentsTab = ({ sale }: { sale: SaleWithToken }) => {
   );
 
   return (
-    <div className="space-y-3 min-h-[185px]" data-testid="documents-tab-content">
+    <div
+      className="space-y-3 min-h-[185px]"
+      data-testid="documents-tab-content"
+    >
       {docs.map((document, index) => (
         <a
           href={document.url}
@@ -239,7 +247,10 @@ const GalleryTab = ({ sale }: { sale: SaleWithToken }) => {
     );
 
   return (
-    <div className="max-w-lg mx-auto min-h-[185px]" data-testid="gallery-tab-content">
+    <div
+      className="max-w-lg mx-auto min-h-[185px]"
+      data-testid="gallery-tab-content"
+    >
       <ImagesSection
         images={docs.images.map((image) => ({
           src: getBucketUrl(image.url),
