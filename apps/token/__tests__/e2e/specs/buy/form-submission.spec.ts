@@ -565,7 +565,6 @@ function getInputTrimmedValue(
     locale,
     currency,
   );
-  console.log("🚀 ~ form-submission.spec.ts:564 ~ formattedValue:", amount, formattedValue, Number(cleanNumericValue).toFixed(decimalScale));
 
 
   return Number(cleanNumericValue).toFixed(decimalScale);

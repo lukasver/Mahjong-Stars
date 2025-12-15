@@ -341,6 +341,7 @@ class TransactionsController {
 					},
 					user: {
 						select: {
+							walletAddress: true,
 							profile: {
 								select: {
 									firstName: true,

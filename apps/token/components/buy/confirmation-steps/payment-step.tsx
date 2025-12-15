@@ -16,6 +16,7 @@ import { toast } from "@mjs/ui/primitives/sonner";
 import { Tabs, TabsContent } from "@mjs/ui/primitives/tabs";
 import { copyToClipboard, safeFormatCurrency } from "@mjs/utils/client";
 import { TransactionStatus } from "@prisma/client";
+import Decimal from "decimal.js";
 import { notFound, useParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
@@ -30,12 +31,14 @@ import {
 } from "@/components/bank-details";
 import { FormError } from "@/components/form-error";
 import useActiveAccount from "@/components/hooks/use-active-account";
+import { useUsdAmount } from "@/components/hooks/use-usd-amount";
 import { PurchaseSummaryCard } from "@/components/invest/summary";
 import { PulseLoader } from "@/components/pulse-loader";
 import { SwitchNetworkButton } from "@/components/switch-network-button";
 import {
   associateDocumentsToUser,
   confirmCryptoTransaction,
+  confirmInstaxchangeTransaction,
   confirmTransaction,
   getFileUploadPrivatePresignedUrl,
 } from "@/lib/actions";
@@ -47,6 +50,7 @@ import {
 } from "@/lib/services/api";
 import { getQueryClient } from "@/lib/services/query";
 import { uploadFile } from "@/lib/utils/files";
+import { InstaxchangeWidget } from "../widgets/instaxchange";
 import { OnRampWidget } from "../widgets/onramp";
 import {
   CryptoTransactionWidget,
@@ -86,7 +90,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
     ) {
       onSuccess();
     }
-  }, [tx?.transaction?.status]);
+  }, [tx?.transaction?.status, onSuccess]);
 
   const handleCryptoSuccessPayment = (d: SuccessCryptoPaymentData) => {
     // amount paid can vary if the user paid in a different token than selected, Example: selected fiat but ended up payingi n ETH
@@ -103,6 +107,35 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
       ...(d.metadata && { metadata: d.metadata }),
     } as Parameters<typeof execute>[0];
     execute(payload);
+  };
+
+  const { execute: executeInstaxchange } = useAction(
+    confirmInstaxchangeTransaction,
+    {
+      onSuccess: () => {
+        onSuccess();
+      },
+      onError: ({ error }) => {
+        console.error("Instaxchange transaction error", error);
+        toast.error(error.serverError || "Instaxchange transaction error");
+      },
+    },
+  );
+
+  const handleInstaxchangeSuccess = (d: SuccessCryptoPaymentData) => {
+    const payload = {
+      txId: txId as string,
+      sessionId: d.metadata?.sessionId as string,
+      transactionHash: d.transactionHash,
+      amountPaid: d.amountPaid,
+      paymentDate: d.paymentDate || new Date(),
+      paidCurrency: d.paidCurrency,
+      metadata: {
+        paymentMethod: d.metadata?.paymentMethod,
+        provider: d.metadata?.provider || "instaxchange",
+      },
+    } as Parameters<typeof executeInstaxchange>[0];
+    executeInstaxchange(payload);
   };
 
   if (isLoading) {
@@ -161,6 +194,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
             tx={tx.transaction}
             onSuccess={onSuccess}
             onSuccessCrypto={handleCryptoSuccessPayment}
+            onSuccessInstaxchange={handleInstaxchangeSuccess}
           />
         ) : (
           <CryptoPayment
@@ -242,10 +276,12 @@ const FiatPayment = ({
   tx,
   onSuccess,
   onSuccessCrypto,
+  onSuccessInstaxchange,
 }: {
   tx: TransactionByIdWithRelations;
   onSuccess: () => void;
   onSuccessCrypto: (d: SuccessCryptoPaymentData) => void;
+  onSuccessInstaxchange: (d: SuccessCryptoPaymentData) => void;
 }) => {
   const { data: banks, isLoading: isBanksLoading } = useSaleBanks(
     tx?.sale?.id || "",
@@ -258,6 +294,12 @@ const FiatPayment = ({
   // const [paymentMethod, setPaymentMethod] = useState<"CARD" | "TRANSFER">(
   //   "CARD",
   // );
+
+  // Convert transaction amount to USD for threshold checking
+  const { usdAmount, isLoading: isCheckingAmount } = useUsdAmount({
+    amount: tx?.totalAmount,
+    currency: tx?.paidCurrency,
+  });
 
   /**
    * Handles the upload of the bank slip file.
@@ -333,11 +375,50 @@ const FiatPayment = ({
     }
   };
 
-  // If no banks available or form of payment is CARD, show only card payment
+  // Amount threshold for Instaxchange (USD 1,000)
+  const INSTAXCHANGE_MAX_AMOUNT = new Decimal(1000);
+  const shouldUseInstaxchange =
+    !isCheckingAmount &&
+    usdAmount !== null &&
+    usdAmount.lte(INSTAXCHANGE_MAX_AMOUNT) &&
+    tx.formOfPayment === "CARD";
+
+  // If no banks available or form of payment is CARD, show card payment (Instaxchange or Thirdweb)
   if (
     (!isBanksLoading && banks?.banks?.length === 0) ||
     tx.formOfPayment === "CARD"
   ) {
+    if (isCheckingAmount) {
+      return (
+        <div className="space-y-4 p-4">
+          <div className="rounded-lg border border-muted bg-muted/10 p-4">
+            <p className="text-sm">Checking payment options...</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Use Instaxchange for amounts ≤ USD 1,000, Thirdweb for larger amounts
+    if (shouldUseInstaxchange) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          <InstaxchangeWidget
+            transaction={tx}
+            onSuccess={onSuccessInstaxchange}
+            onError={(error) => {
+              toast.error("Payment Error", {
+                description: error,
+              });
+            }}
+          />
+        </motion.div>
+      );
+    }
+
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -370,17 +451,41 @@ const FiatPayment = ({
           </TabsList> */}
 
           <TabsContent value={FOPSchema.enum.CARD}>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <CryptoComponent
-                transaction={tx}
-                onSuccessPayment={onSuccessCrypto}
-                showHelp
-              />
-            </motion.div>
+            {isCheckingAmount ? (
+              <div className="space-y-4 p-4">
+                <div className="rounded-lg border border-muted bg-muted/10 p-4">
+                  <p className="text-sm">Checking payment options...</p>
+                </div>
+              </div>
+            ) : shouldUseInstaxchange ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                <InstaxchangeWidget
+                  transaction={tx}
+                  onSuccess={onSuccessInstaxchange}
+                  onError={(error) => {
+                    toast.error("Payment Error", {
+                      description: error,
+                    });
+                  }}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                <CryptoComponent
+                  transaction={tx}
+                  onSuccessPayment={onSuccessCrypto}
+                  showHelp
+                />
+              </motion.div>
+            )}
           </TabsContent>
 
           <TabsContent value="TRANSFER">

@@ -67,6 +67,10 @@ export const env = createEnv({
 		EMAIL_OCTOPUS_API_KEY: z.string().min(1),
 		JWT_SECRET: z.string().min(1),
 		CRON_SECRET: z.string().min(1),
+		INSTAXCHANGE_API_KEY: z.string().min(1),
+		INSTAXCHANGE_API_URL: z.string().url().min(1),
+		INSTAXCHANGE_WEBHOOK_SECRET: z.string().min(1),
+		INSTAXCHANGE_ACCOUNT_REF_ID: z.string().min(1).optional(),
 	},
 	client: {
 		NEXT_PUBLIC_THIRDWEB_CLIENT_ID: z.string().min(1),
@@ -131,6 +135,10 @@ export const env = createEnv({
 		JWT_SECRET: process.env.JWT_SECRET,
 		CRON_SECRET: process.env.CRON_SECRET,
 		NEXT_PUBLIC_SPONSOR_GAS_FEES: process.env.NEXT_PUBLIC_SPONSOR_GAS_FEES,
+		INSTAXCHANGE_API_KEY: process.env.INSTAXCHANGE_API_KEY,
+		INSTAXCHANGE_API_URL: process.env.INSTAXCHANGE_API_URL,
+		INSTAXCHANGE_WEBHOOK_SECRET: process.env.INSTAXCHANGE_WEBHOOK_SECRET,
+		INSTAXCHANGE_ACCOUNT_REF_ID: process.env.INSTAXCHANGE_ACCOUNT_REF_ID,
 	},
 	skipValidation: process.env.NODE_ENV === "test",
 });

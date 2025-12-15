@@ -53,7 +53,9 @@ import {
 	verifyJwt,
 } from "../auth/thirdweb";
 import { erc20Abi } from "../services/crypto/ABI";
+import { instaxchangeService } from "../services/instaxchange";
 import logger from "../services/logger.server";
+import calculator from "../services/pricefeeds";
 import { authActionClient, loginActionClient } from "./config";
 
 export const hasActiveSession = async (address: string, token: string) => {
@@ -379,8 +381,8 @@ export const createTransaction = authActionClient
 							type: TransactionFeeTypeSchema.enum.PROCESSING,
 							amount: new Prisma.Decimal(parsedInput.paid.fees),
 							currencySymbol: parsedInput.paid.currency,
-						}
-					]
+						},
+					],
 				}),
 			},
 			ctx,
@@ -695,6 +697,91 @@ export const confirmCryptoTransaction = authActionClient
 		return result.data;
 	});
 
+/**
+ * Confirms an Instaxchange payment transaction
+ * Processes successful Instaxchange payments and updates transaction status
+ */
+export const confirmInstaxchangeTransaction = authActionClient
+	.schema(
+		z.object({
+			txId: z.string(),
+			sessionId: z.string().min(1, "Session ID is required"),
+			transactionHash: z.string().optional(),
+			amountPaid: z.string(),
+			paymentDate: z.coerce.date(),
+			paidCurrency: z.string().optional(),
+			metadata: z
+				.object({
+					paymentMethod: z.string().optional(),
+					provider: z.string().optional(),
+				})
+				.partial()
+				.optional(),
+		}),
+	)
+	.action(async ({ ctx, parsedInput }) => {
+		// Get transaction to verify ownership and get default values
+		const transaction = await transactionsController.getTransactionById(
+			{ id: parsedInput.txId },
+			ctx,
+		);
+
+		if (!transaction.success || !transaction.data) {
+			throw new Error("Transaction not found or access denied");
+		}
+
+		const tx = transaction.data;
+
+		// Verify transaction belongs to the user
+		if (tx.transaction.user.walletAddress !== ctx.address) {
+			throw new Error("Transaction does not belong to user");
+		}
+
+		// Prepare metadata with Instaxchange-specific information
+		const existingMetadata =
+			(tx.transaction.metadata as Record<string, unknown>) || {};
+		const existingInstaxchangeMetadata =
+			(existingMetadata.instaxchange as Record<string, unknown>) || {};
+		const instaxchangeMetadata = {
+			...existingInstaxchangeMetadata,
+			sessionId: parsedInput.sessionId,
+			transactionHash: parsedInput.transactionHash,
+			paymentMethod: parsedInput.metadata?.paymentMethod,
+			provider: parsedInput.metadata?.provider || "instaxchange",
+			confirmedAt: new Date().toISOString(),
+		};
+
+		const updatedMetadata = {
+			...existingMetadata,
+			instaxchange: instaxchangeMetadata,
+		};
+
+		// Confirm transaction using the transactions controller
+		const result = await transactionsController.confirmTransaction(
+			{
+				id: parsedInput.txId,
+				type: "FIAT",
+				payload: {
+					formOfPayment: FOP.CARD,
+					amountPaid: parsedInput.amountPaid,
+					paidCurrency: parsedInput.paidCurrency || tx.transaction.paidCurrency,
+					paymentDate: parsedInput.paymentDate,
+					...(parsedInput.transactionHash && {
+						txHash: parsedInput.transactionHash,
+					}),
+					metadata: updatedMetadata,
+				},
+			},
+			ctx,
+		);
+
+		if (!result.success) {
+			throw new Error(result.message);
+		}
+
+		return result.data;
+	});
+
 export const removeApproverFromSaft = authActionClient
 	.schema(
 		z.object({
@@ -749,4 +836,130 @@ export const buyPrepare = authActionClient
 			throw new Error(result.message);
 		}
 		return result.data;
+	});
+
+/**
+ * Creates an Instaxchange payment session for a transaction
+ * Validates transaction ownership, checks amount threshold (≤ USD 1,000), and creates session
+ */
+export const createInstaxchangeSession = authActionClient
+	.schema(
+		z.object({
+			transactionId: z.string(),
+			amount: z.number().positive(),
+			currency: z.string().min(3),
+		}),
+	)
+	.action(async ({ ctx, parsedInput }) => {
+		const { transactionId, amount, currency } = parsedInput;
+
+		// Get transaction and verify ownership
+		const transaction = await transactionsController.getTransactionById(
+			{ id: transactionId },
+			ctx,
+		);
+
+		if (!transaction.success || !transaction.data) {
+			throw new Error("Transaction not found or access denied");
+		}
+
+		const tx = transaction.data;
+
+		// Verify transaction belongs to the user
+		if (tx.transaction.user.walletAddress !== ctx.address) {
+			throw new Error("Transaction does not belong to user");
+		}
+
+		// Validate that provided currency matches transaction's paid currency
+		if (tx.transaction.paidCurrency !== currency) {
+			throw new Error(
+				`Currency mismatch: transaction uses ${tx.transaction.paidCurrency}, but ${currency} was provided`,
+			);
+		}
+
+		// Validate that provided amount matches transaction's total amount
+		// Allow small tolerance for decimal precision differences (0.01%)
+		const transactionAmount = new Decimal(tx.transaction.totalAmount);
+		const providedAmount = new Decimal(amount);
+		const amountDifference = transactionAmount.sub(providedAmount).abs();
+		const tolerance = transactionAmount.mul(0.0001); // 0.01% tolerance
+
+		if (amountDifference.gt(tolerance)) {
+			throw new Error(
+				`Amount mismatch: transaction amount is ${transactionAmount.toString()}, but ${amount} was provided`,
+			);
+		}
+
+		// Use transaction's actual amount and currency for consistency
+		const finalAmount = transactionAmount;
+		const finalCurrency = tx.transaction.paidCurrency;
+
+		// Convert amount to USD for threshold check
+		let usdAmount: Decimal;
+		if (finalCurrency === "USD") {
+			usdAmount = finalAmount;
+		} else {
+			const conversion = await calculator.convertToCurrency({
+				amount: finalAmount.toString(),
+				fromCurrency: finalCurrency,
+				toCurrency: "USD",
+				precision: 8,
+			});
+			usdAmount = new Decimal(conversion.amount);
+		}
+
+		// Check amount threshold (≤ USD 1,000 for Instaxchange)
+		const INSTAXCHANGE_MAX_AMOUNT = new Decimal(1000);
+		if (usdAmount.gt(INSTAXCHANGE_MAX_AMOUNT)) {
+			throw new Error(
+				`Transaction amount exceeds Instaxchange limit of $${INSTAXCHANGE_MAX_AMOUNT.toString()} USD`,
+			);
+		}
+
+		// Create Instaxchange session
+		// Convert to number only when calling the API (which expects a number)
+		const session = await instaxchangeService.createSession(
+			finalAmount.toNumber(),
+			finalCurrency,
+			transactionId,
+			{
+				transactionId,
+				userWalletAddress: tx.transaction.user.walletAddress,
+				saleId: tx.transaction.sale.id,
+			},
+		);
+
+		// Store session ID in transaction metadata
+		const existingMetadata =
+			(tx.transaction.metadata as Record<string, unknown>) || {};
+		const updatedMetadata = {
+			...existingMetadata,
+			instaxchange: {
+				sessionId: session.sessionId,
+				createdAt: new Date().toISOString(),
+			},
+		};
+
+		// Update transaction metadata
+		await prisma.saleTransactions.update({
+			where: { id: transactionId },
+			data: {
+				metadata: updatedMetadata as Prisma.InputJsonValue,
+			},
+		});
+
+		logger.info("Instaxchange session created", {
+			sessionId: session.sessionId,
+			transactionId,
+			amount: finalAmount.toString(),
+			currency: finalCurrency,
+			usdAmount: usdAmount.toString(),
+		});
+
+		return {
+			sessionId: session.sessionId,
+			sessionUrl: session.sessionUrl,
+			status: session.status,
+			expiresAt: session.expiresAt,
+		};
 	});

@@ -45,6 +45,7 @@ const transactionByIdWithRelations =
 			tokenDistributions: true,
 			user: {
 				select: {
+					walletAddress: true,
 					profile: {
 						select: {
 							firstName: true,
