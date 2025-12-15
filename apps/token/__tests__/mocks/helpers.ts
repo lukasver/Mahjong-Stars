@@ -418,7 +418,7 @@ export const createScenario = async (db: PrismaClient) => {
     currency: 'USD',
   }).then(async ({ sale, token }) => {
     // biome-ignore lint/correctness/noUnusedVariables: destructured to remove id
-    const { id, ...tx } = mockTransactions({
+    const { id, metadata, ...tx } = mockTransactions({
       blockchainId: token.blockchain.id,
       tokenSymbol: token.token.symbol,
     });
@@ -431,6 +431,7 @@ export const createScenario = async (db: PrismaClient) => {
           ...tx,
           saleId: sale.id,
           userId: regularUser.id,
+          ...metadata ? { metadata } : {},
         },
       }),
     };

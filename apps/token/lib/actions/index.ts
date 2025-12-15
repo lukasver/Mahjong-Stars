@@ -921,6 +921,10 @@ export const createInstaxchangeSession = authActionClient
 			);
 		}
 
+
+		if (!instaxchangeService) {
+			throw new Error("Not implemented, service not available");
+		}
 		// Create Instaxchange session
 		// Convert to number only when calling the API (which expects a number)
 		const session = await instaxchangeService.createSession(

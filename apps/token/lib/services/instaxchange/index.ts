@@ -285,8 +285,7 @@ export class InstaxchangeService {
 
       let result = 0;
       for (let i = 0; i < expectedSignature.length; i++) {
-        result |=
-          expectedSignature.charCodeAt(i) ^ signature.charCodeAt(i);
+        result |= expectedSignature.charCodeAt(i) ^ signature.charCodeAt(i);
       }
 
       const isValid = result === 0;
@@ -385,9 +384,19 @@ export class InstaxchangeService {
   }
 }
 
+let service: InstaxchangeService | null = null;
+try {
+  service = new InstaxchangeService();
+} catch (e) {
+  logger.error(
+    `Error creating Instaxchange service: ${e instanceof Error ? e.message : "Unknown error"}`,
+  );
+
+}
+
+
 /**
  * Default singleton instance of InstaxchangeService
  * Uses environment variables for configuration
- */
-export const instaxchangeService = new InstaxchangeService();
-
+*/
+export const instaxchangeService = service;

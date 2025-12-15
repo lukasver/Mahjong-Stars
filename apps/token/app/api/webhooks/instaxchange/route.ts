@@ -56,6 +56,9 @@ type InstaxchangeWebhookPayload = z.infer<
  */
 export async function POST(req: NextRequest) {
   try {
+    if (!instaxchangeService) {
+      return NextResponse.json({ error: "Not implemented" }, { status: 501 });
+    }
     // Get raw body for signature verification
     // Next.js 13+ requires reading the body as text for webhook signature verification
     const rawBody = await req.text();
