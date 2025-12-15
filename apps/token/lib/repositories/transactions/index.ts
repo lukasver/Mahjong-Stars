@@ -985,6 +985,9 @@ class TransactionsController {
 		},
 		ctx: ActionCtx,
 	) {
+
+		console.log("🚀 ~ index.ts:989 ~ payload:", payload);
+
 		try {
 			// Only the user who created the transaction can confirm it
 			const [tx, admins] = await Promise.all([
@@ -1036,14 +1039,6 @@ class TransactionsController {
 				}),
 			]);
 
-			// Check if the sale has enough tokens available
-			// TODO! This should be done before actually confriming payment of the tx
-			// if (
-			//   new Prisma.Decimal(tx.sale.availableTokenQuantity).lessThan(tx.quantity)
-			// ) {
-			//   invariant(false, 'Not enough tokens available to confirm transaction');
-			// }
-
 			const shouldFinishSale = new Prisma.Decimal(
 				tx.sale.availableTokenQuantity,
 			).equals(tx.quantity);
@@ -1064,6 +1059,7 @@ class TransactionsController {
 
 			const isCryptoWithoutConfirmation =
 				formOfPayment === "CRYPTO" && (!chainId || !rest.txHash);
+
 			if (isCryptoWithoutConfirmation) {
 				throw new Error(
 					"Crypto transaction without confirmation is not allowed, please wait for the transaction to be confirmed or contact support",
@@ -1285,7 +1281,8 @@ class TransactionsController {
 					: tx.paidCurrency === "BTC"
 						? "WBTC"
 						: tx.paidCurrency;
-			console.log("tokenSymbol", tokenSymbol, tx.paidCurrency, dto.chainId);
+
+
 			const paymentToken = await prisma.tokensOnBlockchains.findUnique({
 				where: {
 					tokenSymbol_chainId: {

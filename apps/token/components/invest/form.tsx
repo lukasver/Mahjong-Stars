@@ -67,7 +67,7 @@ export const InvestForm = ({
   openModal: (modal: TransactionModalTypes) => void;
   children?: React.ReactNode;
 }) => {
-  const { activeAccount } = useActiveAccount();
+  const { activeAccount, chainId } = useActiveAccount();
   const { data: kycData, isLoading: loadingKyc } = useUserKyc();
 
   const [hash] = useHash();
@@ -79,7 +79,12 @@ export const InvestForm = ({
     "icon"
   >>(null);
   const router = useRouter();
-  const { data: options, isLoading: loadingOptions } = useInputOptions();
+  const { data: options, isLoading: loadingOptions } = useInputOptions({
+    chainId,
+  });
+
+  console.log("🚀 ~ form.tsx:84 ~ options:", options?.data?.cryptoCurrencies);
+
 
   const { data: pendingTransactions } = usePendingTransactionsForSale(
     props.sale.id,

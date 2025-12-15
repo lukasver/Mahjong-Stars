@@ -30,6 +30,7 @@ import { SaleWithRelations, SaleWithToken } from "@/common/types/sales";
 import { BankDetailsForm } from "@/components/admin/create-sales/utils";
 import { prisma } from "@/db";
 import { serverClient } from "@/lib/auth/thirdweb";
+import { NETWORK_TO_TOKEN_MAPPING } from "@/lib/services/crypto/config";
 import logger from "@/lib/services/logger.server";
 import { StorageService } from "../documents/storage";
 import { TransactionValidator as validator } from "../transactions/validator";
@@ -768,7 +769,7 @@ class SalesController {
 		}
 	}
 
-	async getInputOptions(_ctx: ActionCtx) {
+	async getInputOptions(qParams: { chainId?: number } = {}, _ctx: ActionCtx) {
 		try {
 			const [currencies, blockchains, tokens, banks] = await Promise.all([
 				prisma.currency.findMany({
@@ -788,6 +789,9 @@ class SalesController {
 					},
 				}),
 				prisma.token.findMany({
+					where: qParams.chainId
+						? { TokensOnBlockchains: { some: { chainId: qParams.chainId } } }
+						: undefined,
 					select: {
 						symbol: true,
 						id: true,
@@ -818,6 +822,23 @@ class SalesController {
 				}),
 			]);
 
+			// If we have a chainId, we need to filter the currencies to accept only those that are supported on the chain
+			const whitelistedCrypto = new Map<string, (typeof currencies)[number]>();
+			if (qParams.chainId) {
+				const chainId = z.number().parse(qParams.chainId);
+				currencies.forEach((c) => {
+					const fromMapping = NETWORK_TO_TOKEN_MAPPING[chainId]?.[
+						c.symbol as keyof (typeof NETWORK_TO_TOKEN_MAPPING)[typeof chainId]
+					];
+					if (
+						c.type === "CRYPTO" &&
+						fromMapping?.enabled
+					) {
+						whitelistedCrypto.set(c.symbol, c);
+					}
+				});
+			}
+
 			type SelectOption = {
 				meta?: Record<string, unknown>;
 				id: string;
@@ -829,6 +850,11 @@ class SalesController {
 					(agg, c) => {
 						const recipient =
 							c.type === "FIAT" ? "fiatCurrencies" : "cryptoCurrencies";
+
+						if (c.type === "CRYPTO" && whitelistedCrypto.size && !whitelistedCrypto.has(c.symbol)) {
+							return agg;
+						}
+
 						agg[recipient].push({
 							meta: {
 								type: c.type,

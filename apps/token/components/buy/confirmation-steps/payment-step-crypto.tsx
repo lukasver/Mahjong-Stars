@@ -41,6 +41,9 @@ export const CryptoPayment = ({
     error,
   } = useCryptoTransaction(tx.id, { chainId: chainId || 0 });
 
+
+  console.debug('cryptoTransaction', cryptoTransaction);
+
   return (
     <div className="py-2 text-center space-y-4">
       {/* Balance Checker */}

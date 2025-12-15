@@ -23,6 +23,8 @@ import { ZodError } from "zod";
 import { metadata } from "@/common/config/site";
 import { FOPSchema } from "@/common/schemas/generated";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
+import useActiveAccount from "@/components/hooks/use-active-account";
+import { useBlockchains } from "@/lib/services/api";
 import { ethAddressSchema } from "@/lib/utils";
 import { SuccessCryptoPaymentData } from "../widgets/transaction";
 
@@ -39,11 +41,15 @@ export function CryptoManualPaymentForm({
 }) {
   const [txHash, setTxHash] = useState("");
   const [copied, setCopied] = useState(false);
+  const { chainId } = useActiveAccount();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const { data: blockchains } = useBlockchains();
+
+  const networks = blockchains?.chains?.filter((chain) => chain.isEnabled);
 
   const walletAddress = transaction.sale?.toWalletsAddress;
+
   const amount = transaction.totalAmount.toString();
-  const network = transaction.blockchain?.name;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(walletAddress);
@@ -71,9 +77,13 @@ export function CryptoManualPaymentForm({
   const handleConfirmSubmit = async () => {
     if (isSubmitting) return;
     setShowConfirmDialog(false);
+    if (!chainId) {
+      toast.error("No active account found, please refresh and try again");
+      return
+    }
     onSuccess({
       transactionHash: txHash,
-      chainId: transaction.blockchain?.chainId || 0,
+      chainId,
       amountPaid: amount,
       paidCurrency: transaction.totalAmountCurrency,
       formOfPayment: FOPSchema.enum.CRYPTO,
@@ -104,7 +114,6 @@ export function CryptoManualPaymentForm({
         </p>
       </div>
 
-
       {/* Payment Details */}
       <div className="space-y-4 rounded-lg bg-zinc-900/50 p-4">
         <div className="space-y-3">
@@ -118,10 +127,12 @@ export function CryptoManualPaymentForm({
             </span>
           </div>
           <div className="flex items-start justify-between gap-4">
-            <span className="text-sm text-zinc-400">Network</span>
+            <span className="text-sm text-zinc-400">Supported Networks</span>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-yellow-500" />
-              <span className="text-sm font-medium text-white">{network}</span>
+              <span className="text-sm font-medium text-white">
+                {networks?.map((network) => network.name).join(", ")}
+              </span>
             </div>
           </div>
         </div>
@@ -159,10 +170,12 @@ export function CryptoManualPaymentForm({
           Important: Verify Network Before Sending
         </AlertTitle>
         <AlertDescription className="text-xs">
-          Ensure you are sending funds on the{" "}
-          <strong className="text-red-200">{network}</strong> network. Sending
-          funds on the wrong network will result in permanent loss and cannot be
-          recovered.
+          Ensure you are sending funds on any of the supported networks:
+          <strong className="text-red-200">
+            {networks?.map((network) => network.name).join(", ")}
+          </strong>
+          .<br /> Sending funds on the wrong network will result in permanent
+          loss and cannot be recovered.
         </AlertDescription>
       </Alert>
 
@@ -198,9 +211,9 @@ export function CryptoManualPaymentForm({
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle
-              className="text-secondary-300"
-            >Confirm Transaction Submission</AlertDialogTitle>
+            <AlertDialogTitle className="text-secondary-300">
+              Confirm Transaction Submission
+            </AlertDialogTitle>
             <AlertDialogDescription className="space-y-2 pt-2 text-foreground">
               <p>
                 Please confirm that the following information is correct before

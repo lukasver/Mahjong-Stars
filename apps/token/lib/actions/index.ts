@@ -525,8 +525,8 @@ export const getContract = authActionClient.action(async ({ ctx }) => {
 	return result;
 });
 
-export const getInputOptions = authActionClient.action(async ({ ctx }) => {
-	const result = await salesController.getInputOptions(ctx);
+export const getInputOptions = authActionClient.schema(z.object({ chainId: z.number().optional() }).optional()).action(async ({ ctx, parsedInput }) => {
+	const result = await salesController.getInputOptions(parsedInput, ctx);
 	if (!result.success) {
 		throw new Error(result.message);
 	}

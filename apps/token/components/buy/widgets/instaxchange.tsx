@@ -9,7 +9,6 @@ import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { useInstaxchangeSession } from "@/components/hooks/use-instaxchange-session";
 import { PulseLoader } from "@/components/pulse-loader";
 import { OnRampSkeleton } from "./skeletons";
-import { SuccessCryptoPaymentData } from "./transaction";
 import { WithErrorHandler } from "./utils";
 
 /**
@@ -17,7 +16,15 @@ import { WithErrorHandler } from "./utils";
  */
 interface InstaxchangeWidgetProps {
   transaction: TransactionByIdWithRelations;
-  onSuccess: (data: SuccessCryptoPaymentData) => void;
+  onSuccess: (data: {
+    id: string;
+    txHash: string;
+    amountPaid: string;
+    paidCurrency: string;
+    formOfPayment: 'CARD';
+    paymentDate: Date;
+    metadata?: Record<string, unknown>;
+  }) => void;
   onError?: (error: string) => void;
 }
 
@@ -89,9 +96,10 @@ const InstaxchangeWidgetComponent = ({
 
           // Call onSuccess with payment data
           onSuccess({
-            transactionHash: message.transactionHash || "",
-            chainId: 0, // Instaxchange payments don't use blockchain
+            id: tx.id,
+            txHash: message.transactionHash || "",
             amountPaid: message.amount?.toString() || tx.totalAmount.toString(),
+            // Check the paid currency from instaxchange docs
             paidCurrency: message.currency || tx.paidCurrency,
             formOfPayment: FOPSchema.enum.CARD,
             paymentDate: message.timestamp

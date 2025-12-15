@@ -5,9 +5,10 @@ import { TokenInfo } from "thirdweb/react";
 
 export const ALLOWED_CHAINS =
 	process.env.NODE_ENV === "production"
-		? [c.bsc, c.base, c.optimism, c.arbitrum, c.ethereum]
+		? [c.bsc, c.base, c.optimism, c.arbitrum, c.ethereum, c.polygon]
 		: [
 			c.bscTestnet,
+			c.polygonMumbai,
 			c.sepolia,
 			c.baseSepolia,
 			c.base,
@@ -15,6 +16,7 @@ export const ALLOWED_CHAINS =
 			c.optimism,
 			c.arbitrum,
 			c.ethereum,
+			c.polygon
 		];
 
 const STABLECOIN_DECIMALS = 6;
@@ -329,6 +331,44 @@ export const NETWORK_TO_TOKEN_MAPPING = {
 			image:
 				"https://storage.googleapis.com/mjs-public/branding/curs/WBTC.webp",
 		},
+	},
+	[c.polygon.id]: {
+		["POL"]: {
+			symbol: "POL",
+			contract: NATIVE_TOKEN_ADDRESS,
+			enabled: false,
+			decimals: ERC20_DECIMALS,
+			isNative: true,
+			isStablecoin: false,
+			image: "https://storage.googleapis.com/mjs-public/branding/curs/POL.webp",
+		},
+		["ETH"]: {
+			symbol: "ETH",
+			contract: getAddress("0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"),
+			enabled: false,
+			decimals: ERC20_DECIMALS,
+			isNative: false,
+			isStablecoin: false,
+			image: "https://storage.googleapis.com/mjs-public/branding/curs/ETH.webp",
+		},
+		["USDC"]: {
+			symbol: "USDC",
+			contract: getAddress("0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"),
+			enabled: true,
+			decimals: STABLECOIN_DECIMALS,
+			isNative: false,
+			isStablecoin: true,
+			image: "https://storage.googleapis.com/mjs-public/branding/curs/USDC.webp",
+		},
+		["BTC"]: {
+			symbol: "BTC",
+			contract: getAddress("0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6"),
+			enabled: false,
+			decimals: BTC_DECIMALS,
+			isNative: false,
+			isStablecoin: false,
+			image: "https://storage.googleapis.com/mjs-public/branding/curs/BTC.webp",
+		}
 	},
 };
 
