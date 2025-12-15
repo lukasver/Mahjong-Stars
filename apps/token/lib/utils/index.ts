@@ -1,16 +1,18 @@
-import { ROLES } from '@/common/config/constants';
+import { isAddress } from "thirdweb/utils";
+import { z } from "zod";
+import { ROLES } from "@/common/config/constants";
 
-export const GET_UNHANDLED_ERROR = 'Oops something went wrong';
+export const GET_UNHANDLED_ERROR = "Oops something went wrong";
 
 export const convertCapitalizedCase = (value: string) => {
   return value
-    .split(' ')
+    .split(" ")
     .map((s) => s.slice(0, 1).toUpperCase() + s.slice(1).toLowerCase())
-    .join(' ');
+    .join(" ");
 };
 
 export function convertToSlug(inputString: string) {
-  return inputString?.toLowerCase().replace(/\s+/g, '-');
+  return inputString?.toLowerCase().replace(/\s+/g, "-");
 }
 
 export const generateRandomKey = () => {
@@ -18,8 +20,8 @@ export const generateRandomKey = () => {
 };
 
 export const getShortAddress = (str: string) => {
-  if (!str) return '';
-  return str.substring(0, 5) + '...' + str.slice(-4);
+  if (!str) return "";
+  return str.substring(0, 5) + "..." + str.slice(-4);
 };
 
 export const hasRole = (roles: Record<string, string>, role: string) => {
@@ -42,3 +44,8 @@ export const isAbsoluteUrl = (url: string) => {
     return false;
   }
 };
+
+export const ethAddressSchema = z.string().refine((value) => isAddress(value), {
+  message:
+    "Provided address is invalid. Please insure you have typed correctly.",
+});

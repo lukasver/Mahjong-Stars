@@ -258,6 +258,9 @@ export class AmountCalculatorService {
     // Get exchange rate from source to target currency
     const res = await this.getRateFetcher(fromCurrency, toCurrency);
 
+    console.log("🚀 ~ amount.service.ts:261 ~ res:", res);
+
+
     if (res.error) {
       throw new Error("Error fetching exchange rate for currency conversion");
     }

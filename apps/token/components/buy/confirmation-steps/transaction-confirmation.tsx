@@ -9,7 +9,8 @@ import { getQueryClient } from "@/lib/services/query";
 import { ConfirmationStep } from "./confirmation-step";
 import { FormStepper } from "./form-stepper";
 import { KycUploadStep } from "./kyc-upload-step";
-import { PaymentAvailabilityGuard, PaymentStep } from "./payment-step";
+import { PaymentStep } from "./payment-step";
+import { PaymentAvailabilityGuard } from "./payment-step-guard";
 import { SaftReviewStep } from "./saft-review-step";
 
 interface TransactionConfirmationProps {

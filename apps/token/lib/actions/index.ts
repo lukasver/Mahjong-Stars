@@ -846,7 +846,7 @@ export const createInstaxchangeSession = authActionClient
 	.schema(
 		z.object({
 			transactionId: z.string(),
-			amount: z.number().positive(),
+			amount: z.string(),
 			currency: z.string().min(3),
 		}),
 	)
@@ -877,10 +877,15 @@ export const createInstaxchangeSession = authActionClient
 			);
 		}
 
+		if (Number.isNaN(Number(amount))) {
+			throw new Error("Invalid amount");
+		}
+
 		// Validate that provided amount matches transaction's total amount
 		// Allow small tolerance for decimal precision differences (0.01%)
 		const transactionAmount = new Decimal(tx.transaction.totalAmount);
 		const providedAmount = new Decimal(amount);
+
 		const amountDifference = transactionAmount.sub(providedAmount).abs();
 		const tolerance = transactionAmount.mul(0.0001); // 0.01% tolerance
 

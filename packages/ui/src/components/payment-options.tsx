@@ -55,7 +55,7 @@ const paymentMethods: PaymentMethodOption[] = [
     id: "apple-pay",
     name: "Apple Pay",
     icon: (
-      <div className="w-[80px] h-[51px] px-[20px] flex items-center justify-center bg-transparent rounded">
+      <div className="size-8 flex items-center justify-center bg-transparent rounded">
         <svg version="1.1" id="Artwork" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
           width="165.52107px" height="105.9651px" viewBox="0 0 165.52107 105.9651" enableBackground="new 0 0 165.52107 105.9651"
           xmlSpace="preserve">
@@ -144,7 +144,7 @@ const paymentMethods: PaymentMethodOption[] = [
   {
     id: "google-pay",
     name: "Google Pay",
-    icon: <div className="w-[80px] h-[51px] flex items-center justify-center bg-transparent rounded">
+    icon: <div className="-ml-2! size-12 flex items-center justify-center bg-transparent rounded">
       <svg version="1.1" id="G_Pay_Acceptance_Mark" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
         x="0px" y="0px" viewBox="0 0 1094 742" enableBackground="new 0 0 1094 742" xmlSpace="preserve">
         <path id="Base_1_" fill="#FFFFFF" d="M722.7,170h-352c-110,0-200,90-200,200l0,0c0,110,90,200,200,200h352c110,0,200-90,200-200l0,0

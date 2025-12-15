@@ -1,16 +1,19 @@
 import { AnimatedText } from "@mjs/ui/components/motion";
+import { cn } from "@mjs/ui/lib/utils";
 import Image from "next/image";
 import MahjongStarsIconXl from "@/public/static/images/logos/isologo.webp";
 
 export function PulseLoader({
   children,
   text = "Loading...",
+  className,
 }: {
   children?: React.ReactNode;
   text?: string;
+  className?: string;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", className)}>
       <span className="aspect-square animate-pulse">
         <Image
           height={80}

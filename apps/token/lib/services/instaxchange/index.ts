@@ -88,6 +88,7 @@ export class InstaxchangeService {
   private readonly accountRefId?: string;
   private readonly maxRetries: number;
   private readonly retryDelay: number;
+  private readonly toCurrency = "USDC_POLYGON";
 
   constructor(config?: Partial<InstaxchangeServiceConfig>) {
     const {
@@ -138,7 +139,7 @@ export class InstaxchangeService {
         ...metadata,
         internalTransactionId: transactionId,
       },
-      toCurrency: "USDC", // Always convert to USDC as per plan
+      toCurrency: this.toCurrency, // Always convert to USDC_POLYGON as per plan
       ...(this.accountRefId && { accountRefId: this.accountRefId }),
     };
 

@@ -76,6 +76,7 @@ export function FiatPaymentSelector({
                     </Label>
                   </div>
 
+
                   {/* Transfer Option */}
                   {hasBanks && (
                     <div className="flex items-center space-x-3 p-4 border border-red-700 rounded-lg hover:bg-red-800/30 transition-colors cursor-pointer group">

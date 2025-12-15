@@ -3,13 +3,11 @@
 import { StaggeredRevealAnimation } from "@mjs/ui/components/motion";
 import PaymentMethodSelector, { PaymentMethod } from "@mjs/ui/components/payment-options";
 import { toast } from "@mjs/ui/primitives/sonner";
-import { Decimal } from "decimal.js";
-import { useAction } from "next-safe-action/hooks";
 import { Activity, useCallback, useEffect, useRef, useState } from "react";
 import { FOPSchema } from "@/common/schemas/generated";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
+import { useInstaxchangeSession } from "@/components/hooks/use-instaxchange-session";
 import { PulseLoader } from "@/components/pulse-loader";
-import { createInstaxchangeSession } from "@/lib/actions";
 import { OnRampSkeleton } from "./skeletons";
 import { SuccessCryptoPaymentData } from "./transaction";
 import { WithErrorHandler } from "./utils";
@@ -50,63 +48,20 @@ const InstaxchangeWidgetComponent = ({
   onSuccess,
   onError,
 }: InstaxchangeWidgetProps) => {
-  const [sessionUrl, setSessionUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const { execute: createSession, status: createSessionStatus } = useAction(
-    createInstaxchangeSession,
-    {
-      onSuccess: ({ data }) => {
-        if (data?.sessionUrl) {
-          setSessionUrl(data.sessionUrl);
-          setIsLoading(false);
-          setError(null);
-        } else {
-          const errorMsg = "Failed to create payment session";
-          setError(errorMsg);
-          setIsLoading(false);
-          onError?.(errorMsg);
-        }
-      },
-      onError: (error) => {
-        const errorMsg =
-          error.error?.serverError ||
-          error.error?.validationErrors?._errors?.[0] ||
-          "Failed to create payment session";
-        setError(errorMsg);
-        setIsLoading(false);
-        toast.error("Payment Error", {
-          description: errorMsg,
-        });
-        onError?.(errorMsg);
-      },
-    },
-  );
-
-  /**
-   * Creates the Instaxchange payment session
-   */
-  useEffect(() => {
-    if (!tx?.id) {
-      setError("Transaction not found");
-      setIsLoading(false);
-      return;
-    }
-
-    // Convert amount to number for API
-    const amount = new Decimal(tx.totalAmount).toNumber();
-
-    createSession({
-      transactionId: tx.id,
-      amount,
-      currency: tx.paidCurrency,
+  const { sessionUrl, isLoading, error, status: createSessionStatus } =
+    useInstaxchangeSession({
+      transactionId: tx?.id,
+      totalAmount: tx?.totalAmount,
+      paidCurrency: tx?.paidCurrency,
+      onError,
     });
-  }, [tx?.id, tx?.totalAmount, tx?.paidCurrency, createSession]);
 
   /**
+   * TODO: revise instaxchange uses webhooks not iframe messages
    * Handles postMessage events from Instaxchange iframe
    */
   const handleIframeMessage = useCallback(
@@ -157,7 +112,7 @@ const InstaxchangeWidgetComponent = ({
 
         case "payment.failed": {
           const errorMsg = message.error || "Payment failed";
-          setError(errorMsg);
+          setPaymentError(errorMsg);
           setIsProcessing(false);
           toast.error("Payment Failed", {
             description: errorMsg,
@@ -205,8 +160,7 @@ const InstaxchangeWidgetComponent = ({
    */
   const handleIframeError = useCallback(() => {
     const errorMsg = "Failed to load payment widget";
-    setError(errorMsg);
-    setIsLoading(false);
+    setPaymentError(errorMsg);
     toast.error("Load Error", {
       description: errorMsg,
     });
@@ -217,7 +171,7 @@ const InstaxchangeWidgetComponent = ({
    * Handle iframe load success
    */
   const handleIframeLoad = useCallback(() => {
-    setIsLoading(false);
+    // Iframe loaded successfully
   }, []);
 
   if (createSessionStatus === "executing" || isLoading) {
@@ -225,12 +179,15 @@ const InstaxchangeWidgetComponent = ({
     return <OnRampSkeleton />;
   }
 
-  if (error && !sessionUrl) {
+  // Combine session creation error and payment error
+  const displayError = error || paymentError;
+
+  if (displayError && !sessionUrl) {
     return (
       <div className="space-y-4 p-4">
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <h3 className="font-semibold text-destructive">Payment Error</h3>
-          <p className="text-sm text-destructive/80">{error}</p>
+          <p className="text-sm text-destructive/80">{displayError}</p>
         </div>
       </div>
     );
@@ -279,9 +236,9 @@ const InstaxchangeWidgetComponent = ({
               onLoad={handleIframeLoad}
             />
 
-            {error && (
+            {paymentError && (
               <div className="mt-4 rounded-lg border border-destructive bg-destructive/10 p-4">
-                <p className="text-sm text-destructive">{error}</p>
+                <p className="text-sm text-destructive">{paymentError}</p>
               </div>
             )}
           </div>
