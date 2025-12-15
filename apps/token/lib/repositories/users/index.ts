@@ -647,8 +647,8 @@ class UsersController {
 						supportEmail: siteMetadata.supportEmail,
 						tokenName: siteMetadata.businessName,
 					})
-					.catch((error) => {
-						logger("Failed to send KYC verified email:", error);
+					.catch((e) => {
+						logger("Failed to send KYC verified email:", e instanceof Error ? e.message : undefined);
 					});
 			} else if (status === "REJECTED") {
 				emailEventHelpers
@@ -660,8 +660,8 @@ class UsersController {
 						supportEmail: siteMetadata.supportEmail,
 						tokenName: siteMetadata.businessName,
 					})
-					.catch((error) => {
-						logger("Failed to send KYC rejected email:", error);
+					.catch((e) => {
+						logger("Failed to send KYC rejected email:", e instanceof Error ? e.message : undefined);
 					});
 			}
 

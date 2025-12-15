@@ -13,7 +13,7 @@ import {
 } from "@react-email/components";
 import * as styles from "./shared-styles";
 
-interface UserTransactionConfirmationProps {
+export interface UserTransactionConfirmationProps {
   userName: string;
   tokenName: string;
   tokenSymbol: string;
@@ -222,7 +222,7 @@ export const UserTransactionNotification = ({
                   </Text>
                 </>
               )}
-              {status === "PAYMENT_SUBMITTED" && (
+              {status === "RECONCILIATION_PENDING" && (
                 <>
                   <Text style={styles.listItem}>
                     • Our team is reviewing your payment submission

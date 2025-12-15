@@ -13,7 +13,7 @@ import {
 } from "@react-email/components";
 import * as styles from "./shared-styles";
 
-interface SaleStartingSoonProps {
+export interface SaleStartingSoonProps {
   userName?: string;
   tokenName: string;
   tokenSymbol: string;

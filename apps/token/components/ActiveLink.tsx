@@ -1,7 +1,7 @@
 "use client";
 
+import { Route } from "next";
 import { usePathname } from "next/navigation";
-
 import React, {
   Children,
   ReactElement,
@@ -64,7 +64,7 @@ export const ActiveLink = ({
   };
 
   return (
-    <AppLink {...props} href={props.href}>
+    <AppLink {...props} href={props.href as Route<string>}>
       {processChildren(children)}
     </AppLink>
   );

@@ -13,7 +13,7 @@ import {
 } from "@react-email/components";
 import * as styles from "./shared-styles";
 
-interface KycVerifiedProps {
+export interface KycVerifiedProps {
   userName: string;
   kycTier?: string;
   purchaseLimit?: string;

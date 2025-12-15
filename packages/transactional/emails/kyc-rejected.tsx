@@ -13,7 +13,7 @@ import {
 } from "@react-email/components";
 import * as styles from "./shared-styles";
 
-interface KycRejectedProps {
+export interface KycRejectedProps {
   userName: string;
   rejectionReason?: string;
   resubmitUrl?: string;

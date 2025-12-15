@@ -13,7 +13,7 @@ import {
 } from "@react-email/components";
 import * as styles from "./shared-styles";
 
-interface SecurityAlertProps {
+export interface SecurityAlertProps {
   userName: string;
   alertType: "login" | "email_change" | "password_change" | "device_change" | "other";
   eventDescription: string;

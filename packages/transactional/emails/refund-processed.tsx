@@ -1,5 +1,6 @@
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
@@ -12,7 +13,7 @@ import {
 } from "@react-email/components";
 import * as styles from "./shared-styles";
 
-interface RefundProcessedProps {
+export interface RefundProcessedProps {
   userName: string;
   refundAmount: string;
   refundCurrency: string;

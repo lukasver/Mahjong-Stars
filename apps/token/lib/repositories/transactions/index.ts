@@ -265,8 +265,8 @@ class TransactionsController {
 					distributionDate: new Date().toISOString(),
 					dashboardUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
 					supportEmail: siteMetadata.supportEmail,
-				}).catch((error) => {
-					logger("Failed to send tokens distributed email:", error);
+				}).catch((e) => {
+					logger("Failed to send tokens distributed email:", e instanceof Error ? e.message : undefined);
 				});
 			}
 
@@ -282,8 +282,8 @@ class TransactionsController {
 					dashboardUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
 					supportEmail: siteMetadata.supportEmail,
 					tokenName: siteMetadata.businessName,
-				}).catch((error) => {
-					logger("Failed to send refund processed email:", error);
+				}).catch((e) => {
+					logger("Failed to send refund processed email:", e instanceof Error ? e.message : undefined);
 				});
 			}
 

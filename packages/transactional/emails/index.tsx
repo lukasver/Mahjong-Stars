@@ -44,6 +44,6 @@ const templates = {
   saleClosingSoon: SaleClosingSoonEmail,
   saleMilestone: SaleMilestoneEmail,
   securityAlert: SecurityAlertEmail,
-};
+} as const;
 
 export { templates };

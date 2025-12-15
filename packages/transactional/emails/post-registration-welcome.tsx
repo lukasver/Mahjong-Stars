@@ -13,7 +13,7 @@ import {
 } from "@react-email/components";
 import * as styles from "./shared-styles";
 
-interface PostRegistrationWelcomeProps {
+export interface PostRegistrationWelcomeProps {
   userName: string;
   dashboardUrl?: string;
   supportEmail?: string;
