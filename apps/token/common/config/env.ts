@@ -67,9 +67,9 @@ export const env = createEnv({
 		EMAIL_OCTOPUS_API_KEY: z.string().min(1),
 		JWT_SECRET: z.string().min(1),
 		CRON_SECRET: z.string().min(1),
-		INSTAXCHANGE_API_KEY: z.string().min(1),
-		INSTAXCHANGE_API_URL: z.string().url().min(1),
-		INSTAXCHANGE_WEBHOOK_SECRET: z.string().min(1),
+		INSTAXCHANGE_API_KEY: z.string().min(1).optional(),
+		INSTAXCHANGE_API_URL: z.string().url().min(1).optional(),
+		INSTAXCHANGE_WEBHOOK_SECRET: z.string().min(1).optional(),
 		INSTAXCHANGE_ACCOUNT_REF_ID: z.string().min(1).optional(),
 	},
 	client: {
