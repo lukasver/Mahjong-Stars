@@ -1,12 +1,14 @@
 "use client";
 
 import { StaggeredRevealAnimation } from "@mjs/ui/components/motion";
+import PaymentMethodSelector, { PaymentMethod } from "@mjs/ui/components/payment-options";
 import { toast } from "@mjs/ui/primitives/sonner";
 import { Decimal } from "decimal.js";
 import { useAction } from "next-safe-action/hooks";
 import { Activity, useCallback, useEffect, useRef, useState } from "react";
 import { FOPSchema } from "@/common/schemas/generated";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
+import { PulseLoader } from "@/components/pulse-loader";
 import { createInstaxchangeSession } from "@/lib/actions";
 import { OnRampSkeleton } from "./skeletons";
 import { SuccessCryptoPaymentData } from "./transaction";
@@ -193,7 +195,6 @@ const InstaxchangeWidgetComponent = ({
    */
   useEffect(() => {
     window.addEventListener("message", handleIframeMessage);
-
     return () => {
       window.removeEventListener("message", handleIframeMessage);
     };
@@ -220,6 +221,7 @@ const InstaxchangeWidgetComponent = ({
   }, []);
 
   if (createSessionStatus === "executing" || isLoading) {
+    //TODO! check this skeleton
     return <OnRampSkeleton />;
   }
 
@@ -237,9 +239,7 @@ const InstaxchangeWidgetComponent = ({
   if (!sessionUrl) {
     return (
       <div className="space-y-4 p-4">
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <p className="text-sm">Preparing payment session...</p>
-        </div>
+        <PulseLoader text="Preparing payment session..." />
       </div>
     );
   }
@@ -298,4 +298,36 @@ const InstaxchangeWidgetComponent = ({
   );
 };
 
-export const InstaxchangeWidget = WithErrorHandler(InstaxchangeWidgetComponent);
+type PaymentProcessors = Extract<
+  PaymentMethod,
+  "card" | "apple-pay" | "google-pay"
+>;
+
+export const Instaxchange = WithErrorHandler(InstaxchangeWidgetComponent);
+
+
+/**
+ * Instaxchange component with paymentp processor selection
+ */
+export const InstaxchangeWidget = ({
+  transaction: tx,
+  onSuccess,
+  onError,
+}: InstaxchangeWidgetProps) => {
+  const [paymentProcessor, setPaymentProcessor] = useState<null | PaymentProcessors>(null);
+  if (!paymentProcessor) {
+    return (
+      <PaymentMethodSelector
+        onSelect={(method) => {
+          if (method === "card" || method === "apple-pay" || method === "google-pay") {
+            setPaymentProcessor(method);
+          }
+        }}
+        allowedMethods={["card", "apple-pay", "google-pay"]}
+      />
+    );
+  } else {
+    return <Instaxchange transaction={tx} onSuccess={onSuccess} onError={onError} />
+  }
+};
+

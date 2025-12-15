@@ -9,9 +9,10 @@ import {
 } from "thirdweb";
 import { transfer } from "thirdweb/extensions/erc20";
 import { TransactionWidget, useActiveWallet } from "thirdweb/react";
+import { InstaxchangeWidget } from "@/components/buy/widgets/instaxchange";
 import useActiveAccount from "@/components/hooks/use-active-account";
 import { client } from "@/lib/auth/thirdweb-client";
-import { useBlockchains } from "@/lib/services/api";
+import { useBlockchains, useTransactionById } from "@/lib/services/api";
 import { NETWORK_TO_TOKEN_MAPPING } from "@/lib/services/crypto/config";
 
 function getSupportedTokens(chainId: number | undefined) {
@@ -33,14 +34,18 @@ export const TestClientComponent = () => {
   const { activeAccount, chainId } = useActiveAccount();
   const activeWallet = useActiveWallet();
   const { data, isLoading, error } = useBlockchains(!!activeAccount);
-
+  const txId = "cmj33zu7500018o2as7lacqb7";
+  const {
+    data: txData,
+    isLoading: txLoading,
+    error: txError,
+  } = useTransactionById(txId);
 
   const chain = data?.chains?.find((chain) => {
     return chain.chainId === chainId;
   });
 
   const supportedTokens = getSupportedTokens(chain?.chainId);
-
 
   const paymentToken = supportedTokens.find((token) => token.isNative);
 
@@ -91,13 +96,30 @@ export const TestClientComponent = () => {
     }
   };
 
-  if (isLoading || !chainId) {
+  if (isLoading || !chainId || txLoading || !txData) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
+  if (error || txError) {
     return <div>Error: {JSON.stringify(error)}</div>;
   }
+
+  const tx = txData?.transaction;
+  if (!tx) {
+    return <div>Transaction not found</div>;
+  }
+
+  return (
+    <InstaxchangeWidget
+      transaction={tx}
+      onSuccess={() => {
+        console.log("success");
+      }}
+      onError={(error) => {
+        console.error(error);
+      }}
+    />
+  );
 
   return (
     <div className="h-screen w-screen grid place-items-center">
@@ -112,10 +134,10 @@ export const TestClientComponent = () => {
           connectOptions={{
             autoConnect: true,
           }}
-          image='https://storage.googleapis.com/mjs-public/branding/banner.webp'
-          paymentMethods={['crypto', 'card']}
-          title='Purchase'
-          buttonLabel='Proceed'
+          image="https://storage.googleapis.com/mjs-public/branding/banner.webp"
+          paymentMethods={["crypto", "card"]}
+          title="Purchase"
+          buttonLabel="Proceed"
 
         // transaction={claimTo({
         //   contract: nftContract,

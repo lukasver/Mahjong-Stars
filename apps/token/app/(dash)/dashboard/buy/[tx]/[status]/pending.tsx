@@ -1,17 +1,17 @@
-'use client';
-import { Button } from '@mjs/ui/primitives/button';
-import { ExternalLink, Mail } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { metadata } from '@/common/config/site';
-import { useTransactionById } from '@/lib/services/api';
-import { useEffect } from 'react';
-import { TransactionStatus } from '@prisma/client';
+"use client";
+import { Button } from "@mjs/ui/primitives/button";
+import { TransactionStatus } from "@prisma/client";
+import { ExternalLink, Mail } from "lucide-react";
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect } from "react";
+import { metadata } from "@/common/config/site";
+import { useTransactionById } from "@/lib/services/api";
 
 /**
  * Pending status page for dashboard actions.
- * Shows that transaction is confirmed but under review by Mahjong Stars team.
+ * Shows that transaction is confirmed but under review by The Tiles Company team.
  * Displays txHash/transactionId for fiat payments and provides contact options.
  */
 const Pending = () => {
@@ -21,7 +21,7 @@ const Pending = () => {
   const supportEmail = metadata.supportEmail;
 
   const handleDashboardClick = () => {
-    router.push('/dashboard');
+    router.push("/dashboard");
   };
 
   const handleContactClick = () => {
@@ -31,7 +31,6 @@ const Pending = () => {
   const { data, isLoading } = useTransactionById(tx as string);
 
   useEffect(() => {
-
     if (
       !isLoading &&
       data?.transaction?.status &&
@@ -52,36 +51,36 @@ const Pending = () => {
   }, [data?.transaction?.status, isLoading]);
 
   return (
-    <div className='flex flex-col items-center justify-center h-full w-full p-8 rounded-xl gap-6 -mt-10 min-h-[80dvh]'>
-      <div className='w-24 flex justify-center'>
+    <div className="flex flex-col items-center justify-center h-full w-full p-8 rounded-xl gap-6 -mt-10 min-h-[80dvh]">
+      <div className="w-24 flex justify-center">
         <Image
-          src='/static/images/features4.webp'
-          alt='Mahjong Stars'
+          src="/static/images/features4.webp"
+          alt="The Tiles Company characters"
           width={96}
           height={96}
-          className='rounded-lg'
+          className="rounded-lg"
         />
       </div>
 
-      <h2 className='text-3xl font-semibold text-center leading-tight max-w-[70%] sm:max-w-full'>
-        {t('status.pending.title')}
+      <h2 className="text-3xl font-semibold text-center leading-tight max-w-[70%] sm:max-w-full">
+        {t("status.pending.title")}
       </h2>
 
-      <div className='text-center text-base font-medium text-foreground max-w-[85%] sm:max-w-[60%] leading-7'>
-        {t('status.pending.text', {
-          projectName: data?.transaction?.sale?.name || 'Mahjong Stars',
+      <div className="text-center text-base font-medium text-foreground max-w-[85%] sm:max-w-[60%] leading-7">
+        {t("status.pending.text", {
+          projectName: data?.transaction?.sale?.name || "$TILE for MJS",
         })}
       </div>
 
       {(data?.transaction?.txHash || data?.transaction?.id) && (
-        <div className='w-full max-w-md'>
-          <div className='bg-gray-50 rounded-lg p-4 border'>
-            <div className='text-sm font-medium text-gray-700 mb-2'>
+        <div className="w-full max-w-md">
+          <div className="bg-gray-50 rounded-lg p-4 border">
+            <div className="text-sm font-medium text-gray-700 mb-2">
               {data?.transaction?.txHash
-                ? 'Transaction Hash:'
-                : 'Transaction ID:'}
+                ? "Transaction Hash:"
+                : "Transaction ID:"}
             </div>
-            <div className='text-sm font-mono text-gray-900 break-all'>
+            <div className="text-sm font-mono text-gray-900 break-all">
               {data?.transaction?.txHash || data?.transaction?.id}
             </div>
           </div>
@@ -89,40 +88,40 @@ const Pending = () => {
       )}
 
       {data?.explorerUrl && (
-        <div className='flex items-center mt-2 mb-2'>
+        <div className="flex items-center mt-2 mb-2">
           <a
             href={data?.explorerUrl}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='flex items-center gap-1 text-sm text-primary underline hover:text-primary/80 transition-colors'
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-sm text-primary underline hover:text-primary/80 transition-colors"
           >
-            {t('status.pending.transactionLink')}
-            <ExternalLink size={16} className='ml-1' />
+            {t("status.pending.transactionLink")}
+            <ExternalLink size={16} className="ml-1" />
           </a>
         </div>
       )}
 
-      <div className='flex flex-col sm:flex-row gap-3 w-full max-w-xs'>
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
         <Button
-          variant='outline'
+          variant="outline"
           onClick={handleContactClick}
-          className='flex-1 flex items-center gap-2'
+          className="flex-1 flex items-center gap-2"
         >
           <Mail size={16} />
-          {t('status.pending.contactButton')}
+          {t("status.pending.contactButton")}
         </Button>
         <Button
-          variant='primary'
+          variant="primary"
           onClick={handleDashboardClick}
-          className='flex-1'
+          className="flex-1"
         >
-          {t('status.pending.button')}
+          {t("status.pending.button")}
         </Button>
       </div>
 
-      <div className='text-secondary mt-2'>
-        {t('status.pending.supportText')}{' '}
-        <a href={`mailto:${supportEmail}`} className='underline'>
+      <div className="text-secondary mt-2">
+        {t("status.pending.supportText")}{" "}
+        <a href={`mailto:${supportEmail}`} className="underline">
           {supportEmail}
         </a>
       </div>

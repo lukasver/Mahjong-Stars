@@ -147,7 +147,7 @@ const LoadingModal = () => {
           height={80}
           width={80}
           src={MahjongStarsIconXl}
-          alt="Mahjong Stars Logo"
+          alt="The Tiles Company Logo"
           className="animate-spin aspect-square"
         />
       </span>
@@ -199,7 +199,7 @@ const PendingTransactionModal = ({
             height={80}
             width={80}
             src={MahjongStarsIconXl}
-            alt="Mahjong Stars Logo"
+            alt="The Tiles Company Logo"
             className="animate-spin aspect-square"
           />
         </span>

@@ -147,7 +147,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
           transition={{ delay: 0.1, duration: 0.4 }}
         >
           <CardHeader>
-            <CardTitle>Payment</CardTitle>
+            <CardTitle><h2 className='font-head'>Payment</h2></CardTitle>
             <CardDescription>
               Please follow the instructions below to complete your payment.
             </CardDescription>
@@ -301,6 +301,12 @@ const FiatPayment = ({
     currency: tx?.paidCurrency,
   });
 
+  console.log("🚀 ~ payment-step.tsx:304 ~ isCheckingAmount:", isCheckingAmount);
+
+
+  console.log("🚀 ~ payment-step.tsx:304 ~ usdAmount:", usdAmount);
+
+
   /**
    * Handles the upload of the bank slip file.
    */
@@ -377,6 +383,7 @@ const FiatPayment = ({
 
   // Amount threshold for Instaxchange (USD 1,000)
   const INSTAXCHANGE_MAX_AMOUNT = new Decimal(1000);
+
   const shouldUseInstaxchange =
     !isCheckingAmount &&
     usdAmount !== null &&
@@ -388,13 +395,11 @@ const FiatPayment = ({
     (!isBanksLoading && banks?.banks?.length === 0) ||
     tx.formOfPayment === "CARD"
   ) {
-    if (isCheckingAmount) {
+    if (true) {
       return (
-        <div className="space-y-4 p-4">
-          <div className="rounded-lg border border-muted bg-muted/10 p-4">
-            <p className="text-sm">Checking payment options...</p>
-          </div>
-        </div>
+
+        <PulseLoader text="Checking payment options..." />
+
       );
     }
 
@@ -452,10 +457,8 @@ const FiatPayment = ({
 
           <TabsContent value={FOPSchema.enum.CARD}>
             {isCheckingAmount ? (
-              <div className="space-y-4 p-4">
-                <div className="rounded-lg border border-muted bg-muted/10 p-4">
-                  <p className="text-sm">Checking payment options...</p>
-                </div>
+              <div className="space-y-4 p-4 mx-auto">
+                <PulseLoader text="Checking payment options..." />
               </div>
             ) : shouldUseInstaxchange ? (
               <motion.div
@@ -487,7 +490,6 @@ const FiatPayment = ({
               </motion.div>
             )}
           </TabsContent>
-
           <TabsContent value="TRANSFER">
             <div className="space-y-4">
               <motion.div

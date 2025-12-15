@@ -243,7 +243,7 @@ export class DashboardPage extends BasePage {
 	 */
 	getSidebarLogo() {
 		return this.getSidebarHeader()
-			.locator('figure > img[alt="Mahjong Stars Logo"]')
+			.locator('figure > img[alt="The Tiles company Logo"]')
 	}
 
 	/**

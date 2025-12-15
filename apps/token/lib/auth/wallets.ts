@@ -43,7 +43,7 @@ export const wallets = [
 				src: MahjongStarsLogo.src,
 				height: MahjongStarsLogo.height,
 				width: MahjongStarsLogo.width,
-				alt: "Mahjong Stars Logo",
+				alt: "The Tiles Company Logo",
 			},
 			icon: `https://storage.googleapis.com/mjs-public/branding/icon-120x120.png`,
 		},

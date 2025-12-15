@@ -6,7 +6,7 @@ import path from "path";
 import sharp from "sharp";
 import { metadata } from "../common/config/site";
 
-export const alt = "Mahjong Stars";
+export const alt = "The Tiles Company";
 export const size = {
 	width: 1200,
 	height: 630,

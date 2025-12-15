@@ -2,7 +2,7 @@
 
 ## Test Scope
 
-This plan covers end-to-end testing for the Mahjong Stars token platform deployed at `https://mjs-token-env-tests-smat-sa.vercel.app`. Tests assume authentication state is pre-loaded via `playwright/.auth/storage.json`.
+This plan covers end-to-end testing for the The Tiles Company token platform deployed at `https://mjs-token-env-tests-smat-sa.vercel.app`. Tests assume authentication state is pre-loaded via `playwright/.auth/storage.json`.
 
 ## Test Categories
 
@@ -80,7 +80,7 @@ This plan covers end-to-end testing for the Mahjong Stars token platform deploye
 - **TC-DASH-009: Sidebar Functionality**
 - Navigate to `/dashboard`
 - Verify sidebar is visible
-- Verify "Mahjong Stars" logo is displayed
+- Verify "The Tiles Company" logo is displayed
 - Verify "Overview" section is expanded
 - Verify navigation links (Dashboard, Buy, Transactions) are visible
 - Click "Toggle Sidebar" button

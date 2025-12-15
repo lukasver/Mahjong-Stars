@@ -4,7 +4,7 @@
  *
  * Navigate to `/dashboard`
  * Verify sidebar is visible
- * Verify "Mahjong Stars" logo is displayed
+ * Verify "The Tiles company" logo is displayed
  * Verify "Overview" section is expanded
  * Verify navigation links (Dashboard, Buy, Transactions) are visible
  * Click "Toggle Sidebar" button
@@ -30,7 +30,7 @@ test("TC-DASH-009: Sidebar Functionality", async ({ page }) => {
 	if (sidebarCount > 0) {
 		await expect(sidebar).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-		// Verify "Mahjong Stars" logo is displayed
+		// Verify "The Tiles company" logo is displayed
 		const logo = dashboardPage.getSidebarLogo();
 		const logoCount = await logo.count();
 		if (logoCount > 0) {

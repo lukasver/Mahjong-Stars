@@ -51,7 +51,7 @@ export default async function Login() {
                   priority: true,
                 }}
               />
-              <span className="sr-only">Mahjong Stars</span>
+              <span className="sr-only">The Tiles Company</span>
             </LogoAnimate>
           </div>
 

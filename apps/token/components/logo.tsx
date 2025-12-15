@@ -30,7 +30,7 @@ export const Logo = ({
   return (
     <figure className={cn(className, "dark:bg-none")}>
       <Image
-        alt="Mahjong Stars Logo"
+        alt="The Tiles company Logo"
         {...rest}
         height={80}
         width={100}

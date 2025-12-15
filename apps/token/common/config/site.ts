@@ -1,19 +1,19 @@
 import { publicUrl } from "./env";
 
 const metadata = {
-	title: "$TILE – Empowering the Mahjong Stars Ecosystem",
+	title: "$TILE – Empowering Mahjong on Web3",
 	description:
-		"$TILE is the core utility token of Mahjong Stars, enabling NFT trading, AI upgrades, tournament access, and revenue staking. Participate in a multi-billion dollar Web3 opportunity and fuel the first global social mahjong platform with real-world value and AI liquidity.",
-	domain: "mahjongstars.com",
-	logoTitle: "Mahjong Stars",
-	businessName: "Mahjong Stars",
+		"$TILE is the core utility token of MJS, enabling NFT trading, AI upgrades, tournament access, and revenue staking. Participate in a multi-billion dollar Web3 opportunity and fuel the first global social mahjong platform with real-world value and AI liquidity.",
+	domain: "thetilescompany.io",
+	logoTitle: "The Tiles Company",
+	businessName: "The Tiles Company",
 	siteUrl: publicUrl,
 	siteRepo: "",
 	socialBanner: "/api/og",
 	tokenSymbol: "TILE",
 	tokenName: "TILES",
 	supportEmail:
-		process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@mahjongstars.com",
+		process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@thetilescompany.io",
 	twitter: process.env.NEXT_PUBLIC_TWITTER_HANDLE || "",
 	instagram: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "",
 	tiktok: process.env.NEXT_PUBLIC_TIKTOK_HANDLE || "",
@@ -24,7 +24,7 @@ const metadata = {
 	facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "",
 	threads: process.env.NEXT_PUBLIC_THREADS_URL || "",
 	mastodon: process.env.NEXT_PUBLIC_MASTODON_URL || "",
-	author: "WASABI GAMES DMCC",
+	author: "The Tiles Company",
 	language: "en",
 	theme: "light",
 	locale: "en",

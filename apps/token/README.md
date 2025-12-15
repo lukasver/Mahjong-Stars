@@ -1,4 +1,4 @@
-# Mahjong Stars token dashboard
+# The tiles company token dashboard
 
 🔐 General
 • Login via Thirdweb Smart Wallets (social login, wallet, email, passkeys, etc.)
