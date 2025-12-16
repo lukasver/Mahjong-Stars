@@ -17,6 +17,7 @@ import {
   LinkedinIcon,
   Loader2,
   type LucideIcon,
+  MailIcon,
   Plus,
   RefreshCw,
   Rss,
@@ -34,6 +35,7 @@ export type Icon =
 export const Icons = {
   check: Check,
   copy: Copy,
+  mail: MailIcon,
   sale: HandCoins,
   subscribe: Rss,
   arrowUp: ArrowUp,

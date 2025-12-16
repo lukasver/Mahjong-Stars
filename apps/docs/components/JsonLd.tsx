@@ -147,7 +147,7 @@ export const createSoftwareAppJsonLd = (
 		operatingSystem: ["iOS", "Android", "Web"],
 		description: t("Metadata.description"),
 		url: siteConfig.siteUrl,
-		screenshot: "https://docs.thetilescompany.io/static/images/banner.png",
+		screenshot: "https://docs.thetilescompany.io/static/images/banner.webp",
 		offers: {
 			"@type": "Offer",
 			price: "0",
@@ -315,7 +315,7 @@ export const createArticleJsonLd = (
 		},
 		image:
 			pageMetadata.image ||
-			"https://docs.thetilescompany.io/static/images/banner.png",
+			"https://docs.thetilescompany.io/static/images/banner.webp",
 		articleSection: "Gaming Documentation",
 		keywords:
 			"mahjong, ai gaming, nft, blockchain, social gaming, multiplayer" +

@@ -6,9 +6,8 @@ const domain =
 	process.env.NEXT_PUBLIC_DOMAIN?.split("://")?.[1] ||
 	"docs.thetilescompany.io";
 
-const siteUrl = `http${
-	process.env.NODE_ENV === "development" ? "" : "s"
-}://${domain}`;
+const siteUrl = `http${process.env.NODE_ENV === "development" ? "" : "s"
+	}://${domain}`;
 
 const metadata = {
 	title: "The Tiles Company",
@@ -34,7 +33,7 @@ const metadata = {
 	facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "",
 	threads: process.env.NEXT_PUBLIC_THREADS_URL || "",
 	mastodon: process.env.NEXT_PUBLIC_MASTODON_URL || "",
-	author: "WASABI GAMES DMCC",
+	author: "The Tiles Company",
 	language: "en",
 	theme: "system",
 	locale: "en",

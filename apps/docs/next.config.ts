@@ -53,6 +53,11 @@ const nextConfig: NextConfig = {
         destination: `${process.env.NEXT_PUBLIC_DOCS_DOMAIN!}/:path*`,
         permanent: process.env.NODE_ENV === 'production',
       },
+      {
+        source: '/ico/:path*',
+        destination: `${process.env.NEXT_PUBLIC_ICO_DOMAIN!}/:path*`,
+        permanent: process.env.NODE_ENV === 'production',
+      },
     ];
   },
   // This is required to support PostHog trailing slash API requests

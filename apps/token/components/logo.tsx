@@ -3,12 +3,14 @@
 import { motion } from "@mjs/ui/components/motion";
 import { cn } from "@mjs/ui/lib/utils";
 import Image from "next/image";
-import MahjongStarsLogo from "@/public/static/images/logo-wt.webp";
 import MahjongStarsIconXl from "@/public/static/images/logos/isologo.webp";
 import MahjongStarsIcon from "@/public/static/images/logos/isologo-min.webp";
+import TheTilesCompanyLogo from "@/public/static/images/logos/ttc-logo-wt.webp";
+
+// import MahjongStarsLogo from "@/public/static/images/logo-wt.webp";
 
 const variantMapping = {
-  logo: MahjongStarsLogo,
+  logo: TheTilesCompanyLogo,
   icon: MahjongStarsIcon,
   iconXl: MahjongStarsIconXl,
 };

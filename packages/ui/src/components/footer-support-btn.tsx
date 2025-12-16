@@ -1,14 +1,9 @@
 'use client';
 
-import { metadata } from '@/common/config/site';
-
-
 const appWindow = typeof window !== 'undefined' ? window : null;
 const appNavigator = typeof window !== 'undefined' ? window?.navigator : null;
 
 const sanitizeMailBody = (body: string) => body.replace(/(?:\r\n|\r|\n)/g, '%0D%0A');
-
-export const SUPPORT_EMAIL = metadata.supportEmail;
 
 export const APP_INFO_TEXT = `
 
@@ -32,13 +27,14 @@ Connection: ${(
 -------------------
 `;
 
-const HELP_SUBJECT = `[${metadata.businessName}] Support Request`;
 
-export const HELP_HREF = `mailto:${SUPPORT_EMAIL}?subject=${HELP_SUBJECT}&body=${sanitizeMailBody(
-  APP_INFO_TEXT,
-)}`;
 
-export const FooterSupportButton = () => {
+export const FooterSupportButton = ({ supportEmail, businessName }: { supportEmail: string; businessName: string }) => {
+  const HELP_SUBJECT = `[${businessName}] Support Request`;
+
+  const HELP_HREF = `mailto:${supportEmail}?subject=${HELP_SUBJECT}&body=${sanitizeMailBody(
+    APP_INFO_TEXT,
+  )}`;
   const openSupport = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     window.open(HELP_HREF, '_blank');
@@ -50,5 +46,8 @@ export const FooterSupportButton = () => {
     </a>
   );
 };
+
+FooterSupportButton.displayName = 'FooterSupportButton';
+
 
 export default FooterSupportButton;

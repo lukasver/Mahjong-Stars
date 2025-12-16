@@ -1,12 +1,11 @@
+import { FooterSupportButton } from "@mjs/ui/components/footer-support-btn";
 import { Icons } from "@mjs/ui/components/icons";
 import { cn } from "@mjs/ui/lib/utils";
 import { Button } from "@mjs/ui/primitives/button";
 import { BoxesIcon, MailIcon } from "lucide-react";
 import { Route } from "next";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { metadata as siteConfig } from "@/common/config/site";
-import Logo from "@/public/static/images/logos/isologo-min.webp";
-import FooterSupportButton from "./FooterSupportButton";
 import AppLink from "./link";
 
 export const footerLinks: Array<{
@@ -17,13 +16,11 @@ export const footerLinks: Array<{
   }>;
 }> = [
     {
-      columnName: "Company",
-      links: [
-        { href: "/", title: "Home" },
-        // { href: '/about', title: 'About' },
-      ],
+      columnName: "Company", links: [
+        { href: "/", title: "ICO" },
+        { href: "/web", title: "Website" },
+      ]
     },
-    { columnName: "Product", links: [] },
     {
       columnName: "Docs",
       links: [{ href: "https://docs.thetilescompany.io", title: "White paper" }],
@@ -34,9 +31,19 @@ export const footerLinks: Array<{
     },
   ];
 
-export const Footer = ({ className, title, description }: { className?: string, title?: string, description?: string }) => {
+export const Footer = ({
+  className,
+  title,
+  description,
+  logo
+}: {
+  className?: string;
+  title?: string;
+  description?: string;
+  logo: StaticImageData;
+}) => {
   const columnNumber = footerLinks.filter(({ links }) => links.length).length;
-
+  const Logo = logo;
   return (
     <footer
       className={cn(
@@ -107,7 +114,10 @@ export const Footer = ({ className, title, description }: { className?: string, 
                       if (link.href === "#support") {
                         return (
                           <li key={index} className="text-base">
-                            <FooterSupportButton />
+                            <FooterSupportButton
+                              supportEmail={siteConfig.supportEmail}
+                              businessName={siteConfig.businessName}
+                            />
                           </li>
                         );
                       }

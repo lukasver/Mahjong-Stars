@@ -1,7 +1,8 @@
 import { createWallet, InAppWalletAuth, inAppWallet } from "thirdweb/wallets";
 import { env } from "@/common/config/env";
 import { metadata } from "@/common/config/site";
-import MahjongStarsLogo from "@/public/static/images/logo-wt.webp";
+// import MahjongStarsLogo from "@/public/static/images/logo-wt.webp";
+import TheTilesCompanyLogo from "@/public/static/images/logos/ttc-logo-wt.webp";
 
 const WALLET_OPTIONS: InAppWalletAuth[] = [
 	"google",
@@ -40,9 +41,9 @@ export const wallets = [
 		metadata: {
 			name: metadata.businessName,
 			image: {
-				src: MahjongStarsLogo.src,
-				height: MahjongStarsLogo.height,
-				width: MahjongStarsLogo.width,
+				src: TheTilesCompanyLogo.src,
+				height: TheTilesCompanyLogo.height,
+				width: TheTilesCompanyLogo.width,
 				alt: "The Tiles Company Logo",
 			},
 			icon: `https://storage.googleapis.com/mjs-public/branding/icon-120x120.png`,

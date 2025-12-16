@@ -19,6 +19,7 @@ import {
   getUserFromSession,
 } from "@/lib/services/fetchers.server";
 import { isAdmin } from "@/lib/utils";
+import Logo from "@/public/static/images/logos/isologo-min.webp";
 
 export default async function AdminLayout({
   children,
@@ -27,7 +28,7 @@ export default async function AdminLayout({
 }) {
   const queryClient = new QueryClient();
 
-  const [user, t] = await Promise.all([
+  const [user, _t] = await Promise.all([
     getUserFromSession(),
     getTranslations(),
   ]);
@@ -69,15 +70,8 @@ export default async function AdminLayout({
               <Footer
                 title={'The Tiles Company'}
                 description={'Empowering MJS with Web3'}
+                logo={Logo}
               />
-              {/* <Footer
-                siteConfig={metadata}
-                links={getFooterLinks(t)}
-                copyright={t("Footer.copyright", {
-                  year: new Date().getFullYear(),
-                })}
-                className="bg-black"
-              /> */}
             </section>
           </>
         </PagesProviders>
