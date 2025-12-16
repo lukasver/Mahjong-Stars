@@ -891,7 +891,7 @@ class TransactionsController {
 				this.documents
 					.generatePDF({
 						content,
-						title: `Token Agreement | tx:${dto.transactionId} | ${user.id}:${user.email}`,
+						title: `Token Agreement | ${dto.transactionId} | ${user.email}`,
 						recipients,
 						reference: recipient.id,
 					})
