@@ -1,0 +1,83 @@
+{
+  "name": "Pre-Seed Round",
+  "status": "CREATED",
+  "currency": "USD",
+  "initialTokenQuantity": 29166667,
+  "availableTokenQuantity": 29166667,
+  "minimumTokenBuyPerUser": 1,
+  "maximumTokenBuyPerUser": null,
+  "saleStartDate": "2025-12-19T00:00:00Z",
+  "saleClosingDate": "2026-01-19T23:59:59Z",
+  "tokenName": "TILES",
+  "tokenSymbol": "TILE",
+  "tokenPricePerUnit": "0.012",
+  "toWalletsAddress": "0x9B99A11559CA88F0692E9dc3e1eA4E5F807782F5",
+  "saftCheckbox": true,
+  "tokenContractAddress": null,
+  "tokenContractChainId": null,
+  "tokenTotalSupply": "888888888",
+  "comparisonPricePerUnit": "0.030",
+  "requiresKYC": true,
+  "information": [
+    {
+      "type": "textarea",
+      "label": "The Vision",
+      "value": "The Tiles Company is building the AI layer for onchain gaming. Our flagship MJS platform transforms a 4,000-year-old strategy game into a living, breathing digital ecosystem where your AI learns your style, plays when you're offline, and helps you become legendary. We're not just making games - we're teaching AI to play them better than anyone."
+    },
+    {
+      "type": "textarea",
+      "label": "Why $TILE?",
+      "value": "$TILE is your key to the table. Governance rights to shape where we go next. Staking rewards because loyalty should pay. Premium AI features that give you the edge. An NFT marketplace where your digital assets actually mean something. And revenue sharing - because when we win, you win."
+    },
+    {
+      "type": "textarea",
+      "label": "The Opportunity",
+      "value": "600+ million people play this game worldwide. Most of them are stuck on outdated apps with zero innovation. MJS brings AI-powered avatars, social gaming mechanics, and real ownership to a market that's been waiting for someone to deal them a better hand."
+    },
+    {
+      "type": "textarea",
+      "label": "AI at the Core",
+      "value": "Train an AI that mirrors your strategy. Let it compete in tournaments while you sleep. Watch it learn, adapt, and occasionally humble you. This isn't just a feature - it's the future of competitive gaming, and we're building it tile by tile."
+    },
+    {
+      "type": "text",
+      "label": "Total Supply",
+      "value": "888,888,888 $TILE"
+    },
+    {
+      "type": "text",
+      "label": "Pre-Seed Allocation",
+      "value": "3.3% of total supply (29,166,667 tokens)"
+    },
+    {
+      "type": "textarea",
+      "label": "Your Early Edge",
+      "value": "Pre-Seed means first to the table. You get the lowest entry price at $0.012 (60% below planned public listing), priority access to platform features, direct line to the team, and exclusive community status. The players who stack early, win late."
+    },
+    {
+      "type": "text",
+      "label": "Vesting Terms",
+      "value": "3-month cliff, 18-month vesting"
+    },
+    {
+      "type": "text",
+      "label": "TGE Unlock",
+      "value": "0% (no tokens unlocked at TGE)"
+    },
+    {
+      "type": "textarea",
+      "label": "Built to Last",
+      "value": "Multi-sig treasury wallets. Time-locked vesting contracts. Third-party audits before mainnet. Emergency pause mechanisms. Global compliance framework. KYC/AML for token sales. We're building a house of cards that actually won't fall down."
+    },
+    {
+      "type": "text",
+      "label": "Raise Target",
+      "value": "$350,000"
+    },
+    {
+      "type": "text",
+      "label": "Valuation",
+      "value": "$10.7M FDV"
+    }
+  ]
+}

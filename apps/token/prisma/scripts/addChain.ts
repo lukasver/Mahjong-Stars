@@ -55,7 +55,7 @@ async function main() {
 		path.dirname(fileURLToPath(import.meta.url)),
 		`..`,
 		`..`,
-		environment === "local" ? ".env.local" : `.env.${environment}.local`,
+		environment === "local" ? ".env.local" : `./envs/.env.${environment}.local`,
 	);
 
 	stdout.write(`Loading environment from ${pathname}\n`);

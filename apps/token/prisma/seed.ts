@@ -27,8 +27,11 @@ const truncateTables = async (prisma: PrismaClient, _tables?: string[]) => {
   );
 };
 
-const TEST_ADMIN_WALLET = process.env.NEXT_PUBLIC_MAIN_WALLET!;
-invariant(TEST_ADMIN_WALLET, 'NEXT_PUBLIC_MAIN_WALLET is not set');
+const MAIN_WALLET = process.env.NEXT_PUBLIC_MAIN_WALLET!;
+invariant(MAIN_WALLET, 'NEXT_PUBLIC_MAIN_WALLET is not set');
+
+const ADMIN_EMAIL = 'mahjongstars@protonmail.com';
+invariant(ADMIN_EMAIL, 'ADMIN_EMAIL is not set');
 
 const options = {
   environment: { type: 'string' as const },
@@ -57,7 +60,7 @@ async function main() {
         await seedUsers(
           [
             {
-              walletAddress: TEST_ADMIN_WALLET,
+              walletAddress: MAIN_WALLET,
               name: 'Admin MJS',
               email: 'lucas@smat.io',
             },
@@ -114,7 +117,7 @@ async function main() {
         await seedUsers(
           [
             {
-              walletAddress: TEST_ADMIN_WALLET,
+              walletAddress: MAIN_WALLET,
               name: 'Admin MJS',
               email: 'lucas@smat.io',
             },
@@ -142,6 +145,18 @@ async function main() {
         console.time('seedBlockchains');
         await seedBlockchains(prisma);
         console.timeEnd('seedBlockchains');
+        console.time('seedUsers');
+        await seedUsers(
+          [
+            {
+              walletAddress: MAIN_WALLET,
+              name: 'Admin',
+              email: ADMIN_EMAIL,
+            },
+          ],
+          prisma
+        );
+        console.timeEnd('seedUsers');
         break;
       default:
         break;
