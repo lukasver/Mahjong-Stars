@@ -1035,7 +1035,6 @@ class TransactionsController {
 		},
 		ctx: ActionCtx,
 	) {
-		console.log("🚀 ~ index.ts:989 ~ payload:", payload);
 
 		try {
 			// Only the user who created the transaction can confirm it
@@ -1216,6 +1215,9 @@ class TransactionsController {
 						transactionId: updatedTx.id,
 						paymentMethod: updatedTx.formOfPayment,
 						paidCurrency: updatedTx.paidCurrency,
+						walletAddress: updatedTx.receivingWallet || "",
+						status: getEmailStatus(updatedTx),
+						dashboardUrl: `${publicUrl}/admin/transactions?txId=${tx.id}`,
 						...(type === "CRYPTO" && {
 							transactionHash: updatedTx.txHash,
 							// Update to point to the chain explorer
@@ -1239,11 +1241,11 @@ class TransactionsController {
 					to: {
 						email: tx.user.email,
 						name:
-							tx.user.profile?.firstName || tx.user.profile?.lastName || "user",
+							tx.user.profile?.firstName || tx.user.profile?.lastName || '',
 					},
 					props: {
 						userName:
-							tx.user.profile?.firstName || tx.user.profile?.lastName || "user",
+							tx.user.profile?.firstName || tx.user.profile?.lastName || "",
 						tokenName: tx.sale.name,
 						tokenSymbol: tx.sale.tokenSymbol,
 						purchaseAmount: updatedTx.totalAmount.toFixed(

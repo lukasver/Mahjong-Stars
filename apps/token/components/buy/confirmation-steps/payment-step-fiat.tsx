@@ -65,12 +65,6 @@ export const FiatPayment = ({
     currency: tx?.paidCurrency,
   });
 
-  console.log(
-    "🚀 ~ payment-step.tsx:304 ~ isCheckingAmount:",
-    isCheckingAmount,
-  );
-
-  console.log("🚀 ~ payment-step.tsx:304 ~ usdAmount:", usdAmount);
 
   /**
    * Handles the upload of the bank slip file.

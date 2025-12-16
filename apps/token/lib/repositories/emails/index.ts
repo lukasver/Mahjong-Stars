@@ -127,7 +127,7 @@ export class EmailVerificationService {
 			const sendResponse = await this.sender.sendReactEmail(
 				"emailVerification",
 				{
-					url: `${publicUrl}/verify-email?token=${verification.token}`,
+					url: `${publicUrl}/onboarding?token=${verification.token}`,
 					logoUrl: `https://storage.googleapis.com/mjs-public/branding/icon-120x120.png`,
 					token: verification.token,
 				},

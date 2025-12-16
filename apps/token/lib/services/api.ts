@@ -53,8 +53,6 @@ const getError = (data: any, error: any): string | null => {
 
 export const useInputOptions = (qParams?: { chainId?: number }) => {
 
-	console.log("🚀 ~ api.ts:56 ~ qParams:", qParams);
-
 	const { data, error, ...rest } = useQuery({
 		queryKey: ["input", "options",
 			...(qParams ? [JSON.stringify(qParams)] : []),

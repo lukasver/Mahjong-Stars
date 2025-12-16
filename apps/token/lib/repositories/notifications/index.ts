@@ -1,17 +1,17 @@
+import { templates } from "@mjs/emails";
+import { ComponentProps } from "react";
 import createEmailService, {
   EmailData,
   EmailResult,
   IEmailService,
-} from '@/lib/email';
-import { templates } from '@mjs/emails';
-import { ComponentProps } from 'react';
+} from "@/lib/email";
 
 type NotificationTransportName =
-  | 'Email'
-  | 'Push'
-  | 'SMS'
-  | 'Whatsapp'
-  | 'Telegram';
+  | "Email"
+  | "Push"
+  | "SMS"
+  | "Whatsapp"
+  | "Telegram";
 
 type BaseEmail = EmailData;
 
@@ -36,7 +36,7 @@ interface NotificationTransport {
 }
 
 class EmailTransport implements NotificationTransport {
-  readonly name: NotificationTransportName = 'Email';
+  readonly name: NotificationTransportName = "Email";
   private readonly service: IEmailService;
 
   constructor(_service?: IEmailService) {
@@ -44,16 +44,16 @@ class EmailTransport implements NotificationTransport {
   }
 
   async send(dtos: Notification): Promise<EmailResult> {
-    if ('templateId' in dtos) {
-      const { templateId, templateData, ...rest } = dtos;
+    if ("templateId" in dtos) {
+      const { templateId: _, templateData: __, ...rest } = dtos;
       return this.service.sendTemplateEmail(
         dtos.templateId,
         dtos.templateData || {},
-        rest
+        rest,
       );
     }
-    if ('template' in dtos) {
-      const { props, ...rest } = dtos;
+    if ("template" in dtos) {
+      const { props: ___, ...rest } = dtos;
       return this.service.sendReactEmail(dtos.template, dtos.props || {}, rest);
     }
     return this.service.sendEmail(dtos);

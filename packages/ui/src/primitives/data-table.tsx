@@ -1,6 +1,5 @@
-'use client';
+"use client";
 
-import * as React from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -12,10 +11,11 @@ import {
   SortingState,
   useReactTable,
   VisibilityState,
-} from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
-
-import { Button } from './button';
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import * as React from "react";
+import { cn } from "../lib/utils";
+import { Button } from "./button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -23,8 +23,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './dropdown-menu';
-import { Input } from './input';
+} from "./dropdown-menu";
+import { Input } from "./input";
 import {
   Table,
   TableBody,
@@ -32,8 +32,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './table';
-import { cn } from '../lib/utils';
+} from "./table";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,13 +47,14 @@ interface DataTableProps<TData, TValue> {
   children?: React.ReactNode;
   className?: string;
   headerClassName?: string;
+  emptyState?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder = "Search...",
   showColumnVisibility = true,
   showPagination = true,
   pageSize = 10,
@@ -63,10 +63,11 @@ export function DataTable<TData, TValue>({
   children,
   className,
   headerClassName,
+  emptyState,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(initialColumnVisibility);
@@ -97,36 +98,36 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className={cn('w-full', className)}>
+    <div className={cn("w-full", className)}>
       <div
         className={cn(
           headerClassName,
-          'flex flex-col md:flex-row items-center py-2 md:py-4 gap-2'
+          "flex flex-col md:flex-row items-center py-2 md:py-4 gap-2",
         )}
       >
         {children}
 
-        <div className='flex items-center gap-2 w-full md:w-auto [&>*]:flex-1'>
+        <div className="flex items-center gap-2 w-full md:w-auto [&>*]:flex-1">
           {searchKey && (
             <Input
               placeholder={searchPlaceholder}
               value={
-                (table.getColumn(searchKey)?.getFilterValue() as string) ?? ''
+                (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
               }
               onChange={(event) =>
                 table.getColumn(searchKey)?.setFilterValue(event.target.value)
               }
-              className='max-w-sm'
+              className="max-w-sm"
             />
           )}
           {showColumnVisibility && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant='outline' className='ml-auto w-full md:w-auto'>
-                  Columns <ChevronDown className='ml-2 h-4 w-4' />
+                <Button variant="outline" className="ml-auto w-full md:w-auto">
+                  Columns <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
+              <DropdownMenuContent align="end">
                 {table
                   .getAllColumns()
                   .filter((column) => column.getCanHide())
@@ -134,7 +135,7 @@ export function DataTable<TData, TValue>({
                     return (
                       <DropdownMenuCheckboxItem
                         key={column.id}
-                        className='capitaliz'
+                        className="capitaliz"
                         checked={column.getIsVisible()}
                         onCheckedChange={(value) =>
                           column.toggleVisibility(!!value)
@@ -149,7 +150,7 @@ export function DataTable<TData, TValue>({
           )}
         </div>
       </div>
-      <div className='rounded-md border'>
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -158,14 +159,14 @@ export function DataTable<TData, TValue>({
                   return (
                     <TableHead
                       key={header.id}
-                      className='text-secondary font-semibold'
+                      className="text-secondary font-semibold"
                     >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}
@@ -177,7 +178,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className="h-24 text-center"
                 >
                   Loading...
                 </TableCell>
@@ -186,13 +187,13 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -200,35 +201,44 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
-                  No results.
-                </TableCell>
+                {emptyState ?
+                  <TableCell
+                    colSpan={columns.length}
+                    className="mx-auto"
+                  >
+                    {emptyState}
+                  </TableCell>
+                  : (
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  )}
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
       {showPagination && (
-        <div className='flex items-center justify-end space-x-2 py-4'>
-          <div className='flex-1 text-sm text-secondary'>
-            {table.getFilteredSelectedRowModel().rows.length} of{' '}
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex-1 text-sm text-secondary">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
-          <div className='space-x-2 flex gap-2 items-center justify-between'>
+          <div className="space-x-2 flex gap-2 items-center justify-between">
             <Button
-              variant='outline'
-              size='sm'
+              variant="outline"
+              size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               Previous
             </Button>
             <Button
-              variant='outline'
-              size='sm'
+              variant="outline"
+              size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
@@ -248,7 +258,7 @@ export function DataTableColumnHeader({
 }: {
   column: {
     getCanSort: () => boolean;
-    getIsSorted: () => false | 'asc' | 'desc';
+    getIsSorted: () => false | "asc" | "desc";
     toggleSorting: (desc?: boolean) => void;
     toggleVisibility: (value: boolean) => void;
   };
@@ -264,32 +274,32 @@ export function DataTableColumnHeader({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant='ghost'
-            size='sm'
-            className='data-[state=open]:bg-accent -ml-3 h-8'
+            variant="ghost"
+            size="sm"
+            className="data-[state=open]:bg-accent -ml-3 h-8"
           >
             <span>{title}</span>
-            {column.getIsSorted() === 'desc' ? (
-              <ArrowUpDown className='ml-2 h-4 w-4' />
-            ) : column.getIsSorted() === 'asc' ? (
-              <ArrowUpDown className='ml-2 h-4 w-4' />
+            {column.getIsSorted() === "desc" ? (
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === "asc" ? (
+              <ArrowUpDown className="ml-2 h-4 w-4" />
             ) : (
-              <ArrowUpDown className='ml-2 h-4 w-4' />
+              <ArrowUpDown className="ml-2 h-4 w-4" />
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align='start'>
+        <DropdownMenuContent align="start">
           <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-            <ArrowUpDown className='mr-2 h-3.5 w-3.5 text-muted-foreground/70' />
+            <ArrowUpDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Asc
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-            <ArrowUpDown className='mr-2 h-3.5 w-3.5 text-muted-foreground/70' />
+            <ArrowUpDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Desc
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-            <MoreHorizontal className='mr-2 h-3.5 w-3.5 text-muted-foreground/70' />
+            <MoreHorizontal className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Hide
           </DropdownMenuItem>
         </DropdownMenuContent>

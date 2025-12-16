@@ -90,10 +90,12 @@ export function ApproveTransactionDialog({
       // Get presigned URL from backend
       const response = await getDocumentById(id);
 
+
       if (response.error) {
         throw new Error("Failed to get document URL");
       }
       const data = response.data?.documents[0];
+
 
       if (!data) {
         throw new Error("Document not found");
@@ -101,7 +103,7 @@ export function ApproveTransactionDialog({
 
       // Open document in new tab
       if (data.url) {
-        window.open(data.url, "_blank");
+        window.open(data.url.url, "_blank");
       }
     } catch (error) {
       console.error("Error getting document URL:", error);

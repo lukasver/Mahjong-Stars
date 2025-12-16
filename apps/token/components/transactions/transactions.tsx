@@ -1,5 +1,6 @@
 "use client";
 import { getGlassyCardClassName } from "@mjs/ui/components/cards";
+import { EmptyState } from "@mjs/ui/components/empty-states";
 import { motion } from "@mjs/ui/components/motion";
 import { Button } from "@mjs/ui/primitives/button";
 import {
@@ -135,9 +136,7 @@ export const Transactions = ({
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <NetworkStatus
-                    compact
-                  />
+                  <NetworkStatus compact />
                 </div>
               </motion.div>
             </div>
@@ -162,6 +161,17 @@ export const Transactions = ({
           showPagination={true}
           showColumnVisibility={true}
           initialColumnVisibility={initialColumnVisibility}
+          emptyState={
+            <EmptyState
+              icon={'transaction'}
+              title="No transactions found"
+              description="Your purchases will be listed here"
+              action={{
+                href: "/dashboard/buy",
+                label: "Get started!",
+              }}
+            />
+          }
         >
           <div className="flex items-center gap-2 w-full md:w-auto h-full flex-1 md:mr-2">
             <motion.div

@@ -3,6 +3,7 @@
 import { invariant } from "@epic-web/invariant";
 import { motion } from "@mjs/ui/components/motion";
 import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
+import { Alert, AlertDescription, AlertTitle } from "@mjs/ui/primitives/alert";
 import { AlertDialog } from "@mjs/ui/primitives/alert-dialog";
 import { Button } from "@mjs/ui/primitives/button";
 import {
@@ -14,6 +15,7 @@ import {
 import { useAppForm } from "@mjs/ui/primitives/form";
 import { FormInput } from "@mjs/ui/primitives/form-input";
 import { toast } from "@mjs/ui/primitives/sonner";
+import { AlertTriangle } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryState } from "nuqs";
@@ -83,35 +85,32 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
         transactionId: value.transactionId || (txId as string),
       };
 
-
       // We shouild check that all custom inputs have values
       for (const [key, v] of Object.entries(formData.variables || {})) {
         // check for nested variables
-        if (v && typeof v === 'object' && Object.keys(v).length > 0) {
+        if (v && typeof v === "object" && Object.keys(v).length > 0) {
           for (const [k2, v2] of Object.entries(v || {})) {
             if (k2 && !v2) {
               toast.error(`Variable ${k2} is required`);
-              return
+              return;
             }
           }
         }
         // check for single variables
         if (key && !v) {
           toast.error(`Variable ${key} is required`);
-          return
+          return;
         }
       }
 
       action.execute(formData);
     },
     onSubmitInvalid(_props) {
-      toast.error("Invalid form")
+      toast.error("Invalid form");
     },
   });
 
   const variables = data?.missingVariables || [];
-
-
 
   const template = data?.content as string;
 
@@ -123,7 +122,6 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
     },
     [form],
   );
-
 
   useEffect(() => {
     if (isRecipientLoading) return;
@@ -140,7 +138,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
 
   if (isLoading)
     return (
-      <CardContent className='min-h-96 grid place-items-center w-full h-full'>
+      <CardContent className="min-h-96 grid place-items-center w-full h-full">
         <PulseLoader text="Loading document..." />
       </CardContent>
     );
@@ -182,7 +180,13 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
 
   return (
     <>
-      {process.env.NODE_ENV === "development" && <Button onClick={() => console.debug("FORM VALUES:", form.state.values)}>check values</Button>}
+      {process.env.NODE_ENV === "development" && (
+        <Button
+          onClick={() => console.debug("FORM VALUES:", form.state.values)}
+        >
+          check values
+        </Button>
+      )}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -192,7 +196,8 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
           <CardTitle>SAFT Review</CardTitle>
           <CardDescription>
             Please review the contract and fill in the required information
-            below. This is a preview; signature document will be send to your email.
+            below. This is a preview; signature document will be send to your
+            email.
           </CardDescription>
         </CardHeader>
       </motion.div>
@@ -219,7 +224,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
                       label={getLabel(v)}
                     />
                   </motion.div>
-                )
+                );
               })}
             </motion.div>
 
@@ -244,6 +249,27 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
                 />
               </motion.div>
             </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+            >
+              <Alert
+              >
+                <AlertTriangle className='stroke-destructive' />
+                <AlertTitle className="text-secondary-300">Notice: Accuracy of Information Required</AlertTitle>
+                <AlertDescription className='text-foreground'>
+                  By proceeding with this token purchase, you affirm that all
+                  information provided is accurate, complete, and truthful.
+                  Providing false, misleading, or inaccurate information
+                  constitutes fraudulent misrepresentation and may result in the
+                  termination of this agreement, invalidation of your token
+                  purchase, and forfeiture of any associated tokens.
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}

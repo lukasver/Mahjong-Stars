@@ -15,7 +15,7 @@ import {
   getCurrentUser,
   getUserFromSession,
 } from "@/lib/services/fetchers.server";
-import TheTilesCompanyLogo from "@/public/static/images/logos/ttc-logo-wt.webp";
+import Logo from "@/public/static/images/logos/isologo-min.webp";
 import { DashboardSidebar } from "../../../components/sidebar";
 import AdminSidebar from "./admin-sidebar";
 import { DashboardHeader } from "./header";
@@ -74,7 +74,7 @@ export default async function DashboardLayout({
             <Footer
               title={"The Tiles Company"}
               description={"Empowering MJS with Web3"}
-              logo={TheTilesCompanyLogo}
+              logo={Logo}
             />
           </div>
         </PagesProviders>

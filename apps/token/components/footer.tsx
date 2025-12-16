@@ -78,7 +78,7 @@ export const Footer = ({
               <p className="text-sm opacity-70">{description}</p>
             ) : null}
 
-            <p className="text-xs">Copyright © {siteConfig.businessName}</p>
+            {/* <p className="text-xs">Copyright © {siteConfig.businessName}</p> */}
           </div>
 
           <div

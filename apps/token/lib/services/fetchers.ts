@@ -461,7 +461,10 @@ export const getDocumentById = async (id: string | string[]) => {
 				id: string;
 				fileName: string;
 				name: string;
-				url: string;
+				url: {
+					bucket: string;
+					url: string
+				};
 			}[];
 		}>(`/admin/documents${queryParams}`, {
 			next: {

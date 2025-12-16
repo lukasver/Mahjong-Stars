@@ -83,8 +83,6 @@ export const InvestForm = ({
     chainId,
   });
 
-  console.log("🚀 ~ form.tsx:84 ~ options:", options?.data?.cryptoCurrencies);
-
 
   const { data: pendingTransactions } = usePendingTransactionsForSale(
     props.sale.id,
@@ -591,8 +589,8 @@ const SecurityNotice = () => {
         <div className="text-xs text-yellow-400">
           <p className="font-medium">Security Notice</p>
           <p className="text-yellow-400/80">
-            Always verify the contract address and never share your private
-            keys.
+            Verify the receiving wallet address is correct and never share your private
+            keys with anyone.
           </p>
         </div>
       </div>
