@@ -20,6 +20,7 @@ import {
 	getActiveSale,
 	getAllTransactions,
 	getBlockchains,
+	getCardProviderAvailability,
 	getCryptoTransaction,
 	getCurrencies,
 	getCurrentUser,
@@ -437,3 +438,23 @@ export const useAllUsers = (
 	const e = getError(data, error);
 	return { data: data?.data, error: e, status, isLoading };
 };
+
+/**
+ * Get card payment provider availability
+ * Checks if card payment provider is configured and available
+ */
+export const useCardProviderAvailability = () => {
+	const { data, status, error, isLoading } = useQuery({
+		queryKey: ["card-provider", "availability"],
+		queryFn: () => getCardProviderAvailability(),
+		staleTime: DEFAULT_STALE_TIME,
+	});
+	const e = getError(data, error);
+	return {
+		data: data?.data,
+		error: e,
+		status,
+		isLoading,
+	};
+};
+

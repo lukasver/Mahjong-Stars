@@ -6,7 +6,6 @@ export const WithErrorHandler = <P extends object>(
   Component: React.ComponentType<P>,
 ) => {
   return (props: P) => {
-    console.debug('WithErrorHandler', props);
     return (
       <ErrorBoundary
         fallback={

@@ -628,6 +628,74 @@ class TransactionsController {
 		}
 	}
 
+	/**
+	 * Update transaction to AWAITING_PAYMENT status with formOfPayment = CARD
+	 * Validates that user doesn't already have another reserved transaction
+	 */
+	async updateTransactionToAwaitingPayment(
+		dto: { id: string },
+		ctx: ActionCtx,
+	) {
+		try {
+			invariant(dto.id, "Transaction id missing");
+			invariant(ctx.userId, "User id missing");
+
+			// Check if user already has a reserved transaction (AWAITING_PAYMENT + CARD)
+			const existingReservedTx = await prisma.saleTransactions.findFirst({
+				where: {
+					userId: ctx.userId,
+					status: TransactionStatus.AWAITING_PAYMENT,
+					formOfPayment: FOP.CARD,
+					id: { not: dto.id }, // Exclude the current transaction
+				},
+				select: {
+					id: true,
+					totalAmount: true,
+					paidCurrency: true,
+				},
+			});
+
+			if (existingReservedTx) {
+				return Failure({
+					code: "RESERVED_TRANSACTION_EXISTS",
+					message: "You already have a reserved transaction for card payment",
+					existingTransactionId: existingReservedTx.id,
+				});
+			}
+
+			// Verify transaction exists and belongs to user
+			const tx = await prisma.saleTransactions.findUnique({
+				where: { id: String(dto.id), userId: ctx.userId },
+				select: {
+					id: true,
+					status: true,
+					formOfPayment: true,
+				},
+			});
+
+			invariant(tx, "Transaction not found");
+
+			// Update transaction to AWAITING_PAYMENT and set formOfPayment to CARD
+			const updatedTx = await prisma.saleTransactions.update({
+				where: { id: tx.id },
+				data: {
+					status: TransactionStatus.AWAITING_PAYMENT,
+					formOfPayment: FOP.CARD,
+				},
+				select: {
+					id: true,
+					status: true,
+					formOfPayment: true,
+				},
+			});
+
+			return Success({ transaction: updatedTx });
+		} catch (e) {
+			logger(e);
+			return Failure(e);
+		}
+	}
+
 	public crons = {
 		cleanUp: async () => {
 			console.debug(
@@ -661,6 +729,13 @@ class TransactionsController {
 							},
 							{
 								createdAt: { lte: sixHoursAgo },
+							},
+							// Exclude CARD+AWAITING_PAYMENT transactions from cleanup
+							{
+								OR: [
+									{ status: { not: TransactionStatus.AWAITING_PAYMENT } },
+									{ formOfPayment: { not: FOP.CARD } },
+								],
 							},
 						],
 					},

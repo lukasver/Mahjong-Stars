@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import {
+	FOP,
 	Prisma,
 	SaftContract,
 	Sale,
@@ -7,6 +8,7 @@ import {
 	TransactionStatus,
 	User,
 } from "@prisma/client";
+import { DateTime } from "luxon";
 import nock from "nock";
 import {
 	afterAll,
@@ -513,6 +515,151 @@ describe("TransactionsController", () => {
 
 			// Should return empty array since all required variables have values
 			expect(missingVariables).toEqual([]);
+		});
+	});
+
+	describe("crons.cleanUp", () => {
+		it("should clean up old transactions but preserve reserved CARD+AWAITING_PAYMENT transactions", async () => {
+			// Create transactions older than 6 hours that should be cleaned up
+			const sevenHoursAgo = DateTime.local().minus({ hours: 7 }).toJSDate();
+
+			const txToCleanup1 = await db.saleTransactions.create({
+				data: {
+					id: faker.string.uuid(),
+					tokenSymbol: "TEST",
+					quantity: 50,
+					formOfPayment: FOP.TRANSFER,
+					receivingWallet: faker.finance.ethereumAddress(),
+					status: TransactionStatus.PENDING,
+					paidCurrency: "USD",
+					totalAmountCurrency: "USD",
+					saleId: testSale.id,
+					userId: regularUser.id,
+					price: 1.5,
+					totalAmount: 75,
+					createdAt: sevenHoursAgo,
+				},
+			});
+
+			const txToCleanup2 = await db.saleTransactions.create({
+				data: {
+					id: faker.string.uuid(),
+					tokenSymbol: "TEST",
+					quantity: 30,
+					formOfPayment: FOP.CRYPTO,
+					receivingWallet: faker.finance.ethereumAddress(),
+					status: TransactionStatus.AWAITING_PAYMENT,
+					paidCurrency: "ETH",
+					totalAmountCurrency: "ETH",
+					saleId: testSale.id,
+					userId: regularUser.id,
+					price: 1.5,
+					totalAmount: 45,
+					createdAt: sevenHoursAgo,
+				},
+			});
+
+			// Create a reserved transaction (AWAITING_PAYMENT + CARD) that should NOT be cleaned up
+			const reservedTx = await db.saleTransactions.create({
+				data: {
+					id: faker.string.uuid(),
+					tokenSymbol: "TEST",
+					quantity: 100,
+					formOfPayment: FOP.CARD,
+					receivingWallet: null,
+					status: TransactionStatus.AWAITING_PAYMENT,
+					paidCurrency: "USD",
+					totalAmountCurrency: "USD",
+					saleId: testSale.id,
+					userId: regularUser.id,
+					price: 1.5,
+					totalAmount: 150,
+					createdAt: sevenHoursAgo, // Also older than 6 hours
+				},
+			});
+
+			// Create a recent transaction that should NOT be cleaned up (too new)
+			const recentTx = await db.saleTransactions.create({
+				data: {
+					id: faker.string.uuid(),
+					tokenSymbol: "TEST",
+					quantity: 20,
+					formOfPayment: FOP.TRANSFER,
+					receivingWallet: faker.finance.ethereumAddress(),
+					status: TransactionStatus.PENDING,
+					paidCurrency: "USD",
+					totalAmountCurrency: "USD",
+					saleId: testSale.id,
+					userId: regularUser.id,
+					price: 1.5,
+					totalAmount: 30,
+					createdAt: new Date(), // Recent, should not be cleaned up
+				},
+			});
+
+			// Get initial available token quantity
+			const saleBefore = await db.sale.findUnique({
+				where: { id: testSale.id },
+				select: { availableTokenQuantity: true },
+			});
+			const initialAvailable = saleBefore?.availableTokenQuantity || 0;
+
+			// Run cleanup
+			const result = await TransactionsController.crons.cleanUp();
+
+			// Verify cleanup succeeded
+			expect(result.success).toBe(true);
+
+			// Verify transactions that should be cleaned up are now CANCELLED
+			const cleanedTx1 = await db.saleTransactions.findUnique({
+				where: { id: txToCleanup1.id },
+			});
+			expect(cleanedTx1?.status).toBe(TransactionStatus.CANCELLED);
+			expect(cleanedTx1?.comment).toContain(
+				"Transaction cancelled for not being confirmed after time limit",
+			);
+
+			const cleanedTx2 = await db.saleTransactions.findUnique({
+				where: { id: txToCleanup2.id },
+			});
+			expect(cleanedTx2?.status).toBe(TransactionStatus.CANCELLED);
+
+			// Verify reserved transaction is still AWAITING_PAYMENT (NOT cleaned up)
+			const reservedTxAfter = await db.saleTransactions.findUnique({
+				where: { id: reservedTx.id },
+			});
+			expect(reservedTxAfter?.status).toBe(TransactionStatus.AWAITING_PAYMENT);
+			expect(reservedTxAfter?.formOfPayment).toBe(FOP.CARD);
+			expect(reservedTxAfter?.comment).toBeNull();
+
+			// Verify recent transaction is still PENDING (not cleaned up because it's too new)
+			const recentTxAfter = await db.saleTransactions.findUnique({
+				where: { id: recentTx.id },
+			});
+			expect(recentTxAfter?.status).toBe(TransactionStatus.PENDING);
+
+			// Verify sale available token quantity was restored for cleaned transactions
+			// (50 + 30 = 80 tokens should be restored, but NOT the 100 from reserved transaction)
+			const saleAfter = await db.sale.findUnique({
+				where: { id: testSale.id },
+				select: { availableTokenQuantity: true },
+			});
+			const finalAvailable = saleAfter?.availableTokenQuantity || 0;
+			expect(finalAvailable).toBe(initialAvailable + 80); // Only cleaned transactions restored
+
+			// Clean up test transactions
+			await db.saleTransactions.deleteMany({
+				where: {
+					id: {
+						in: [
+							txToCleanup1.id,
+							txToCleanup2.id,
+							reservedTx.id,
+							recentTx.id,
+						],
+					},
+				},
+			});
 		});
 	});
 });

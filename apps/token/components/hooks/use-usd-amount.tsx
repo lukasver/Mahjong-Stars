@@ -13,6 +13,10 @@ interface UseUsdAmountProps {
    * The currency of the amount
    */
   currency: string | null | undefined;
+  /**
+   * Whether the conversion is enabled
+   */
+  enabled?: boolean;
 }
 
 interface UseUsdAmountReturn {
@@ -39,12 +43,17 @@ interface UseUsdAmountReturn {
 export function useUsdAmount({
   amount,
   currency,
+  enabled = true,
 }: UseUsdAmountProps): UseUsdAmountReturn {
   const [usdAmount, setUsdAmount] = useState<Decimal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
     const convertToUsd = async () => {
       // Reset state
       setIsLoading(true);

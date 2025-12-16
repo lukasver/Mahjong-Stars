@@ -391,10 +391,12 @@ const ActionButtons = ({
             </DropdownMenuItem>
           )}
         {status === TransactionStatus.AWAITING_PAYMENT && (
-          <DropdownMenuItem>
-            <Eye className="h-4 w-4 mr-2" />
-            Confirm payment
-          </DropdownMenuItem>
+          <Link href={`/dashboard/buy/${row.id}`}>
+            <DropdownMenuItem>
+              <Eye className="h-4 w-4 mr-2" />
+              Confirm payment
+            </DropdownMenuItem>
+          </Link>
         )}
 
         {"explorerUrl" in row && row.explorerUrl && (

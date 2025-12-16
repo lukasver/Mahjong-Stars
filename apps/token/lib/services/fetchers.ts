@@ -448,6 +448,23 @@ export const getCryptoTransaction = async (
 	}
 };
 
+/**
+ * Get card payment provider availability
+ * Checks if card payment provider is configured and available
+ */
+export const getCardProviderAvailability = async () => {
+	try {
+		const response = await fetch("/api/card-provider/availability");
+		if (!response.ok) {
+			throw new Error("Failed to check card provider availability");
+		}
+		const data = await response.json();
+		return { data: data as { available: boolean }, error: null };
+	} catch (e) {
+		return { data: null, error: e };
+	}
+};
+
 export const getDocumentById = async (id: string | string[]) => {
 	const search = new URLSearchParams();
 	const ids = Array.isArray(id) ? id : [id];

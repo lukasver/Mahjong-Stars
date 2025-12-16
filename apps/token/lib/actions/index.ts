@@ -611,6 +611,23 @@ export const deleteOwnTransaction = authActionClient
 		return result;
 	});
 
+export const updateTransactionToAwaitingPayment = authActionClient
+	.schema(z.object({ id: z.string() }))
+	.action(async ({ ctx, parsedInput }) => {
+		const result = await transactionsController.updateTransactionToAwaitingPayment(
+			parsedInput,
+			ctx,
+		);
+		if (!result.success) {
+			// Preserve error details for reserved transaction conflicts
+			if (result.error && typeof result.error === "object" && "code" in result.error) {
+				throw new Error(JSON.stringify(result.error));
+			}
+			throw new Error(result.message);
+		}
+		return result;
+	});
+
 export const generateContractForTransaction = authActionClient
 	.schema(
 		z.object({
