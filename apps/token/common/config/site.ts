@@ -13,7 +13,7 @@ const metadata = {
 	tokenSymbol: "TILE",
 	tokenName: "TILES",
 	supportEmail:
-		process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@thetilescompany.io",
+		process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "info@thetilescompany.io",
 	twitter: process.env.NEXT_PUBLIC_TWITTER_HANDLE || "",
 	instagram: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "",
 	tiktok: process.env.NEXT_PUBLIC_TIKTOK_HANDLE || "",

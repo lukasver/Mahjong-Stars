@@ -29,7 +29,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const queryClient = new QueryClient();
-  const [t, user] = await Promise.all([
+  const [_t, user] = await Promise.all([
     getTranslations(),
     getUserFromSession(),
   ]);
