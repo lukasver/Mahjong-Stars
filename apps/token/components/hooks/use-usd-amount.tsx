@@ -99,7 +99,7 @@ export function useUsdAmount({
     };
 
     convertToUsd();
-  }, [amount, currency]);
+  }, [amount, currency, enabled]);
 
   return { usdAmount, isLoading, error };
 }
