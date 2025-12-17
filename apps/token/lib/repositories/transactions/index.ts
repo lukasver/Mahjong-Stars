@@ -56,7 +56,7 @@ class TransactionsController {
 	private documents;
 	private readonly notificator: Notificator;
 
-	constructor(readonly _notificator: Notificator) {
+	constructor(_notificator: Notificator) {
 		this.documents = documentsController;
 		this.notificator = _notificator;
 	}

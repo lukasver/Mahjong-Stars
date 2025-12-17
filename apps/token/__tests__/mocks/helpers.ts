@@ -1,25 +1,25 @@
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 import {
   Prisma,
   PrismaClient,
   Profile,
   Sale,
   TransactionStatus,
-} from '@prisma/client';
-import { defineChain } from 'thirdweb';
-import { CRYPTO_CURRENCIES, FIAT_CURRENCIES } from '@/common/config/constants';
-import { GetExchangeRate } from '@/common/schemas/dtos/rates';
+} from "@prisma/client";
+import { defineChain } from "thirdweb";
+import { CRYPTO_CURRENCIES, FIAT_CURRENCIES } from "@/common/config/constants";
+import { GetExchangeRate } from "@/common/schemas/dtos/rates";
 import {
   CurrencyTypeSchema,
   FOPSchema,
   SaleStatusSchema,
   SaleTransactions,
   User,
-} from '@/common/schemas/generated';
+} from "@/common/schemas/generated";
 import {
   ALLOWED_CHAINS,
   NETWORK_TO_TOKEN_MAPPING,
-} from '@/lib/services/crypto/config';
+} from "@/lib/services/crypto/config";
 
 const Decimal = Prisma.Decimal;
 
@@ -74,7 +74,26 @@ export const mockExchangeRates: GetExchangeRate = {
   },
 };
 
-export const mockTransactions = (data?: Partial<SaleTransactions>) => {
+
+
+type MockTransactionPayload = Partial<Prisma.SaleTransactionsCreateInput> | Partial<Prisma.SaleTransactionsCreateManyInput>;
+
+export function mockTransactions(
+  data?: Partial<SaleTransactions>,
+  mode?: 'default',
+): SaleTransactions;
+export function mockTransactions(
+  data: Partial<Prisma.SaleTransactionsCreateManyInput> & { userId: string; saleId: string },
+  mode: 'createMany',
+): Prisma.SaleTransactionsCreateManyInput;
+export function mockTransactions(
+  data: Partial<Prisma.SaleTransactionsCreateInput>,
+  mode: 'create',
+): Prisma.SaleTransactionsCreateInput
+export function mockTransactions(
+  data: Partial<SaleTransactions> | (MockTransactionPayload & { userId?: string; saleId?: string }) = {},
+  mode: 'default' | 'createMany' | 'create' = 'default',
+): SaleTransactions | Prisma.SaleTransactionsCreateManyInput | Prisma.SaleTransactionsCreateInput {
   const status = faker.helpers.arrayElement(Object.values(TransactionStatus));
   const currency = faker.helpers.arrayElement([
     ...FIAT_CURRENCIES,
@@ -87,15 +106,75 @@ export const mockTransactions = (data?: Partial<SaleTransactions>) => {
       min: 0.0001,
       max: 999999999,
       fractionDigits: isCrypto ? 8 : 4,
-    })
+    }),
   );
 
   const decimals = isCrypto ? 8 : 4;
+  const computed = {
+    quantity: q,
+    amountPaid: paid.toFixed(decimals),
+    price: paid.div(q),
+    totalAmountCurrency: currency,
+    paidCurrency: currency,
+    totalAmount: paid,
+  };
+
+  if (mode === 'createMany') {
+    const { userId, saleId, metadata, ...rest } = data;
+    return {
+      tokenSymbol: faker.word.noun({ length: { min: 3, max: 5 } }),
+      formOfPayment: isCrypto ? FOPSchema.enum.CRYPTO : FOPSchema.enum.TRANSFER,
+      receivingWallet: faker.finance.ethereumAddress(),
+      status,
+      userId: userId!,
+      saleId: saleId!,
+      comment: faker.datatype.boolean() ? faker.lorem.lines(1) : null,
+      ...(metadata ? { metadata } : {}),
+      ...computed,
+      ...rest,
+    } satisfies Prisma.SaleTransactionsCreateManyInput;
+  }
+
+  if (mode === 'create') {
+    const { userId: _, saleId: __, metadata, ...rest } = data;
+    const { paidCurrency, ...restComputed } = computed;
+    return {
+      id: faker.string.uuid(),
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent(),
+      deletedAt: null,
+      tokenSymbol: faker.word.noun({ length: { min: 3, max: 5 } }),
+      formOfPayment: isCrypto ? FOPSchema.enum.CRYPTO : FOPSchema.enum.TRANSFER,
+      receivingWallet: faker.finance.ethereumAddress(),
+      amountPaidCurrency: {
+        connect: {
+          symbol: paidCurrency,
+        },
+      },
+      user: {
+        connect: {
+          id: data.userId,
+        },
+      },
+      sale: {
+        connect: {
+          id: data.saleId,
+        },
+      },
+      ...(metadata ? { metadata } : {}),
+      ...restComputed,
+      ...rest
+    } satisfies Prisma.SaleTransactionsCreateInput;
+  }
+
+
+
+  const { metadata, createdAt, updatedAt, deletedAt, paymentDate, ...rest } = data;
   return {
     id: faker.string.uuid(),
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent(),
-    deletedAt: null,
+    createdAt: new Date((createdAt ?? faker.date.past())),
+    updatedAt: new Date((updatedAt ?? faker.date.recent())),
+    deletedAt: (deletedAt ? new Date(deletedAt) : null),
     tokenSymbol: faker.word.noun({ length: { min: 3, max: 5 } }),
     formOfPayment: isCrypto ? FOPSchema.enum.CRYPTO : FOPSchema.enum.TRANSFER,
     receivingWallet: faker.finance.ethereumAddress(),
@@ -103,21 +182,16 @@ export const mockTransactions = (data?: Partial<SaleTransactions>) => {
     userId: faker.database.mongodbObjectId(),
     saleId: faker.database.mongodbObjectId(),
     comment: faker.datatype.boolean() ? faker.lorem.lines(1) : null,
-    quantity: q,
-    amountPaid: paid.toFixed(decimals),
-    price: paid.div(q),
-    totalAmountCurrency: currency,
-    paidCurrency: currency,
     approvedBy: null,
     txHash: isCrypto ? faker.finance.ethereumAddress() : null,
     agreementId: null,
     blockchainId: null,
-    totalAmount: paid,
     rejectionReason: null,
-    paymentDate: null,
     paymentEvidenceId: null,
-    metadata: null,
-    ...data,
+    paymentDate: (paymentDate ? new Date(paymentDate) : null),
+    ...(metadata ? { metadata: metadata as Prisma.JsonValue } : { metadata: {} as Prisma.JsonValue }),
+    ...rest,
+    ...computed,
   } satisfies SaleTransactions;
 };
 
@@ -135,7 +209,7 @@ export const mockUsers = (data?: Partial<User>) => {
     ...data,
   } satisfies Pick<
     Prisma.UserCreateInput,
-    'id' | 'email' | 'emailVerified' | 'name' | 'walletAddress' | 'isSiwe'
+    "id" | "email" | "emailVerified" | "name" | "walletAddress" | "isSiwe"
   >;
 };
 
@@ -148,13 +222,13 @@ export const mockProfile = (data?: Partial<Profile>) => {
     ...data,
   } satisfies Pick<
     Prisma.ProfileCreateInput,
-    'firstName' | 'lastName' | 'phoneNumber' | 'dateOfBirth'
+    "firstName" | "lastName" | "phoneNumber" | "dateOfBirth"
   >;
 };
 
 export const mockContract = (
   data?: Partial<{ isSign: boolean; urlSign: null | string }>,
-  probability = 0.5
+  probability = 0.5,
 ) => {
   return {
     isSign: faker.datatype.boolean({
@@ -185,7 +259,7 @@ export const generateMockSale = (data?: Partial<Prisma.SaleCreateInput>) => {
       faker.number.float({
         min: 0.111111111,
         max: 9999.99,
-      })
+      }),
     ),
     tokenName: faker.finance.currencyName(),
     tokenContractAddress: faker.finance.ethereumAddress(),
@@ -197,7 +271,10 @@ export const generateMockSale = (data?: Partial<Prisma.SaleCreateInput>) => {
 
 const mockTokenOnBlockchain = () => {
   const chain = faker.helpers.arrayElement(ALLOWED_CHAINS);
-  const tokenListObjs = NETWORK_TO_TOKEN_MAPPING[chain.id];
+  let tokenListObjs = NETWORK_TO_TOKEN_MAPPING[chain.id];
+  if (!tokenListObjs) {
+    tokenListObjs = NETWORK_TO_TOKEN_MAPPING[137]; // Polygon as fallback
+  }
   const tokenList = Object.values(tokenListObjs!) as {
     symbol: string;
     contract: string;
@@ -227,7 +304,7 @@ export const createMockSaleWithToken = async (
     userAddress: string;
     currency: string;
     saleData?: Partial<Prisma.SaleCreateInput>;
-  }
+  },
 ) => {
   const sale = generateMockSale(saleData);
   const { token, ...tob } = mockTokenOnBlockchain();
@@ -249,7 +326,7 @@ export const createMockSaleWithToken = async (
             chainId: tob.chainId,
           },
           create: {
-            name: chain.name || 'Unknown chain',
+            name: chain.name || "Unknown chain",
             rpcUrl: chain.rpc,
             explorerUrl: chain.blockExplorers?.[0]?.url,
             isTestnet: chain.testnet,
@@ -335,9 +412,9 @@ export const cleanUpTestContext = async (
     transactions?: SaleTransactions[];
     sales?: Sale[];
     users?: User[];
-  }
+  },
 ) => {
-  console.time('[cleanUpTestContext]');
+  console.time("[cleanUpTestContext]");
   if (transactions?.length) {
     const toDelete = transactions.map((tx) => tx?.id).filter(Boolean);
     if (toDelete?.length) {
@@ -375,7 +452,7 @@ export const cleanUpTestContext = async (
       });
     }
   }
-  console.timeEnd('[cleanUpTestContext]');
+  console.timeEnd("[cleanUpTestContext]");
 };
 
 /**
@@ -394,8 +471,8 @@ export const createScenario = async (db: PrismaClient) => {
           create: {
             role: {
               connectOrCreate: {
-                where: { name: 'ADMIN' },
-                create: { name: 'ADMIN' },
+                where: { name: "ADMIN" },
+                create: { name: "ADMIN" },
               },
             },
           },
@@ -404,7 +481,7 @@ export const createScenario = async (db: PrismaClient) => {
     }),
     db.user.create({
       data: {
-        ...mockUsers({ email: 'test@example.com' }),
+        ...mockUsers({ email: "test@example.com" }),
         profile: {
           create: mockProfile(),
         },
@@ -415,7 +492,10 @@ export const createScenario = async (db: PrismaClient) => {
 
   const { sale, transaction, token } = await createMockSaleWithToken(db, {
     userAddress: adminUser.walletAddress,
-    currency: 'USD',
+    currency: "USD",
+    saleData: {
+      status: SaleStatusSchema.enum.OPEN,
+    }
   }).then(async ({ sale, token }) => {
     // biome-ignore lint/correctness/noUnusedVariables: destructured to remove id
     const { id, metadata, ...tx } = mockTransactions({
@@ -431,7 +511,7 @@ export const createScenario = async (db: PrismaClient) => {
           ...tx,
           saleId: sale.id,
           userId: regularUser.id,
-          ...metadata ? { metadata } : {},
+          ...(metadata ? { metadata } : {}),
         },
       }),
     };

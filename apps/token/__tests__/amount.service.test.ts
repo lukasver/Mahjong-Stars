@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import Decimal from "decimal.js";
 import nock from "nock";
 import sinon from "sinon";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { CRYPTO_CURRENCIES, FIAT_CURRENCIES } from "@/common/config/constants";
 import { AmountCalculatorService } from "@/lib/services/pricefeeds/amount.service";
 import { mockExchangeRates } from "./mocks/helpers";
@@ -26,7 +26,7 @@ describe("Amount Calculator service", () => {
   });
 
   describe("[getPrecision]", () => {
-    it("Return precision for FIAT currencies", () => {
+    test("Return precision for FIAT currencies", () => {
       const spy = sandbox.spy(service, "getPrecision");
       let callCount = 0;
 
@@ -40,7 +40,7 @@ describe("Amount Calculator service", () => {
         expect(spy.callCount).toBe(callCount);
       }
     });
-    it("Return precision for CRYPTO currencies", () => {
+    test("Return precision for CRYPTO currencies", () => {
       let callCount = 0;
       const spy = sandbox.spy(service, "getPrecision");
       const CRYPTO_PRECISION = 18;
@@ -58,7 +58,7 @@ describe("Amount Calculator service", () => {
   });
 
   describe("[getPricePerUnit] ", () => {
-    it("Should calculate price per unit with correct precision", () => {
+    test("Should calculate price per unit with correct precision", () => {
       const spy = sandbox.spy(service, "getPricePerUnit");
       const exchangeRate = 0.2;
       const base = 0.1;
@@ -81,7 +81,7 @@ describe("Amount Calculator service", () => {
       expect(new Prisma.Decimal(result).toNumber()).not.toBe(0.2 * 0.1);
       expect(result.toString()).toBe("0.0200");
     });
-    it("Should calculate price per unit with correct precision for several known and random cases", () => {
+    test("Should calculate price per unit with correct precision for several known and random cases", () => {
       const spy = sandbox.spy(service, "getPricePerUnit");
       const iterable = Object.values(mockExchangeRates)
         .reduce(
@@ -152,7 +152,7 @@ describe("Amount Calculator service", () => {
   });
 
   describe("[getTotalAmount]", () => {
-    it("Should calculate total amount to pay with correct precision", () => {
+    test("Should calculate total amount to pay with correct precision", () => {
       const spy = sandbox.spy(service, "getTotalAmount");
       const cases = Array.from(Array(100), () => {
         const precision = faker.helpers.arrayElement([
@@ -211,7 +211,7 @@ describe("Amount Calculator service", () => {
   });
 
   describe("[getTotalAmountCrypto]", () => {
-    it("Should calculate total amount to pay in formatted in crypto as BigNumber", () => {
+    test("Should calculate total amount to pay in formatted in crypto as BigNumber", () => {
       const spy = sandbox.spy(service, "getTotalAmountCrypto");
       const cases = Array.from(Array(100), () => {
         const precision = faker.helpers.arrayElement([
@@ -258,7 +258,7 @@ describe("Amount Calculator service", () => {
   });
 
   describe("[convertToCurrency]", () => {
-    it("Should convert currency correctly with known exchange rates", async () => {
+    test("Should convert currency correctly with known exchange rates", async () => {
       const spy = sandbox.spy(service, "convertToCurrency");
 
       // Test USD to EUR conversion
@@ -312,7 +312,7 @@ describe("Amount Calculator service", () => {
       expect(result3.amount).toBe(new Decimal("50").mul(0.8824).toFixed(service.getPrecision('CHF')));
     });
 
-    it("Should convert currency with correct mathematical precision", async () => {
+    test("Should convert currency with correct mathematical precision", async () => {
       const spy = sandbox.spy(service, "convertToCurrency");
 
       // Test with various amounts and verify mathematical correctness
@@ -376,7 +376,7 @@ describe("Amount Calculator service", () => {
       }
     });
 
-    it("Should use correct precision for FIAT and CRYPTO currencies", async () => {
+    test("Should use correct precision for FIAT and CRYPTO currencies", async () => {
       // Test FIAT currency precision (4 decimal places)
       const fiatResult = await service.convertToCurrency({
         amount: "100",
@@ -414,7 +414,7 @@ describe("Amount Calculator service", () => {
       expect(customResult.amount.split(".")[1]?.length).toBe(customPrecision);
     });
 
-    it("Should convert currency correctly with random test cases", async () => {
+    test("Should convert currency correctly with random test cases", async () => {
       const spy = sandbox.spy(service, "convertToCurrency");
 
       // Get all available currency pairs from mockExchangeRates
@@ -488,7 +488,7 @@ describe("Amount Calculator service", () => {
       }
     });
 
-    it("Should handle edge cases correctly", async () => {
+    test("Should handle edge cases correctly", async () => {
       // Test with zero amount
       const zeroResult = await service.convertToCurrency({
         amount: "0",
@@ -536,7 +536,7 @@ describe("Amount Calculator service", () => {
       expect(numberResult.amount).toBe(new Decimal("100").mul(0.9252).toFixed(service.getPrecision('EUR')));
     });
 
-    it("Should throw error when exchange rate cannot be fetched", async () => {
+    test("Should throw error when exchange rate cannot be fetched", async () => {
       const errorService = new AmountCalculatorService(async () => ({
         data: null,
         error: new Error("Network error"),
@@ -551,7 +551,7 @@ describe("Amount Calculator service", () => {
       ).rejects.toThrow("Error fetching exchange rate for currency conversion");
     });
 
-    it("Should throw error when exchange rate is missing", async () => {
+    test("Should throw error when exchange rate is missing", async () => {
       const errorService = new AmountCalculatorService(async () => ({
         data: {},
         error: null,
@@ -576,7 +576,7 @@ describe("Amount Calculator service", () => {
   })
 
   describe("Management fees calculation", () => {
-    it("Should work in random cases", () => {
+    test("Should work in random cases", () => {
       const payloads = Array.from(Array(1000), () => {
         const precision = faker.helpers.arrayElement([
           service.getPrecision('USD'), //FIAT precision (8)

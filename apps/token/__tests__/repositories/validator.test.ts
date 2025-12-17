@@ -11,7 +11,7 @@ import {
 } from '@prisma/client';
 import Decimal from 'decimal.js';
 import { DateTime } from 'luxon';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { prisma as db } from '@/lib/db/prisma';
 import { TransactionValidationError } from '@/lib/repositories/errors';
 import {
@@ -112,7 +112,7 @@ describe('TransactionValidator', () => {
       };
     }
 
-    it('should validate transaction creation successfully', async () => {
+    test('should validate transaction creation successfully', async () => {
       // Mock the database calls
       const mockUser: UserPayload = {
         id: regularUser.id,
@@ -145,7 +145,7 @@ describe('TransactionValidator', () => {
       expect(result.pendingTransaction).toBeNull();
     });
 
-    it('should throw error when user not found', async () => {
+    test('should throw error when user not found', async () => {
       vi.spyOn(db.user, 'findUnique').mockResolvedValue(null);
 
       await expect(
@@ -155,7 +155,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when sale not found', async () => {
+    test('should throw error when sale not found', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -181,7 +181,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when sale is not open', async () => {
+    test('should throw error when sale is not open', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -217,7 +217,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when insufficient tokens available', async () => {
+    test('should throw error when insufficient tokens available', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -250,7 +250,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when quantity below minimum', async () => {
+    test('should throw error when quantity below minimum', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -284,7 +284,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when quantity above maximum', async () => {
+    test('should throw error when quantity above maximum', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -319,7 +319,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when sale closing date has passed', async () => {
+    test('should throw error when sale closing date has passed', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -355,7 +355,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when user has pending transaction', async () => {
+    test('should throw error when user has pending transaction', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -400,7 +400,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when SAFT contract requires email but user has no email', async () => {
+    test('should throw error when SAFT contract requires email but user has no email', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -438,7 +438,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when SAFT contract requires verified email but email not verified', async () => {
+    test('should throw error when SAFT contract requires verified email but email not verified', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -475,7 +475,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when sale requires KYC but user has no email', async () => {
+    test('should throw error when sale requires KYC but user has no email', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -512,7 +512,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error when sale requires KYC but user email is not verified', async () => {
+    test('should throw error when sale requires KYC but user email is not verified', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -549,7 +549,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should allow transaction when sale requires KYC and user has verified email', async () => {
+    test('should allow transaction when sale requires KYC and user has verified email', async () => {
       const mockUser: UserPayload = {
         id: regularUser.id,
         walletAddress: regularUser.walletAddress,
@@ -585,7 +585,7 @@ describe('TransactionValidator', () => {
       expect(result.pendingTransaction).toBeNull();
     });
 
-    it('should validate required data fields', async () => {
+    test('should validate required data fields', async () => {
       vi.spyOn(db.user, 'findUnique').mockResolvedValue(
         faker.helpers.arrayElement([regularUser, null])
       );
@@ -640,7 +640,7 @@ describe('TransactionValidator', () => {
       });
     });
 
-    it('should validate status update successfully', async () => {
+    test('should validate status update successfully', async () => {
       const mockTx = {
         ...testTransaction,
         status: TransactionStatus.PENDING,
@@ -657,7 +657,7 @@ describe('TransactionValidator', () => {
       expect(result.transaction).toEqual(mockTx);
     });
 
-    it('should throw error when transaction not found', async () => {
+    test('should throw error when transaction not found', async () => {
       vi.spyOn(db.saleTransactions, 'findUnique').mockResolvedValue(null);
 
       await expect(
@@ -668,7 +668,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should throw error for invalid status transition', async () => {
+    test('should throw error for invalid status transition', async () => {
       vi.spyOn(db.saleTransactions, 'findUnique').mockResolvedValue(
         testTransaction as any
       );
@@ -681,7 +681,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should require payment evidence for PAYMENT_SUBMITTED status', async () => {
+    test('should require payment evidence for PAYMENT_SUBMITTED status', async () => {
       vi.spyOn(db.saleTransactions, 'findUnique').mockResolvedValue(
         testTransaction as any
       );
@@ -695,7 +695,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    it('should require rejection reason for REJECTED status', async () => {
+    test('should require rejection reason for REJECTED status', async () => {
       vi.spyOn(db.saleTransactions, 'findUnique').mockResolvedValue(
         testTransaction as any
       );
@@ -709,7 +709,7 @@ describe('TransactionValidator', () => {
       ).rejects.toThrow(TransactionValidationError);
     });
 
-    // it('should validate blockchain transaction when txHash provided', async () => {
+    // test('should validate blockchain transaction when txHash provided', async () => {
     //   const transactionWithHash = {
     //     ...mockTransaction,
     //     status: TransactionStatus.PAYMENT_SUBMITTED,
@@ -734,7 +734,7 @@ describe('TransactionValidator', () => {
     //   expect(result.transaction).toEqual(transactionWithHash);
     // });
 
-    // it('should throw error for invalid transaction hash format', async () => {
+    // test('should throw error for invalid transaction hash format', async () => {
     //   const transactionWithHash = {
     //     ...mockTransaction,
     //     status: TransactionStatus.PAYMENT_SUBMITTED,
@@ -756,7 +756,7 @@ describe('TransactionValidator', () => {
     //   ).rejects.toThrow(TransactionValidationError);
     // });
 
-    // it('should throw error when blockchain not found', async () => {
+    // test('should throw error when blockchain not found', async () => {
     //   const transactionWithHash = {
     //     ...mockTransaction,
     //     status: TransactionStatus.PAYMENT_SUBMITTED,
@@ -780,7 +780,7 @@ describe('TransactionValidator', () => {
     //   ).rejects.toThrow(TransactionValidationError);
     // });
 
-    // it('should throw error when blockchain is disabled', async () => {
+    // test('should throw error when blockchain is disabled', async () => {
     //   const transactionWithHash = {
     //     ...mockTransaction,
     //     status: TransactionStatus.PAYMENT_SUBMITTED,
@@ -811,7 +811,7 @@ describe('TransactionValidator', () => {
     //   ).rejects.toThrow(TransactionValidationError);
     // });
 
-    // it('should throw error for duplicate transaction hash', async () => {
+    // test('should throw error for duplicate transaction hash', async () => {
     //   const transactionWithHash = {
     //     ...mockTransaction,
     //     status: TransactionStatus.PAYMENT_SUBMITTED,
@@ -846,7 +846,7 @@ describe('TransactionValidator', () => {
   });
 
   describe('validateSaleClosingConditions', () => {
-    it('should return shouldClose true when sale is expired', () => {
+    test('should return shouldClose true when sale is expired', () => {
       const expiredSale: Pick<
         Sale,
         'saleClosingDate' | 'availableTokenQuantity'
@@ -863,7 +863,7 @@ describe('TransactionValidator', () => {
       expect(result.reason).toBe('Sale closing date has passed');
     });
 
-    it('should return shouldClose true when sale is sold out', () => {
+    test('should return shouldClose true when sale is sold out', () => {
       const soldOutSale: Pick<
         Sale,
         'saleClosingDate' | 'availableTokenQuantity'
@@ -880,7 +880,7 @@ describe('TransactionValidator', () => {
       expect(result.reason).toBe('All tokens have been sold');
     });
 
-    it('should return shouldClose false when sale is active', () => {
+    test('should return shouldClose false when sale is active', () => {
       const activeSale: Pick<
         Sale,
         'saleClosingDate' | 'availableTokenQuantity'
@@ -897,7 +897,7 @@ describe('TransactionValidator', () => {
       expect(result.reason).toBeUndefined();
     });
 
-    it('should return shouldClose false when availableTokenQuantity is null', () => {
+    test('should return shouldClose false when availableTokenQuantity is null', () => {
       const unlimitedSale: Pick<
         Sale,
         'saleClosingDate' | 'availableTokenQuantity'
@@ -916,7 +916,7 @@ describe('TransactionValidator', () => {
   });
 
   describe('validateTransactionTimeout', () => {
-    it('should return shouldTimeout true for old crypto transaction', () => {
+    test('should return shouldTimeout true for old crypto transaction', () => {
       const oldTransaction = mockTransactions({
         createdAt: DateTime.now().minus({ hours: 7 }).toJSDate(),
         formOfPayment: FOP.CRYPTO,
@@ -931,7 +931,7 @@ describe('TransactionValidator', () => {
       expect(result.reason).toBe('Crypto transaction pending for too long');
     });
 
-    it('should return shouldTimeout true for old non-crypto transaction', () => {
+    test('should return shouldTimeout true for old non-crypto transaction', () => {
       const oldTransaction = mockTransactions({
         createdAt: DateTime.now().minus({ hours: 7 }).toJSDate(),
         formOfPayment: FOP.TRANSFER,
@@ -946,7 +946,7 @@ describe('TransactionValidator', () => {
       expect(result.reason).toBe('Non-crypto transaction pending for too long');
     });
 
-    it('should return shouldTimeout false for recent transaction', () => {
+    test('should return shouldTimeout false for recent transaction', () => {
       const recentTransaction = mockTransactions({
         createdAt: DateTime.now().minus({ hours: 2 }).toJSDate(),
         formOfPayment: FOP.CRYPTO,
@@ -961,7 +961,7 @@ describe('TransactionValidator', () => {
       expect(result.reason).toBeUndefined();
     });
 
-    it('should use default timeout of 6 hours', () => {
+    test('should use default timeout of 6 hours', () => {
       const oldTransaction = mockTransactions({
         createdAt: DateTime.now().minus({ hours: 7 }).toJSDate(),
         formOfPayment: FOP.CRYPTO,
@@ -973,7 +973,7 @@ describe('TransactionValidator', () => {
       expect(result.shouldTimeout).toBe(true);
     });
 
-    it('should respect custom timeout hours', () => {
+    test('should respect custom timeout hours', () => {
       const transaction = mockTransactions({
         createdAt: DateTime.now().minus({ hours: 3 }).toJSDate(),
         formOfPayment: FOP.CRYPTO,
@@ -989,7 +989,7 @@ describe('TransactionValidator', () => {
   });
 
   describe('validateSaleDateNotExpired', () => {
-    it('should not throw error for future closing date', () => {
+    test('should not throw error for future closing date', () => {
       const futureSale: Pick<Sale, 'saleClosingDate'> = {
         saleClosingDate: DateTime.now().plus({ days: 1 }).toJSDate(),
       };
@@ -999,7 +999,7 @@ describe('TransactionValidator', () => {
       }).not.toThrow();
     });
 
-    it('should throw error for past closing date', () => {
+    test('should throw error for past closing date', () => {
       const pastSale: Pick<Sale, 'saleClosingDate'> = {
         saleClosingDate: DateTime.now().minus({ days: 1 }).toJSDate(),
       };
@@ -1009,7 +1009,7 @@ describe('TransactionValidator', () => {
       }).toThrow(TransactionValidationError);
     });
 
-    it('should throw error for current closing date', () => {
+    test('should throw error for current closing date', () => {
       const currentSale: Pick<Sale, 'saleClosingDate'> = {
         saleClosingDate: DateTime.now().toJSDate(),
       };

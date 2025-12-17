@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import Decimal from "decimal.js";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import {
 	formatCurrency,
 	formatStringCurrencyToNumber,
@@ -48,14 +48,14 @@ describe("Currency Formatting", () => {
 	};
 
 	describe("[formatCurrency] - Basic functionality", () => {
-		it("should format basic numbers correctly", () => {
+		test("should format basic numbers correctly", () => {
 			expect(formatCurrency(100, { locale: "en-US" })).toBe("100");
 			expect(formatCurrency(100.5, { locale: "en-US" })).toBe("100.5");
 			expect(formatCurrency(100.5, { locale: "en-US" })).toBe("100.5");
 			expect(formatCurrency(100.0, { locale: "en-US" })).toBe("100");
 		});
 
-		it("should handle currency symbols", () => {
+		test("should handle currency symbols", () => {
 			const usResult = formatCurrency(100, {
 				locale: "en-US",
 				currency: "USD",
@@ -71,7 +71,7 @@ describe("Currency Formatting", () => {
 			expect(deResult).toContain("100");
 		});
 
-		it("should handle different precision types", () => {
+		test("should handle different precision types", () => {
 			expect(
 				formatCurrency(100.12345678, { locale: "en-US", precision: "CRYPTO" }),
 			).toBe("100.12345678");
@@ -106,7 +106,7 @@ describe("Currency Formatting", () => {
 			});
 		});
 
-		it("should handle edge cases", () => {
+		test("should handle edge cases", () => {
 			expect(formatCurrency(0, { locale: "en-US" })).toBe("0");
 			expect(formatCurrency(0.0, { locale: "en-US" })).toBe("0");
 			expect(formatCurrency(0.0, { locale: "en-US" })).toBe("0");
@@ -140,60 +140,60 @@ describe("Currency Formatting", () => {
 	});
 
 	describe("[formatCurrency] - Locale decimal separators", () => {
-		it("should handle US locale with period decimal separator", () => {
+		test("should handle US locale with period decimal separator", () => {
 			testTrailingZeroRemoval(100.0, "en-US", ".");
 			testTrailingZeroRemoval(100.5, "en-US", ".");
 			testTrailingZeroRemoval(100.5, "en-US", ".");
 		});
 
-		it("should handle German locale with comma decimal separator", () => {
+		test("should handle German locale with comma decimal separator", () => {
 			testTrailingZeroRemoval(100.0, "de-DE", ",");
 			testTrailingZeroRemoval(100.5, "de-DE", ",");
 			testTrailingZeroRemoval(100.5, "de-DE", ",");
 		});
 
-		it("should handle French locale with comma decimal separator", () => {
+		test("should handle French locale with comma decimal separator", () => {
 			testTrailingZeroRemoval(100.0, "fr-FR", ",");
 			testTrailingZeroRemoval(100.5, "fr-FR", ",");
 			testTrailingZeroRemoval(100.5, "fr-FR", ",");
 		});
 
-		it("should handle Swiss locale with period decimal separator", () => {
+		test("should handle Swiss locale with period decimal separator", () => {
 			testTrailingZeroRemoval(100.0, "de-CH", ".");
 			testTrailingZeroRemoval(100.5, "de-CH", ".");
 			testTrailingZeroRemoval(100.5, "de-CH", ".");
 		});
 
-		it("should handle Italian locale with comma decimal separator", () => {
-			testTrailingZeroRemoval(100.0, "it-IT", ",");
-			testTrailingZeroRemoval(100.5, "it-IT", ",");
-			testTrailingZeroRemoval(100.5, "it-IT", ",");
+		test("should handle Italian locale with comma decimal separator", () => {
+			testTrailingZeroRemoval(100.0, "test-IT", ",");
+			testTrailingZeroRemoval(100.5, "test-IT", ",");
+			testTrailingZeroRemoval(100.5, "test-IT", ",");
 		});
 	});
 
 	describe("[formatCurrency] - Thousand separators", () => {
-		it("should handle US locale with comma thousand separator", () => {
+		test("should handle US locale with comma thousand separator", () => {
 			const result = formatCurrency(100000.0, { locale: "en-US" });
 			expect(result).toContain("100");
 			expect(result).toContain("000");
 			testTrailingZeroRemoval(100000.5, "en-US", ".");
 		});
 
-		it("should handle German locale with period thousand separator", () => {
+		test("should handle German locale with period thousand separator", () => {
 			const result = formatCurrency(100000.0, { locale: "de-DE" });
 			expect(result).toContain("100");
 			expect(result).toContain("000");
 			testTrailingZeroRemoval(100000.5, "de-DE", ",");
 		});
 
-		it("should handle Swiss locale with apostrophe thousand separator", () => {
+		test("should handle Swiss locale with apostrophe thousand separator", () => {
 			const result = formatCurrency(100000.0, { locale: "de-CH" });
 			expect(result).toContain("100");
 			expect(result).toContain("000");
 			testTrailingZeroRemoval(100000.5, "de-CH", ".");
 		});
 
-		it("should handle French locale with space thousand separator", () => {
+		test("should handle French locale with space thousand separator", () => {
 			const result = formatCurrency(100000.0, { locale: "fr-FR" });
 			expect(result).toContain("100");
 			expect(result).toContain("000");
@@ -202,7 +202,7 @@ describe("Currency Formatting", () => {
 	});
 
 	describe("[formatCurrency] - Complex cases with currency symbols", () => {
-		it("should handle US dollar formatting", () => {
+		test("should handle US dollar formatting", () => {
 			const result = formatCurrency(100000.0, {
 				locale: "en-US",
 				currency: "USD",
@@ -212,7 +212,7 @@ describe("Currency Formatting", () => {
 			expect(result).toContain("000");
 		});
 
-		it("should handle Euro formatting in German locale", () => {
+		test("should handle Euro formatting in German locale", () => {
 			const result = formatCurrency(100000.0, {
 				locale: "de-DE",
 				currency: "EUR",
@@ -222,7 +222,7 @@ describe("Currency Formatting", () => {
 			expect(result).toContain("000");
 		});
 
-		it("should handle Swiss Franc formatting", () => {
+		test("should handle Swiss Franc formatting", () => {
 			const result = formatCurrency(100000.0, {
 				locale: "de-CH",
 				currency: "CHF",
@@ -232,7 +232,7 @@ describe("Currency Formatting", () => {
 			expect(result).toContain("000");
 		});
 
-		it("should handle British Pound formatting", () => {
+		test("should handle British Pound formatting", () => {
 			const result = formatCurrency(100000.0, {
 				locale: "en-GB",
 				currency: "GBP",
@@ -244,7 +244,7 @@ describe("Currency Formatting", () => {
 	});
 
 	describe("[formatCurrency] - Crypto precision", () => {
-		it("should handle crypto precision with trailing zeros", () => {
+		test("should handle crypto precision with trailing zeros", () => {
 			expect(
 				formatCurrency(100.12345678, { locale: "en-US", precision: "CRYPTO" }),
 			).toBe("100.12345678");
@@ -259,7 +259,7 @@ describe("Currency Formatting", () => {
 			).toBe("100");
 		});
 
-		it("should handle crypto precision with different locales", () => {
+		test("should handle crypto precision with different locales", () => {
 			expect(
 				formatCurrency(100.12345678, { locale: "de-DE", precision: "CRYPTO" }),
 			).toBe("100,12345678");
@@ -273,7 +273,7 @@ describe("Currency Formatting", () => {
 	});
 
 	describe("[formatCurrency] - Trailing zero removal with different separators", () => {
-		it("should remove trailing zeros with comma decimal separator (German locale)", () => {
+		test("should remove trailing zeros with comma decimal separator (German locale)", () => {
 			// Test cases with comma as decimal separator
 			expect(
 				formatCurrency(100.009, { locale: "de-DE", precision: "CRYPTO" }),
@@ -292,7 +292,7 @@ describe("Currency Formatting", () => {
 			).toBe("100,12");
 		});
 
-		it("should remove trailing zeros with period decimal separator (US locale)", () => {
+		test("should remove trailing zeros with period decimal separator (US locale)", () => {
 			// Test cases with period as decimal separator
 			expect(
 				formatCurrency(100.00123, { locale: "en-US", precision: "CRYPTO" }),
@@ -311,7 +311,7 @@ describe("Currency Formatting", () => {
 			).toBe("100.12");
 		});
 
-		it("should remove trailing zeros with period decimal separator (Swiss locale)", () => {
+		test("should remove trailing zeros with period decimal separator (Swiss locale)", () => {
 			// Test cases with period as decimal separator in Swiss locale
 			const result1 = formatCurrency(100000000.234, {
 				locale: "de-CH",
@@ -332,7 +332,7 @@ describe("Currency Formatting", () => {
 			expect(result2).not.toContain("000000"); // Should not have trailing zeros
 		});
 
-		it("should remove trailing zeros with comma decimal separator (French locale)", () => {
+		test("should remove trailing zeros with comma decimal separator (French locale)", () => {
 			// Test cases with comma as decimal separator in French locale
 			const result1 = formatCurrency(100000000.234, {
 				locale: "fr-FR",
@@ -353,7 +353,7 @@ describe("Currency Formatting", () => {
 			expect(result2).not.toContain("000000"); // Should not have trailing zeros
 		});
 
-		it("should handle complex cases with multiple trailing zeros", () => {
+		test("should handle complex cases with multiple trailing zeros", () => {
 			// Test with many trailing zeros
 			const result1 = formatCurrency(100.123456789, {
 				locale: "en-US",
@@ -379,7 +379,7 @@ describe("Currency Formatting", () => {
 			).toBe("100");
 		});
 
-		it("should handle user-specific examples correctly", () => {
+		test("should handle user-specific examples correctly", () => {
 			// User's specific examples:
 			// Separator ',': 100.00,0090000 => 100.00,009
 			// Separator '.': 100,00.0012300 => 100,00.00123
@@ -412,7 +412,7 @@ describe("Currency Formatting", () => {
 			expect(swissResult).not.toContain("000000"); // Should not have trailing zeros
 		});
 
-		it("should handle FIAT precision with trailing zeros", () => {
+		test("should handle FIAT precision with trailing zeros", () => {
 			// Test FIAT precision (4 decimal places) with trailing zeros
 			expect(
 				formatCurrency(100.1234, { locale: "en-US", precision: "FIAT" }),
@@ -436,7 +436,7 @@ describe("Currency Formatting", () => {
 	});
 
 	describe("[formatCurrency] - Error handling", () => {
-		it("should handle Intl.NumberFormat errors gracefully", () => {
+		test("should handle Intl.NumberFormat errors gracefully", () => {
 			// Mock Intl.NumberFormat to throw an error for all locales
 			global.Intl = {
 				...originalIntl,
@@ -454,20 +454,20 @@ describe("Currency Formatting", () => {
 			const result4 = formatCurrency("100.5000", { locale: "de-DE" });
 
 			// The fallback should use the locale-specific decimal separator
-			// Since we are not supplying any currency, it will use the default decimal separator
+			// Since we are not supplying any currency, test will use the default decimal separator
 			expect(result1).toBe("100.5");
 			expect(result2).toBe("100.5");
 			expect(result3).toBe("100.5");
 			expect(result4).toBe("100.5");
 		});
 
-		it("should handle invalid locales gracefully", () => {
+		test("should handle invalid locales gracefully", () => {
 			expect(formatCurrency(100.5, { locale: "invalid-locale" })).toBe("100.5");
 		});
 	});
 
 	describe("[safeFormatCurrency]", () => {
-		it("should format currency safely with valid input", () => {
+		test("should format currency safely with valid input", () => {
 			const result = safeFormatCurrency(
 				{ totalAmount: "100.50", currency: "USD" },
 				{ locale: "en-US" },
@@ -476,12 +476,12 @@ describe("Currency Formatting", () => {
 			expect(result).toContain("100.5");
 		});
 
-		it("should handle different precision types", () => {
+		test("should handle different precision types", () => {
 			const cryptoResult = safeFormatCurrency(
 				{ totalAmount: "100.12345678", currency: "BTC" },
 				{ locale: "en-US", precision: "CRYPTO" },
 			);
-			// Check that it contains the expected parts rather than exact string match
+			// Check that test contains the expected parts rather than exact string match
 			expect(cryptoResult).toContain("100.12345678");
 			expect(cryptoResult).toContain("BTC");
 
@@ -498,7 +498,7 @@ describe("Currency Formatting", () => {
 	});
 
 	describe("[formatStringCurrencyToNumber]", () => {
-		it("should parse US formatted currency strings", () => {
+		test("should parse US formatted currency strings", () => {
 			expect(formatStringCurrencyToNumber("$100,000.50", "USD", "en-US")).toBe(
 				100000.5,
 			);
@@ -508,7 +508,7 @@ describe("Currency Formatting", () => {
 			expect(formatStringCurrencyToNumber("$100", "USD", "en-US")).toBe(100);
 		});
 
-		it("should parse German formatted currency strings", () => {
+		test("should parse German formatted currency strings", () => {
 			expect(formatStringCurrencyToNumber("100.000,50 €", "EUR", "de-DE")).toBe(
 				100000.5,
 			);
@@ -518,7 +518,7 @@ describe("Currency Formatting", () => {
 			expect(formatStringCurrencyToNumber("100 €", "EUR", "de-DE")).toBe(100);
 		});
 
-		it("should parse Swiss formatted currency strings", () => {
+		test("should parse Swiss formatted currency strings", () => {
 			expect(
 				formatStringCurrencyToNumber("CHF 100'000.50", "CHF", "de-CH"),
 			).toBe(100000.5);
@@ -528,7 +528,7 @@ describe("Currency Formatting", () => {
 			expect(formatStringCurrencyToNumber("CHF 100", "CHF", "de-CH")).toBe(100);
 		});
 
-		it("should handle invalid input gracefully", () => {
+		test("should handle invalid input gracefully", () => {
 			// Fn removes non-numeric characters
 			expect(formatStringCurrencyToNumber("invalid", "USD", "en-US")).toBe(0);
 			expect(formatStringCurrencyToNumber("", "USD", "en-US")).toBe(0);
@@ -537,7 +537,7 @@ describe("Currency Formatting", () => {
 	});
 
 	describe("[formatCurrency] - Edge cases and robustness", () => {
-		it("should handle very large numbers", () => {
+		test("should handle very large numbers", () => {
 			const usResult = formatCurrency(999999999.99, { locale: "en-US" });
 			expect(usResult).toContain("999");
 			expect(usResult).toContain("999");
@@ -549,7 +549,7 @@ describe("Currency Formatting", () => {
 			expect(deResult).toContain("99");
 		});
 
-		it("should handle very small numbers", () => {
+		test("should handle very small numbers", () => {
 			expect(
 				formatCurrency(0.00000001, { locale: "en-US", precision: "CRYPTO" }),
 			).toBe("0.00000001");
@@ -558,7 +558,7 @@ describe("Currency Formatting", () => {
 			).toBe("0");
 		});
 
-		it("should handle negative numbers", () => {
+		test("should handle negative numbers", () => {
 			const usResult = formatCurrency(-100.5, { locale: "en-US" });
 			expect(usResult).toContain("-");
 			expect(usResult).toContain("100.5");
@@ -568,7 +568,7 @@ describe("Currency Formatting", () => {
 			expect(deResult).toContain("100.5");
 		});
 
-		it("should handle Decimal.js objects", () => {
+		test("should handle Decimal.js objects", () => {
 			const { Decimal } = require("decimal.js");
 			expect(formatCurrency(new Decimal("100.50"), { locale: "en-US" })).toBe(
 				"100.5",
@@ -578,7 +578,7 @@ describe("Currency Formatting", () => {
 			);
 		});
 
-		it("should handle string numbers", () => {
+		test("should handle string numbers", () => {
 			expect(formatCurrency("100.50", { locale: "en-US" })).toBe("100.5");
 			expect(formatCurrency("100.50", { locale: "de-DE" })).toBe("100.5");
 		});

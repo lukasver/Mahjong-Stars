@@ -1,5 +1,5 @@
 import { getUser } from "thirdweb";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { extractEmailVerification, serverClient } from "@/lib/auth/thirdweb";
 import {
 	CoinbaseProfileDetails,
@@ -61,7 +61,7 @@ describe("Thirdweb profiles", () => {
 		x: "0x0F5672E421Af52f5c01f44814f8BdC0B2564f4ac",
 		telegram: "0x8b0C6b6295BEb7527A2A7F2dFCFB196B56C930Ad",
 	} as { [K in (typeof authOptions)[number]]: string };
-	it("Should parse profiles to check if email is verified", async () => {
+	test("Should parse profiles to check if email is verified", async () => {
 		for (const option of authOptions) {
 			const wallet = ADDRESSES[option];
 			if (!wallet) {
@@ -110,7 +110,7 @@ describe("Thirdweb profiles", () => {
 		}
 	});
 
-	it("Should correctly identify profile types using type guards", () => {
+	test("Should correctly identify profile types using type guards", () => {
 		// Test Google profile type guard
 		const googleDetails: GoogleProfileDetails = {
 			email: "test@gmail.com",
