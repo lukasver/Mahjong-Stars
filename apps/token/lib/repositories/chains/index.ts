@@ -15,12 +15,12 @@ export class BlockchainController {
 				where:
 					process.env.NODE_ENV === "production"
 						? {
-								isEnabled: true,
-								isTestnet: false,
-							}
+							isEnabled: true,
+							isTestnet: false,
+						}
 						: {
-								isEnabled: true,
-							},
+							isEnabled: true,
+						},
 				select: {
 					chainId: true,
 					explorerUrl: true,
@@ -61,6 +61,7 @@ export class BlockchainController {
 	 * Get all tokens
 	 */
 	async getTokens({ symbol }: { symbol?: string } = {}) {
+
 		try {
 			const tokens = await prisma.token.findMany({
 				where: symbol ? { symbol } : undefined,
@@ -89,6 +90,7 @@ export class BlockchainController {
 					};
 				},
 			);
+
 
 			return Success({
 				tokens: result,

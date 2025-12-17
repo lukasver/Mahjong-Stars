@@ -14,7 +14,7 @@ export const container = {
 
 export const header = {
   padding: '32px 24px',
-  backgroundColor: 'oklch(0.2569 0.1054 29.23)', // --primary
+  backgroundColor: '#4a0000', // --primary
   textAlign: 'center' as const,
 };
 
@@ -31,21 +31,21 @@ export const h1 = {
 };
 
 export const h2 = {
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   fontSize: '20px',
   fontWeight: 'bold',
   margin: '24px 0 16px 0',
 };
 
 export const h3 = {
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '20px 0 12px 0',
 };
 
 export const greeting = {
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   fontSize: '16px',
   lineHeight: '24px',
   margin: '0 0 16px 0',
@@ -67,7 +67,7 @@ export const successBox = {
 };
 
 export const successTitle = {
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0 0 8px 0',
@@ -134,7 +134,7 @@ export const actionSection = {
 };
 
 export const button = {
-  backgroundColor: 'oklch(0.5398 0.2198 29.39)', // --accent
+  backgroundColor: '#D00501', // --accent
   borderRadius: '6px',
   color: '#ffffff',
   fontSize: '16px',
@@ -170,14 +170,14 @@ export const footer = {
 };
 
 export const signature = {
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   fontSize: '14px',
   lineHeight: '20px',
   margin: '24px 0 0 0',
 };
 
 export const link = {
-  color: 'oklch(0.5398 0.2198 29.39)', // --accent
+  color: '#D00501', // --accent
   textDecoration: 'underline',
 };
 
@@ -211,7 +211,7 @@ export const alertBox = {
 };
 
 export const alertTitle = {
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0 0 8px 0',
@@ -220,7 +220,7 @@ export const alertTitle = {
 };
 
 export const alertReason = {
-  color: 'oklch(0.5398 0.2198 29.39)', // --accent
+  color: '#D00501', // --accent
   fontSize: '16px',
   fontWeight: '600',
   margin: '0',
@@ -237,7 +237,7 @@ export const errorBox = {
 };
 
 export const errorTitle = {
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0 0 8px 0',
@@ -282,7 +282,7 @@ export const validityText = {
 };
 
 export const verifyText = {
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   fontSize: '14px',
   fontWeight: 'bold',
   margin: 0,
@@ -292,7 +292,7 @@ export const verifyText = {
 };
 
 export const codeText = {
-  color: 'oklch(0.5398 0.2198 29.39)', // --accent
+  color: '#D00501', // --accent
   fontSize: '36px',
   fontWeight: 'bold',
   margin: '10px 0',
@@ -306,7 +306,7 @@ export const heading = {
   letterSpacing: '-0.5px',
   lineHeight: '1.3',
   fontWeight: 'bold',
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
   padding: '17px 0 0',
   textAlign: 'center' as const,
 };
@@ -316,7 +316,7 @@ export const logo = {
 };
 
 export const fontToken = {
-  color: 'oklch(0.5398 0.2198 29.39)', // --accent
+  color: '#D00501', // --accent
   fontSize: '12px',
   textAlign: 'center' as const,
   wordBreak: 'break-all' as const,
@@ -335,7 +335,7 @@ export const logoText = {
   fontSize: '32px',
   fontWeight: 'bold',
   textAlign: 'center' as const,
-  color: 'oklch(0.2569 0.1054 29.23)', // --primary
+  color: '#4a0000', // --primary
 };
 
 export const hr = {

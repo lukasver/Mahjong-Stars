@@ -57,7 +57,7 @@ test("TC-BUY-008: Payment Method Selection", async ({ page }) => {
   await page.waitForTimeout(300);
 
   // Select a CRYPTO currency (e.g., ETH)
-  const cryptoCurrency = buyPage.getCurrencyOption("ETH");
+  const cryptoCurrency = buyPage.getCurrencyOption("USDC");
   await expect(cryptoCurrency).toBeVisible({ timeout: TIMEOUTS.SHORT });
   await cryptoCurrency.click();
   await page.waitForTimeout(500); // Wait for form update
@@ -65,7 +65,7 @@ test("TC-BUY-008: Payment Method Selection", async ({ page }) => {
   // Verify form updates for CRYPTO payment
   // Check that the selected currency is displayed in the combobox
   const selectedCryptoCurrency = await paymentSelector.textContent();
-  expect(selectedCryptoCurrency).toContain("ETH");
+  expect(selectedCryptoCurrency).toContain("USDC");
 
   await page.screenshot({
     path: "./__tests__/e2e/specs/__screenshots__/buy/payment-method-selection.png",

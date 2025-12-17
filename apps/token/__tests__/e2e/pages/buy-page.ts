@@ -40,8 +40,7 @@ export class BuyPage extends BasePage {
 	 * Get sale name heading (h1)
 	 */
 	getSaleName() {
-		return this.page.getByRole("heading", {
-			name: /Test Sale|.*Sale/i,
+		return this.page.locator('[data-testid="sale-header"]').getByRole("heading", {
 			level: 1,
 		});
 	}

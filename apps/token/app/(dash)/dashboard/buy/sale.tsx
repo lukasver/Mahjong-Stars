@@ -80,7 +80,7 @@ const Header = ({ sale }: { sale: SaleWithToken }) => {
     sale?.catchPhrase ||
     "Join our exclusive presale and be part of the future of decentralized finance";
   return (
-    <div className="text-center mb-8">
+    <div className="text-center mb-8" data-testid="sale-header">
       <div className="flex items-center justify-center gap-2 mb-4">
         <Coins className="h-8 w-8 text-accent" />
         <h1 className="text-4xl font-bold text-white">{sale.name}</h1>

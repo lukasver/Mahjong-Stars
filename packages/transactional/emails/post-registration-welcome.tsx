@@ -103,7 +103,7 @@ export const PostRegistrationWelcomeEmail = ({
           <Text style={styles.signature}>
             Welcome aboard!
             <br />
-            The {companyName} Team
+            {companyName} Team
           </Text>
         </Section>
       </Container>

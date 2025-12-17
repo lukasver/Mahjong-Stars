@@ -346,7 +346,7 @@ test.describe.serial("Invest Form Submission ", () => {
     const cryptoHeader = buyPage.getCryptoSectionHeader();
     await expect(cryptoHeader).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-    const PURCHASE_CRYPTO_CURRENCY = "ETH";
+    const PURCHASE_CRYPTO_CURRENCY = "USDC";
     // Select ETH (CRYPTO currency)
     const btcOption = buyPage.getCurrencyOption(PURCHASE_CRYPTO_CURRENCY);
     await expect(btcOption).toBeVisible({ timeout: TIMEOUTS.SHORT });

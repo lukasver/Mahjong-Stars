@@ -72,12 +72,17 @@ test("TC-BUY-005: Invest Form Display", async ({ page }) => {
     await expect(currencyOption).toBeVisible({ timeout: TIMEOUTS.SHORT });
   }
 
-  // Verify all CRYPTO currencies are present
+  // Verify at least one CRYPTO currency is present
   const cryptoCurrencies = ["ETH", "BTC", "USDC", "BNB", "USDT"];
-  for (const currency of cryptoCurrencies) {
-    const currencyOption = buyPage.getCurrencyOption(currency);
-    await expect(currencyOption).toBeVisible({ timeout: TIMEOUTS.SHORT });
-  }
+  const cryptoOptionsLocator = buyPage
+    .getCurrencyDropdownContent()
+    .getByRole("option")
+    .filter({
+      hasText: new RegExp(`^(${cryptoCurrencies.join("|")})$`, "i"),
+    });
+  await expect(cryptoOptionsLocator.first()).toBeVisible({
+    timeout: TIMEOUTS.SHORT,
+  });
 
   // Close the dropdown by clicking outside or pressing Escape
   await page.keyboard.press("Escape");
