@@ -165,9 +165,9 @@ describe("Currency Formatting", () => {
 		});
 
 		test("should handle Italian locale with comma decimal separator", () => {
-			testTrailingZeroRemoval(100.0, "test-IT", ",");
-			testTrailingZeroRemoval(100.5, "test-IT", ",");
-			testTrailingZeroRemoval(100.5, "test-IT", ",");
+			testTrailingZeroRemoval(100.0, "it-IT", ",");
+			testTrailingZeroRemoval(100.5, "it-IT", ",");
+			testTrailingZeroRemoval(100.5, "it-IT", ",");
 		});
 	});
 

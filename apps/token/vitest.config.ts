@@ -32,11 +32,11 @@ export default defineConfig({
     // TODO: should mock the response from the thirdweb sdk instead of using a client
     exclude: ['__tests__/profiles.test.ts'],
     include: [
-      // '__tests__/amount.service.test.ts',
-      // '__tests__/currencies.test.ts',
-      // '__tests__/sales.test.ts',
-      // '__tests__/repositories/validator.test.ts',
-      // '__tests__/repositories/transactions.test.ts',
+      '__tests__/amount.service.test.ts',
+      '__tests__/currencies.test.ts',
+      '__tests__/sales.test.ts',
+      '__tests__/repositories/validator.test.ts',
+      '__tests__/repositories/transactions.test.ts',
       '__tests__/crons.test.ts',
     ],
     // include: ['__tests__/**/?(*.)test.?(c|m)[jt]s?(x)'],
