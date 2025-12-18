@@ -38,9 +38,17 @@ export class TransactionPage extends BasePage {
 	 * Get current step indicator
 	 */
 	getCurrentStep() {
-		return this.page
-			.locator('[data-testid="current-step"]')
-			.or(this.page.locator('[aria-current="step"]'));
+		return this.getStepIndicators()
+			.locator('[data-state="active"]')
+	}
+
+	/**
+	 * Get all step indicators
+	 */
+	getStepIndicators() {
+		return this.page.locator('[data-testid^="step-indicator-"]').or(
+			this.page.locator('[role="button"]').filter({ hasText: /KYC|SAFT|Payment|Confirmation/i })
+		);
 	}
 
 	/**
@@ -50,6 +58,30 @@ export class TransactionPage extends BasePage {
 		return this.page
 			.getByText(/KYC|Know Your Customer/i)
 			.locator("..")
+			.first();
+	}
+
+	/**
+	 * Get KYC document upload area
+	 */
+	getKycUploadArea() {
+		return this.page
+			.getByTestId('kyc-upload-area')
+	}
+
+	/**
+	 * Get KYC file input
+	 */
+	getKycFileInput() {
+		return this.getKycUploadArea().locator('input[type="file"]').first();
+	}
+
+	/**
+	 * Get KYC continue button
+	 */
+	getKycContinueButton() {
+		return this.page.getByTestId("kyc-upload-form")
+			.getByRole("button").filter({ hasText: /Continue|Next|Submit/i })
 			.first();
 	}
 
@@ -64,12 +96,111 @@ export class TransactionPage extends BasePage {
 	}
 
 	/**
+	 * Get SAFT document display area
+	 */
+	getSaftDocument() {
+		return this.page
+			.getByTestId('saft-document')
+			.or(this.page.getByText(/SAFT|Agreement/i).locator(".."))
+			.first();
+	}
+
+	/**
+	 * Get SAFT sign button
+	 */
+	getSaftSignButton() {
+		return this.page
+			.getByRole("button", { name: /Sign|Agree|Accept|Sign Document/i })
+			.first();
+	}
+
+	/**
+	 * Get SAFT continue button
+	 */
+	getSaftContinueButton() {
+		return this.page
+			.getByRole("button", { name: /Continue|Next/i })
+			.filter({ hasText: /Continue|Next/i })
+			.first();
+	}
+
+	/**
 	 * Get payment step section
 	 */
 	getPaymentStep() {
+		return this.page.getByTestId('payment-step-container')
+
+	}
+
+	/**
+	 * Get payment amount display
+	 */
+	getPaymentAmount() {
 		return this.page
-			.getByText(/Payment|Pay/i)
-			.locator("..")
+			.locator('[data-testid="payment-amount"]')
+			.or(this.page.getByText(/\$|USD|EUR|ETH|BTC/i).first());
+	}
+
+	/**
+	 * Get payment method display
+	 */
+	getPaymentMethod() {
+		return this.page
+			.locator('[data-testid="payment-method"]')
+			.or(this.page.getByText(/FIAT|CRYPTO|TRANSFER|CARD/i).first());
+	}
+
+	/**
+	 * Get payment instructions
+	 */
+	getPaymentInstructions() {
+		return this.page
+			.locator('[data-testid="payment-instructions"]')
+			.or(this.page.getByText(/instructions|reference|account/i).first());
+	}
+
+	/**
+	 * Get payment reference/ID
+	 */
+	getPaymentReference() {
+		return this.page
+			.locator('[data-testid="payment-reference"]')
+			.or(this.page.getByText(/reference|ID|transaction/i).first());
+	}
+
+	/**
+	 * Get wallet address (for crypto payments)
+	 */
+	getWalletAddress() {
+		return this.page
+			.locator('[data-testid="wallet-address"]')
+			.or(this.page.locator('code').filter({ hasText: /0x/i }).first());
+	}
+
+	/**
+	 * Get QR code (for crypto payments)
+	 */
+	getQRCode() {
+		return this.page.locator('[data-testid="qr-code"]').or(
+			this.page.locator('img[alt*="QR" i], canvas').first()
+		);
+	}
+
+	/**
+	 * Get network/chain information
+	 */
+	getNetworkInfo() {
+		return this.page
+			.locator('[data-testid="network-info"]')
+			.or(this.page.getByText(/network|chain|blockchain/i).first());
+	}
+
+	/**
+	 * Get payment submit button
+	 */
+	getPaymentSubmitButton() {
+		return this.page
+			.getByRole("button", { name: /Submit Payment|Pay Now|Confirm Payment|Mark as Paid|I've Sent Payment/i })
 			.first();
 	}
 
@@ -84,10 +215,19 @@ export class TransactionPage extends BasePage {
 	}
 
 	/**
+	 * Get transaction ID display
+	 */
+	getTransactionId() {
+		return this.page
+			.locator('[data-testid="transaction-id"]')
+			.or(this.page.getByText(/transaction.*id/i).first());
+	}
+
+	/**
 	 * Upload KYC document
 	 */
 	async uploadKycDocument(filePath: string): Promise<void> {
-		const fileInput = this.page.locator('input[type="file"]').first();
+		const fileInput = this.getKycFileInput();
 		await fileInput.setInputFiles(filePath);
 		// Wait for upload to complete
 		await this.waitForElement('[data-testid="upload-complete"]', TIMEOUTS.LONG);
@@ -95,26 +235,28 @@ export class TransactionPage extends BasePage {
 
 	/**
 	 * Sign SAFT agreement
+	 * Waits for dialog to close and navigation to payment step
 	 */
 	async signSaft(): Promise<void> {
-		const signButton = this.page
-			.getByRole("button", { name: /Sign|Agree|Accept/i })
-			.first();
+		const signButton = this.getSaftSignButton();
 		await signButton.click();
-		// Wait for signature process
-		await this.waitForElement(
-			'[data-testid="signature-complete"]',
-			TIMEOUTS.LONG,
-		);
+		// Wait for dialog to appear
+		const dialog = this.page.getByRole("dialog").first();
+		await dialog.waitFor({ state: "visible", timeout: TIMEOUTS.MEDIUM });
+
+		// Wait for dialog to close (signature completed)
+		await dialog.waitFor({ state: "hidden", timeout: TIMEOUTS.LONG });
+
+		// Wait for navigation to payment step
+		const paymentStep = this.getPaymentStep();
+		await paymentStep.waitFor({ state: "visible", timeout: TIMEOUTS.MEDIUM });
 	}
 
 	/**
 	 * Submit payment
 	 */
 	async submitPayment(): Promise<void> {
-		const submitButton = this.page
-			.getByRole("button", { name: /Submit Payment|Pay Now|Confirm Payment/i })
-			.first();
+		const submitButton = this.getPaymentSubmitButton();
 		await submitButton.click();
 	}
 
@@ -147,5 +289,129 @@ export class TransactionPage extends BasePage {
 	): Promise<void> {
 		await super.goto(`/dashboard/buy/${transactionId}/${status}`);
 		await this.waitForLoadState();
+	}
+
+	/**
+	 * Get success message on status page
+	 */
+	getSuccessMessage() {
+		return this.page
+			.locator('[data-testid="success-message"]')
+			.or(this.page.getByText(/success|completed|confirmed/i).first());
+	}
+
+	/**
+	 * Get pending message on status page
+	 */
+	getPendingMessage() {
+		return this.page
+			.locator('[data-testid="pending-message"]')
+			.or(this.page.getByText(/pending|processing|waiting/i).first());
+	}
+
+	/**
+	 * Get failure/error message on status page
+	 */
+	getFailureMessage() {
+		return this.page
+			.locator('[data-testid="error-message"]')
+			.or(this.page.getByText(/error|failed|failure/i).first());
+	}
+
+	/**
+	 * Get transaction details on status page
+	 */
+	getTransactionDetails() {
+		return this.page.locator('[data-testid="transaction-details"]').or(
+			this.page.getByText(/transaction|details/i).first()
+		);
+	}
+
+	/**
+	 * Get "Back to Dashboard" button
+	 */
+	getBackToDashboardButton() {
+		return this.page
+			.getByRole("button", { name: /Back to Dashboard|View Dashboard|Dashboard/i })
+			.first();
+	}
+
+	/**
+	 * Get "View Transaction" button
+	 */
+	getViewTransactionButton() {
+		return this.page
+			.getByRole("button", { name: /View Transaction|Transaction Details/i })
+			.first();
+	}
+
+	/**
+	 * Get "Retry" button
+	 */
+	getRetryButton() {
+		return this.page
+			.getByRole("button", { name: /Retry|Try Again/i })
+			.first();
+	}
+
+	/**
+	 * Get "Contact Support" button
+	 */
+	getContactSupportButton() {
+		return this.page
+			.getByRole("button", { name: /Contact Support|Support/i })
+			.first();
+	}
+
+	/**
+	 * Get "Cancel Transaction" button
+	 */
+	getCancelTransactionButton() {
+		return this.page
+			.getByRole("button", { name: /Cancel Transaction|Cancel/i })
+			.first();
+	}
+
+	/**
+	 * Get estimated processing time (for pending status)
+	 */
+	getEstimatedProcessingTime() {
+		return this.page
+			.locator('[data-testid="processing-time"]')
+			.or(this.page.getByText(/processing|estimated|time/i).first());
+	}
+
+	/**
+	 * Check if step is completed
+	 */
+	async isStepCompleted(stepName: string): Promise<boolean> {
+		const step = this.page
+			.getByText(new RegExp(stepName, "i"))
+			.locator("..")
+			.first();
+		const ariaLabel = await step.getAttribute("aria-label");
+		return ariaLabel?.includes("completed") || ariaLabel?.includes("done") || false;
+	}
+
+	/**
+	 * Check if step is active
+	 */
+	async isStepActive(stepName: string): Promise<boolean> {
+		const step = this.getCurrentStep()
+		const text = await step.innerText()
+		return text === stepName || false;
+	}
+
+	/**
+	 * Check if step is disabled
+	 */
+	async isStepDisabled(stepName: string): Promise<boolean> {
+		const step = this.page
+			.getByText(new RegExp(stepName, "i"))
+			.locator("..")
+			.first();
+		const disabled = await step.getAttribute("disabled");
+		const ariaDisabled = await step.getAttribute("aria-disabled");
+		return disabled !== null || ariaDisabled === "true";
 	}
 }

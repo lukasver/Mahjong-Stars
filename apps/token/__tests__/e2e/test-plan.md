@@ -241,17 +241,19 @@ This plan covers end-to-end testing for the The Tiles Company token platform dep
 **Test Suite: Transaction Creation and Processing**
 
 - **TC-TX-001: Transaction Page Load**
-- Navigate to `/dashboard/buy/[tx]` (after creating transaction)
+- Mock API responses to get a transaction to use in `/dashboard/buy/[tx]`.
+- Navigate to `/dashboard/buy/[tx]`
 - Verify transaction page loads
 - Verify transaction ID is displayed
 - Verify transaction steps are visible
 - Expected: Transaction page loads successfully
 
 - **TC-TX-002: Transaction Steps Display**
+- Mock API responses to get a transaction to use in `/dashboard/buy/[tx]` with KYC and SAFT required.
 - Navigate to `/dashboard/buy/[tx]`
 - Verify step indicators are visible:
-- KYC step (if required)
-- SAFT step (if required)
+- KYC step
+- SAFT step
 - Payment step
 - Confirmation step
 - Verify current step is highlighted
@@ -260,6 +262,7 @@ This plan covers end-to-end testing for the The Tiles Company token platform dep
 - Expected: Transaction steps are displayed correctly
 
 - **TC-TX-003: KYC Document Upload**
+- Reuse mocked transaction in TX-TX-002.
 - Navigate to `/dashboard/buy/[tx]` (KYC step)
 - Verify KYC step is active
 - Verify document upload area is visible
@@ -272,6 +275,7 @@ This plan covers end-to-end testing for the The Tiles Company token platform dep
 - Expected: KYC document upload works correctly
 
 - **TC-TX-004: KYC Document Validation**
+- Reuse mocked transaction in TX-TX-002.
 - Navigate to `/dashboard/buy/[tx]` (KYC step)
 - Attempt to upload invalid file type
 - Verify error message is displayed
@@ -280,6 +284,7 @@ This plan covers end-to-end testing for the The Tiles Company token platform dep
 - Expected: File validation works correctly
 
 - **TC-TX-005: SAFT Signing**
+- Reuse mocked transaction in TX-TX-002, with KYC completed.
 - Navigate to `/dashboard/buy/[tx]` (SAFT step)
 - Verify SAFT document is displayed
 - Verify "Sign Document" button is visible
@@ -291,8 +296,20 @@ This plan covers end-to-end testing for the The Tiles Company token platform dep
 - Verify navigation to payment step
 - Expected: SAFT signing works correctly
 
-- **TC-TX-006: Payment Step (FIAT)**
-- Navigate to `/dashboard/buy/[tx]` (Payment step, FIAT)
+- **TC-TX-006-A: Payment Step (FIAT/TRANSFER)**
+- Reuse mocked transaction in TX-TX-002, with KYC and SAFT completed and FOP TRANSFER.
+- Navigate to `/dashboard/buy/[tx]` (Payment step)
+- Verify payment amount is displayed
+- Verify payment method is "FIAT"
+- Verify payment instructions are displayed
+- Verify payment reference/ID is displayed
+- Verify "Mark as Paid" or "Submit Payment" button is visible
+- Expected: FIAT payment step displays correctly
+
+- **TC-TX-006-B: Payment Step (FIAT/CARD)**
+- Reuse mocked transaction in TX-TX-002, with KYC and SAFT completed and FOP CARD.
+- Mock API call to `api/card-provider/availability` to mock unavailable service
+- Navigate to `/dashboard/buy/[tx]` (Payment step)
 - Verify payment amount is displayed
 - Verify payment method is "FIAT"
 - Verify payment instructions are displayed
@@ -301,6 +318,7 @@ This plan covers end-to-end testing for the The Tiles Company token platform dep
 - Expected: FIAT payment step displays correctly
 
 - **TC-TX-007: Payment Step (CRYPTO)**
+- Reuse mocked transaction in TX-TX-002, with KYC and SAFT completed and FOP CRYPTO.
 - Navigate to `/dashboard/buy/[tx]` (Payment step, CRYPTO)
 - Verify payment amount in crypto is displayed
 - Verify wallet address is displayed

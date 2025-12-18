@@ -134,7 +134,9 @@ export function FileUpload({ type = "all", label, defaultValue, ...props }: File
             />
 
             {previewUrl ? (
-              props.multiple ? (
+              <div
+                data-testid='upload-complete'
+              >{props.multiple ? (
                 <MultipleFilesPreview
                   files={files}
                   type={type}
@@ -152,6 +154,7 @@ export function FileUpload({ type = "all", label, defaultValue, ...props }: File
                   size={files[0]?.file.size}
                 />
               )
+                }</div>
             ) : (
               <div className="flex flex-col items-center justify-center px-4 py-3 text-center">
                 <FileUploadHeader

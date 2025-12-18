@@ -56,6 +56,7 @@ export function TransactionConfirmation({
             steps={steps}
             step={step.id}
             setStep={handleStepChange}
+            dataTestId="transaction-stepper"
           />
         </motion.div>
         <motion.div
@@ -93,6 +94,7 @@ export function TransactionConfirmation({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.4, ease: "easeInOut" }}
+                  data-testid="saft-document-container"
                 >
                   <SaftReviewStep
                     onSuccess={() =>
@@ -128,6 +130,7 @@ export function TransactionConfirmation({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.4, ease: "easeInOut" }}
+                  data-testid="confirmation-step-container"
                 >
                   <ConfirmationStep />
                 </motion.div>

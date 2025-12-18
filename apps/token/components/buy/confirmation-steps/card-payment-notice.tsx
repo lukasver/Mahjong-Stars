@@ -160,15 +160,15 @@ export function CardPaymentNotice({
               <Clock className="size-6 text-amber-400 flex-shrink-0 mt-0.5" />
               <div className="flex-grow">
                 <h3 className="text-amber-200 font-semibold mb-2 text-xl">
-                  Reserve Your Purchase
+                  Reserve Your Tokens
                 </h3>
                 <p className="text-amber-200/80 text-sm leading-relaxed mb-1">
                   We will reserve your purchase with a{" "}
-                  <strong className="text-amber-300">"Pay Soon"</strong> status.
+                  <strong className="text-amber-300">"Awaiting Payment"</strong> status.
                 </p>
                 <p className="text-amber-200/70 text-xs leading-relaxed">
                   You’ll receive an email notification as soon as the card
-                  payment service is available again. Your booking will be
+                  payment service is available again. Your tokens will be
                   securely held for 24 hours after that moment.
                 </p>
               </div>

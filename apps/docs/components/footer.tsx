@@ -11,32 +11,35 @@ import { metadata as siteConfig } from "@/lib/site-config";
 import Logo from "@/public/icon.png";
 import AppLink from "./link";
 
-const footerLinks: Array<{
+
+type FooterLink = {
 	columnName: string;
 	links: Array<{
 		href: string;
 		title: string;
 	}>;
-}> = [
-		{
-			columnName: "Docs",
-			links: [
-				{ href: "/", title: "Home" },
-				// { href: '/about', title: 'About' },
-			],
-		},
-		{
-			columnName: "Company",
-			links: [
-				{ href: "/web", title: "Website" },
-				{ href: "/ico", title: "ICO" },
-			],
-		},
-		{
-			columnName: "Support",
-			links: [{ href: "#support", title: "Support" }],
-		},
-	];
+}
+const getFooterLinks = (t: TFunction): FooterLink[] => [
+	{
+		columnName: "Docs",
+		links: [
+			{ href: "/", title: "Home" },
+			// { href: '/about', title: 'About' },
+		],
+	},
+	{
+		columnName: "Company",
+		links: [
+			{ href: "/web", title: "Website" },
+			{ href: "/ico", title: "ICO" },
+		],
+	},
+	{
+		columnName: "Support",
+		links: [{ href: "#support", title: "Support" }],
+	},
+];
+
 export const Footer = async ({
 	locale,
 	className,
@@ -49,7 +52,7 @@ export const Footer = async ({
 	description?: string;
 }) => {
 	const t = await getTranslations(locale);
-	const columnNumber = footerLinks.filter(({ links }) => links.length).length;
+	const columnNumber = getFooterLinks(t).filter(({ links }) => links.length).length;
 
 	return (
 		<FooterComponent className="m-0! p-0! bg-black mx-auto w-full max-w-full!">

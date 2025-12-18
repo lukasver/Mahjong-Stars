@@ -31,10 +31,12 @@ export function getDirection(locale: string | Locale): "ltr" | "rtl" {
 	return getLangDir(locale);
 }
 
+export type TFunction = (key: string, values?: { [key: string]: string | number }) => string;
+
 export const getTranslations = async (lang: Locale) => {
 	const dictionary = await getDictionary(lang as Locale);
 
-	const t = (
+	const t: TFunction = (
 		key: string,
 		values?: { [key: string]: string | number },
 	): string => {

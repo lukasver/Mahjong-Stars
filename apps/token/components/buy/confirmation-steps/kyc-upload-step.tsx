@@ -291,7 +291,7 @@ export function KycUploadStep({
         />
       ) : (
         <form.AppForm>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" data-testid="kyc-upload-form">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -310,7 +310,7 @@ export function KycUploadStep({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.4 }}
             >
-              <div className="space-y-4">
+              <div className="space-y-4" data-testid="kyc-upload">
                 {kycTier && (
                   <KycTierComponent
                     tier={kycTier}

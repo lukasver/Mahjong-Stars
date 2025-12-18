@@ -56,6 +56,7 @@ import { erc20Abi } from "../services/crypto/ABI";
 import { instaxchangeService } from "../services/instaxchange";
 import logger from "../services/logger.server";
 import calculator from "../services/pricefeeds";
+import { GetTransactionByIdRes } from "../types/fetchers";
 import { authActionClient, loginActionClient } from "./config";
 
 export const hasActiveSession = async (address: string, token: string) => {
@@ -341,7 +342,7 @@ export const getTransactionById = authActionClient
 		if (!transactions.success) {
 			throw new Error(transactions.message);
 		}
-		return transactions.data;
+		return transactions.data satisfies GetTransactionByIdRes;
 	});
 
 export const getTransactionAvailabilityForSale = authActionClient
@@ -525,13 +526,15 @@ export const getContract = authActionClient.action(async ({ ctx }) => {
 	return result;
 });
 
-export const getInputOptions = authActionClient.schema(z.object({ chainId: z.number().optional() }).optional()).action(async ({ ctx, parsedInput }) => {
-	const result = await salesController.getInputOptions(parsedInput, ctx);
-	if (!result.success) {
-		throw new Error(result.message);
-	}
-	return result;
-});
+export const getInputOptions = authActionClient
+	.schema(z.object({ chainId: z.number().optional() }).optional())
+	.action(async ({ ctx, parsedInput }) => {
+		const result = await salesController.getInputOptions(parsedInput, ctx);
+		if (!result.success) {
+			throw new Error(result.message);
+		}
+		return result;
+	});
 
 /**
  * Used to upload a file to the public bucket
@@ -614,13 +617,18 @@ export const deleteOwnTransaction = authActionClient
 export const updateTransactionToAwaitingPayment = authActionClient
 	.schema(z.object({ id: z.string() }))
 	.action(async ({ ctx, parsedInput }) => {
-		const result = await transactionsController.updateTransactionToAwaitingPayment(
-			parsedInput,
-			ctx,
-		);
+		const result =
+			await transactionsController.updateTransactionToAwaitingPayment(
+				parsedInput,
+				ctx,
+			);
 		if (!result.success) {
 			// Preserve error details for reserved transaction conflicts
-			if (result.error && typeof result.error === "object" && "code" in result.error) {
+			if (
+				result.error &&
+				typeof result.error === "object" &&
+				"code" in result.error
+			) {
 				throw new Error(JSON.stringify(result.error));
 			}
 			throw new Error(result.message);
@@ -937,7 +945,6 @@ export const createInstaxchangeSession = authActionClient
 				`Transaction amount exceeds Instaxchange limit of $${INSTAXCHANGE_MAX_AMOUNT.toString()} USD`,
 			);
 		}
-
 
 		if (!instaxchangeService) {
 			throw new Error("Not implemented, service not available");

@@ -5,8 +5,7 @@
 			"docs": "Docs",
 			"whoWeAre": "Who We Are",
 			"termsAndConditions": "Terms and Conditions",
-			"privacyPolicy": "Privacy Policy",
-			"contact": "Contact"
+			"privacyPolicy": "Privacy Policy"
 		},
 		"copyright": "©{year} WASABI GAMES DMCC"
 	},
@@ -18,6 +17,12 @@
 		"contact": "Contact us",
 		"banner": {
 			"title": ""
-		}
+		},
+		"website": "Website",
+		"ico": "ICO",
+		"support": "Support",
+		"whitePaper": "White Paper",
+		"company": "Company",
+		"catchPhrase": "Empowering MJS with Web3"
 	}
 }

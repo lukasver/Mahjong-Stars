@@ -242,6 +242,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
                 className="max-h-3xl overflow-y-auto"
               >
                 <div
+                  data-testid="saft-document"
                   className="border rounded p-3 prose w-full max-w-none! max-h-96 sm:max-h-svh overflow-y-auto bg-white"
                   dangerouslySetInnerHTML={{
                     __html: template,

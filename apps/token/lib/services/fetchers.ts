@@ -15,13 +15,11 @@ import { Failure, Success } from "@/common/schemas/dtos/utils";
 import {
 	Blockchain,
 	Currency,
-	Document,
-	KycTierType,
-	SaftContract,
+	Document, SaftContract,
 	Sale,
 	SaleTransactions,
 	TransactionStatusSchema,
-	User,
+	User
 } from "@/common/schemas/generated";
 import { SaleInvestInfo, SaleWithToken } from "@/common/types/sales";
 import { TokenWithRelations } from "@/common/types/tokens";
@@ -29,6 +27,7 @@ import {
 	TransactionByIdWithRelations,
 	TransactionWithRelations,
 } from "@/common/types/transactions";
+import { GetTransactionByIdRes } from '../types/fetchers';
 
 export type FetcherOptions = Omit<RequestInit, "body"> & {
 	baseUrl?: string;
@@ -285,11 +284,7 @@ export const getUserPendingTransactionsForSale = async (saleId: string) => {
 
 export const getTransactionById = async (id: string) => {
 	try {
-		const data = await fetcher<{
-			transaction: TransactionByIdWithRelations;
-			requiresKYC: KycTierType | null;
-			requiresSAFT: boolean;
-		}>(`/transactions/${id}`);
+		const data = await fetcher<GetTransactionByIdRes>(`/transactions/${id}`);
 		return { data, error: null };
 	} catch (e) {
 		return { data: null, error: e };

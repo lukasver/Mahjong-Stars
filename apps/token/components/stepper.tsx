@@ -15,6 +15,7 @@ interface StepperProps {
   onStepClick?: (step: number) => void;
   className?: string;
   disableClick?: boolean;
+  dataTestId?: string;
 }
 
 export function Stepper({
@@ -23,6 +24,7 @@ export function Stepper({
   onStepClick,
   className,
   disableClick = false,
+  dataTestId,
 }: StepperProps) {
   const BtnEl = (disableClick || !onStepClick) ? 'div' : 'button';
   return (
@@ -31,10 +33,14 @@ export function Stepper({
         'w-full py-4 sm:py-6 max-w-md scrollbar-hidden sm:max-w-none',
         className
       )}
+      data-testid={dataTestId}
     >
       <div className='flex items-center justify-between px-2 sm:px-4 py-2 w-full'>
         {steps.map((step, index) => (
-          <div key={step.id} className='flex not-last:flex-1 items-center'>
+          <div key={step.id} className='flex not-last:flex-1 items-center'
+            data-testid={`step-indicator-${step.id}`}
+            data-state={currentStep > step.id ? 'completed' : currentStep === step.id ? 'active' : 'inactive'}
+          >
             <div className='flex flex-col items-center'>
               <BtnEl
                 type='button'
