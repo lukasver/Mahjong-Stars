@@ -5,6 +5,7 @@ import {
 	DocumentSignatureStatus,
 	FOP,
 	Prisma,
+	PrismaClient,
 	Sale,
 	SaleStatus,
 	SaleTransactions,
@@ -52,13 +53,15 @@ import notificatorService, { Notificator } from "../notifications";
 import { emailEventHelpers } from "../notifications/email-events";
 import { TransactionValidator } from "./validator";
 
-class TransactionsController {
+export class TransactionsController {
 	private documents;
 	private readonly notificator: Notificator;
+	private readonly db: PrismaClient;
 
-	constructor(_notificator: Notificator) {
+	constructor(_db: PrismaClient, _notificator: Notificator) {
 		this.documents = documentsController;
 		this.notificator = _notificator;
+		this.db = _db;
 	}
 
 	/**
@@ -81,7 +84,7 @@ class TransactionsController {
 			}
 
 			const transactions: AdminTransactionsWithRelations[] =
-				await prisma.saleTransactions.findMany({
+				await this.db.saleTransactions.findMany({
 					...(Object.keys(whereClause).length > 0 && { where: whereClause }),
 					include: {
 						sale: true,
@@ -144,7 +147,7 @@ class TransactionsController {
 			invariant(ctx.isAdmin, "Forbidden");
 			invariant(dto.id, "Id missing");
 			const { id, requiresKYC } = dto;
-			const tx = await prisma.saleTransactions.update({
+			const tx = await this.db.saleTransactions.update({
 				where: { id },
 				data: {
 					status: dto.status,
@@ -185,7 +188,7 @@ class TransactionsController {
 			});
 
 			if (requiresKYC) {
-				await prisma.user.update({
+				await this.db.user.update({
 					where: { id: tx.user.id },
 					data: {
 						kycVerification: {
@@ -246,45 +249,56 @@ class TransactionsController {
 			// Send email notifications for token distribution and refunds
 			if (dto.status === TransactionStatus.TOKENS_DISTRIBUTED) {
 				const transactionHash = tx.txHash;
-				const blockchain = await prisma.blockchain.findUnique({
+				const blockchain = await this.db.blockchain.findUnique({
 					where: { id: tx.blockchainId || undefined },
 					select: { explorerUrl: true },
 				});
 
-				emailEventHelpers.tokensDistributed({
-					userName: tx.user.name,
-					userEmail: tx.user.email,
-					tokenName: tx.sale.name,
-					tokenSymbol: tx.sale.tokenSymbol,
-					tokenAmount: tx.quantity.toString(),
-					walletAddress: tx.receivingWallet || tx.user.walletAddress,
-					transactionHash: transactionHash || undefined,
-					transactionUrl: transactionHash && blockchain?.explorerUrl
-						? `${blockchain.explorerUrl}/tx/${transactionHash}`
-						: undefined,
-					distributionDate: new Date().toISOString(),
-					dashboardUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
-					supportEmail: siteMetadata.supportEmail,
-				}).catch((e) => {
-					logger("Failed to send tokens distributed email:", e instanceof Error ? e.message : undefined);
-				});
+				emailEventHelpers
+					.tokensDistributed({
+						userName: tx.user.name,
+						userEmail: tx.user.email,
+						tokenName: tx.sale.name,
+						tokenSymbol: tx.sale.tokenSymbol,
+						tokenAmount: tx.quantity.toString(),
+						walletAddress: tx.receivingWallet || tx.user.walletAddress,
+						transactionHash: transactionHash || undefined,
+						transactionUrl:
+							transactionHash && blockchain?.explorerUrl
+								? `${blockchain.explorerUrl}/tx/${transactionHash}`
+								: undefined,
+						distributionDate: new Date().toISOString(),
+						dashboardUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
+						supportEmail: siteMetadata.supportEmail,
+					})
+					.catch((e) => {
+						logger(
+							"Failed to send tokens distributed email:",
+							e instanceof Error ? e.message : undefined,
+						);
+					});
 			}
 
 			if (dto.status === TransactionStatus.REFUNDED) {
-				emailEventHelpers.refundProcessed({
-					userName: tx.user.name,
-					userEmail: tx.user.email,
-					refundAmount: tx.amountPaid || "0",
-					refundCurrency: tx.paidCurrency,
-					transactionId: tx.id,
-					refundMethod: "Original Payment Method",
-					refundReason: tx.rejectionReason || dto.comment,
-					dashboardUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
-					supportEmail: siteMetadata.supportEmail,
-					tokenName: siteMetadata.businessName,
-				}).catch((e) => {
-					logger("Failed to send refund processed email:", e instanceof Error ? e.message : undefined);
-				});
+				emailEventHelpers
+					.refundProcessed({
+						userName: tx.user.name,
+						userEmail: tx.user.email,
+						refundAmount: tx.amountPaid || "0",
+						refundCurrency: tx.paidCurrency,
+						transactionId: tx.id,
+						refundMethod: "Original Payment Method",
+						refundReason: tx.rejectionReason || dto.comment,
+						dashboardUrl: `${publicUrl}/dashboard/transactions/${tx.id}`,
+						supportEmail: siteMetadata.supportEmail,
+						tokenName: siteMetadata.businessName,
+					})
+					.catch((e) => {
+						logger(
+							"Failed to send refund processed email:",
+							e instanceof Error ? e.message : undefined,
+						);
+					});
 			}
 
 			return Success({ transaction: decimalsToString(tx) });
@@ -307,7 +321,7 @@ class TransactionsController {
 			const address = ctx.address;
 
 			if (!userId) {
-				const user = await prisma.user.findUniqueOrThrow({
+				const user = await this.db.user.findUniqueOrThrow({
 					where: { walletAddress: address },
 					select: { id: true },
 				});
@@ -317,13 +331,13 @@ class TransactionsController {
 			const andQuery: { saleId?: string; tokenSymbol?: string }[] = [];
 			if (sale === "current") {
 				saleId = (
-					await prisma.sale.findFirst({ where: { status: SaleStatus.OPEN } })
+					await this.db.sale.findFirst({ where: { status: SaleStatus.OPEN } })
 				)?.id;
 				andQuery.push({ saleId });
 			}
 			if (symbol) andQuery.push({ tokenSymbol: symbol });
 			const transactions: TransactionWithRelations[] =
-				await prisma.saleTransactions.findMany({
+				await this.db.saleTransactions.findMany({
 					where: {
 						OR: [
 							{ userId, ...(formOfPayment && { formOfPayment }) },
@@ -361,7 +375,7 @@ class TransactionsController {
 
 	async getTransactionById(dto: { id: string }, ctx: ActionCtx) {
 		try {
-			const transaction = await prisma.saleTransactions.findUnique({
+			const transaction = await this.db.saleTransactions.findUnique({
 				where: { id: String(dto.id) },
 				include: {
 					sale: {
@@ -500,8 +514,8 @@ class TransactionsController {
 
 			const { sale } = validationResult;
 			const price = new Prisma.Decimal(totalAmount);
-			const [_updtSale, transaction] = await prisma.$transaction([
-				prisma.sale.update({
+			const [_updtSale, transaction] = await this.db.$transaction([
+				this.db.sale.update({
 					where: { id: saleId },
 					data: { availableTokenQuantity: { decrement: Number(quantity) } },
 					select: {
@@ -509,7 +523,7 @@ class TransactionsController {
 						id: true,
 					},
 				}),
-				prisma.saleTransactions.create({
+				this.db.saleTransactions.create({
 					data: {
 						tokenSymbol,
 						quantity: new Prisma.Decimal(quantity),
@@ -559,7 +573,7 @@ class TransactionsController {
 			if (transaction && fees && fees.length > 0) {
 				// Create fees in the background
 				waitUntil(
-					prisma.transactionFee
+					this.db.transactionFee
 						.createMany({
 							data: fees.map(({ metadata, ...f }) => ({
 								...f,
@@ -598,7 +612,7 @@ class TransactionsController {
 		try {
 			invariant(dto.id, "Transaction id missing");
 			invariant(ctx.userId, "User id missing");
-			const tx = await prisma.saleTransactions.findUnique({
+			const tx = await this.db.saleTransactions.findUnique({
 				where: { id: String(dto.id), userId: ctx.userId },
 				select: {
 					id: true,
@@ -641,7 +655,7 @@ class TransactionsController {
 			invariant(ctx.userId, "User id missing");
 
 			// Check if user already has a reserved transaction (AWAITING_PAYMENT + CARD)
-			const existingReservedTx = await prisma.saleTransactions.findFirst({
+			const existingReservedTx = await this.db.saleTransactions.findFirst({
 				where: {
 					userId: ctx.userId,
 					status: TransactionStatus.AWAITING_PAYMENT,
@@ -664,7 +678,7 @@ class TransactionsController {
 			}
 
 			// Verify transaction exists and belongs to user
-			const tx = await prisma.saleTransactions.findUnique({
+			const tx = await this.db.saleTransactions.findUnique({
 				where: { id: String(dto.id), userId: ctx.userId },
 				select: {
 					id: true,
@@ -676,7 +690,7 @@ class TransactionsController {
 			invariant(tx, "Transaction not found");
 
 			// Update transaction to AWAITING_PAYMENT and set formOfPayment to CARD
-			const updatedTx = await prisma.saleTransactions.update({
+			const updatedTx = await this.db.saleTransactions.update({
 				where: { id: tx.id },
 				data: {
 					status: TransactionStatus.AWAITING_PAYMENT,
@@ -705,7 +719,7 @@ class TransactionsController {
 			const sixHoursAgo = DateTime.local().minus({ hours: 6 }).toJSDate();
 
 			try {
-				const txs = await prisma.saleTransactions.findMany({
+				const txs = await this.db.saleTransactions.findMany({
 					where: {
 						AND: [
 							{
@@ -765,8 +779,8 @@ class TransactionsController {
 					},
 				});
 
-				await prisma.$transaction(async (prisma) => {
-					await prisma.saleTransactions.updateMany({
+				await this.db.$transaction(async (prisma) => {
+					await this.db.saleTransactions.updateMany({
 						where: {
 							id: { in: txs.map((tx) => tx.id) },
 						},
@@ -797,7 +811,7 @@ class TransactionsController {
 							const quantityToReturn = groupedTxs.reduce((acc, tx) => {
 								return acc.add(tx.quantity);
 							}, new Prisma.Decimal(0));
-							return prisma.sale.update({
+							return this.db.sale.update({
 								where: { id: saleId },
 								data: {
 									availableTokenQuantity: {
@@ -859,7 +873,7 @@ class TransactionsController {
 		try {
 			const { saleId, status: _status } = dto;
 			invariant(saleId, "Sale not found");
-			const transactions = await prisma.saleTransactions.findMany({
+			const transactions = await this.db.saleTransactions.findMany({
 				where: {
 					AND: [
 						{ saleId: String(saleId) },
@@ -907,7 +921,7 @@ class TransactionsController {
 			// return temp;
 			invariant(result.success, "Failed to get sale saft for transaction");
 			const { content } = result.data;
-			const user = await prisma.user.findUnique({
+			const user = await this.db.user.findUnique({
 				where: { walletAddress: ctx.address },
 				select: {
 					email: true,
@@ -922,7 +936,7 @@ class TransactionsController {
 					: "";
 
 			// 2) Generate contract reference in our own DB and call documenso service to generate the HTML
-			const recipient = await prisma.documentRecipient.create({
+			const recipient = await this.db.documentRecipient.create({
 				data: {
 					email: user.email,
 					fullname,
@@ -940,7 +954,7 @@ class TransactionsController {
 				},
 			});
 
-			const res = await prisma.saftContract.findUnique({
+			const res = await this.db.saftContract.findUnique({
 				where: { id: dto.contractId },
 				select: { approver: { select: { email: true, fullname: true } } },
 			});
@@ -971,7 +985,7 @@ class TransactionsController {
 						reference: recipient.id,
 					})
 					.catch(async (e) => {
-						await prisma.documentRecipient.update({
+						await this.db.documentRecipient.update({
 							where: { id: recipient.id },
 							data: {
 								status: DocumentSignatureStatusSchema.enum.ERROR,
@@ -1001,7 +1015,7 @@ class TransactionsController {
 		// We need to replace default variables with the ones from the transaction.
 		// We need ot send it to the front end for review with puplated vars
 		try {
-			const transaction = await prisma.saleTransactions.findUnique({
+			const transaction = await this.db.saleTransactions.findUnique({
 				where: { id: String(dto.txId) },
 				include: {
 					user: {
@@ -1064,7 +1078,7 @@ class TransactionsController {
 		ctx: ActionCtx,
 	) {
 		try {
-			const recipient = await prisma.documentRecipient.findUnique({
+			const recipient = await this.db.documentRecipient.findUnique({
 				where: { id: dto.recipientId, address: ctx.address },
 				select: {
 					id: true,
@@ -1110,11 +1124,10 @@ class TransactionsController {
 		},
 		ctx: ActionCtx,
 	) {
-
 		try {
 			// Only the user who created the transaction can confirm it
 			const [tx, admins] = await Promise.all([
-				prisma.saleTransactions.findUniqueOrThrow({
+				this.db.saleTransactions.findUniqueOrThrow({
 					where: { id, userId: ctx.userId },
 					include: {
 						sale: {
@@ -1146,7 +1159,7 @@ class TransactionsController {
 						},
 					},
 				}),
-				prisma.user.findMany({
+				this.db.user.findMany({
 					where: {
 						userRole: {
 							some: {
@@ -1189,8 +1202,8 @@ class TransactionsController {
 				);
 			}
 
-			const [updatedTx] = await prisma.$transaction([
-				prisma.saleTransactions.update({
+			const [updatedTx] = await this.db.$transaction([
+				this.db.saleTransactions.update({
 					where: { id },
 					data: {
 						status: TransactionStatus.PAYMENT_SUBMITTED,
@@ -1232,7 +1245,7 @@ class TransactionsController {
 						},
 					},
 				}),
-				prisma.sale.update({
+				this.db.sale.update({
 					where: { id: tx.saleId },
 					data: {
 						...(shouldFinishSale && { status: SaleStatus.FINISHED }),
@@ -1315,8 +1328,7 @@ class TransactionsController {
 					subject: `${tx.sale.name} Transaction Confirmed | ${tx.id}`,
 					to: {
 						email: tx.user.email,
-						name:
-							tx.user.profile?.firstName || tx.user.profile?.lastName || '',
+						name: tx.user.profile?.firstName || tx.user.profile?.lastName || "",
 					},
 					props: {
 						userName:
@@ -1383,7 +1395,7 @@ class TransactionsController {
 		_ctx: ActionCtx,
 	) {
 		try {
-			const transaction = await prisma.saleTransactions.findUnique({
+			const transaction = await this.db.saleTransactions.findUnique({
 				where: { id: dto.id },
 			});
 			invariant(transaction, "Transaction not found");
@@ -1406,7 +1418,7 @@ class TransactionsController {
 	) {
 		invariant(dto.chainId, "Chain ID not found");
 		try {
-			const tx = await prisma.saleTransactions.findUnique({
+			const tx = await this.db.saleTransactions.findUnique({
 				where: {
 					id: dto.id,
 					user: {
@@ -1437,7 +1449,7 @@ class TransactionsController {
 						? "WBTC"
 						: tx.paidCurrency;
 
-			const paymentToken = await prisma.tokensOnBlockchains.findUnique({
+			const paymentToken = await this.db.tokensOnBlockchains.findUnique({
 				where: {
 					tokenSymbol_chainId: {
 						tokenSymbol: tokenSymbol,
@@ -1487,7 +1499,7 @@ class TransactionsController {
 		ctx: ActionCtx,
 	) {
 		try {
-			const recipient = await prisma.documentRecipient.findMany({
+			const recipient = await this.db.documentRecipient.findMany({
 				where: {
 					SaleTransactions: {
 						id: dto.transactionId,
@@ -1531,7 +1543,7 @@ class TransactionsController {
 	): Promise<{ result: null | KycTierType | "FAILURE" | "BLOCKED" }> {
 		try {
 			const { amount, currency } = dto;
-			const { kycVerification: kyc } = await prisma.user.findUniqueOrThrow({
+			const { kycVerification: kyc } = await this.db.user.findUniqueOrThrow({
 				where: {
 					walletAddress: ctx.address,
 				},
@@ -1633,8 +1645,8 @@ class TransactionsController {
 		tx: Pick<SaleTransactions, "id" | "saleId" | "quantity" | "userId">,
 		reason?: string,
 	) {
-		return prisma.$transaction([
-			prisma.sale.update({
+		return this.db.$transaction([
+			this.db.sale.update({
 				where: {
 					id: tx.saleId,
 				},
@@ -1644,7 +1656,7 @@ class TransactionsController {
 					},
 				},
 			}),
-			prisma.saleTransactions.update({
+			this.db.saleTransactions.update({
 				where: {
 					id: tx.id,
 					userId: tx.userId,
@@ -1823,4 +1835,4 @@ class TransactionsController {
 	}
 }
 
-export default new TransactionsController(notificatorService);
+export default new TransactionsController(prisma, notificatorService);

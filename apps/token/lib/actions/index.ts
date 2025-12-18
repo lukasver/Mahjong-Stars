@@ -459,7 +459,7 @@ export const createEmailVerification = authActionClient
 		if (!result.success) {
 			throw new Error(result.message);
 		}
-		return result;
+		return true;
 	});
 
 export const verifyEmail = authActionClient

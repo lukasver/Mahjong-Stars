@@ -29,7 +29,7 @@ export const VerifyMandatoryEmail = ({ email }: { email: string }) => {
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-      <AlertDialogContent overlayClassName="bg-black/80">
+      <AlertDialogContent overlayClassName="bg-black/80" data-testid="verify-email-dialog">
         <AlertDialogHeader>
           <AlertDialogTitle>Verify Email</AlertDialogTitle>
           <AlertDialogDescription className="text-secondary">

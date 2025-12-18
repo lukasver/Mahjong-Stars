@@ -15,7 +15,7 @@ export type TransactionWithRelations = Prisma.SaleTransactionsGetPayload<
 	explorerUrl?: string | null;
 };
 
-const transactionByIdWithRelations =
+export const transactionByIdWithRelations =
 	Prisma.validator<Prisma.SaleTransactionsDefaultArgs>()({
 		include: {
 			sale: {

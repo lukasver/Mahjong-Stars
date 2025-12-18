@@ -1,4 +1,7 @@
-import { Page } from "@playwright/test";
+import { invariant } from '@epic-web/invariant';
+import { BrowserContext, Page } from "@playwright/test";
+import { jwtDecode } from "jwt-decode";
+
 
 /**
  * Wait for a specific amount of time
@@ -188,3 +191,30 @@ export const serializeForRSC = (obj: unknown): unknown => {
 	}
 	return obj;
 };
+
+
+const getStorageContent = async (context: BrowserContext) => {
+	return await context.storageState()
+}
+
+export const getDecodedJwtFromStorage = async (context: BrowserContext) => {
+	const storage = await getStorageContent(context)
+	const baseUrl = process.env.PLAYWRIGHT_TEST_BASE_URL;
+	invariant(baseUrl, "PLAYWRIGHT_TEST_BASE_URL is not set");
+	const originData = storage.origins.find(o => o.origin === baseUrl)
+	const jwt = originData?.localStorage.find((ls) => ls.name.includes("walletToken-"))?.value
+	invariant(jwt, "JWT is not set");
+	return jwtDecode(jwt);
+}
+
+
+
+/**
+ * get the storage state and return the user wallet address if exists. Throws otherwise.
+ * @param context Browser Context from Playwright
+ * @returns user wallet address string
+ */
+export const getUserWalletAddressFromStorage = async (context: BrowserContext) => {
+	const decoded = await getDecodedJwtFromStorage(context);
+	return decoded.sub;
+}

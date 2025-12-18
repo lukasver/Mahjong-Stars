@@ -16,7 +16,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { TransactionStatus } from "@prisma/client";
-import { TransactionPage } from "../../pages/transaction-page";
+import { TransactionPage } from "../../pages/transaction.pom";
 import { TIMEOUTS } from "../../utils/constants";
 import {
   mockCardProviderAvailability,

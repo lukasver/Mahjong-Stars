@@ -20,7 +20,7 @@ import { expect, test } from "@playwright/test";
 import { TransactionStatus } from "@prisma/client";
 import { unlinkSync, writeFileSync } from "fs";
 import { join } from "path";
-import { TransactionPage } from "../../pages/transaction-page";
+import { TransactionPage } from "../../pages/transaction.pom";
 import { TIMEOUTS } from "../../utils/constants";
 import { mockTransactionResponse } from "../../utils/transaction-mocks";
 

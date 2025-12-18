@@ -9,11 +9,13 @@ import {
 import { defineChain } from "thirdweb";
 import { CRYPTO_CURRENCIES, FIAT_CURRENCIES } from "@/common/config/constants";
 import { GetExchangeRate } from "@/common/schemas/dtos/rates";
+import { CreateTransactionDto } from "@/common/schemas/dtos/transactions";
 import {
   CurrencyTypeSchema,
   FOPSchema,
   SaleStatusSchema,
   SaleTransactions,
+  TransactionFeeTypeSchema,
   User,
 } from "@/common/schemas/generated";
 import {
@@ -74,26 +76,35 @@ export const mockExchangeRates: GetExchangeRate = {
   },
 };
 
-
-
-type MockTransactionPayload = Partial<Prisma.SaleTransactionsCreateInput> | Partial<Prisma.SaleTransactionsCreateManyInput>;
+type MockTransactionPayload =
+  | Partial<Prisma.SaleTransactionsCreateInput>
+  | Partial<Prisma.SaleTransactionsCreateManyInput>;
 
 export function mockTransactions(
   data?: Partial<SaleTransactions>,
-  mode?: 'default',
+  mode?: "default",
 ): SaleTransactions;
 export function mockTransactions(
-  data: Partial<Prisma.SaleTransactionsCreateManyInput> & { userId: string; saleId: string },
-  mode: 'createMany',
+  data: Partial<Prisma.SaleTransactionsCreateManyInput> & {
+    userId: string;
+    saleId: string;
+  },
+  mode: "createMany",
 ): Prisma.SaleTransactionsCreateManyInput;
 export function mockTransactions(
   data: Partial<Prisma.SaleTransactionsCreateInput>,
-  mode: 'create',
-): Prisma.SaleTransactionsCreateInput
+  mode: "create",
+): Prisma.SaleTransactionsCreateInput;
+
 export function mockTransactions(
-  data: Partial<SaleTransactions> | (MockTransactionPayload & { userId?: string; saleId?: string }) = {},
-  mode: 'default' | 'createMany' | 'create' = 'default',
-): SaleTransactions | Prisma.SaleTransactionsCreateManyInput | Prisma.SaleTransactionsCreateInput {
+  data:
+    | Partial<SaleTransactions>
+    | (MockTransactionPayload & { userId?: string; saleId?: string }) = {},
+  mode: "default" | "createMany" | "create" = "default",
+):
+  | SaleTransactions
+  | Prisma.SaleTransactionsCreateManyInput
+  | Prisma.SaleTransactionsCreateInput {
   const status = faker.helpers.arrayElement(Object.values(TransactionStatus));
   const currency = faker.helpers.arrayElement([
     ...FIAT_CURRENCIES,
@@ -119,7 +130,7 @@ export function mockTransactions(
     totalAmount: paid,
   };
 
-  if (mode === 'createMany') {
+  if (mode === "createMany") {
     const { userId, saleId, metadata, ...rest } = data;
     return {
       tokenSymbol: faker.word.noun({ length: { min: 3, max: 5 } }),
@@ -135,7 +146,7 @@ export function mockTransactions(
     } satisfies Prisma.SaleTransactionsCreateManyInput;
   }
 
-  if (mode === 'create') {
+  if (mode === "create") {
     const { userId: _, saleId: __, metadata, ...rest } = data;
     const { paidCurrency, ...restComputed } = computed;
     return {
@@ -163,18 +174,17 @@ export function mockTransactions(
       },
       ...(metadata ? { metadata } : {}),
       ...restComputed,
-      ...rest
+      ...rest,
     } satisfies Prisma.SaleTransactionsCreateInput;
   }
 
-
-
-  const { metadata, createdAt, updatedAt, deletedAt, paymentDate, ...rest } = data;
+  const { metadata, createdAt, updatedAt, deletedAt, paymentDate, ...rest } =
+    data;
   return {
     id: faker.string.uuid(),
-    createdAt: new Date((createdAt ?? faker.date.past())),
-    updatedAt: new Date((updatedAt ?? faker.date.recent())),
-    deletedAt: (deletedAt ? new Date(deletedAt) : null),
+    createdAt: new Date(createdAt ?? faker.date.past()),
+    updatedAt: new Date(updatedAt ?? faker.date.recent()),
+    deletedAt: deletedAt ? new Date(deletedAt) : null,
     tokenSymbol: faker.word.noun({ length: { min: 3, max: 5 } }),
     formOfPayment: isCrypto ? FOPSchema.enum.CRYPTO : FOPSchema.enum.TRANSFER,
     receivingWallet: faker.finance.ethereumAddress(),
@@ -188,12 +198,14 @@ export function mockTransactions(
     blockchainId: null,
     rejectionReason: null,
     paymentEvidenceId: null,
-    paymentDate: (paymentDate ? new Date(paymentDate) : null),
-    ...(metadata ? { metadata: metadata as Prisma.JsonValue } : { metadata: {} as Prisma.JsonValue }),
+    paymentDate: paymentDate ? new Date(paymentDate) : null,
+    ...(metadata
+      ? { metadata: metadata as Prisma.JsonValue }
+      : { metadata: {} as Prisma.JsonValue }),
     ...rest,
     ...computed,
   } satisfies SaleTransactions;
-};
+}
 
 export const mockUsers = (data?: Partial<User>) => {
   const wallet = faker.finance.ethereumAddress();
@@ -495,7 +507,7 @@ export const createScenario = async (db: PrismaClient) => {
     currency: "USD",
     saleData: {
       status: SaleStatusSchema.enum.OPEN,
-    }
+    },
   }).then(async ({ sale, token }) => {
     // biome-ignore lint/correctness/noUnusedVariables: destructured to remove id
     const { id, metadata, ...tx } = mockTransactions({
@@ -524,4 +536,58 @@ export const createScenario = async (db: PrismaClient) => {
     transaction,
     token,
   };
+};
+
+export const mockCreateTransactionDto = (
+  data: Partial<CreateTransactionDto> & { saleId: string },
+) => {
+  const currency = faker.helpers.arrayElement([
+    ...FIAT_CURRENCIES,
+    ...CRYPTO_CURRENCIES,
+  ]);
+  const isCrypto = CRYPTO_CURRENCIES.includes(currency);
+  const quantity = faker.number.int({ min: 1, max: 9999 });
+  const totalAmount = faker.number.float({
+    min: 0.0001,
+    max: 999999999,
+    fractionDigits: isCrypto ? 8 : 4,
+  });
+  const hasFees = faker.datatype.boolean({ probability: 0.3 });
+  const formOfPayment =
+    data?.formOfPayment ||
+    (isCrypto ? FOPSchema.enum.CRYPTO : FOPSchema.enum.TRANSFER);
+
+  return {
+    tokenSymbol: faker.word.noun({ length: { min: 3, max: 5 } }).toUpperCase(),
+    quantity: new Decimal(quantity),
+    formOfPayment,
+    receivingWallet: faker.finance.ethereumAddress(),
+    totalAmount: new Decimal(totalAmount),
+    paidCurrency: currency,
+    comment: faker.datatype.boolean({ probability: 0.3 })
+      ? faker.lorem.sentence()
+      : null,
+    ...(hasFees && {
+      fees: [
+        {
+          type: TransactionFeeTypeSchema.enum.PROCESSING,
+          amount: new Decimal(
+            faker.number.float({
+              min: 0.01,
+              max: totalAmount * 0.1,
+              fractionDigits: isCrypto ? 8 : 4,
+            }),
+          ),
+          currencySymbol: currency,
+          description: faker.datatype.boolean({ probability: 0.5 })
+            ? faker.lorem.sentence()
+            : null,
+          metadata: faker.datatype.boolean({ probability: 0.2 })
+            ? ({ provider: faker.company.name() } as Prisma.JsonValue)
+            : null,
+        },
+      ],
+    }),
+    ...data,
+  } satisfies CreateTransactionDto;
 };

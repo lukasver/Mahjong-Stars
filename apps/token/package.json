@@ -10,7 +10,9 @@
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
+		"build:e2e": "NODE_ENV=test next build",
 		"start": "next start",
+		"start:e2e": "NODE_ENV=test next start",
 		"lint": "next lint",
 		"clean": "rimraf .next node_modules",
 		"build-deps": "turbo run build --filter @mjs/utils",
@@ -131,6 +133,7 @@
 		"dotenv": "^16.5.0",
 		"dotenv-cli": "^8.0.0",
 		"eslint-config-next": "^15.3.0",
+		"jwt-decode": "^4.0.0",
 		"nock": "^14.0.6",
 		"pino-pretty": "^13.0.0",
 		"prisma": "6.8.2",
