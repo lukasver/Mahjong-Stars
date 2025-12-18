@@ -29,7 +29,7 @@ Connection: ${(
 
 
 
-export const FooterSupportButton = ({ supportEmail, businessName }: { supportEmail: string; businessName: string }) => {
+export const FooterSupportButton = ({ supportEmail, businessName, title }: { supportEmail: string; businessName: string; title?: string }) => {
   const HELP_SUBJECT = `[${businessName}] Support Request`;
 
   const HELP_HREF = `mailto:${supportEmail}?subject=${HELP_SUBJECT}&body=${sanitizeMailBody(
@@ -42,7 +42,7 @@ export const FooterSupportButton = ({ supportEmail, businessName }: { supportEma
 
   return (
     <a href="#" onClick={openSupport}>
-      Contact Support
+      {title || 'Contact Support'}
     </a>
   );
 };

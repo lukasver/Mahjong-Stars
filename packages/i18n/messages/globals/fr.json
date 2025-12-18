@@ -1,23 +1,28 @@
 {
-	"Footer": {
-		"links": {
-			"home": "Accueil",
-			"docs": "Docs",
-			"whoWeAre": "Qui sommes-nous ?",
-			"termsAndConditions": "Conditions générales d'utilisation",
-			"privacyPolicy": "Politique de confidentialité",
-			"contact": "Contact"
-		},
-		"copyright": "©{year} WASABI GAMES DMCC"
-	},
-	"Global": {
-		"soon": "Bientôt disponible",
-		"search": "Rechercher...",
-		"subscribe": "Abonnez-vous maintenant",
-		"subscribePlaceholder": "Entrez votre email",
-		"contact": "Contactez-nous",
-		"banner": {
-			"title": "Le jeton $TILE arrive bientôt 🚀"
-		}
-	}
+  "Footer": {
+    "links": {
+      "home": "Accueil",
+      "docs": "Docs",
+      "whoWeAre": "Qui sommes-nous",
+      "termsAndConditions": "Termes et Conditions",
+      "privacyPolicy": "Politique de confidentialité"
+    },
+    "copyright": "©{year} WASABI GAMES DMCC"
+  },
+  "Global": {
+    "soon": "Bientôt disponible",
+    "search": "Rechercher...",
+    "subscribe": "Abonnez-vous maintenant",
+    "subscribePlaceholder": "Entrez votre email",
+    "contact": "Contactez-nous",
+    "banner": {
+      "title": ""
+    },
+    "website": "Site Web",
+    "ico": "ICO",
+    "support": "Support",
+    "whitePaper": "White Paper",
+    "company": "Entreprise",
+    "catchPhrase": "Propulser le MJS avec Web3"
+  }
 }

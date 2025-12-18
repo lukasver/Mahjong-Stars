@@ -6,7 +6,7 @@ import { Route } from "next";
 import Image from "next/image";
 import { Footer as FooterComponent } from "nextra-theme-docs";
 import { Locale } from "@/lib/i18n";
-import { getTranslations } from "@/lib/i18n/get-dictionaries";
+import { getTranslations, TFunction } from "@/lib/i18n/get-dictionaries";
 import { metadata as siteConfig } from "@/lib/site-config";
 import Logo from "@/public/icon.png";
 import AppLink from "./link";
@@ -21,38 +21,36 @@ type FooterLink = {
 }
 const getFooterLinks = (t: TFunction): FooterLink[] => [
 	{
-		columnName: "Docs",
+		columnName: t("Footer.links.docs"),
 		links: [
-			{ href: "/", title: "Home" },
-			// { href: '/about', title: 'About' },
+			{ href: "/", title: t("Footer.links.home") },
 		],
 	},
 	{
-		columnName: "Company",
+		columnName: t("Global.company"),
 		links: [
-			{ href: "/web", title: "Website" },
-			{ href: "/ico", title: "ICO" },
+			{ href: "/web", title: t("Global.website") },
+			{ href: "/ico", title: t("Global.ico") },
 		],
 	},
 	{
-		columnName: "Support",
-		links: [{ href: "#support", title: "Support" }],
+		columnName: t("Global.support"),
+		links: [{ href: "#support", title: t("Global.contact") }],
 	},
 ];
 
 export const Footer = async ({
 	locale,
 	className,
-	title,
-	description,
 }: {
 	locale: Locale;
 	className?: string;
-	title?: string;
-	description?: string;
 }) => {
 	const t = await getTranslations(locale);
-	const columnNumber = getFooterLinks(t).filter(({ links }) => links.length).length;
+	const footerLinks = getFooterLinks(t).filter(({ links }) => links.length);
+	const columnNumber = footerLinks.length;
+	const title = siteConfig.title;
+	const description = t("Global.catchPhrase") || '';
 
 	return (
 		<FooterComponent className="m-0! p-0! bg-black mx-auto w-full max-w-full!">
@@ -99,7 +97,7 @@ export const Footer = async ({
 								<p className="text-sm opacity-70">{description}</p>
 							) : null}
 
-							<p className="text-xs">Copyright © {siteConfig.businessName}</p>
+							{/* <p className="text-xs">Copyright © {siteConfig.businessName}</p> */}
 						</div>
 
 						<div
@@ -138,6 +136,7 @@ export const Footer = async ({
 															<FooterSupportButton
 																supportEmail={siteConfig.supportEmail}
 																businessName={siteConfig.businessName}
+																title={link.title}
 															/>
 														</li>
 													);

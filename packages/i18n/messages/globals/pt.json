@@ -5,19 +5,24 @@
       "docs": "Documentos",
       "whoWeAre": "Quem Somos",
       "termsAndConditions": "Termos e Condições",
-      "privacyPolicy": "Política de Privacidade",
-      "contact": "Contato"
+      "privacyPolicy": "Política de Privacidade"
     },
     "copyright": "©{year} WASABI GAMES DMCC"
   },
   "Global": {
-    "soon": "Em breve",
+    "soon": "Em Breve",
     "search": "Pesquisar...",
-    "subscribe": "Inscreva-se agora",
-    "subscribePlaceholder": "Digite seu email",
-    "contact": "Contate-nos",
+    "subscribe": "Assine agora",
+    "subscribePlaceholder": "Insira seu e-mail",
+    "contact": "Contacte-nos",
     "banner": {
-      "title": "Token $TILE chegando em breve 🚀"
-    }
+      "title": ""
+    },
+    "website": "Website",
+    "ico": "ICO",
+    "support": "Suporte",
+    "whitePaper": "White Paper",
+    "company": "Empresa",
+    "catchPhrase": "Potencializando o Mahjong com Web3"
   }
 }

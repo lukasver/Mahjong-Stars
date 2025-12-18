@@ -1,23 +1,28 @@
 {
-	"Footer": {
-		"links": {
-			"home": "首页",
-			"docs": "文档",
-			"whoWeAre": "关于我们",
-			"termsAndConditions": "条款与条件",
-			"privacyPolicy": "隐私政策",
-			"contact": "联系我们"
-		},
-		"copyright": "©{year} WASABI GAMES DMCC"
-	},
-	"Global": {
-		"soon": "即将推出",
-		"search": "搜索...",
-		"subscribe": "立即订阅",
-		"subscribePlaceholder": "输入您的邮箱",
-		"contact": "联系我们",
-		"banner": {
-			"title": "$TILE 代币即将推出 🚀"
-		}
-	}
+  "Footer": {
+    "links": {
+      "home": "主页",
+      "docs": "文档",
+      "whoWeAre": "关于我们",
+      "termsAndConditions": "条款与条件",
+      "privacyPolicy": "隐私政策"
+    },
+    "copyright": "©{year} WASABI GAMES DMCC"
+  },
+  "Global": {
+    "soon": "即将推出",
+    "search": "搜索...",
+    "subscribe": "立即订阅",
+    "subscribePlaceholder": "请输入您的邮箱",
+    "contact": "联系我们",
+    "banner": {
+      "title": ""
+    },
+    "website": "网站",
+    "ico": "ICO",
+    "support": "支持",
+    "whitePaper": "白皮书",
+    "company": "公司",
+    "catchPhrase": "赋能麻将，拥抱Web3"
+  }
 }

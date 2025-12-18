@@ -1,23 +1,28 @@
 {
-	"Footer": {
-		"links": {
-			"home": "Inicio",
-			"docs": "Documentación",
-			"whoWeAre": "Quiénes Somos",
-			"termsAndConditions": "Términos y Condiciones",
-			"privacyPolicy": "Política de Privacidad",
-			"contact": "Contacto"
-		},
-		"copyright": "©{year} WASABI GAMES DMCC"
-	},
-	"Global": {
-		"soon": "Próximamente",
-		"search": "Buscar...",
-		"subscribe": "Suscríbete ahora",
-		"subscribePlaceholder": "Introduce tu correo electrónico",
-		"contact": "Contáctanos",
-		"banner": {
-			"title": "El token $TILE llega pronto 🚀"
-		}
-	}
+  "Footer": {
+    "links": {
+      "home": "Inicio",
+      "docs": "Documentos",
+      "whoWeAre": "Quiénes somos",
+      "termsAndConditions": "Términos y condiciones",
+      "privacyPolicy": "Política de privacidad"
+    },
+    "copyright": "©{year} WASABI GAMES DMCC"
+  },
+  "Global": {
+    "soon": "Próximamente",
+    "search": "Buscar...",
+    "subscribe": "Suscríbete ahora",
+    "subscribePlaceholder": "Introduce tu correo electrónico",
+    "contact": "Contáctanos",
+    "banner": {
+      "title": ""
+    },
+    "website": "Sitio web",
+    "ico": "ICO",
+    "support": "Soporte",
+    "whitePaper": "White Paper",
+    "company": "Empresa",
+    "catchPhrase": "Potenciando el MJS con Web3"
+  }
 }

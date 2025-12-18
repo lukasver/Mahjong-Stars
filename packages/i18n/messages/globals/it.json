@@ -1,23 +1,28 @@
 {
-	"Footer": {
-		"links": {
-			"home": "Home",
-			"docs": "Documenti",
-			"whoWeAre": "Chi Siamo",
-			"termsAndConditions": "Termini e Condizioni",
-			"privacyPolicy": "Informativa sulla Privacy",
-			"contact": "Contatti"
-		},
-		"copyright": "©{year} WASABI GAMES DMCC"
-	},
-	"Global": {
-		"soon": "Prossimamente",
-		"search": "Cerca...",
-		"subscribe": "Iscriviti ora",
-		"subscribePlaceholder": "Inserisci la tua email",
-		"contact": "Contattaci",
-		"banner": {
-			"title": "Il token $TILE è in arrivo 🚀"
-		}
-	}
+  "Footer": {
+    "links": {
+      "home": "Home",
+      "docs": "Documentazione",
+      "whoWeAre": "Chi Siamo",
+      "termsAndConditions": "Termini e Condizioni",
+      "privacyPolicy": "Politica sulla Privacy"
+    },
+    "copyright": "©{year} WASABI GAMES DMCC"
+  },
+  "Global": {
+    "soon": "Prossimamente",
+    "search": "Cerca...",
+    "subscribe": "Iscriviti ora",
+    "subscribePlaceholder": "Inserisci la tua email",
+    "contact": "Contattaci",
+    "banner": {
+      "title": ""
+    },
+    "website": "Sito Web",
+    "ico": "ICO",
+    "support": "Supporto",
+    "whitePaper": "White Paper",
+    "company": "Azienda",
+    "catchPhrase": "Potenziare il Mahjong con Web3"
+  }
 }

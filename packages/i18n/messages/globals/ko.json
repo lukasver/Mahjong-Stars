@@ -1,23 +1,28 @@
 {
-	"Footer": {
-		"links": {
-			"home": "홈",
-			"docs": "문서",
-			"whoWeAre": "회사소개",
-			"termsAndConditions": "이용약관",
-			"privacyPolicy": "개인정보처리방침",
-			"contact": "문의하기"
-		},
-		"copyright": "©{year} WASABI GAMES DMCC"
-	},
-	"Global": {
-		"soon": "곧 출시 예정",
-		"search": "검색...",
-		"subscribe": "지금 구독하기",
-		"subscribePlaceholder": "이메일 주소를 입력하세요",
-		"contact": "문의하기",
-		"banner": {
-			"title": "$TILE 토큰 곧 출시 🚀"
-		}
-	}
+  "Footer": {
+    "links": {
+      "home": "홈",
+      "docs": "문서",
+      "whoWeAre": "회사 소개",
+      "termsAndConditions": "이용 약관",
+      "privacyPolicy": "개인정보처리방침"
+    },
+    "copyright": "©{year} WASABI GAMES DMCC"
+  },
+  "Global": {
+    "soon": "출시 예정",
+    "search": "검색...",
+    "subscribe": "지금 구독하세요",
+    "subscribePlaceholder": "이메일 주소를 입력하세요",
+    "contact": "문의하기",
+    "banner": {
+      "title": ""
+    },
+    "website": "웹사이트",
+    "ico": "ICO",
+    "support": "지원",
+    "whitePaper": "백서",
+    "company": "회사",
+    "catchPhrase": "웹3로 MJS를 강화합니다"
+  }
 }
