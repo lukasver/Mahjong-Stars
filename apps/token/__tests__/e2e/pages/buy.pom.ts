@@ -1,7 +1,7 @@
 import { expect, Locator, Page } from "@playwright/test";
 import { ROUTES, TIMEOUTS } from "../utils/constants";
 import { getServerActionBody, mockServerActionHeaders } from "../utils/helpers";
-import { BasePage } from "./base-page";
+import { BasePage } from "./base.pom";
 
 /**
  * Page Object Model for the Buy Page

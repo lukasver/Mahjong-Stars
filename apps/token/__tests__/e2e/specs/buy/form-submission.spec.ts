@@ -20,7 +20,7 @@ import Decimal from "decimal.js";
 import { FIAT_CURRENCIES } from "@/common/config/constants";
 import { SaleInvestInfo } from "@/common/types/sales";
 import { AmountCalculatorService } from "@/lib/services/pricefeeds/amount.service";
-import { BuyPage } from "../../pages/buy-page";
+import { BuyPage } from "../../pages/buy.pom";
 import { TIMEOUTS } from "../../utils/constants";
 
 async function getExchangeRate() {

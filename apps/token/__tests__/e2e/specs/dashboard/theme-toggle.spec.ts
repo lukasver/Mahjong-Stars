@@ -10,7 +10,7 @@
  */
 
 import { expect, test } from "@playwright/test";
-import { DashboardPage } from "../../pages/dashboard-page";
+import { DashboardPage } from "../../pages/dashboard.pom";
 import { TIMEOUTS } from "../../utils/constants";
 
 test("TC-DASH-010: Theme Toggle", async ({ page }) => {

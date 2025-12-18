@@ -4,7 +4,7 @@ import { User } from "@prisma/client";
 import { ROLES } from "@/common/config/constants";
 import { TIMEOUTS } from "../utils/constants";
 import { getServerActionBody, mockServerActionHeaders } from "../utils/helpers";
-import { BasePage } from "./base-page";
+import { BasePage } from "./base.pom";
 /**
  * Page Object Model for the Transaction Confirmation page
  */

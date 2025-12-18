@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 import { ROUTES, TIMEOUTS } from "../utils/constants";
-import { BasePage } from "./base-page";
+import { BasePage } from "./base.pom";
 
 /**
  * Page Object Model for the Transactions List page

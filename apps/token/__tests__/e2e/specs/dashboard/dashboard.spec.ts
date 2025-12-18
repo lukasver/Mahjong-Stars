@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { DashboardPage } from "__tests__/e2e/pages/dashboard-page";
+import { DashboardPage } from "__tests__/e2e/pages/dashboard.pom";
 import { ROUTES, TIMEOUTS } from "__tests__/e2e/utils/constants";
 import { getNormalizedPageStructure } from "__tests__/e2e/utils/helpers";
 

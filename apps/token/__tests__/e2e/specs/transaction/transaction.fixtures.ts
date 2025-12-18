@@ -1,6 +1,7 @@
 import { invariant } from "@epic-web/invariant";
+import { faker } from "@faker-js/faker";
 import { test as base } from "@playwright/test";
-import { FOP, SaleStatus, TransactionStatus } from "@prisma/client";
+import { BankDetails, FOP, SaleStatus, TransactionStatus } from "@prisma/client";
 import { getUserWalletAddressFromStorage } from "__tests__/e2e/utils/helpers";
 import { mockTransactions } from "__tests__/mocks/helpers";
 import {
@@ -14,7 +15,11 @@ type TransactionEntities = {
   saleTransactions: TransactionByIdWithRelations[];
 };
 
-type Entities = TransactionEntities;
+type BankEntities = {
+  banks: Pick<BankDetails, "id">[];
+};
+
+type Entities = TransactionEntities & BankEntities;
 
 // Declare the types of your fixtures.
 type TransactionFixtures = {
@@ -42,7 +47,9 @@ export const test = base.extend<TransactionFixtures>({
       }),
     ]);
 
-    const { include: { tokenDistributions: _, ...rest } } = transactionByIdWithRelations
+    const {
+      include: { tokenDistributions: _, ...rest },
+    } = transactionByIdWithRelations;
 
     const txs = await testDb.saleTransactions.createManyAndReturn({
       data: Array.from({ length: 1 }).map(() =>
@@ -58,6 +65,35 @@ export const test = base.extend<TransactionFixtures>({
       ),
       include: {
         ...rest,
+      },
+    });
+
+    console.log(
+      "🚀 ~ transaction.fixtures.ts:64 ~ txs:",
+      JSON.stringify(txs, null, 2),
+    );
+
+    const originalKyc = openSale.requiresKYC;
+    const originalSaft = openSale.saftCheckbox;
+    const { banks } = await testDb.sale.update({
+      where: { id: openSale.id },
+      data: {
+        requiresKYC: false,
+        saftCheckbox: false,
+        banks: {
+          // need to add a bank to make it logically possible to select transfer as FOP
+          create: {
+            bankName: faker.company.name(),
+            iban: faker.finance.iban(),
+          },
+        },
+      },
+      select: {
+        banks: {
+          select: {
+            id: true,
+          }
+        }
       }
     });
 
@@ -66,6 +102,7 @@ export const test = base.extend<TransactionFixtures>({
     const tempEntities = {} as Entities;
     // Expand if needed
     tempEntities.saleTransactions = txs as TransactionByIdWithRelations[];
+    tempEntities.banks = banks;
 
     // Set up the fixture.
     const todoPage = new TransactionPage(page);
@@ -76,13 +113,26 @@ export const test = base.extend<TransactionFixtures>({
     await use(todoPage);
 
     // Clean up the db & fixture;
-    // await testDb.saleTransactions.deleteMany({
-    //   where: {
-    //     id: {
-    //       in: tempEntities['saleTransactions'].map((t) => t.id),
-    //     },
-    //   },
-    // });
+    await testDb.$transaction(async (prisma) => {
+      await prisma.saleTransactions.deleteMany({
+        where: {
+          id: {
+            in: tempEntities["saleTransactions"].map((t) => t.id),
+          },
+        },
+      });
+      await prisma.bankDetails.deleteMany({
+        where: {
+          id: {
+            in: tempEntities["banks"].map((b) => b.id),
+          },
+        },
+      });
+      await prisma.sale.update({
+        where: { id: openSale.id },
+        data: { requiresKYC: originalKyc, saftCheckbox: originalSaft },
+      });
+    });
     await testDb.$disconnect();
     entities.delete(todoPage.pageId);
   },

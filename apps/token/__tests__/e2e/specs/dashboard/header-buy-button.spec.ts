@@ -9,7 +9,7 @@
  */
 
 import { expect, test } from "@playwright/test";
-import { DashboardPage } from "../../pages/dashboard-page";
+import { DashboardPage } from "../../pages/dashboard.pom";
 import { ROUTES, TIMEOUTS } from "../../utils/constants";
 
 test("TC-DASH-008: Header Buy Button Navigation", async ({ page }) => {

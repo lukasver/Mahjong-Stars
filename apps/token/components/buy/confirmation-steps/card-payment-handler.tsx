@@ -19,7 +19,7 @@ import { CryptoPaymentComponent } from "./payment-step-crypto";
 interface CardPaymentHandlerProps {
   transaction: TransactionByIdWithRelations;
   onSuccessInstaxchange: (d: SuccessInstaxchangePaymentData) => void;
-  onSuccessCrypto?: (d: SuccessCryptoPaymentData) => void;
+  onSuccessCrypto: (d: SuccessCryptoPaymentData) => void;
 }
 
 
@@ -124,30 +124,30 @@ export function CardPaymentHandler({
       <CardPaymentNotice
         transaction={tx}
         onSelectDifferent={
-          onSuccessCrypto ? () => setShowCryptoPayment(true) : undefined
+          () => setShowCryptoPayment(true)
         }
       />
     );
   }
-  // If amount exceeds Instaxchange threshold, use crypto payment (Thirdweb)
-  // This applies regardless of provider availability since Instaxchange can't handle large amounts
-  if (
-    shouldUseCrypto
-  ) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-      >
-        <CryptoPaymentComponent
-          transaction={tx}
-          onSuccessPayment={onSuccessCrypto}
-          showHelp
-        />
-      </motion.div>
-    );
-  }
+  // // If amount exceeds Instaxchange threshold, use crypto payment (Thirdweb)
+  // // This applies regardless of provider availability since Instaxchange can't handle large amounts
+  // if (
+  //   shouldUseCrypto
+  // ) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.3, duration: 0.5 }}
+    >
+      <CryptoPaymentComponent
+        transaction={tx}
+        onSuccessPayment={onSuccessCrypto}
+        showHelp
+      />
+    </motion.div>
+  );
+  // }
 
-  throw new Error("Invalid payment state");
+  // throw new Error("Invalid payment state");
 }

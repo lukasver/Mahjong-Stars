@@ -11,7 +11,7 @@
  */
 
 import { expect, test } from "@playwright/test";
-import { BuyPage } from "../../pages/buy-page";
+import { BuyPage } from "../../pages/buy.pom";
 import { TIMEOUTS } from "../../utils/constants";
 
 test("TC-BUY-012: Disabled State Handling", async ({ page }) => {
