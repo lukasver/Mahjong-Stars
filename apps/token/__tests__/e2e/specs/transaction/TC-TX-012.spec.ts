@@ -14,23 +14,12 @@
 
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { TransactionStatus } from "@prisma/client";
 import { TransactionPage } from "../../pages/transaction.pom";
 import { ROUTES, TIMEOUTS } from "../../utils/constants";
-import { mockTransactionResponse } from "../../utils/transaction-mocks";
 
 test("TC-TX-012: Transaction Cancellation", async ({ page }) => {
   const transactionId = faker.string.uuid();
 
-  // Mock transaction API response with pending status (cancellable)
-  await mockTransactionResponse(page, transactionId, {
-    status: TransactionStatus.PENDING,
-    formOfPayment: "TRANSFER",
-    requiresKYC: "ENHANCED",
-    requiresSAFT: true,
-    kycCompleted: false,
-    saftCompleted: false,
-  });
 
   const transactionPage = new TransactionPage(page);
 

@@ -23,7 +23,8 @@ type Entities = TransactionEntities & BankEntities;
 
 // Declare the types of your fixtures.
 type TransactionFixtures = {
-  txPage: TransactionPage;
+  tx001: TransactionPage;
+  //TODO! make fixtures for other test cases.
   entities: Map<string, Entities>;
 };
 
@@ -33,7 +34,7 @@ const entities: Map<string, Entities> = new Map();
 // Extend base test by providing "todoPage" and "settingsPage".
 // This new "test" can be used in multiple test files, and each of them will get the fixtures.
 export const test = base.extend<TransactionFixtures>({
-  txPage: async ({ page, context }, use) => {
+  tx001: async ({ page, context }, use) => {
     const [currentUser, openSale] = await testDb.$transaction([
       testDb.user.findUniqueOrThrow({
         where: {
@@ -67,11 +68,6 @@ export const test = base.extend<TransactionFixtures>({
         ...rest,
       },
     });
-
-    console.log(
-      "🚀 ~ transaction.fixtures.ts:64 ~ txs:",
-      JSON.stringify(txs, null, 2),
-    );
 
     const originalKyc = openSale.requiresKYC;
     const originalSaft = openSale.saftCheckbox;

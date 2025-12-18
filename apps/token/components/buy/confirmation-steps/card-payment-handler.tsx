@@ -76,7 +76,7 @@ export function CardPaymentHandler({
 
   const shouldUseProvider = isProviderAvailable && shouldUseInstaxchange;
   const shouldShowNotice = !isProviderAvailable && shouldUseInstaxchange;
-  const shouldUseCrypto = !shouldUseInstaxchange && tx.formOfPayment === "CARD" && onSuccessCrypto;
+  // const shouldUseCrypto = !shouldUseInstaxchange && tx.formOfPayment === "CARD" && onSuccessCrypto;
 
 
   // If provider is available and should use Instaxchange, render widget

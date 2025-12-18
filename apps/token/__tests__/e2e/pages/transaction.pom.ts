@@ -1,7 +1,11 @@
 import crypto from "node:crypto";
+import { faker } from "@faker-js/faker";
 import { expect, Page } from "@playwright/test";
 import { User } from "@prisma/client";
 import { ROLES } from "@/common/config/constants";
+import { KycTierType } from "@/common/schemas/generated";
+import { TransactionByIdWithRelations } from "@/common/types/transactions";
+import { GetTransactionByIdRes } from "@/lib/types/fetchers";
 import { TIMEOUTS } from "../utils/constants";
 import { getServerActionBody, mockServerActionHeaders } from "../utils/helpers";
 import { BasePage } from "./base.pom";
@@ -38,9 +42,7 @@ export class TransactionPage extends BasePage {
 	 * Get transaction stepper component
 	 */
 	getStepper() {
-		return this.page
-			.locator('[data-testid="transaction-stepper"]')
-			.first();
+		return this.page.locator('[data-testid="transaction-stepper"]').first();
 	}
 
 	/**
@@ -595,9 +597,11 @@ export class TransactionPage extends BasePage {
 			const response = await route.fetch();
 			const responseBody = await response.json();
 
-			console.debug("🚀 ~ transaction-page.ts:598 ~ responseBody:", responseBody);
+			console.debug(
+				"🚀 ~ transaction-page.ts:598 ~ responseBody:",
+				responseBody,
+			);
 			expect(responseBody).toBeDefined();
-
 
 			await route.fulfill({
 				status: 200,
@@ -606,12 +610,14 @@ export class TransactionPage extends BasePage {
 					status: 200,
 					data: Object.assign(responseBody, overrides),
 				}),
-
-			})
+			});
 		});
 	}
 
-	async interceptEmailTokenVerificationRequest(txId: string, success: boolean = true): Promise<void> {
+	async interceptEmailTokenVerificationRequest(
+		txId: string,
+		success: boolean = true,
+	): Promise<void> {
 		return this.page.route(`**/dashboard/buy/${txId}`, async (route) => {
 			const request = route.request();
 			// Only intercept POST requests
@@ -628,12 +634,14 @@ export class TransactionPage extends BasePage {
 					data: {
 						success: success,
 						status: 200,
-						data: success ? 'Email verified successfully' : '"Failed to verify code"',
-					}
-				})
+						data: success
+							? "Email verified successfully"
+							: '"Failed to verify code"',
+					},
+				}),
 			});
 		});
-	};
+	}
 
 	async getEmailVerificationSuccessMessage() {
 		return await this.page.getByText(/email verified/i).first();
@@ -653,4 +661,105 @@ export class TransactionPage extends BasePage {
 		await this.getTokenInput().fill(token);
 		await this.getVerifyButton().click();
 	}
-};
+
+	/**
+	 * Mock transaction API response for useQuery client responses
+	 */
+	async mockTransactionResponse(
+		tx: TransactionByIdWithRelations,
+		overrides: {
+			transaction: Partial<TransactionByIdWithRelations>;
+			requiresKYC?: KycTierType | null;
+			requiresSAFT?: boolean;
+			kycCompleted?: boolean;
+		},
+	): Promise<void> {
+		const {
+			transaction: ovTransactionData,
+			requiresKYC = "ENHANCED",
+			requiresSAFT = true,
+			kycCompleted = false,
+		} = overrides;
+
+		// Build transaction with relations
+		const transaction: TransactionByIdWithRelations = {
+			...ovTransactionData,
+			sale: {
+				id: tx.sale.id,
+				...ovTransactionData?.sale,
+			},
+			user: {
+				...tx.user,
+				walletAddress: tx.user.walletAddress,
+				kycVerification: kycCompleted
+					? {
+						id: faker.string.uuid(),
+						status: "APPROVED",
+						documents: [
+							{
+								id: faker.string.uuid(),
+								url: faker.internet.url(),
+								fileName: "kyc-document.pdf",
+								name: "KYC Document",
+							},
+						],
+					}
+					: null,
+			},
+			blockchain: null,
+			approver: null,
+			tokenDistributions: [],
+		} as TransactionByIdWithRelations;
+
+		const bodyRes: GetTransactionByIdRes = {
+			transaction,
+			requiresKYC,
+			requiresSAFT,
+			explorerUrl: tx.sale.blockchain?.explorerUrl || null,
+		};
+
+		await this.page.route(`**/transactions/${tx.id}`, async (route) => {
+			if (route.request().method() === "GET") {
+				await route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({
+						success: true,
+						data: bodyRes,
+						status: 200,
+					}),
+				});
+			} else {
+				await route.continue();
+			}
+		});
+	}
+
+	/**
+	 * Mock card provider availability API response
+	 */
+	async mockCardProviderAvailability(
+		available: boolean = false,
+	): Promise<void> {
+		await this.page.route(
+			"**/api/card-provider/availability",
+			async (route) => {
+				if (route.request().method() === "GET") {
+					await route.fulfill({
+						status: 200,
+						contentType: "application/json",
+						body: JSON.stringify({
+							success: true,
+							data: {
+								available,
+							},
+							status: 200,
+						}),
+					});
+				} else {
+					await route.continue();
+				}
+			},
+		);
+	}
+}

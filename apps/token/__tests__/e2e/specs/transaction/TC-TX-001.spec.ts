@@ -16,14 +16,10 @@
 import { invariant } from "@epic-web/invariant";
 import { FOP } from "@prisma/client";
 import { TIMEOUTS } from "../../utils/constants";
-import {
-  // mockEmailVerification,
-  mockTransactionResponse,
-} from "../../utils/transaction-mocks";
 import { expect, test } from "./transaction.fixtures";
 
 test("TC-TX-001: Transaction Page Load", async ({
-  txPage,
+  tx001: txPage,
   entities,
 }) => {
   const { page } = txPage;
@@ -36,7 +32,7 @@ test("TC-TX-001: Transaction Page Load", async ({
   invariant(tx, "Transaction not found");
 
   // Mock transaction API response
-  await mockTransactionResponse(page, tx, {
+  await txPage.mockTransactionResponse(tx, {
     transaction: {
       status: tx.status,
       formOfPayment: tx.formOfPayment,

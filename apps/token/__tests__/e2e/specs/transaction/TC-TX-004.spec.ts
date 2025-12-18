@@ -13,25 +13,14 @@
 
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { TransactionStatus } from "@prisma/client";
 import { unlinkSync, writeFileSync } from "fs";
 import { join } from "path";
 import { TransactionPage } from "../../pages/transaction.pom";
 import { TIMEOUTS } from "../../utils/constants";
-import { mockTransactionResponse } from "../../utils/transaction-mocks";
 
 test("TC-TX-004: KYC Document Validation", async ({ page }) => {
   const transactionId = faker.string.uuid();
 
-  // Mock transaction API response with KYC required
-  await mockTransactionResponse(page, transactionId, {
-    status: TransactionStatus.PENDING,
-    formOfPayment: "TRANSFER",
-    requiresKYC: "ENHANCED",
-    requiresSAFT: true,
-    kycCompleted: false,
-    saftCompleted: false,
-  });
 
   const transactionPage = new TransactionPage(page);
 

@@ -123,6 +123,7 @@ export const FiatPayment = ({
     }
   };
 
+
   // If no banks available or form of payment is CARD, show card payment (Instaxchange or Thirdweb)
   if (
     (!isBanksLoading && banks?.banks?.length === 0) ||

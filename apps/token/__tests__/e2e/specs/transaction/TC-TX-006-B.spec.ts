@@ -15,31 +15,16 @@
 
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { TransactionStatus } from "@prisma/client";
 import { TransactionPage } from "../../pages/transaction.pom";
 import { TIMEOUTS } from "../../utils/constants";
-import {
-  mockCardProviderAvailability,
-  mockTransactionResponse,
-} from "../../utils/transaction-mocks";
 
 test("TC-TX-006-B: Payment Step (FIAT/CARD)", async ({ page }) => {
   const transactionId = faker.string.uuid();
 
-  // Mock card provider availability as unavailable
-  await mockCardProviderAvailability(page, false);
-
-  // Mock transaction API response with KYC and SAFT completed, FOP CARD
-  await mockTransactionResponse(page, transactionId, {
-    status: TransactionStatus.AWAITING_PAYMENT,
-    formOfPayment: "CARD",
-    requiresKYC: "ENHANCED",
-    requiresSAFT: true,
-    kycCompleted: true,
-    saftCompleted: true,
-  });
-
   const transactionPage = new TransactionPage(page);
+
+  // Mock card provider availability as unavailable
+  await transactionPage.mockCardProviderAvailability(false);
 
   // Navigate to transaction page
   await transactionPage.goto(transactionId);
