@@ -118,11 +118,7 @@ export async function mockTransactionResponse(
         contentType: "application/json",
         body: JSON.stringify({
           success: true,
-          data: {
-            transaction,
-            requiresKYC,
-            requiresSAFT,
-          },
+          data: bodyRes,
           status: 200,
         }),
       });
