@@ -1,8 +1,7 @@
 /**
  * @test-plan.md (251-262)
  * TC-TX-002: Transaction Steps Display
- *
- * Mock API responses to get a transaction to use in `/dashboard/buy/[tx]` with KYC and SAFT required.
+ * Implement and use tx002 fixture to get a transaction to use in `/dashboard/buy/[tx]` with KYC and SAFT required.
  * Navigate to `/dashboard/buy/[tx]`
  * Verify step indicators are visible:
  * - KYC step
@@ -10,59 +9,84 @@
  * - Payment step
  * - Confirmation step
  * Verify current step is highlighted
- * Verify completed steps are marked
+ * Verify completed steps are marked (none since starts at the first step)
  * Verify pending steps are disabled
  * Expected: Transaction steps are displayed correctly
  */
 
-import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
-import { TransactionPage } from "../../pages/transaction.pom";
+import { invariant } from "@epic-web/invariant";
+import { FOP } from "@prisma/client";
 import { TIMEOUTS } from "../../utils/constants";
+import { expect, test } from "./transaction.fixtures";
 
-test("TC-TX-002: Transaction Steps Display", async ({ page }) => {
-  const transactionId = faker.string.uuid();
+test("TC-TX-002: Transaction Steps Display", async ({
+  tx002: txPage,
+  entities,
+}) => {
+  const { page } = txPage;
+  const pageEntities = entities.get(txPage.pageId);
 
+  const tx = pageEntities?.saleTransactions.find(
+    (t) => t.formOfPayment === FOP.TRANSFER,
+  );
 
-  const transactionPage = new TransactionPage(page);
+  invariant(tx, "Transaction not found");
+
+  // Mock transaction API response with KYC and SAFT required
+  await txPage.mockTransactionResponse(tx, {
+    transaction: {
+      status: tx.status,
+      formOfPayment: tx.formOfPayment,
+    },
+    requiresKYC: "ENHANCED",
+    requiresSAFT: true,
+    kycCompleted: false,
+  });
 
   // Navigate to transaction page
-  await transactionPage.goto(transactionId);
-  await transactionPage.waitForTransactionPageLoaded();
+  await txPage.goto(tx.id);
+  await txPage.waitForTransactionPageLoaded();
 
   // Verify stepper is visible
-  const stepper = transactionPage.getStepper();
+  const stepper = txPage.getStepper();
   await expect(stepper).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Verify KYC step is visible
-  const kycStep = transactionPage.getKycStep();
+  // Verify all step indicators are visible
+  const kycStep = txPage.getKycStep();
   await expect(kycStep).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Verify SAFT step is visible
-  const saftStep = transactionPage.getSaftStep();
+  const saftStep = txPage.getSaftStep();
   await expect(saftStep).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Verify Payment step is visible
-  const paymentStep = transactionPage.getPaymentStep();
+  const paymentStep = txPage.getPaymentStep();
   await expect(paymentStep).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Verify Confirmation step is visible
-  const confirmationStep = transactionPage.getConfirmationStep();
+  const confirmationStep = txPage.getConfirmationStep();
   await expect(confirmationStep).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
-  // Verify current step is highlighted (should be KYC as first step)
-  const isKycActive = await transactionPage.isStepActive("KYC");
+  // Verify current step is highlighted (KYC should be active as first step)
+  const isKycActive = await txPage.isStepActive("KYC");
   expect(isKycActive).toBe(true);
 
-  // Verify pending steps are disabled (SAFT, Payment, Confirmation should be disabled initially)
-  const isSaftDisabled = await transactionPage.isStepDisabled("SAFT");
-  const isPaymentDisabled = await transactionPage.isStepDisabled("Payment");
-  const isConfirmationDisabled =
-    await transactionPage.isStepDisabled("Confirmation");
+  // Verify no steps are completed (starting at first step)
+  const isKycCompleted = await txPage.isStepCompleted("KYC");
+  const isSaftCompleted = await txPage.isStepCompleted("SAFT");
+  const isPaymentCompleted = await txPage.isStepCompleted("Payment");
+  const isConfirmationCompleted = await txPage.isStepCompleted("Confirmation");
 
-  expect(isSaftDisabled || !isSaftDisabled).toBeDefined(); // At least one should be disabled
-  expect(isPaymentDisabled || !isPaymentDisabled).toBeDefined();
-  expect(isConfirmationDisabled || !isConfirmationDisabled).toBeDefined();
+  expect(isKycCompleted).toBe(false);
+  expect(isSaftCompleted).toBe(false);
+  expect(isPaymentCompleted).toBe(false);
+  expect(isConfirmationCompleted).toBe(false);
+
+  // Verify pending steps are inactive (not yet reached)
+  const isSaftInactive = await txPage.isStepInactive("SAFT");
+  const isPaymentInactive = await txPage.isStepInactive("Payment");
+  const isConfirmationInactive = await txPage.isStepInactive("Confirmation");
+
+  expect(isSaftInactive).toBe(true);
+  expect(isPaymentInactive).toBe(true);
+  expect(isConfirmationInactive).toBe(true);
 
   await page.screenshot({
     path: "./__tests__/e2e/specs/__screenshots__/transaction/steps-display.png",

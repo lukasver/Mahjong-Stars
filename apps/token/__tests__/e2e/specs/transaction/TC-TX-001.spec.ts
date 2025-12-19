@@ -108,8 +108,8 @@ test("TC-TX-001: Transaction Page Load", async ({
   await expect(stepper).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
   // Verify at least one step is visible (Payment step should be visible since KYC and SAFT are not required)
-  const paymentStep = txPage.getPaymentStep();
-  await expect(paymentStep).toBeVisible({ timeout: TIMEOUTS.SHORT });
+  const paymentStepContent = txPage.getPaymentStepContent();
+  await expect(paymentStepContent).toBeVisible({ timeout: TIMEOUTS.SHORT });
 
   await page.screenshot({
     path: "./__tests__/e2e/specs/__screenshots__/transaction/page-load.png",

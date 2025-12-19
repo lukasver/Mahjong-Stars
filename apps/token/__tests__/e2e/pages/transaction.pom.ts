@@ -46,33 +46,45 @@ export class TransactionPage extends BasePage {
 	}
 
 	/**
-	 * Get current step indicator
+	 * Get current step indicator (the one with active state)
 	 */
 	getCurrentStep() {
-		return this.getStepIndicators().locator('[data-state="active"]');
+		return this.page.locator('[data-testid^="step-indicator-"][data-state="active"]');
 	}
 
 	/**
 	 * Get all step indicators
 	 */
 	getStepIndicators() {
-		return this.page
-			.locator('[data-testid^="step-indicator-"]')
-			.or(
-				this.page
-					.locator('[role="button"]')
-					.filter({ hasText: /KYC|SAFT|Payment|Confirmation/i }),
-			);
+		return this.page.locator('[data-testid^="step-indicator-"]');
 	}
 
 	/**
-	 * Get KYC step section
+	 * Get step indicator by step ID
+	 */
+	getStepIndicatorById(stepId: number) {
+		return this.page.locator(`[data-testid="step-indicator-${stepId}"]`);
+	}
+
+	/**
+	 * Get step indicator by step name
+	 */
+	getStepIndicatorByName(stepName: string) {
+		return this.getStepIndicators().filter({ hasText: new RegExp(stepName, "i") });
+	}
+
+	/**
+	 * Get KYC step indicator in the stepper
 	 */
 	getKycStep() {
-		return this.page
-			.getByText(/KYC|Know Your Customer/i)
-			.locator("..")
-			.first();
+		return this.getStepIndicatorByName("KYC");
+	}
+
+	/**
+	 * Get KYC step content container
+	 */
+	getKycStepContent() {
+		return this.page.getByTestId("kyc-upload-form");
 	}
 
 	/**
@@ -101,13 +113,17 @@ export class TransactionPage extends BasePage {
 	}
 
 	/**
-	 * Get SAFT step section
+	 * Get SAFT step indicator in the stepper
 	 */
 	getSaftStep() {
-		return this.page
-			.getByText(/SAFT|Agreement/i)
-			.locator("..")
-			.first();
+		return this.getStepIndicatorByName("SAFT");
+	}
+
+	/**
+	 * Get SAFT step content container
+	 */
+	getSaftStepContent() {
+		return this.page.getByTestId("saft-document-container");
 	}
 
 	/**
@@ -140,9 +156,16 @@ export class TransactionPage extends BasePage {
 	}
 
 	/**
-	 * Get payment step section
+	 * Get Payment step indicator in the stepper
 	 */
 	getPaymentStep() {
+		return this.getStepIndicatorByName("Payment");
+	}
+
+	/**
+	 * Get payment step content container
+	 */
+	getPaymentStepContent() {
 		return this.page.getByTestId("payment-step-container");
 	}
 
@@ -221,13 +244,17 @@ export class TransactionPage extends BasePage {
 	}
 
 	/**
-	 * Get confirmation step section
+	 * Get Confirmation step indicator in the stepper
 	 */
 	getConfirmationStep() {
-		return this.page
-			.getByText(/Confirmation|Confirm/i)
-			.locator("..")
-			.first();
+		return this.getStepIndicatorByName("Confirmation");
+	}
+
+	/**
+	 * Get confirmation step content container
+	 */
+	getConfirmationStepContent() {
+		return this.page.getByTestId("confirmation-step-container");
 	}
 
 	/**
@@ -398,39 +425,46 @@ export class TransactionPage extends BasePage {
 	}
 
 	/**
-	 * Check if step is completed
+	 * Check if step is completed (data-state="completed")
 	 */
 	async isStepCompleted(stepName: string): Promise<boolean> {
-		const step = this.page
-			.getByText(new RegExp(stepName, "i"))
-			.locator("..")
-			.first();
-		const ariaLabel = await step.getAttribute("aria-label");
-		return (
-			ariaLabel?.includes("completed") || ariaLabel?.includes("done") || false
-		);
+		const step = this.getStepIndicatorByName(stepName);
+		const state = await step.getAttribute("data-state");
+		return state === "completed";
 	}
 
 	/**
-	 * Check if step is active
+	 * Check if step is active (data-state="active")
 	 */
 	async isStepActive(stepName: string): Promise<boolean> {
-		const step = this.getCurrentStep();
-		const text = await step.innerText();
-		return text === stepName || false;
+		const step = this.getStepIndicatorByName(stepName);
+		const state = await step.getAttribute("data-state");
+		return state === "active";
 	}
 
 	/**
-	 * Check if step is disabled
+	 * Check if step is inactive/pending (data-state="inactive")
+	 */
+	async isStepInactive(stepName: string): Promise<boolean> {
+		const step = this.getStepIndicatorByName(stepName);
+		const state = await step.getAttribute("data-state");
+		return state === "inactive";
+	}
+
+	/**
+	 * Get step state (completed, active, or inactive)
+	 */
+	async getStepState(stepName: string): Promise<string | null> {
+		const step = this.getStepIndicatorByName(stepName);
+		return step.getAttribute("data-state");
+	}
+
+	/**
+	 * Check if step is disabled (for backwards compatibility - maps to inactive state)
+	 * @deprecated Use isStepInactive instead
 	 */
 	async isStepDisabled(stepName: string): Promise<boolean> {
-		const step = this.page
-			.getByText(new RegExp(stepName, "i"))
-			.locator("..")
-			.first();
-		const disabled = await step.getAttribute("disabled");
-		const ariaDisabled = await step.getAttribute("aria-disabled");
-		return disabled !== null || ariaDisabled === "true";
+		return this.isStepInactive(stepName);
 	}
 
 	/**

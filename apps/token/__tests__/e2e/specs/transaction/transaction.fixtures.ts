@@ -19,12 +19,18 @@ type BankEntities = {
   banks: Pick<BankDetails, "id">[];
 };
 
-type Entities = TransactionEntities & BankEntities;
+type SaleOverrides = {
+  originalKyc: boolean;
+  originalSaft: boolean;
+  saleId: string;
+};
+
+type Entities = TransactionEntities & BankEntities & { saleOverrides?: SaleOverrides };
 
 // Declare the types of your fixtures.
 type TransactionFixtures = {
   tx001: TransactionPage;
-  //TODO! make fixtures for other test cases.
+  tx002: TransactionPage;
   entities: Map<string, Entities>;
 };
 
@@ -132,6 +138,113 @@ export const test = base.extend<TransactionFixtures>({
     await testDb.$disconnect();
     entities.delete(todoPage.pageId);
   },
+
+  /**
+   * Fixture for TC-TX-002: Transaction with KYC and SAFT required
+   * Creates a transaction where the sale requires both KYC verification and SAFT agreement
+   */
+  tx002: async ({ page, context }, use) => {
+    const [currentUser, openSale] = await testDb.$transaction([
+      testDb.user.findUniqueOrThrow({
+        where: {
+          walletAddress: await getUserWalletAddressFromStorage(context),
+        },
+      }),
+      testDb.sale.findFirstOrThrow({
+        where: {
+          status: SaleStatus.OPEN,
+        },
+      }),
+    ]);
+
+    const {
+      include: { tokenDistributions: _, ...rest },
+    } = transactionByIdWithRelations;
+
+    const txs = await testDb.saleTransactions.createManyAndReturn({
+      data: Array.from({ length: 1 }).map(() =>
+        mockTransactions(
+          {
+            userId: currentUser.id,
+            saleId: openSale.id,
+            formOfPayment: FOP.TRANSFER,
+            status: TransactionStatus.PENDING,
+          },
+          "createMany",
+        ),
+      ),
+      include: {
+        ...rest,
+      },
+    });
+
+    // Store original values to restore after test
+    const originalKyc = openSale.requiresKYC;
+    const originalSaft = openSale.saftCheckbox;
+
+    // Update sale to require KYC and SAFT
+    const { banks } = await testDb.sale.update({
+      where: { id: openSale.id },
+      data: {
+        requiresKYC: true,
+        saftCheckbox: true,
+        banks: {
+          create: {
+            bankName: faker.company.name(),
+            iban: faker.finance.iban(),
+          },
+        },
+      },
+      select: {
+        banks: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    invariant(txs.length > 0, "Failed to create transaction");
+
+    const tempEntities = {} as Entities;
+    tempEntities.saleTransactions = txs as TransactionByIdWithRelations[];
+    tempEntities.banks = banks;
+    tempEntities.saleOverrides = {
+      originalKyc,
+      originalSaft,
+      saleId: openSale.id,
+    };
+
+    const transactionPage = new TransactionPage(page);
+    entities.set(transactionPage.pageId, tempEntities);
+
+    await use(transactionPage);
+
+    // Cleanup: restore sale settings and delete test data
+    await testDb.$transaction(async (prisma) => {
+      await prisma.saleTransactions.deleteMany({
+        where: {
+          id: {
+            in: tempEntities.saleTransactions.map((t) => t.id),
+          },
+        },
+      });
+      await prisma.bankDetails.deleteMany({
+        where: {
+          id: {
+            in: tempEntities.banks.map((b) => b.id),
+          },
+        },
+      });
+      await prisma.sale.update({
+        where: { id: openSale.id },
+        data: { requiresKYC: originalKyc, saftCheckbox: originalSaft },
+      });
+    });
+    await testDb.$disconnect();
+    entities.delete(transactionPage.pageId);
+  },
+
   entities,
 });
 
