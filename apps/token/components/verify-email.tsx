@@ -15,6 +15,7 @@ import {
 } from "@mjs/ui/primitives/card";
 import { useAppForm } from "@mjs/ui/primitives/form";
 import { FormInput } from "@mjs/ui/primitives/form-input";
+import { toast } from "@mjs/ui/primitives/sonner";
 import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useCallback, useState, useTransition } from "react";
@@ -28,7 +29,7 @@ import {
 } from "@/lib/actions";
 import { useUser } from "@/lib/services/api";
 import useActiveAccount from "./hooks/use-active-account";
-import { PulseLoader } from './pulse-loader';
+import { PulseLoader } from "./pulse-loader";
 
 const titleMapping = {
   1: {
@@ -51,12 +52,14 @@ export function VerifyEmail({
   initialStep,
 }: {
   token: string;
-  email?: string
+  email?: string;
   initialStep?: 1 | 2 | 3;
 }) {
   const [magicWord] = useLocalStorage(MW_KEY, "");
   const { data, isLoading } = useUser();
-  const [step, setStep] = useState<1 | 2 | 3>(initialStep ?? (token ? 3 : magicWord ? 2 : 1));
+  const [step, setStep] = useState<1 | 2 | 3>(
+    initialStep ?? (token ? 3 : magicWord ? 2 : 1),
+  );
   const router = useRouter();
 
   const handleCancel = async () => {
@@ -93,16 +96,30 @@ export function VerifyEmail({
               }}
             />
           )}
-          {step === 2 && (
-            isLoading ? <PulseLoader /> : <VerifyEmailForm
-              key={2}
-              onCancel={handleCancel}
-              onSuccess={() => handleNextStep(3)}
-              defaultEmail={email || (!data?.email?.startsWith('temp_') ? data?.email : undefined)}
-              defaultFirstName={data?.name !== 'Anonymous' ? data?.name?.split(' ')[0] : undefined}
-              defaultLastName={data?.name !== 'Anonymous' ? data?.name?.split(' ')[1] : undefined}
-            />
-          )}
+          {step === 2 &&
+            (isLoading ? (
+              <PulseLoader />
+            ) : (
+              <VerifyEmailForm
+                key={2}
+                onCancel={handleCancel}
+                onSuccess={() => handleNextStep(3)}
+                defaultEmail={
+                  email ||
+                  (!data?.email?.startsWith("temp_") ? data?.email : undefined)
+                }
+                defaultFirstName={
+                  data?.name !== "Anonymous"
+                    ? data?.name?.split(" ")[0]
+                    : undefined
+                }
+                defaultLastName={
+                  data?.name !== "Anonymous"
+                    ? data?.name?.split(" ")[1]
+                    : undefined
+                }
+              />
+            ))}
           {step === 3 && (
             <VerifyTokenForm
               key={2}
@@ -136,10 +153,13 @@ const MagicWordForm = ({
   const [_, setMagicWord] = useLocalStorage(MW_KEY, "");
   const { signout, isConnected } = useActiveAccount();
 
-  const action = useActionListener(useAction(validateMagicWord), {
+  const action = useAction(validateMagicWord, {
     onSuccess: () => {
       setMagicWord(MW_KEY);
       onSuccess?.();
+    },
+    onError: ({ error }) => {
+      toast.error(error.serverError || "Invalid invitation code");
     },
   });
 
@@ -196,7 +216,7 @@ const MagicWordForm = ({
               type="button"
               onClick={handleCancel}
               loading={isLoading}
-              disabled={action.isExecuting}
+              disabled={action.isPending}
             >
               Cancel
             </Button>
@@ -205,7 +225,7 @@ const MagicWordForm = ({
               className="flex-1"
               type="submit"
               disabled={isLoading}
-              loading={action.isExecuting}
+              loading={action.isPending}
             >
               Continue
             </Button>
@@ -231,7 +251,6 @@ export const VerifyEmailForm = ({
   defaultFirstName?: string;
   defaultLastName?: string;
 }) => {
-
   const { execute, isExecuting } = useActionListener(
     useAction(createEmailVerification),
     {

@@ -138,7 +138,6 @@ export const login = loginActionClient
 			chainId: payload.chain_id ? Number(payload.chain_id) : undefined,
 		});
 		invariant(user?.success, "User could not be found/created");
-
 		redirect(
 			user.data.user.emailVerified ? "/in?to=dashboard" : "/in?to=onboarding",
 			RedirectType.replace,

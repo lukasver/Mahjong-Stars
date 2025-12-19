@@ -2,7 +2,7 @@ import { invariant } from "@epic-web/invariant";
 import { KycVerification } from "@prisma/client";
 import { DateTime } from "luxon";
 import { headers } from "next/headers";
-import { JWT_EXPIRATION_TIME, ONE_DAY, ROLES } from "@/common/config/constants";
+import { JWT_EXPIRATION_TIME, ROLES } from "@/common/config/constants";
 import { env, publicUrl } from "@/common/config/env";
 import { metadata as siteMetadata } from "@/common/config/site";
 import { ActionCtx } from "@/common/schemas/dtos/sales";
@@ -202,7 +202,7 @@ class UsersController {
 						sessions: {
 							create: {
 								token: hashedJwt,
-								expiresAt: new Date(expirationTime || Date.now() + ONE_DAY),
+								expiresAt,
 								ipAddress,
 								userAgent,
 							},

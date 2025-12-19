@@ -50,7 +50,6 @@ export function withAuth(
         isAdminUser = !!_isAdmin.value;
         userId = _isAdmin?.value?.id;
       }
-
       if (!authed) {
         console.debug("Unauthorized API, deleting session cookie");
         await deleteSessionCookie();
