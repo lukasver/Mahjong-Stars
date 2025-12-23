@@ -403,6 +403,7 @@ export class TransactionsController {
 					user: {
 						select: {
 							walletAddress: true,
+							email: true,
 							profile: {
 								select: {
 									firstName: true,

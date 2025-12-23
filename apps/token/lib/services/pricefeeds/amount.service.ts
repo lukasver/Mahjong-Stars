@@ -120,7 +120,7 @@ export class AmountCalculatorService {
   }: {
     amount: string;
     decimals: number;
-  }): { bigNumber: BigNumberish, decimals: number } {
+  }): { bigNumber: BigNumberish; decimals: number } {
     // Regular expression to match only the necessary number of decimal places
     const regex = new RegExp(`^(\\d+\\.?\\d{0,${decimals}})`);
     const match = amount.match(regex);
@@ -134,8 +134,6 @@ export class AmountCalculatorService {
       : amount;
     return { bigNumber: parseUnits(formattedAmount, decimals), decimals };
   }
-
-
 
   async getAmountAndPricePerUnit({
     initialCurrency,
@@ -175,7 +173,6 @@ export class AmountCalculatorService {
       currency, // New currency
     };
   }
-
 
   /**
    * Main function to calculate the amount to pay by the user based on the bought token quantity.
@@ -236,7 +233,6 @@ export class AmountCalculatorService {
       fees: amountToPay.fees,
       currency,
     };
-
   };
 
   /**
@@ -255,9 +251,12 @@ export class AmountCalculatorService {
   }) => {
     const { amount, fromCurrency, toCurrency, precision } = args;
 
+    console.log("🚀 ~ amount.service.ts:258 ~ args:", args);
+
     // Get exchange rate from source to target currency
     const res = await this.getRateFetcher(fromCurrency, toCurrency);
 
+    console.log("🚀 ~ amount.service.ts:265 ~ res:", res);
 
     if (res.error) {
       throw new Error("Error fetching exchange rate for currency conversion");
@@ -274,10 +273,8 @@ export class AmountCalculatorService {
     // Calculate the converted amount
     const convertedAmount = new Decimal(amount).mul(exchangeRate);
 
-
     // Get appropriate precision for the target currency
     const targetPrecision = this.getPrecision(toCurrency, precision);
-
 
     // Format the converted amount
     const formattedAmount = convertedAmount.toFixed(targetPrecision);
@@ -290,5 +287,28 @@ export class AmountCalculatorService {
       currency: toCurrency,
       exchangeRate: exchangeRate,
     };
+  };
+
+  /**
+   * Get the fee to be applied based on the amount and the fee configuration
+   */
+  calculateFee = async (args: {
+    fee: {
+      fixed?: string | number | Prisma.Decimal;
+      percentage?: string | number | Prisma.Decimal;
+    };
+    amount: string | number | Prisma.Decimal;
+  }) => {
+    const { amount, fee } = args;
+    let feeAmount = new Decimal(0);
+    if (fee.fixed) {
+      feeAmount = feeAmount.add(new Decimal(fee.fixed));
+    }
+    if (fee.percentage) {
+      feeAmount = feeAmount.add(
+        new Decimal(amount).mul(new Decimal(fee.percentage).div(100)),
+      );
+    }
+    return feeAmount;
   };
 }

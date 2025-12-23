@@ -3,67 +3,8 @@ import { createHash } from "node:crypto";
 import { invariant } from "@epic-web/invariant";
 import { env } from "@/common/config/env";
 import logger from "../logger.server";
+import { CreateSessionRequest, CreateSessionResponse, InstaxchangeApiError, SessionStatusResponse } from './types';
 
-/**
- * Instaxchange API error response structure
- */
-export interface InstaxchangeApiError {
-  message: string;
-  code?: string;
-  details?: unknown;
-}
-
-/**
- * Instaxchange session creation request payload
- */
-export interface CreateSessionRequest {
-  amount: number;
-  currency: string;
-  transactionId: string;
-  metadata?: Record<string, unknown>;
-  accountRefId?: string;
-  toCurrency?: string;
-}
-
-/**
- * Instaxchange session creation response
- */
-export interface CreateSessionResponse {
-  sessionId: string;
-  sessionUrl: string;
-  status: string;
-  expiresAt?: string;
-}
-
-/**
- * Instaxchange session status response
- */
-export interface SessionStatusResponse {
-  sessionId: string;
-  status: "pending" | "completed" | "failed" | "expired" | "cancelled";
-  amount?: number;
-  currency?: string;
-  paymentMethod?: string;
-  transactionHash?: string;
-  completedAt?: string;
-  failedAt?: string;
-  error?: string;
-}
-
-/**
- * Instaxchange webhook payload structure
- */
-export interface InstaxchangeWebhookPayload {
-  event: string;
-  sessionId: string;
-  status: string;
-  amount?: number;
-  currency?: string;
-  paymentMethod?: string;
-  transactionHash?: string;
-  timestamp: string;
-  metadata?: Record<string, unknown>;
-}
 
 /**
  * Configuration options for Instaxchange service
@@ -77,6 +18,8 @@ interface InstaxchangeServiceConfig {
   retryDelay?: number;
 }
 
+
+
 /**
  * Service class for interacting with Instaxchange payment API
  * Handles session creation, status checking, and webhook verification
@@ -85,7 +28,7 @@ export class InstaxchangeService {
   private readonly apiKey: string;
   private readonly apiUrl: string;
   private readonly webhookSecret: string;
-  private readonly accountRefId?: string;
+  private readonly accountRefId: string;
   private readonly maxRetries: number;
   private readonly retryDelay: number;
   private readonly toCurrency = "USDC_POLYGON";
@@ -96,13 +39,14 @@ export class InstaxchangeService {
       apiUrl = env.INSTAXCHANGE_API_URL,
       webhookSecret = env.INSTAXCHANGE_WEBHOOK_SECRET,
       accountRefId = env.INSTAXCHANGE_ACCOUNT_REF_ID,
-      maxRetries = 3,
+      maxRetries = process.env.NODE_ENV === "production" ? 3 : 1,
       retryDelay = 1000,
     } = config || {};
 
     invariant(apiKey, "INSTAXCHANGE_API_KEY is required");
     invariant(apiUrl, "INSTAXCHANGE_API_URL is required");
     invariant(webhookSecret, "INSTAXCHANGE_WEBHOOK_SECRET is required");
+    invariant(accountRefId, "INSTAXCHANGE_ACCOUNT_REF_ID is required");
 
     this.apiKey = apiKey;
     this.apiUrl = apiUrl.replace(/\/$/, ""); // Remove trailing slash
@@ -114,37 +58,60 @@ export class InstaxchangeService {
 
   /**
    * Creates a payment session with Instaxchange
-   * @param amount - Payment amount
-   * @param currency - Payment currency (e.g., "USD")
-   * @param transactionId - Internal transaction ID
-   * @param metadata - Optional metadata to attach to the session
+   * @param fromAmount - Amount the user is sending (required when amountDirection is "sending")
+   * @param fromCurrency - Currency the user is sending (e.g., "USD")
+   * @param transactionId - Internal transaction ID used for webhook correlation
+   * @param address - Destination wallet address that will receive the crypto
+   * @param options - Optional overrides for return URL, payment method and receiver details
    * @returns Promise with session details including sessionId and sessionUrl
    * @throws Error if session creation fails
    */
-  async createSession(
-    amount: number,
-    currency: string,
-    transactionId: string,
-    metadata?: Record<string, unknown>,
-  ): Promise<CreateSessionResponse> {
-    invariant(amount > 0, "Amount must be greater than 0");
-    invariant(currency, "Currency is required");
+  async createSession(args: Omit<CreateSessionRequest, "toCurrency" | "accountRefId" | "webhookRef"> & { transactionId: string, toCurrency?: CreateSessionRequest["toCurrency"] }): Promise<CreateSessionResponse & { iframeUrl: string }> {
+
+    const {
+      fromAmount,
+      toCurrency = this.toCurrency,
+      fromCurrency,
+      address,
+      amountDirection = "sending",
+      transactionId,
+      ...opts
+    } = args;
+
+    invariant(fromCurrency, "Currency is required");
     invariant(transactionId, "Transaction ID is required");
+    invariant(address, "Destination wallet address is required");
+
+    if (amountDirection === "sending") {
+      invariant(
+        typeof fromAmount === "number" && fromAmount > 0,
+        "fromAmount is required when amountDirection is 'sending'",
+      );
+    } else {
+      invariant(
+        typeof opts?.toAmount === "number" && opts.toAmount > 0,
+        "toAmount is required when amountDirection is 'receiving'",
+      );
+    }
 
     const payload: CreateSessionRequest = {
-      amount,
-      currency,
-      transactionId,
-      metadata: {
-        ...metadata,
-        internalTransactionId: transactionId,
-      },
-      toCurrency: this.toCurrency, // Always convert to USDC_POLYGON as per plan
-      ...(this.accountRefId && { accountRefId: this.accountRefId }),
+      accountRefId: this.accountRefId,
+      toCurrency,
+      fromCurrency,
+      address,
+      amountDirection,
+      ...(amountDirection === "sending" ? { fromAmount } : { toAmount: opts?.toAmount }),
+      webhookRef: transactionId,
+      returnUrl: opts?.returnUrl,
+      method: opts.method,
+      email: opts?.email,
+      firstName: opts?.firstName,
+      lastName: opts?.lastName,
+      country: opts?.country,
     };
 
     return this.executeWithRetry(async () => {
-      const response = await fetch(`${this.apiUrl}/api/session`, {
+      const response = await fetch(`${this.apiUrl}/session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -159,20 +126,22 @@ export class InstaxchangeService {
           `Failed to create Instaxchange session: ${errorData.message}`,
         );
       }
-
       const data = (await response.json()) as CreateSessionResponse;
+      invariant(data.id, "Session ID is missing from response");
 
-      invariant(data.sessionId, "Session ID is missing from response");
-      invariant(data.sessionUrl, "Session URL is missing from response");
+      // logger.info("Instaxchange session created", {
+      //   sessionId: data.id,
+      //   transactionId,
+      //   amount:
+      //     amountDirection === "sending" ? fromAmount : opts?.toAmount,
+      //   currency:
+      //     amountDirection === "sending"
+      //       ? fromCurrency
+      //       : toCurrency,
+      //   amountDirection,
+      // });
 
-      logger.info("Instaxchange session created", {
-        sessionId: data.sessionId,
-        transactionId,
-        amount,
-        currency,
-      });
-
-      return data;
+      return Object.assign(data, { iframeUrl: `${this.apiUrl.split('/api')[0]}/order/${data.id}` });
     });
   }
 
@@ -187,7 +156,7 @@ export class InstaxchangeService {
 
     return this.executeWithRetry(async () => {
       const response = await fetch(
-        `${this.apiUrl}/api/session/${sessionId}/status`,
+        `${this.apiUrl}/session/${sessionId}/status`,
         {
           method: "GET",
           headers: {
@@ -206,7 +175,7 @@ export class InstaxchangeService {
       const data = (await response.json()) as SessionStatusResponse;
 
       invariant(data.sessionId, "Session ID is missing from response");
-      invariant(data.status, "Status is missing from response");
+      invariant(data.sessionStatus, "Status is missing from response");
 
       return data;
     });

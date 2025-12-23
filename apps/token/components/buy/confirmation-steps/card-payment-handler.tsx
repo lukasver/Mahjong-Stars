@@ -88,7 +88,7 @@ export function CardPaymentHandler({
         transition={{ delay: 0.3, duration: 0.5 }}
       >
         <InstaxchangeWidget
-          transaction={tx}
+          txId={tx?.id}
           onSuccess={onSuccessInstaxchange}
           onError={(error) => {
             toast.error("Payment Error", {

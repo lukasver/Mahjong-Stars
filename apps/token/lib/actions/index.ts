@@ -1,6 +1,7 @@
 "use server";
 import "server-only";
 import { invariant } from "@epic-web/invariant";
+import { trace } from "@opentelemetry/api";
 import { FOP, Prisma } from "@prisma/client";
 import { waitUntil } from "@vercel/functions";
 import Decimal from "decimal.js";
@@ -54,8 +55,9 @@ import {
 } from "../auth/thirdweb";
 import { erc20Abi } from "../services/crypto/ABI";
 import { instaxchangeService } from "../services/instaxchange";
+import { PaymentMethod } from "../services/instaxchange/types";
 import logger from "../services/logger.server";
-import calculator from "../services/pricefeeds";
+import { AmountCalculatorService } from "../services/pricefeeds/amount.service";
 import { GetTransactionByIdRes } from "../types/fetchers";
 import { authActionClient, loginActionClient } from "./config";
 
@@ -870,128 +872,208 @@ export const createInstaxchangeSession = authActionClient
 	.schema(
 		z.object({
 			transactionId: z.string(),
-			amount: z.string(),
-			currency: z.string().min(3),
+			method: PaymentMethod
 		}),
 	)
 	.action(async ({ ctx, parsedInput }) => {
-		const { transactionId, amount, currency } = parsedInput;
 
-		// Get transaction and verify ownership
-		const transaction = await transactionsController.getTransactionById(
-			{ id: transactionId },
-			ctx,
-		);
-
-		if (!transaction.success || !transaction.data) {
-			throw new Error("Transaction not found or access denied");
-		}
-
-		const tx = transaction.data;
-
-		// Verify transaction belongs to the user
-		if (tx.transaction.user.walletAddress !== ctx.address) {
-			throw new Error("Transaction does not belong to user");
-		}
-
-		// Validate that provided currency matches transaction's paid currency
-		if (tx.transaction.paidCurrency !== currency) {
-			throw new Error(
-				`Currency mismatch: transaction uses ${tx.transaction.paidCurrency}, but ${currency} was provided`,
-			);
-		}
-
-		if (Number.isNaN(Number(amount))) {
-			throw new Error("Invalid amount");
-		}
-
-		// Validate that provided amount matches transaction's total amount
-		// Allow small tolerance for decimal precision differences (0.01%)
-		const transactionAmount = new Decimal(tx.transaction.totalAmount);
-		const providedAmount = new Decimal(amount);
-
-		const amountDifference = transactionAmount.sub(providedAmount).abs();
-		const tolerance = transactionAmount.mul(0.0001); // 0.01% tolerance
-
-		if (amountDifference.gt(tolerance)) {
-			throw new Error(
-				`Amount mismatch: transaction amount is ${transactionAmount.toString()}, but ${amount} was provided`,
-			);
-		}
-
-		// Use transaction's actual amount and currency for consistency
-		const finalAmount = transactionAmount;
-		const finalCurrency = tx.transaction.paidCurrency;
-
-		// Convert amount to USD for threshold check
-		let usdAmount: Decimal;
-		if (finalCurrency === "USD") {
-			usdAmount = finalAmount;
-		} else {
-			const conversion = await calculator.convertToCurrency({
-				amount: finalAmount.toString(),
-				fromCurrency: finalCurrency,
-				toCurrency: "USD",
-				precision: 8,
+		const span = trace
+			.getTracer("payment-service")
+			.startSpan("create-payment-session");
+		try {
+			const { transactionId, method } = parsedInput;
+			span.setAttributes({
+				"transaction.id": transactionId,
+				"checkout.method": method,
 			});
-			usdAmount = new Decimal(conversion.amount);
-		}
 
-		// Check amount threshold (≤ USD 1,000 for Instaxchange)
-		const INSTAXCHANGE_MAX_AMOUNT = new Decimal(1000);
-		if (usdAmount.gt(INSTAXCHANGE_MAX_AMOUNT)) {
-			throw new Error(
-				`Transaction amount exceeds Instaxchange limit of $${INSTAXCHANGE_MAX_AMOUNT.toString()} USD`,
+			// Get transaction and verify ownership
+			const transaction = await transactionsController.getTransactionById(
+				{ id: transactionId },
+				ctx,
 			);
-		}
 
-		if (!instaxchangeService) {
-			throw new Error("Not implemented, service not available");
-		}
-		// Create Instaxchange session
-		// Convert to number only when calling the API (which expects a number)
-		const session = await instaxchangeService.createSession(
-			finalAmount.toNumber(),
-			finalCurrency,
-			transactionId,
-			{
+			if (!instaxchangeService) {
+				throw new Error("Not implemented, service not available");
+			}
+
+			if (!transaction.success || !transaction.data) {
+				throw new Error("Transaction not found or access denied");
+			}
+
+			const tx = transaction.data;
+
+			// Verify transaction belongs to the user
+			if (tx.transaction.user.walletAddress !== ctx.address) {
+				throw new Error("Transaction does not belong to user");
+			}
+			let txAmount = new Decimal(tx.transaction.totalAmount);
+			let txCurrency = tx.transaction.totalAmountCurrency;
+
+			const calculator = new AmountCalculatorService(async () => {
+				const ex = await ratesController.getExchangeRate(txCurrency, "USD");
+				if (!ex?.success || !ex?.data) {
+					return {
+						data: null,
+						error: ex?.message || "Failed to fetch exchange rate",
+					};
+				}
+				return { data: ex.data, error: null };
+			});
+			// if payment type is apple pay, we cannot use CHF. Check that and if it is, we should convert to EUR.
+			// https://instaxchange.com/dashboard/payment-methods
+			if (method === "apple-pay" && txCurrency === "CHF") {
+				// TODO!: we need to convert to supporteed currency (USD/EUR/GBP)
+				const DESTINATION_CURRENCY = "EUR";
+				txAmount = new Decimal((await calculator.convertToCurrency({
+					amount: txAmount.toString(),
+					fromCurrency: txCurrency,
+					toCurrency: DESTINATION_CURRENCY,
+					precision: 8,
+				})).amount)
+				txCurrency = DESTINATION_CURRENCY;
+			}
+
+			// Convert amount to USD for threshold check
+			let usdAmount: Decimal;
+			let fixedFeePart = "0.3"; //USD
+			const percentageFeePart = "5.5";
+
+			if (txCurrency === "USD") {
+				usdAmount = txAmount;
+			} else {
+				const conversion = await calculator.convertToCurrency({
+					amount: txAmount.toString(),
+					fromCurrency: txCurrency,
+					toCurrency: "USD",
+					precision: 8,
+				});
+				usdAmount = new Decimal(conversion.amount);
+				// Convert the fixed fee part to the target currency
+				fixedFeePart = new Decimal(conversion.exchangeRate).mul(new Decimal(fixedFeePart)).toString();
+			}
+
+			const feeAmount = await calculator.calculateFee({
+				amount: txAmount.toString(),
+				fee: {
+					fixed: fixedFeePart,
+					percentage: percentageFeePart,
+				}
+			});
+
+			console.log("🚀 ~ index.ts:965 ~ feeAmount:", feeAmount);
+
+
+			let finalAmount = txAmount;
+			// Add the fee amount to the final amount
+			if (!feeAmount.isZero()) {
+				finalAmount = finalAmount.add(new Decimal(feeAmount));
+			}
+
+			span.setAttributes({
+				"transaction.original_amount": txAmount.toString(),
+				"transaction.final_amount": finalAmount.toString(),
+				"transaction.fee_amount": feeAmount.toString(),
+				"transaction.currency": txCurrency,
+				"transaction.quantity": tx.transaction.quantity.toString(),
+				"transaction.amount_usd": usdAmount.toString(),
+				"transaction.fee_amount_usd": new Decimal(fixedFeePart).mul(new Decimal(percentageFeePart)).mul(new Decimal(usdAmount)).toString(),
+			});
+
+			//TODO! set this for prod
+			const MIN_AMOUNT_TO_PURCHASE = new Decimal(0);
+			invariant(usdAmount.greaterThanOrEqualTo(MIN_AMOUNT_TO_PURCHASE), "Transaction amount is less than the minimum amount to purchase in CC");
+
+
+			// Check amount threshold (≤ USD 1,000 for Instaxchange)
+			// const INSTAXCHANGE_MAX_AMOUNT = new Decimal(1000);
+			// if (usdAmount.gt(INSTAXCHANGE_MAX_AMOUNT)) {
+			// 	throw new Error(
+			// 		`Transaction amount exceeds Instaxchange limit of $${INSTAXCHANGE_MAX_AMOUNT.toString()} USD`,
+			// 	);
+			// }
+
+			// Create Instaxchange session
+			// Convert to number only when calling the API (which expects a number)
+			const session = await instaxchangeService.createSession({
+				// payment method selected by user
+				method,
+				fromAmount: finalAmount.toNumber(),
+				// User sends FIAT, provider computes receiving amount in crypto
+				amountDirection: "sending" as const,
+				// Currency the user is sending
+				fromCurrency: txCurrency,
+				// Destination wallet address that will receive the crypto
+				address: tx.transaction.sale.toWalletsAddress,
+				// Transaction ID for reference in webhooks
 				transactionId,
-				userWalletAddress: tx.transaction.user.walletAddress,
-				saleId: tx.transaction.sale.id,
-			},
-		);
+				// User profile data
+				email: tx.transaction.user.email || undefined,
+				firstName: tx.transaction.user.profile?.firstName || undefined,
+				lastName: tx.transaction.user.profile?.lastName || undefined,
+				// TODO: country from geolocation?
+			});
 
-		// Store session ID in transaction metadata
-		const existingMetadata =
-			(tx.transaction.metadata as Record<string, unknown>) || {};
-		const updatedMetadata = {
-			...existingMetadata,
-			instaxchange: {
-				sessionId: session.sessionId,
-				createdAt: new Date().toISOString(),
-			},
-		};
+			// Store session ID in transaction metadata
+			const existingMetadata =
+				(tx.transaction.metadata as Record<string, unknown>) || {};
+			const updatedMetadata = {
+				...existingMetadata,
+				instaxchange: {
+					sessionId: session.id,
+					status: session.status,
+					returnUrl: session.return_url,
+					createdAt: session.created_at,
+					amountUsd: usdAmount.toString(),
+				},
+			};
 
-		// Update transaction metadata
-		await prisma.saleTransactions.update({
-			where: { id: transactionId },
-			data: {
-				metadata: updatedMetadata as Prisma.InputJsonValue,
-			},
-		});
+			waitUntil(
+				// Update transaction metadata
+				prisma.saleTransactions.update({
+					where: { id: transactionId },
+					data: {
+						metadata: updatedMetadata as Prisma.InputJsonValue,
+						fees: {
+							create: {
+								type: TransactionFeeTypeSchema.enum.PAYMENT_GATEWAY,
+								amount: new Decimal(feeAmount),
+								currencySymbol: txCurrency,
+							},
+						},
+					},
+				}),
+			);
 
-		logger.info("Instaxchange session created", {
-			sessionId: session.sessionId,
-			transactionId,
-			amount: finalAmount.toString(),
-			currency: finalCurrency,
-			usdAmount: usdAmount.toString(),
-		});
+			span.setAttributes({
+				"checkout.from_currency": session.from_currency,
+				"checkout.from_amount": session.from_amount.toString(),
+				"checkout.to_currency": session.to_currency,
+				"checkout.to_amount": session.to_amount.toString(),
+				"checkout.payment_direction": session.payment_direction,
+				"checkout.status": session.status,
+				"checkout.wallet": session.wallet,
+				"checkout.fee_amount": feeAmount.toString(),
+			});
 
-		return {
-			sessionId: session.sessionId,
-			sessionUrl: session.sessionUrl,
-			status: session.status,
-			expiresAt: session.expiresAt,
-		};
+			invariant(session.to_amount > 0, "Transaction amount is less than zero");
+
+			logger.info("Instaxchange session created", {
+				sessionId: session.id,
+				transactionId,
+				usdAmount: usdAmount.toString(),
+				amount: session.to_amount.toString(),
+				currency: session.to_currency,
+				feeAmount: feeAmount,
+			});
+
+			console.debug('SESSION ID=>>', session.id);
+
+			return session;
+		} catch (e) {
+			span.recordException(e instanceof Error ? e : new Error(String(e)));
+			throw e;
+		} finally {
+			span.end();
+		}
 	});

@@ -45,6 +45,7 @@ export const transactionByIdWithRelations =
 			tokenDistributions: true,
 			user: {
 				select: {
+					email: true,
 					walletAddress: true,
 					profile: {
 						select: {

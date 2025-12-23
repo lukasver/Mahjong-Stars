@@ -1,10 +1,10 @@
 "use client";
 
 import { toast } from "@mjs/ui/primitives/sonner";
-import { Decimal } from "decimal.js";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { createInstaxchangeSession } from "@/lib/actions";
+import { CreateSessionRequest } from "@/lib/services/instaxchange/types";
 
 interface UseInstaxchangeSessionProps {
   /**
@@ -12,13 +12,9 @@ interface UseInstaxchangeSessionProps {
    */
   transactionId: string | null | undefined;
   /**
-   * The total amount to pay
+   * The processor to be used for payment
    */
-  totalAmount: string | Decimal | null | undefined;
-  /**
-   * The currency code of the payment
-   */
-  paidCurrency: string | null | undefined;
+  method: CreateSessionRequest["method"];
   /**
    * Optional callback when an error occurs
    */
@@ -54,20 +50,24 @@ interface UseInstaxchangeSessionReturn {
  */
 export function useInstaxchangeSession({
   transactionId,
-  totalAmount,
-  paidCurrency,
+  method,
   onError,
 }: UseInstaxchangeSessionProps): UseInstaxchangeSessionReturn {
-  const [sessionUrl, setSessionUrl] = useState<string | null>(null);
+  const [sessionUrl, setSessionUrl] = useState<{ method: UseInstaxchangeSessionProps["method"]; url: string } | null>(null);
+
+  // useLocalStorage<{ method: UseInstaxchangeSessionProps["method"]; url: string } | null>(
+  //   `mjs-tx-${transactionId}`,
+  //   null,
+  // );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const { execute: createSession, status } = useAction(
     createInstaxchangeSession,
     {
       onSuccess: ({ data }) => {
-        if (data?.sessionUrl) {
-          setSessionUrl(data.sessionUrl);
+        console.debug('DATA=>>', data);
+        if (data?.iframeUrl) {
+          setSessionUrl({ method, url: data.iframeUrl });
           setIsLoading(false);
           setError(null);
         } else {
@@ -96,28 +96,20 @@ export function useInstaxchangeSession({
    * Creates the Instaxchange payment session
    */
   useEffect(() => {
-    if (!transactionId) {
-      setError("Transaction not found");
+    if (sessionUrl?.url) {
       setIsLoading(false);
       return;
     }
-
-    if (!totalAmount || !paidCurrency) {
+    if (!transactionId || !method) {
+      setError("idle");
       setIsLoading(false);
       return;
     }
-    // Convert amount to number for API
-    const amount =
-      totalAmount instanceof Decimal
-        ? totalAmount.toString()
-        : new Decimal(totalAmount).toString();
     createSession({
       transactionId,
-      amount,
-      currency: paidCurrency,
+      method,
     });
-  }, [transactionId, totalAmount, paidCurrency, createSession]);
+  }, [transactionId, method, createSession, sessionUrl]);
 
-  return { sessionUrl, isLoading, error, status };
+  return { sessionUrl: sessionUrl?.url || null, isLoading, error, status };
 }
-

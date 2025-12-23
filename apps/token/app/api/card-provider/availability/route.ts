@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { env } from "@/common/config/env";
 
-const ENABLED = false;
+const ENABLED = true;
 
 /**
  * GET endpoint to check if card payment provider is available

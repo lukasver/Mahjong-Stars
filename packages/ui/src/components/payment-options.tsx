@@ -6,15 +6,9 @@ import type React from "react";
 import { useState } from "react";
 import { Button } from '../primitives/button';
 
-export type PaymentMethod =
-  | "card"
-  | "ideal"
-  | "bancontact"
-  | "apple-pay"
-  | "google-pay";
 
 interface PaymentMethodOption {
-  id: PaymentMethod;
+  id: string;
   name: string;
   icon: React.ReactNode;
 }
@@ -186,19 +180,19 @@ const paymentMethods: PaymentMethodOption[] = [
 ];
 
 
-type PaymentMethodSelectorProps = {
-  onSelect: (method: PaymentMethod) => void;
-  allowedMethods?: PaymentMethod[];
-  defaultMethod?: PaymentMethod;
+type PaymentMethodSelectorProps<T extends readonly string[] = readonly string[]> = {
+  onSelect: (method: T[number]) => void;
+  allowedMethods?: T;
+  defaultMethod?: T[number];
   asCard?: boolean;
 }
 
-export default function PaymentMethodSelector({
+export default function PaymentMethodSelector<T extends readonly string[]>({
   onSelect,
   allowedMethods,
   defaultMethod = "card",
   asCard = false,
-}: PaymentMethodSelectorProps) {
+}: PaymentMethodSelectorProps<T>) {
   const availableMethods = allowedMethods
     ? paymentMethods.filter(m => allowedMethods.includes(m.id))
     : paymentMethods;
@@ -207,7 +201,7 @@ export default function PaymentMethodSelector({
     ? availableMethods[0]?.id ?? defaultMethod
     : defaultMethod;
 
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(initialMethod);
+  const [selectedMethod, setSelectedMethod] = useState<T[number]>(initialMethod);
 
   const handleProceed = () => {
     onSelect(selectedMethod);
