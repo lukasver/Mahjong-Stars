@@ -33,10 +33,13 @@ const E_SIGN_DOMAIN = `https://*.documenso.com/`;
 const UPGRADE_INSECURE_REQUESTS =
 	process.env.NODE_ENV === "production" ? "upgrade-insecure-requests;" : "";
 
+const INSTAXCHANGE_FRAME = `https://instaxchange.banxa.com https://instaxchange.com https://*.instaxchange.com`;
+const INSTAXCHANGE_CONNECT = `https://instaxchange.com https://api.instaxchange.com https://*.instaxchange.com`;
+
 const cspHeader = `
     default-src 'self' ${MAIN_DOMAIN};
-    connect-src 'self' ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io ${VERCEL_LIVE_CSP} https://instaxchange.com https://api.instaxchange.com https://*.instaxchange.com;
-    frame-src 'self' https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.thirdweb.com/ https://instaxchange.com https://*.instaxchange.com;
+    connect-src 'self' ${INSTAXCHANGE_CONNECT} ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io ${VERCEL_LIVE_CSP};
+    frame-src 'self' ${INSTAXCHANGE_FRAME} https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.thirdweb.com/;
     script-src 'self' 'unsafe-eval' 'unsafe-inline' ${ANALYTICS_PROVIDERS} ${GOOGLE_CSP} ${E_SIGN_DOMAIN} ${VERCEL_LIVE_CSP} ${HELIO_SCRIPT};
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${HELIO_STYLES};

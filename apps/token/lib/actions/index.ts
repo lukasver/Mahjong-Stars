@@ -1034,13 +1034,17 @@ export const createInstaxchangeSession = authActionClient
 					where: { id: transactionId },
 					data: {
 						metadata: updatedMetadata as Prisma.InputJsonValue,
-						fees: {
-							create: {
-								type: TransactionFeeTypeSchema.enum.PAYMENT_GATEWAY,
-								amount: new Decimal(feeAmount),
-								currencySymbol: txCurrency,
-							},
-						},
+						...(feeAmount.isZero()
+							? {}
+							: {
+								fees: {
+									create: {
+										type: TransactionFeeTypeSchema.enum.PAYMENT_GATEWAY,
+										amount: new Decimal(feeAmount),
+										currencySymbol: txCurrency,
+									},
+								},
+							}),
 					},
 				}),
 			);
