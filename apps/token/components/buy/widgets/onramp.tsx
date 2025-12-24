@@ -263,6 +263,9 @@ const OnRampWidgetComponent = ({
   );
 };
 
+/**
+ * @deprecated Use InstaxchangeWidget instead
+ */
 export const OnRampWidget = WithErrorHandler(OnRampWidgetComponent);
 
 function getSupportedTokens(chainId: number | undefined) {

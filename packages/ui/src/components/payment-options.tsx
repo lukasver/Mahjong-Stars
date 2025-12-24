@@ -289,7 +289,7 @@ export default function PaymentMethodSelector<T extends readonly string[]>({
     return (
       <Button
         onClick={handleProceed}
-        className="px-4 pb-4 sm:pb-0 sm:px-0 w-full bg-white hover:bg-gray-100 text-black font-semibold rounded-xl text-base transition-all shadow-lg hover:shadow-xl"
+        className="px-4 sm:px-0 w-full bg-white hover:bg-gray-100 text-black font-semibold rounded-xl text-base transition-all shadow-lg hover:shadow-xl"
       >
         Proceed
       </Button>

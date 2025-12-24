@@ -4,7 +4,7 @@ import { trace } from "@opentelemetry/api";
 import { Geo } from "@vercel/functions";
 import Decimal from "decimal.js";
 import { z } from "zod";
-import { env } from "@/common/config/env";
+import { env, publicUrl } from "@/common/config/env";
 import { TransactionFeeTypeSchema } from "@/common/schemas/generated";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { InstaxchangeService } from "@/lib/services/instaxchange";
@@ -38,8 +38,10 @@ export class PaymentsService {
     let txAmount = new Decimal(tx.totalAmount);
     let txCurrency = tx.totalAmountCurrency;
 
-    const calculator = new AmountCalculatorService(async () => {
-      const ex = await rates.getExchangeRate(txCurrency, "USD");
+
+
+    const calculator = new AmountCalculatorService(async (from, to) => {
+      const ex = await rates.getExchangeRate(from, to);
       if (!ex?.success || !ex?.data) {
         return {
           data: null,
@@ -53,18 +55,18 @@ export class PaymentsService {
     // https://instaxchange.com/dashboard/payment-methods
     if (method === "apple-pay" && txCurrency === "CHF") {
       // TODO!: we need to convert to supporteed currency (USD/EUR/GBP)
-      const DESTINATION_CURRENCY = "EUR";
+      const FALLBACK_CURRENCY = "EUR";
       txAmount = new Decimal(
         (
           await calculator.convertToCurrency({
             amount: txAmount.toString(),
             fromCurrency: txCurrency,
-            toCurrency: DESTINATION_CURRENCY,
+            toCurrency: FALLBACK_CURRENCY,
             precision: 8,
           })
         ).amount,
       );
-      txCurrency = DESTINATION_CURRENCY;
+      txCurrency = FALLBACK_CURRENCY;
     }
 
     // Convert amount to USD for threshold check
@@ -171,6 +173,7 @@ export class PaymentsService {
       firstName: tx.user.profile?.firstName || undefined,
       lastName: tx.user.profile?.lastName || undefined,
       country: geo?.country || undefined,
+      returnUrl: `${publicUrl}/apps/dashboard/buy/${tx.id}/pending`
     });
 
     // Store session ID in transaction metadata

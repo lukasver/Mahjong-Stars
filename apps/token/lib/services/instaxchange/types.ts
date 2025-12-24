@@ -19,6 +19,7 @@ export const PaymentMethod = z.enum([
   "interac",
   "pix",
   "blik",
+  "sepa"
 ]);
 
 

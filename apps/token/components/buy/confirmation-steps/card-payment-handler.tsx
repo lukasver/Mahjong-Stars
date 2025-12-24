@@ -12,6 +12,7 @@ import { PulseLoader } from "@/components/pulse-loader";
 import { useCardProviderAvailability } from "@/lib/services/api";
 import type { SuccessInstaxchangePaymentData } from "../widgets/instaxchange";
 import { SuccessCryptoPaymentData } from "../widgets/transaction";
+import { WithErrorHandler } from "../widgets/utils";
 import { CardPaymentNotice } from "./card-payment-notice";
 import { CryptoPaymentComponent } from "./payment-step-crypto";
 
@@ -19,8 +20,8 @@ const ENABLE_RESERVATION = false;
 
 const InstaxchangeWidget = dynamic(
   () =>
-    import("../widgets/instaxchange").then(
-      ({ InstaxchangeWidget }) => InstaxchangeWidget,
+    import("../widgets/instaxchange").then(({ InstaxchangeWidget }) =>
+      WithErrorHandler(InstaxchangeWidget),
     ),
   {
     ssr: false,

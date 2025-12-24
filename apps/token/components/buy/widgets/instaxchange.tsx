@@ -4,7 +4,7 @@ import { motion } from "@mjs/ui/components/motion";
 import PaymentMethodSelector, {
   PaymentMethodSelectorSkeleton,
 } from "@mjs/ui/components/payment-options";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { useInstaxchangeSession } from "@/components/hooks/use-instaxchange-session";
 import { PulseLoader } from "@/components/pulse-loader";
@@ -29,6 +29,7 @@ interface InstaxchangeWidgetProps {
   method: CreateSessionRequest["method"];
   onSuccess: (data: SuccessInstaxchangePaymentData) => void;
   onError?: (error: string) => void;
+  errorComponent?: React.ReactNode;
 }
 
 /**
@@ -40,6 +41,7 @@ const InstaxchangeWidgetComponent = ({
   method,
   onSuccess,
   onError,
+  errorComponent = null
 }: InstaxchangeWidgetProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -57,7 +59,7 @@ const InstaxchangeWidgetComponent = ({
   const displayError = error;
 
   if (displayError && !sessionUrl) {
-    return (
+    return (errorComponent ||
       <div className="space-y-4 p-4">
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <h3 className="font-semibold text-destructive">Payment Error</h3>
@@ -98,18 +100,29 @@ const InstaxchangeWidgetComponent = ({
         )} */}
         </div>
 
-        <motion.div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <p className="text-xs text-foreground/80">
-            Your payment is processed securely by our providers. We take care of
-            the processing fees for you 😉
-          </p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+        >
+          <Alert
+            className='border-secondary-300'
+          >
+            <Icons.infoCircle className="stroke-secondary-300" />
+            <AlertDescription className="text-foreground">
+              Your payment is processed securely by our partner's. We take care
+              of the processing fees for you 😉
+            </AlertDescription>
+          </Alert>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.9, duration: 0.6 }}
         >
-          <Alert>
+          <Alert
+            className='border-secondary-300'
+          >
             <AlertTriangle className="stroke-destructive" />
             {/* <AlertTitle className="text-secondary-300">Notice: Accuracy of Information Required</AlertTitle> */}
             <AlertDescription className="text-foreground">
@@ -125,11 +138,11 @@ const InstaxchangeWidgetComponent = ({
   );
 };
 
+import { Icons } from "@mjs/ui/components/icons";
 import { StaggeredRevealAnimation } from "@mjs/ui/components/motion";
 import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
 import { AlertTriangle } from "lucide-react";
 import { memo } from "react";
-import { WithErrorHandler } from "./utils";
 
 const Iframe = memo(function Iframe({
   src,
@@ -138,6 +151,26 @@ const Iframe = memo(function Iframe({
   src: string;
   ref: React.RefObject<HTMLIFrameElement | null>;
 }) {
+
+  const handleIframeMessage = useCallback(
+    (event: unknown) => {
+      console.debug('EVENT:', event);
+    },
+    [ref?.current],
+  );
+
+  /**
+   * Set up postMessage listener for iframe communication
+   */
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.addEventListener("message", handleIframeMessage);
+    }
+    return () => {
+      ref.current?.removeEventListener("message", handleIframeMessage);
+    };
+  }, [handleIframeMessage, ref]);
+
   return (
     <iframe
       ref={ref}
@@ -166,7 +199,7 @@ type PaymentProcessors = Extract<
   "card" | "apple-pay" | "google-pay"
 >;
 
-export const Instaxchange = WithErrorHandler(InstaxchangeWidgetComponent);
+export const Instaxchange = InstaxchangeWidgetComponent;
 
 /**
  * Instaxchange component with paymentp processor selection

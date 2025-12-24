@@ -7,7 +7,7 @@ import type { ActionCtx } from "@/common/schemas/dtos/sales";
 import { transactionByIdWithRelations } from "@/common/types/transactions";
 import { prisma } from "@/lib/db/prisma";
 import transactionsController from "@/lib/repositories/transactions";
-import { ConfirmTransactionDto } from "@/lib/repositories/transactions/dtos";
+import { ConfirmTransactionDto, RejectTransactionDto } from "@/lib/repositories/transactions/dtos";
 import { instaxchangeService } from "@/lib/services/instaxchange";
 import { InstaxchangeWebhookPayload } from "./types";
 
@@ -195,6 +195,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
+/**
+ * Main function to process events from Instaxchange webhook
+ */
 const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
   const span = trace
     .getTracer("instaxchange-webhook")
@@ -275,7 +278,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
       span.setStatus({ code: SpanStatusCode.OK });
       span.addEvent("webhook.already_processed");
       span.end();
-      return NextResponse.json({ success: true, message: "Already processed" });
+      return;
     }
 
     idempotencySpan.setStatus({ code: SpanStatusCode.OK });
@@ -338,36 +341,48 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
 
       const updateSpan = trace
         .getTracer("instaxchange-webhook")
-        .startSpan("update-transaction-status");
+        .startSpan("reject-transaction");
 
       try {
-        const result = await prisma.saleTransactions.update({
-          where: { id: txId },
-          data: {
-            status: TransactionStatus.REJECTED,
-            comment:
-              "Transaction recipient wallet changed by user during payment process",
-            metadata: updatedMetadata as Prisma.InputJsonValue,
-          },
-          select: {
-            id: true,
-          },
-        });
+        const ctx: ActionCtx = {
+          userId: tx.userId,
+          isAdmin: false,
+          address: tx.user.walletAddress,
+        };
+
+        const rejectDto: RejectTransactionDto = {
+          id: txId,
+          reason: "Transaction recipient wallet changed by user during payment process",
+          metadata: updatedMetadata,
+        };
+
+        const result = await transactionsController.rejectTransaction(rejectDto, ctx);
+
+        if (!result.success) {
+          throw new Error(result.message || "Failed to reject transaction");
+        }
 
         updateSpan.setAttributes({
           "transaction.status": TransactionStatus.REJECTED,
         });
         updateSpan.setStatus({ code: SpanStatusCode.OK });
         updateSpan.end();
+        span.setStatus({ code: SpanStatusCode.OK });
         span.end();
-        return result;
+        return
       } catch (error) {
         updateSpan.recordException(error as Error);
         updateSpan.setStatus({
           code: SpanStatusCode.ERROR,
-          message: "Failed to update transaction status",
+          message: "Failed to reject transaction",
         });
         updateSpan.end();
+        span.recordException(error as Error);
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: "Error rejecting transaction",
+        });
+        span.end();
         throw error;
       }
     }
@@ -462,7 +477,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
           span.setStatus({ code: SpanStatusCode.OK });
           span.addEvent("webhook.completed");
           span.end();
-          return NextResponse.json({ success: true });
+          return;
         } catch (error) {
           confirmSpan.recordException(error as Error);
           confirmSpan.setStatus({
@@ -517,21 +532,26 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
             "webhook.deposit_tx_status": payload.invoiceData.Deposit_tx_status ?? "",
           });
 
-          // Update transaction status to reflect failure
-          // Note: We don't change status to REJECTED automatically as that requires admin approval
-          // Keep current status but update metadata with failure reason
-          //TODO!: notify user
-          const res = await prisma.saleTransactions.update({
-            where: { id: tx.id },
-            data: {
-              status: TransactionStatus.CANCELLED,
-              metadata: updatedMetadata as Prisma.InputJsonValue,
-              comment: `Payment failed with provider: ${payload.data.statusReason}`,
-            },
-            select: {
-              id: true,
-            },
-          });
+          // Cancel transaction using rejectTransaction method with CANCELLED status
+          // This will restore units to the sale and send email notification to the user
+          const ctx: ActionCtx = {
+            userId: tx.userId,
+            isAdmin: false,
+            address: tx.user.walletAddress,
+          };
+
+          const cancelDto: RejectTransactionDto = {
+            id: tx.id,
+            reason: `Payment failed with provider: ${payload.data.statusReason}`,
+            metadata: updatedMetadata,
+            status: "CANCELLED",
+          };
+
+          const result = await transactionsController.rejectTransaction(cancelDto, ctx);
+
+          if (!result.success) {
+            throw new Error(result.message || "Failed to cancel transaction");
+          }
 
           failedSpan.addEvent("payment.failed", {
             transactionId: tx.id,
@@ -550,7 +570,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
           span.setStatus({ code: SpanStatusCode.OK });
           span.addEvent("webhook.failed");
           span.end();
-          return res;
+          return
         } catch (error) {
           failedSpan.recordException(error as Error);
           failedSpan.setStatus({
@@ -582,7 +602,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
           });
 
           // For other statuses (e.g., pending, processing), just update metadata
-          const res = await prisma.saleTransactions.update({
+          await prisma.saleTransactions.update({
             where: { id: tx.id },
             data: {
               //TODO! check if we should keep this in PENDING instead...
@@ -610,7 +630,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
           span.setStatus({ code: SpanStatusCode.OK });
           span.addEvent("webhook.pending");
           span.end();
-          return res;
+          return
         } catch (error) {
           defaultSpan.recordException(error as Error);
           defaultSpan.setStatus({

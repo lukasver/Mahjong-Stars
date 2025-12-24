@@ -17,3 +17,10 @@ export type ConfirmTransactionDto = {
     metadata?: Record<string, unknown>;
   };
 };
+
+export type RejectTransactionDto = {
+  id: string;
+  reason?: string;
+  metadata?: Record<string, unknown>;
+  status?: "REJECTED" | "CANCELLED";
+};

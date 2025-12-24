@@ -50,11 +50,11 @@ import { prisma } from "@/db";
 import { InstaxchangeService } from "@/lib/services/instaxchange";
 import { PaymentMethod } from "@/lib/services/instaxchange/types";
 import logger from "@/lib/services/logger.server";
-import { ConfirmTransactionDto } from "@/lib/types/fetchers";
 import documentsController from "../documents";
 import rates from "../feeds/rates";
 import notificatorService, { Notificator } from "../notifications";
 import { emailEventHelpers } from "../notifications/email-events";
+import { ConfirmTransactionDto, RejectTransactionDto } from "./dtos";
 import { PaymentsService } from "./payments";
 import { TransactionValidator } from "./validator";
 
@@ -1110,6 +1110,167 @@ export class TransactionsController {
 		}
 	}
 
+	/**
+	 * Reject or cancel a transaction and restore units to the sale
+	 * Valid transaction statuses: PENDING, AWAITING_PAYMENT, PAYMENT_SUBMITTED
+	 * Sends email notification to the user
+	 * @param dto - Transaction rejection/cancellation data
+	 * @param ctx - Action context
+	 * @returns Success or Failure result
+	 */
+	async rejectTransaction(dto: RejectTransactionDto, ctx: ActionCtx) {
+		try {
+			invariant(dto.id, "Transaction ID is required");
+
+			// Determine target status (default to REJECTED)
+			const targetStatus =
+				(dto.status === "CANCELLED"
+					? TransactionStatus.CANCELLED
+					: TransactionStatus.REJECTED) as TransactionStatus;
+
+			// Fetch transaction with necessary relations
+			const tx = await this.db.saleTransactions.findUniqueOrThrow({
+				where: { id: dto.id },
+				include: {
+					sale: {
+						select: {
+							id: true,
+							name: true,
+							tokenSymbol: true,
+							availableTokenQuantity: true,
+						},
+					},
+					user: {
+						select: {
+							id: true,
+							email: true,
+							emailVerified: true,
+							walletAddress: true,
+							profile: {
+								select: {
+									firstName: true,
+									lastName: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			// Validate transaction status - only allow rejection/cancellation for specific statuses
+			const allowedStatuses = [
+				TransactionStatus.PENDING,
+				TransactionStatus.AWAITING_PAYMENT,
+				TransactionStatus.PAYMENT_SUBMITTED,
+			];
+
+			if (!allowedStatuses.includes(tx.status)) {
+				throw new Error(
+					`Transaction cannot be ${targetStatus === TransactionStatus.CANCELLED ? "cancelled" : "rejected"}. Current status: ${tx.status}. Allowed statuses: ${allowedStatuses.join(", ")}`,
+				);
+			}
+
+			// Prepare update data based on target status
+			const defaultReason =
+				targetStatus === TransactionStatus.CANCELLED
+					? "Transaction cancelled"
+					: "Transaction rejected";
+
+			const updateData: Prisma.SaleTransactionsUpdateInput = {
+				status: targetStatus,
+				comment: dto.reason || defaultReason,
+				...(dto.metadata && {
+					metadata: {
+						toJSON() {
+							return dto.metadata;
+						},
+					},
+				}),
+			};
+
+			// Only set rejectionReason for REJECTED status
+			if (targetStatus === TransactionStatus.REJECTED) {
+				updateData.rejectionReason = dto.reason || defaultReason;
+			}
+
+			// Update transaction and restore units to sale
+			const [updatedTx] = await this.db.$transaction([
+				// Restore units to sale
+				this.db.sale.update({
+					where: { id: tx.saleId },
+					data: {
+						availableTokenQuantity: {
+							increment: tx.quantity.toNumber(),
+						},
+					},
+				}),
+				// Update transaction status
+				this.db.saleTransactions.update({
+					where: { id: dto.id },
+					data: updateData,
+					include: {
+						sale: {
+							select: {
+								name: true,
+								tokenSymbol: true,
+							},
+						},
+					},
+				}),
+			]);
+
+			// Send email notification to user
+			if (tx.user.emailVerified) {
+				const userName =
+					tx.user.profile?.firstName || tx.user.profile?.lastName
+						? `${tx.user.profile.firstName || ""} ${tx.user.profile.lastName || ""}`.trim()
+						: tx.user.email;
+
+				const isCancelled = targetStatus === TransactionStatus.CANCELLED;
+
+				await this.notificator.send({
+					template: isCancelled ? "transactionCancelled" : "transactionRejected",
+					to: {
+						email: tx.user.email,
+						name: userName,
+					},
+					subject: `${tx.sale.name} Transaction ${isCancelled ? "Cancelled" : "Rejected"} | ${tx.id}`,
+					props: isCancelled
+						? {
+							userName,
+							saleName: tx.sale.name,
+							transactionId: tx.id,
+							quantity: tx.quantity.toString(),
+							tokenSymbol: tx.sale.tokenSymbol,
+							reason: dto.reason || defaultReason,
+							supportEmail: siteMetadata.supportEmail,
+						}
+						: {
+							userName,
+							tokenName: tx.sale.name,
+							tokenSymbol: tx.sale.tokenSymbol,
+							purchaseAmount:
+								tx.amountPaid?.toString() || tx.totalAmount.toString(),
+							transactionHash: tx.txHash || tx.id,
+							transactionTime:
+								tx.paymentDate?.toISOString() || tx.createdAt.toISOString(),
+							paymentMethod: tx.formOfPayment,
+							walletAddress: tx.receivingWallet || tx.user.walletAddress,
+							transactionId: tx.id,
+							rejectionReason: dto.reason || defaultReason,
+							supportEmail: siteMetadata.supportEmail,
+							paidCurrency: tx.paidCurrency || tx.totalAmountCurrency || "",
+						},
+				});
+			}
+
+			return Success({ transaction: decimalsToString(updatedTx) });
+		} catch (e) {
+			logger(e);
+			return Failure(e);
+		}
+	}
+
 	async confirmTransaction(
 		{ id, type, payload }: ConfirmTransactionDto,
 		ctx: ActionCtx,
@@ -1498,13 +1659,21 @@ export class TransactionsController {
 				tx: tx.data.transaction,
 				method: dto.method,
 				geo: ctx.geo,
+
 			});
+
+			console.log("🚀 ~ index.ts:1665 ~ session:", session);
+
 
 			waitUntil(
 				// Update transaction metadata
 				prisma.saleTransactions.update({
 					where: { id: tx.data.transaction.id },
 					data: {
+						totalAmount: session.from_amount,
+						totalAmountCurrency: session.from_currency,
+						amountPaidCurrency: { connect: { symbol: session.to_currency?.includes('USDC') ? 'USDC' : session.to_currency } },
+						amountPaid: session.to_amount.toString(),
 						metadata: metadata as Prisma.InputJsonValue,
 						...(fee
 							? {
