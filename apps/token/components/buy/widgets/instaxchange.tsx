@@ -1,6 +1,9 @@
 "use client";
 
-import PaymentMethodSelector, { PaymentMethodSelectorSkeleton } from "@mjs/ui/components/payment-options";
+import { motion } from "@mjs/ui/components/motion";
+import PaymentMethodSelector, {
+  PaymentMethodSelectorSkeleton,
+} from "@mjs/ui/components/payment-options";
 import { useRef, useState } from "react";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { useInstaxchangeSession } from "@/components/hooks/use-instaxchange-session";
@@ -40,11 +43,7 @@ const InstaxchangeWidgetComponent = ({
 }: InstaxchangeWidgetProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const {
-    sessionUrl,
-    isLoading,
-    error,
-  } = useInstaxchangeSession({
+  const { sessionUrl, isLoading, error } = useInstaxchangeSession({
     transactionId: txId,
     method,
     onError,
@@ -99,11 +98,27 @@ const InstaxchangeWidgetComponent = ({
         )} */}
         </div>
 
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
+        <motion.div className="rounded-lg border border-muted bg-muted/10 p-4">
           <p className="text-xs text-foreground/80">
-            Your payment is processed securely by Instaxchange.
+            Your payment is processed securely by our providers. We take care of
+            the processing fees for you 😉
           </p>
-        </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.9, duration: 0.6 }}
+        >
+          <Alert>
+            <AlertTriangle className="stroke-destructive" />
+            {/* <AlertTitle className="text-secondary-300">Notice: Accuracy of Information Required</AlertTitle> */}
+            <AlertDescription className="text-foreground">
+              Avoid changing the recipient address after the payment is
+              initiated, this could result in your transaction being cancelled
+              and your funds being lost.
+            </AlertDescription>
+          </Alert>
+        </motion.div>
       </div>
     </StaggeredRevealAnimation>
     // </Activity>
@@ -111,8 +126,10 @@ const InstaxchangeWidgetComponent = ({
 };
 
 import { StaggeredRevealAnimation } from "@mjs/ui/components/motion";
+import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
+import { AlertTriangle } from "lucide-react";
 import { memo } from "react";
-import { WithErrorHandler } from './utils';
+import { WithErrorHandler } from "./utils";
 
 const Iframe = memo(function Iframe({
   src,
@@ -130,7 +147,13 @@ const Iframe = memo(function Iframe({
       allow="clipboard-read; clipboard-write; fullscreen; payment"
       sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       referrerPolicy="strict-origin-when-cross-origin"
-      style={{ width: "100%", height: "100%", border: "0", minHeight: "600px", maxHeight: "600px" }}
+      style={{
+        width: "100%",
+        height: "100%",
+        border: "0",
+        minHeight: "600px",
+        maxHeight: "600px",
+      }}
       allowFullScreen
     // onError={handleIframeError}
     // onLoad={handleIframeLoad}
@@ -185,5 +208,3 @@ export const InstaxchangeWidget = ({
     />
   );
 };
-
-

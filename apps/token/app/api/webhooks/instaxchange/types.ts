@@ -21,9 +21,9 @@ export const InstaxchangeWebhookPayload = z.object({
     createdAt: z.string(),
   }),
   invoiceData: z.object({
-    Email: z.string(),
-    Name: z.string(),
-    Credit_card_number: z.string(),
+    Email: z.string().nullable(),
+    Name: z.string().nullable(),
+    Credit_card_number: z.string().nullable(),
     Invoice_ID: z.string(),
     Status: z.string(),
     Wallet_address: z.string(),
