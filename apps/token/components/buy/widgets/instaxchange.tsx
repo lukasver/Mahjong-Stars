@@ -81,7 +81,7 @@ const InstaxchangeWidgetComponent = ({
     // <Activity mode={!sessionUrl ? "visible" : "hidden"}>
     <StaggeredRevealAnimation isVisible={!!sessionUrl}>
       <div className="space-y-4">
-        <div className="relative w-full" style={{ minHeight: "600px" }}>
+        <div className="relative w-full">
           {/* {isProcessing && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
               <div className="text-center">
@@ -176,7 +176,7 @@ const Iframe = memo(function Iframe({
       ref={ref}
       src={src}
       title="Instaxchange Payment"
-      className="h-full w-full rounded-lg border border-border"
+      className="h-full w-full rounded-lg border border-border min-h-[90vh] md:min-h-screen]"
       allow="clipboard-read; clipboard-write; fullscreen; payment"
       sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       referrerPolicy="strict-origin-when-cross-origin"
@@ -184,8 +184,6 @@ const Iframe = memo(function Iframe({
         width: "100%",
         height: "100%",
         border: "0",
-        minHeight: "600px",
-        maxHeight: "600px",
       }}
       allowFullScreen
     // onError={handleIframeError}
