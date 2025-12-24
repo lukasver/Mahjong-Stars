@@ -35,14 +35,14 @@ const Pending = () => {
       !isLoading &&
       data?.transaction?.status &&
       ![
-        TransactionStatus.AWAITING_PAYMENT,
-        TransactionStatus.COMPLETED,
         TransactionStatus.PAYMENT_SUBMITTED,
         TransactionStatus.PAYMENT_VERIFIED,
         TransactionStatus.TOKENS_DISTRIBUTED,
       ].includes(data?.transaction.status as TransactionStatus)
     ) {
       if (data?.transaction.status === TransactionStatus.COMPLETED) {
+        router.replace(`/dashboard/buy/${tx}`);
+      } else if (data?.transaction.status === TransactionStatus.AWAITING_PAYMENT) {
         router.replace(`/dashboard/buy/${tx}`);
       } else {
         router.replace(`/dashboard/buy/${tx}/failure`);
