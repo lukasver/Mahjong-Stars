@@ -6,8 +6,11 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
+import { Suspense } from "react";
 import { metadata as siteConfig } from "@/common/config/site";
+import { VercelToolbar } from "@/components/admin/vercel-toolbar";
 import { CookieConsent } from "@/components/cookie-consent";
+import { getCurrentUser } from "@/lib/services/fetchers.server";
 import packageJson from "../package.json";
 import { Providers } from "./providers";
 
@@ -88,8 +91,17 @@ export default async function RootLayout({
             </Providers>
             <CookieConsent />
           </NextIntlClientProvider>
+          <Suspense fallback={null}>
+            <VercelToolbarRSC />
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
+const VercelToolbarRSC = async () => {
+  const res = await getCurrentUser();
+  if (!res.data) return null;
+  return <VercelToolbar roles={res.data?.roles} />;
+};

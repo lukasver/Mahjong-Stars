@@ -74,6 +74,7 @@
 		"@vercel/functions": "^2.2.2",
 		"@vercel/og": "^0.6.8",
 		"@vercel/otel": "^2.1.0",
+		"@vercel/toolbar": "^0.1.41",
 		"cacheable": "^1.10.1",
 		"canvas-confetti": "^1.9.3",
 		"decimal.js": "^10.6.0",
