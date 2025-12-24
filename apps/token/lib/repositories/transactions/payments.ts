@@ -173,7 +173,7 @@ export class PaymentsService {
       firstName: tx.user.profile?.firstName || undefined,
       lastName: tx.user.profile?.lastName || undefined,
       country: geo?.country || undefined,
-      returnUrl: `${publicUrl}/apps/dashboard/buy/${tx.id}/pending`
+      returnUrl: `${publicUrl}/dashboard/buy/${tx.id}/pending`
     });
 
     // Store session ID in transaction metadata
