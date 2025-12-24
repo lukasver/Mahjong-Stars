@@ -1,20 +1,32 @@
 "use client";
 
 import { motion } from "@mjs/ui/components/motion";
+import { PaymentMethodSelectorSkeleton } from "@mjs/ui/components/payment-options";
 import { toast } from "@mjs/ui/primitives/sonner";
 import Decimal from "decimal.js";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { useUsdAmount } from "@/components/hooks/use-usd-amount";
 import { PulseLoader } from "@/components/pulse-loader";
 import { useCardProviderAvailability } from "@/lib/services/api";
-import {
-  InstaxchangeWidget,
-  SuccessInstaxchangePaymentData,
-} from "../widgets/instaxchange";
+import type { SuccessInstaxchangePaymentData } from "../widgets/instaxchange";
 import { SuccessCryptoPaymentData } from "../widgets/transaction";
 import { CardPaymentNotice } from "./card-payment-notice";
 import { CryptoPaymentComponent } from "./payment-step-crypto";
+
+const ENABLE_RESERVATION = false;
+
+const InstaxchangeWidget = dynamic(
+  () =>
+    import("../widgets/instaxchange").then(
+      ({ InstaxchangeWidget }) => InstaxchangeWidget,
+    ),
+  {
+    ssr: false,
+    loading: () => <PaymentMethodSelectorSkeleton />,
+  },
+);
 
 interface CardPaymentHandlerProps {
   transaction: TransactionByIdWithRelations;
@@ -22,9 +34,8 @@ interface CardPaymentHandlerProps {
   onSuccessCrypto: (d: SuccessCryptoPaymentData) => void;
 }
 
-
-// Amount threshold for Instaxchange (USD 1,000)
-const INSTAXCHANGE_MAX_AMOUNT = new Decimal(1000);
+// Amount threshold for Instaxchange (USD 100_000)
+const INSTAXCHANGE_MAX_AMOUNT = new Decimal(100_000);
 /**
  * Component that handles card payment logic
  * Checks card provider availability and conditionally renders Instaxchange widget or fallback
@@ -34,10 +45,8 @@ export function CardPaymentHandler({
   onSuccessInstaxchange,
   onSuccessCrypto,
 }: CardPaymentHandlerProps) {
-  const {
-    data: availabilityData,
-    isLoading: isCheckingAvailability,
-  } = useCardProviderAvailability();
+  const { data: availabilityData, isLoading: isCheckingAvailability } =
+    useCardProviderAvailability();
 
   const isProviderAvailable = availabilityData?.available ?? false;
   const [showCryptoPayment, setShowCryptoPayment] = useState(false);
@@ -56,13 +65,7 @@ export function CardPaymentHandler({
     usdAmount.lte(INSTAXCHANGE_MAX_AMOUNT) &&
     tx.formOfPayment === "CARD";
 
-
-
-
-
-
-
-  const isLoading = isCheckingAvailability || isCheckingAmount
+  const isLoading = isCheckingAvailability || isCheckingAmount;
 
   // Show loading state while checking availability or amount
   if (isLoading) {
@@ -75,9 +78,8 @@ export function CardPaymentHandler({
   }
 
   const shouldUseProvider = isProviderAvailable && shouldUseInstaxchange;
-  const shouldShowNotice = !isProviderAvailable && shouldUseInstaxchange;
-  // const shouldUseCrypto = !shouldUseInstaxchange && tx.formOfPayment === "CARD" && onSuccessCrypto;
-
+  const shouldShowNotice =
+    !isProviderAvailable && shouldUseInstaxchange && ENABLE_RESERVATION;
 
   // If provider is available and should use Instaxchange, render widget
   if (shouldUseProvider) {
@@ -99,7 +101,6 @@ export function CardPaymentHandler({
       </motion.div>
     );
   }
-
 
   // If provider is unavailable, show notice with reservation options
   if (shouldShowNotice) {
@@ -123,17 +124,12 @@ export function CardPaymentHandler({
     return (
       <CardPaymentNotice
         transaction={tx}
-        onSelectDifferent={
-          () => setShowCryptoPayment(true)
-        }
+        onSelectDifferent={() => setShowCryptoPayment(true)}
       />
     );
   }
-  // // If amount exceeds Instaxchange threshold, use crypto payment (Thirdweb)
-  // // This applies regardless of provider availability since Instaxchange can't handle large amounts
-  // if (
-  //   shouldUseCrypto
-  // ) {
+
+  // If nothing works, default to thirdweb crypto component.
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -147,7 +143,4 @@ export function CardPaymentHandler({
       />
     </motion.div>
   );
-  // }
-
-  // throw new Error("Invalid payment state");
 }

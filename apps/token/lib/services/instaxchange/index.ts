@@ -70,10 +70,11 @@ export class InstaxchangeService {
 
     const {
       fromAmount,
+      toAmount,
       toCurrency = this.toCurrency,
       fromCurrency,
       address,
-      amountDirection = "sending",
+      amountDirection,
       transactionId,
       ...opts
     } = args;
@@ -89,7 +90,7 @@ export class InstaxchangeService {
       );
     } else {
       invariant(
-        typeof opts?.toAmount === "number" && opts.toAmount > 0,
+        typeof toAmount === "number" && toAmount > 0,
         "toAmount is required when amountDirection is 'receiving'",
       );
     }
@@ -100,8 +101,9 @@ export class InstaxchangeService {
       fromCurrency,
       address,
       amountDirection,
-      ...(amountDirection === "sending" ? { fromAmount } : { toAmount: opts?.toAmount }),
-      webhookRef: transactionId,
+      ...(amountDirection === "sending" ? { fromAmount } : { toAmount }),
+      // add a nonce to the webhookRef to prevent duplicate webhooks
+      webhookRef: `${transactionId}-${Date.now()}`,
       returnUrl: opts?.returnUrl,
       method: opts.method,
       email: opts?.email,
@@ -109,6 +111,9 @@ export class InstaxchangeService {
       lastName: opts?.lastName,
       country: opts?.country,
     };
+
+    console.log("🚀 ~ index.ts:115 ~ payload:", payload);
+
 
     return this.executeWithRetry(async () => {
       const response = await fetch(`${this.apiUrl}/session`, {
@@ -128,19 +133,6 @@ export class InstaxchangeService {
       }
       const data = (await response.json()) as CreateSessionResponse;
       invariant(data.id, "Session ID is missing from response");
-
-      // logger.info("Instaxchange session created", {
-      //   sessionId: data.id,
-      //   transactionId,
-      //   amount:
-      //     amountDirection === "sending" ? fromAmount : opts?.toAmount,
-      //   currency:
-      //     amountDirection === "sending"
-      //       ? fromCurrency
-      //       : toCurrency,
-      //   amountDirection,
-      // });
-
       return Object.assign(data, { iframeUrl: `${this.apiUrl.split('/api')[0]}/order/${data.id}` });
     });
   }
@@ -194,10 +186,7 @@ export class InstaxchangeService {
     // Sort JSON keys alphabetically
     const sortedKeys = Object.keys(payload).sort();
     const sorted: Record<string, unknown> = {};
-    for (const key of sortedKeys) {
-      sorted[key] = payload[key];
-    }
-
+    for (const k of sortedKeys) sorted[k] = (payload as any)[k];
     // JSON encode the sorted payload
     const jsonString = JSON.stringify(sorted);
 

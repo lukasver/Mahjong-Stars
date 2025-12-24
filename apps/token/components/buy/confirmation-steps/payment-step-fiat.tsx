@@ -126,7 +126,7 @@ export const FiatPayment = ({
 
   // If no banks available or form of payment is CARD, show card payment (Instaxchange or Thirdweb)
   if (
-    (!isBanksLoading && banks?.banks?.length === 0) ||
+    // (!isBanksLoading && banks?.banks?.length === 0) ||
     tx.formOfPayment === "CARD"
   ) {
     return (
@@ -155,11 +155,11 @@ export const FiatPayment = ({
           </TabsList> */}
 
           <TabsContent value={FOPSchema.enum.CARD}>
-            <CardPaymentHandler
+            {/* <CardPaymentHandler
               transaction={tx}
               onSuccessInstaxchange={onSuccessInstaxchange}
               onSuccessCrypto={onSuccessCrypto}
-            />
+            /> */}
           </TabsContent>
           <TabsContent value="TRANSFER">
             <div className="space-y-4">

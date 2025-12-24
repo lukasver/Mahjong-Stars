@@ -38,6 +38,7 @@ export default defineConfig({
       '__tests__/repositories/validator.test.ts',
       '__tests__/repositories/transactions.test.ts',
       '__tests__/crons.test.ts',
+      'app/api/webhooks/instaxchange/signature.test.ts'
     ],
     // include: ['__tests__/**/?(*.)test.?(c|m)[jt]s?(x)'],
     environment: 'node',

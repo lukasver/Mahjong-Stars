@@ -28,6 +28,7 @@ import {
 	TransactionWithRelations,
 } from "@/common/types/transactions";
 import { GetTransactionByIdRes } from '../types/fetchers';
+import { CreateSessionResponse } from './instaxchange/types';
 
 export type FetcherOptions = Omit<RequestInit, "body"> & {
 	baseUrl?: string;
@@ -455,6 +456,25 @@ export const getCardProviderAvailability = async () => {
 		}
 		const data = await response.json();
 		return { data: data as { available: boolean }, error: null };
+	} catch (e) {
+		return { data: null, error: e };
+	}
+};
+
+/**
+ * Get card payment provider availability
+ * Checks if card payment provider is configured and available
+ */
+export const createPaymentSession = async (body: { method: string, transactionId: string }) => {
+	try {
+		const data = await fetcher<CreateSessionResponse & { iframeUrl: string }>(`/transactions/checkout/session`, {
+			method: "POST",
+			body: JSON.stringify(body),
+		});
+
+		console.log("🚀 ~ fetchers.ts:475 ~ data:", data);
+
+		return { data, error: null };
 	} catch (e) {
 		return { data: null, error: e };
 	}

@@ -26,8 +26,8 @@ const HELIO_API = `https://api.hel.io/v1/ https://tiplink.io/api/wallet_adapter_
 const HELIO_ASSETS = `https://helio-assets.s3.eu-west-1.amazonaws.com/`;
 const MAIN_DOMAIN =
 	process.env.NODE_ENV === "production"
-		? `https://*.mahjongstars.com ${publicUrl}`
-		: `https://*.mahjongstars.com https://*.vercel.app http://localhost:3000 http://localhost:8080`;
+		? `https://*.thetilescompany.io ${publicUrl}`
+		: `https://*.thetilescompany.io https://*.vercel.app http://localhost:3000 http://localhost:8080 http://127.0.0.1:7242`;
 const E_SIGN_DOMAIN = `https://*.documenso.com/`;
 
 const UPGRADE_INSECURE_REQUESTS =
@@ -35,6 +35,7 @@ const UPGRADE_INSECURE_REQUESTS =
 
 const INSTAXCHANGE_FRAME = `https://instaxchange.banxa.com https://instaxchange.com https://*.instaxchange.com`;
 const INSTAXCHANGE_CONNECT = `https://instaxchange.com https://api.instaxchange.com https://*.instaxchange.com`;
+
 
 const cspHeader = `
     default-src 'self' ${MAIN_DOMAIN};
@@ -61,7 +62,7 @@ const config: NextConfig = () => {
 		createNextIntlPlugin("./lib/i18n.ts"),
 	];
 	return plugins.reduce((acc, next) => next(acc), {
-		reactStrictMode: process.env.NODE_ENV === "development",
+		reactStrictMode: false, // process.env.NODE_ENV === "development",
 		async headers() {
 			return [
 				{

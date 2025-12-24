@@ -71,6 +71,9 @@ export const env = createEnv({
 		INSTAXCHANGE_API_URL: z.string().url().min(1).optional(),
 		INSTAXCHANGE_WEBHOOK_SECRET: z.string().min(1).optional(),
 		INSTAXCHANGE_ACCOUNT_REF_ID: z.string().min(1).optional(),
+		MIN_AMOUNT_TO_PURCHASE: z.string().optional().transform((v) => v && Number(v)).pipe(z.number().min(0).optional()),
+		INSTAXCHANGE_FIXED_FEE: z.string().optional().transform((v) => v && Number(v)).pipe(z.number().min(0).optional()),
+		INSTAXCHANGE_PERCENTAGE_FEE: z.string().optional().transform((v) => v && Number(v)).pipe(z.number().min(0).optional())
 	},
 	client: {
 		NEXT_PUBLIC_THIRDWEB_CLIENT_ID: z.string().min(1),
@@ -139,6 +142,9 @@ export const env = createEnv({
 		INSTAXCHANGE_API_URL: process.env.INSTAXCHANGE_API_URL,
 		INSTAXCHANGE_WEBHOOK_SECRET: process.env.INSTAXCHANGE_WEBHOOK_SECRET,
 		INSTAXCHANGE_ACCOUNT_REF_ID: process.env.INSTAXCHANGE_ACCOUNT_REF_ID,
+		MIN_AMOUNT_TO_PURCHASE: process.env.MIN_AMOUNT_TO_PURCHASE,
+		INSTAXCHANGE_FIXED_FEE: process.env.INSTAXCHANGE_FIXED_FEE,
+		INSTAXCHANGE_PERCENTAGE_FEE: process.env.INSTAXCHANGE_PERCENTAGE_FEE,
 	},
 	skipValidation: process.env.NODE_ENV === "test",
 });

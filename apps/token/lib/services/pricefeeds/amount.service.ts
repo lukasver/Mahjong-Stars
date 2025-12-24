@@ -292,7 +292,7 @@ export class AmountCalculatorService {
   /**
    * Get the fee to be applied based on the amount and the fee configuration
    */
-  calculateFee = async (args: {
+  calculateFee = (args: {
     fee: {
       fixed?: string | number | Prisma.Decimal;
       percentage?: string | number | Prisma.Decimal;

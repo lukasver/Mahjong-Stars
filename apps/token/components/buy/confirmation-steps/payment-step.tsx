@@ -2,6 +2,7 @@
 
 import { motion } from "@mjs/ui/components/motion";
 import { useActionListener } from "@mjs/ui/hooks/use-action-listener";
+import { cn } from "@mjs/ui/lib/utils";
 import {
   CardContent,
   CardDescription,
@@ -160,7 +161,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
           </CardDescription>
         </CardHeader>
       </motion.div>
-      <CardContent>
+      <CardContent className={cn(paymentMethod === "CARD" ? "p-0 md:p-6" : "")}>
         {paymentMethod !== "CRYPTO" ? (
           <FiatPayment
             tx={tx.transaction}

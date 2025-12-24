@@ -1,5 +1,5 @@
 import "server-only";
-import { invariant } from "@epic-web/invariant";
+import { InvariantError, invariant } from "@epic-web/invariant";
 import { formatDate } from "@mjs/utils/client";
 import {
 	DocumentSignatureStatus,
@@ -11,10 +11,11 @@ import {
 	SaleTransactions,
 	TransactionStatus,
 } from "@prisma/client";
-import { waitUntil } from "@vercel/functions";
+import { Geo, waitUntil } from "@vercel/functions";
 import { deepmerge } from "deepmerge-ts";
 import Handlebars from "handlebars";
 import { DateTime } from "luxon";
+import { z } from "zod";
 import { FIAT_CURRENCIES } from "@/common/config/constants";
 import { publicUrl } from "@/common/config/env";
 import { metadata as siteMetadata } from "@/common/config/site";
@@ -46,11 +47,15 @@ import {
 	TransactionWithRelations,
 } from "@/common/types/transactions";
 import { prisma } from "@/db";
+import { InstaxchangeService } from "@/lib/services/instaxchange";
+import { PaymentMethod } from "@/lib/services/instaxchange/types";
 import logger from "@/lib/services/logger.server";
+import { ConfirmTransactionDto } from "@/lib/types/fetchers";
 import documentsController from "../documents";
 import rates from "../feeds/rates";
 import notificatorService, { Notificator } from "../notifications";
 import { emailEventHelpers } from "../notifications/email-events";
+import { PaymentsService } from "./payments";
 import { TransactionValidator } from "./validator";
 
 export class TransactionsController {
@@ -58,7 +63,11 @@ export class TransactionsController {
 	private readonly notificator: Notificator;
 	private readonly db: PrismaClient;
 
-	constructor(_db: PrismaClient, _notificator: Notificator) {
+	constructor(
+		_db: PrismaClient,
+		_notificator: Notificator,
+		private readonly payments: PaymentsService,
+	) {
 		this.documents = documentsController;
 		this.notificator = _notificator;
 		this.db = _db;
@@ -1102,27 +1111,7 @@ export class TransactionsController {
 	}
 
 	async confirmTransaction(
-		{
-			id,
-			type,
-			payload,
-		}: {
-			id: string;
-			type: "CRYPTO" | "FIAT";
-			payload?: {
-				formOfPayment?: FOP;
-				confirmationId?: string;
-				receivingWallet?: string;
-				comment?: string;
-				txHash?: string;
-				chainId?: number;
-				amountPaid?: string;
-				paymentDate?: Date;
-				paymentEvidenceId?: string;
-				paidCurrency?: string;
-				metadata?: Record<string, unknown>;
-			};
-		},
+		{ id, type, payload }: ConfirmTransactionDto,
 		ctx: ActionCtx,
 	) {
 		try {
@@ -1492,6 +1481,49 @@ export class TransactionsController {
 		}
 	}
 
+	async createPaymentSession(
+		dto: { transactionId: string; method: z.infer<typeof PaymentMethod> },
+		ctx: ActionCtx & { geo: Geo },
+	) {
+		try {
+			// Get transaction and verify ownership
+			const tx = await this.getTransactionById({ id: dto.transactionId }, ctx);
+			invariant(tx.success && tx.data, "Transaction not found");
+			// Verify transaction belongs to the user
+			if (tx.data.transaction.user.walletAddress !== ctx.address) {
+				throw new Error("Transaction does not belong to user");
+			}
+
+			const { session, metadata, fee } = await this.payments.createSession({
+				tx: tx.data.transaction,
+				method: dto.method,
+				geo: ctx.geo,
+			});
+
+			waitUntil(
+				// Update transaction metadata
+				prisma.saleTransactions.update({
+					where: { id: tx.data.transaction.id },
+					data: {
+						metadata: metadata as Prisma.InputJsonValue,
+						...(fee
+							? {
+								fees: {
+									create: fee,
+								},
+							}
+							: {}),
+					},
+				}),
+			);
+
+			return Success(session);
+		} catch (e) {
+			logger(e);
+			return Failure(e, e instanceof InvariantError ? 400 : 500);
+		}
+	}
+
 	/**
 	 * Retrieves the Recipient information for the user and current transaction in case it exists
 	 */
@@ -1836,4 +1868,8 @@ export class TransactionsController {
 	}
 }
 
-export default new TransactionsController(prisma, notificatorService);
+export default new TransactionsController(
+	prisma,
+	notificatorService,
+	new PaymentsService(new InstaxchangeService()),
+);

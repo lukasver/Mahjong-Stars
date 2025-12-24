@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { useSearchParams } from "next/navigation";
 import { InstaxchangeWidget } from "@/components/buy/widgets/instaxchange";
-import { useTransactionById } from "@/lib/services/api";
 
 // function getSupportedTokens(chainId: number | undefined) {
 //   if (!chainId) return [];
@@ -21,52 +19,26 @@ import { useTransactionById } from "@/lib/services/api";
 // const AMOUNT = "0.0001";
 
 export const TestClientComponent = () => {
-  const [txId, setTxId] = useState("");
-  const [debouncedTxId] = useDebounceValue(txId, 500);
-  const handleTxIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTxId(e.target.value);
-  };
-  // const { activeAccount, chainId } = useActiveAccount();
-  // const activeWallet = useActiveWallet();
-  // const { data, isLoading, error } = useBlockchains(!!activeAccount);
-  const { data: txData, isLoading: txLoading } = useTransactionById(
-    debouncedTxId || "",
-  );
-  console.log("🚀 ~ component.tsx:36 ~ txData:", txData);
+  const searchParams = useSearchParams();
+  const tx = searchParams.get("tx");
 
-  const tx = txData?.transaction;
-
-  // const { sessionUrl, isLoading, error, status } = useInstaxchangeSession({
-  //   transactionId: tx?.id,
-  //   totalAmount: tx?.totalAmount,
-  //   paidCurrency: tx?.paidCurrency,
-  //   onError: (e) => {
-  //     console.error("ERROR ON CREATE SESSION---", e);
-  //   },
-  // });
-
-  // console.debug("--==--", { sessionUrl, isLoading, error, status });
-
-  const isLoading = txLoading || !txData;
-
-
+  if (!tx) {
+    return <div>No transaction found</div>;
+  }
 
   return (
     <div className="h-screen w-screen grid place-items-center">
-      <input type="text" value={txId} onChange={handleTxIdChange} />
-      {isLoading || !tx ? <div>Loading...</div> :
-        <div className='max-w-4xl w-full'>
-          <InstaxchangeWidget
-            txId={tx?.id}
-            onSuccess={(d) => {
-              console.log("success---", d);
-            }}
-            onError={(error) => {
-              console.error("ERROR---", error);
-            }}
-          />
-        </div>
-      }
+      <div className="max-w-4xl w-full">
+        <InstaxchangeWidget
+          txId={tx}
+          onSuccess={(d) => {
+            console.log("success---", d);
+          }}
+          onError={(error) => {
+            console.error("ERROR---", error);
+          }}
+        />
+      </div>
     </div>
   );
 

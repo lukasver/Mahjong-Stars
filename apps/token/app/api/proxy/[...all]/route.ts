@@ -1,13 +1,17 @@
+import { InvariantError } from "@epic-web/invariant";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { env } from "@/common/config/env";
 import { GetUsersDto } from "@/common/schemas/dtos/users";
 import { TransactionStatusSchema } from "@/common/schemas/generated";
+import { getGeolocation } from "@/lib/geo";
 import blockchains from "@/lib/repositories/chains";
 import documents from "@/lib/repositories/documents";
 import rates from "@/lib/repositories/feeds/rates";
 import sales from "@/lib/repositories/sales";
 import transactions from "@/lib/repositories/transactions";
 import users from "@/lib/repositories/users";
+import { PaymentMethod } from "@/lib/services/instaxchange/types";
 import { withAuth } from "./_auth";
 
 /**
@@ -247,6 +251,51 @@ export const GET = withAuth(async (req, context, auth) => {
 		}
 		return new NextResponse(JSON.stringify({ error }), {
 			status: 500,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+});
+
+export const POST = withAuth(async (req, context, auth) => {
+	const [{ all }, data] = await Promise.all([
+		context.params,
+		req.json().catch(() => ({})),
+	]);
+
+	const controller = all[0];
+	const identifier = all[1];
+	const subIdentifier = all[2];
+
+	try {
+		switch (controller) {
+			case "transactions": {
+				if (identifier === "checkout") {
+					if (subIdentifier === "session") {
+						const body = z
+							.object({
+								method: PaymentMethod,
+								transactionId: z.string().min(1),
+							})
+							.parse(data);
+
+						const session = await transactions.createPaymentSession(body, {
+							address: auth.address,
+							geo: getGeolocation(req),
+						});
+						return NextResponse.json(session);
+					}
+				}
+			}
+		}
+
+		return NextResponse.json({ error: "Bad request" }, { status: 404 });
+	} catch (e) {
+		let error = "Internal server error";
+		if (e instanceof Error && env.IS_DEV) {
+			error += ": " + e.message;
+		}
+		return new NextResponse(JSON.stringify({ error }), {
+			status: e instanceof InvariantError ? 400 : 500,
 			headers: { "Content-Type": "application/json" },
 		});
 	}

@@ -1,9 +1,7 @@
 "use client";
 
-import { toast } from "@mjs/ui/primitives/sonner";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
-import { createInstaxchangeSession } from "@/lib/actions";
+import { createPaymentSession } from "@/lib/services/fetchers";
 import { CreateSessionRequest } from "@/lib/services/instaxchange/types";
 
 interface UseInstaxchangeSessionProps {
@@ -34,10 +32,7 @@ interface UseInstaxchangeSessionReturn {
    * Error message if session creation failed
    */
   error: string | null;
-  /**
-   * The status of the createSession action
-   */
-  status: "idle" | "executing" | "hasSucceeded" | "hasErrored";
+
 }
 
 /**
@@ -53,63 +48,47 @@ export function useInstaxchangeSession({
   method,
   onError,
 }: UseInstaxchangeSessionProps): UseInstaxchangeSessionReturn {
-  const [sessionUrl, setSessionUrl] = useState<{ method: UseInstaxchangeSessionProps["method"]; url: string } | null>(null);
+  const [sessionUrl, setSessionUrl] = useState<{
+    method: UseInstaxchangeSessionProps["method"];
+    url: string;
+  } | null>(null);
 
-  // useLocalStorage<{ method: UseInstaxchangeSessionProps["method"]; url: string } | null>(
-  //   `mjs-tx-${transactionId}`,
-  //   null,
-  // );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { execute: createSession, status } = useAction(
-    createInstaxchangeSession,
-    {
-      onSuccess: ({ data }) => {
-        console.debug('DATA=>>', data);
-        if (data?.iframeUrl) {
-          setSessionUrl({ method, url: data.iframeUrl });
-          setIsLoading(false);
-          setError(null);
-        } else {
-          const errorMsg = "Failed to create payment session";
-          setError(errorMsg);
-          setIsLoading(false);
-          onError?.(errorMsg);
-        }
-      },
-      onError: (error) => {
-        const errorMsg =
-          error.error?.serverError ||
-          error.error?.validationErrors?._errors?.[0] ||
-          "Failed to create payment session";
-        setError(errorMsg);
-        setIsLoading(false);
-        toast.error("Payment Error", {
-          description: errorMsg,
-        });
-        onError?.(errorMsg);
-      },
-    },
-  );
-
   /**
    * Creates the Instaxchange payment session
    */
   useEffect(() => {
-    if (sessionUrl?.url) {
-      setIsLoading(false);
-      return;
-    }
-    if (!transactionId || !method) {
-      setError("idle");
-      setIsLoading(false);
-      return;
-    }
-    createSession({
-      transactionId,
-      method,
-    });
-  }, [transactionId, method, createSession, sessionUrl]);
+    (async () => {
+      if (sessionUrl?.url) {
+        setIsLoading(false);
+        return;
+      }
+      if (!transactionId || !method) {
+        setError("idle");
+        setIsLoading(false);
+        return;
+      }
+      const res = await createPaymentSession({
+        transactionId,
+        method,
+      });
 
-  return { sessionUrl: sessionUrl?.url || null, isLoading, error, status };
+      console.log("🚀 ~ use-instaxchange-session.tsx:77 ~ res:", res);
+
+
+
+      if (res.error) {
+        const msg = res.error instanceof Error ? res.error.message : "Failed to create payment session";
+        setError(msg);
+        onError?.(msg);
+      }
+      if (res.data?.iframeUrl) {
+        setSessionUrl({ method, url: res.data.iframeUrl });
+      }
+      setIsLoading(false);
+    })();
+  }, []);
+
+  return { sessionUrl: sessionUrl?.url || null, isLoading, error };
 }
