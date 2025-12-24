@@ -17,18 +17,25 @@ import sales from "../repositories/sales";
 import transactions from "../repositories/transactions";
 import users from "../repositories/users";
 
-export const getUserFromSession = cache(async () => {
+export const getUserFromSession = cache(async (shouldRedirect = true) => {
 	const verified = await getSessionCookie()
 		.then((d) => verifyJwt(d || ""))
 		.catch(() => null);
+
 	if (!verified || !verified.valid) {
-		redirect("/in?error=invalid_session");
+		if (shouldRedirect) {
+			redirect("/in?error=invalid_session");
+		}
+		throw new Error("Invalid session");
 	}
 	return getUserFromCache(verified.parsedJWT.sub);
 });
 
-export const getCurrentUser = cache(async () => {
-	const user = await getUserFromSession();
+export const getCurrentUser = cache(async (redirect = true) => {
+	const user = await getUserFromSession(redirect).catch(() => null);
+	if (!user) {
+		return { data: null, error: "User not found" };
+	}
 	const result = await users.getMe({
 		address: user.walletAddress,
 	});

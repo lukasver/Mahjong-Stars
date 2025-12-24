@@ -101,7 +101,7 @@ export default async function RootLayout({
 }
 
 const VercelToolbarRSC = async () => {
-  const res = await getCurrentUser();
-  if (!res.data) return null;
+  const res = await getCurrentUser(false);
+  if (!res?.data) return null;
   return <VercelToolbar roles={res.data?.roles} />;
 };
