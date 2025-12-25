@@ -8,19 +8,17 @@ import { RadioGroup, RadioGroupItem } from "@mjs/ui/primitives/radio-group";
 import { Banknote, CreditCard } from "lucide-react";
 import { useEffect } from "react";
 import { z } from "zod";
-import { metadata } from "@/common/config/site";
 import { FOPSchema } from "@/common/schemas/generated";
+import { PaymentLimitsDialog } from "../buy/payment-limits-kyc-dialog";
 import { InvestFormSchema } from "./schemas";
 
 export function FiatPaymentSelector({
   onClick,
   disabled,
-  hasBanks,
   loading,
 }: {
   disabled: boolean;
   loading: boolean;
-  hasBanks: boolean;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   const form = useFormContext() as unknown as UseAppForm;
@@ -38,10 +36,27 @@ export function FiatPaymentSelector({
 
   return (
     <>
-      <div className="border-t border-secondary-300 pt-4 space-y-4" data-testid="fiat-payment-radio-selector">
-        <h3 className="text-lg font-semibold text-white">
-          Select Payment Method
-        </h3>
+      <div
+        className="border-t border-secondary-300 pt-4 space-y-4"
+        data-testid="fiat-payment-radio-selector"
+      >
+        <div className="flex items-center justify-between w-full">
+          <h3 className="text-lg font-semibold text-white flex-1">
+            Select Payment Method
+          </h3>
+          <PaymentLimitsDialog
+            method="all"
+            trigger={
+              <Button
+                variant="link"
+                size="sm"
+                className="!h-fit text-secondary-300 underlined !p-0 shrink-0 text-sm text-center mb-2"
+              >
+                View limits
+              </Button>
+            }
+          />
+        </div>
         <form.AppField name={"fop"}>
           {(field) => (
             <field.FormItem>
@@ -70,58 +85,39 @@ export function FiatPaymentSelector({
                           Credit/Debit Card
                         </p>
                         <p className="text-sm text-secondary-100">
-                          Visa, Mastercard, or other card payments
+                          Visa, Mastercard, Apple Pay, Google Pay, etc.
                         </p>
                       </div>
                     </Label>
                   </div>
 
-
                   {/* Transfer Option */}
-                  {hasBanks && (
-                    <div className="flex items-center space-x-3 p-4 border border-red-700 rounded-lg hover:bg-red-800/30 transition-colors cursor-pointer group">
-                      <RadioGroupItem
-                        value={FOPSchema.enum.TRANSFER}
-                        id="TRANSFER"
-                        className="border-secondary-500 text-secondary-500"
-                      />
-                      <Label
-                        htmlFor="TRANSFER"
-                        className="flex items-center gap-3 flex-1 cursor-pointer"
-                      >
-                        <Banknote className="w-5 h-5 text-secondary-300" />
-                        <div className="flex-1">
-                          <p className="font-semibold text-white">
-                            Bank Transfer
-                          </p>
-                          <p className="text-sm text-secondary-100">
-                            Direct transfer to our bank account
-                          </p>
-                        </div>
-                      </Label>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-3 p-4 border border-red-700 rounded-lg hover:bg-red-800/30 transition-colors cursor-pointer group">
+                    <RadioGroupItem
+                      value={FOPSchema.enum.TRANSFER}
+                      id="TRANSFER"
+                      className="border-secondary-500 text-secondary-500"
+                    />
+                    <Label
+                      htmlFor="TRANSFER"
+                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                    >
+                      <Banknote className="w-5 h-5 text-secondary-300" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-white">
+                          Bank Transfer
+                        </p>
+                        <p className="text-sm text-secondary-100">
+                          SEPA / OpenBanking / Direct Transfer
+                        </p>
+                      </div>
+                    </Label>
+                  </div>
                 </div>
               </RadioGroup>
             </field.FormItem>
           )}
         </form.AppField>
-        {!hasBanks ? (
-          <div className='text-sm'>
-            <p>
-              If you prefer to pay via bank transfer, or if your payment amount
-              exceeds USD 1,000, please contact us at {' '}
-              <a
-                className="transition-all text-secondary-300 hover:underline hover:text-secondary-500"
-                href={`mailto:${metadata.supportEmail}`}
-              >
-                {metadata.supportEmail}
-              </a>
-              . Our team will provide you with the necessary payment details and
-              instructions.
-            </p>
-          </div>
-        ) : null}
       </div>
       <div className="flex gap-3 pt-2 border-t border-red-700">
         <DialogClose asChild>

@@ -1,19 +1,24 @@
 "use client";
 
 import { invariant } from "@epic-web/invariant";
+import { getGlassyCardClassName } from "@mjs/ui/components/cards";
 import ErrorBoundary from "@mjs/ui/components/error-boundary";
 import { FileUpload } from "@mjs/ui/components/file-upload";
 import { motion } from "@mjs/ui/components/motion";
 import { Button } from "@mjs/ui/primitives/button";
+import { Card, CardContent } from "@mjs/ui/primitives/card";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
 import { copyToClipboard, safeFormatCurrency } from "@mjs/utils/client";
+import { Banknote } from "lucide-react";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 import { FIAT_CURRENCIES } from "@/common/config/constants";
+import { metadata } from "@/common/config/site";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { BankDetailsCard } from "@/components/bank-details";
 import { PurchaseSummaryCard } from "@/components/invest/summary";
+import { Placeholder } from "@/components/placeholder";
 import { PulseLoader } from "@/components/pulse-loader";
 import {
   associateDocumentsToUser,
@@ -53,10 +58,9 @@ export function TransferPaymentHandler({
       toast.error(error);
     };
 
-    const FallbackComponent = () => <ManualTransferPaymentHandler
-      transaction={tx}
-      onSuccess={onSuccess}
-    />
+    const FallbackComponent = () => (
+      <ManualTransferPaymentHandler transaction={tx} onSuccess={onSuccess} />
+    );
 
     return (
       <motion.div
@@ -64,15 +68,11 @@ export function TransferPaymentHandler({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <ErrorBoundary
-          fallback={
-            <FallbackComponent />
-          }
-        >
+        <ErrorBoundary fallback={<FallbackComponent />}>
           <Instaxchange
             method={"sepa"}
             txId={tx.id}
-            onSuccess={onSuccess}
+            // onSuccess={onSuccess}
             onError={onError}
             errorComponent={<FallbackComponent />}
           />
@@ -176,6 +176,67 @@ const ManualTransferPaymentHandler = ({
       setIsSubmitting(false);
     }
   };
+
+  if (isBanksLoading) {
+    return <Skeleton className="h-10 w-full" />;
+  }
+
+  if (!banks?.banks?.length) {
+    return (
+      <div className='space-y-4'>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
+          <PurchaseSummaryCard
+            className={'rounded-2xl'}
+            locale={locale}
+            purchased={{
+              quantity: tx.quantity.toString(),
+              tokenSymbol: tx.sale.tokenSymbol,
+            }}
+            total={tx.quantity.toString()}
+            paid={{
+              totalAmount: tx.totalAmount.toString(),
+              currency: tx.paidCurrency,
+            }}
+          />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.4 }}
+        >
+          <Card className={getGlassyCardClassName("rounded-2xl border p-6")}>
+            <CardContent>
+              <Placeholder
+                title="Bank Transfer Payment Unavailable"
+                description=""
+                icon={Banknote}
+              >
+                <div className="text-sm">
+                  <p>
+                    Please contact us at{" "}
+                    <a
+                      className="transition-all text-secondary-300 hover:underline hover:text-secondary-500"
+                      href={`mailto:${metadata.supportEmail}`}
+                    >
+                      {metadata.supportEmail}
+                    </a>
+                    . Our team will provide you with the necessary payment
+                    details and instructions.
+                  </p>
+                  <p className="text-sm text-secondary-300">We apologize for the inconvenience</p>
+                </div>
+              </Placeholder>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <motion.div
@@ -212,7 +273,7 @@ const ManualTransferPaymentHandler = ({
             {
               locale,
               precision: FIAT_CURRENCIES.includes(tx?.paidCurrency)
-                ? "FIAT"
+                ? 2
                 : "CRYPTO",
             },
           )}
@@ -232,9 +293,7 @@ const ManualTransferPaymentHandler = ({
         transition={{ delay: 0.9, duration: 0.4 }}
         className="space-y-4 max-h-[600px] overflow-y-auto"
       >
-        {isBanksLoading ? (
-          <Skeleton className="h-10 w-full" />
-        ) : (
+        {banks?.banks?.length &&
           banks?.banks.map((bank, index) => (
             <motion.li
               key={bank.id || index}
@@ -259,8 +318,7 @@ const ManualTransferPaymentHandler = ({
                 }}
               />
             </motion.li>
-          ))
-        )}
+          ))}
       </motion.ul>
       <motion.form
         initial={{ opacity: 0, y: 10 }}

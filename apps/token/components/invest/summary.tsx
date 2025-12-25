@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@mjs/ui/lib/utils";
 import { UseAppForm, useFormContext, useStore } from "@mjs/ui/primitives/form";
 import { Separator } from "@mjs/ui/primitives/separator";
 import { safeFormatCurrency } from "@mjs/utils/client";
@@ -57,6 +58,7 @@ export const PurchaseSummaryCard = ({
   total,
   paid,
   locale,
+  className,
 }: {
   purchased: { quantity: string; tokenSymbol: string };
   base?: string;
@@ -64,9 +66,15 @@ export const PurchaseSummaryCard = ({
   total: string;
   paid: { totalAmount: string; currency: string };
   locale: string;
+  className?: string;
 }) => {
   return (
-    <div className="space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600">
+    <div
+      className={cn(
+        "space-y-3 p-4 bg-slate-700/30 rounded-lg border border-slate-600",
+        className,
+      )}
+    >
       <h4 className="text-white font-medium">Summary</h4>
       <div className="space-y-2 text-sm">
         {base && bonus && (
@@ -114,15 +122,22 @@ const getTotalAmountToPay = (paid: {
   const isPayingWithCrypto = !FIAT_CURRENCIES.includes(paid.currency);
 
   if (isPayingWithCrypto) {
-    return Decimal(paid.totalAmount).toDecimalPlaces().toString() + " " + paid.currency;
+    return (
+      Decimal(paid.totalAmount).toDecimalPlaces().toString() +
+      " " +
+      paid.currency
+    );
   }
-  return safeFormatCurrency({
-    currency: paid.currency,
-    totalAmount: paid.totalAmount,
-  }, {
-    locale: paid.locale,
-    precision: 2,
-  });
+  return safeFormatCurrency(
+    {
+      currency: paid.currency,
+      totalAmount: paid.totalAmount,
+    },
+    {
+      locale: paid.locale,
+      precision: 2,
+    },
+  );
 };
 
 /**

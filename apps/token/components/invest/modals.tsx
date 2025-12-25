@@ -287,7 +287,6 @@ const PendingTransactionModal = ({
           </Button>
         </div>
       </div>
-      {/* <SubmitButton form={form} onSubmit={handleSubmit} /> */}
     </div>
   );
 };

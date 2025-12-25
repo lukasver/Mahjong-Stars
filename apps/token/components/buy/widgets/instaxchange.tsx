@@ -1,10 +1,13 @@
 "use client";
 
-import { motion } from "@mjs/ui/components/motion";
+import { Icons } from "@mjs/ui/components/icons";
+import { motion, StaggeredRevealAnimation } from "@mjs/ui/components/motion";
 import PaymentMethodSelector, {
   PaymentMethodSelectorSkeleton,
 } from "@mjs/ui/components/payment-options";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
+import { AlertTriangle } from "lucide-react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { useInstaxchangeSession } from "@/components/hooks/use-instaxchange-session";
 import { PulseLoader } from "@/components/pulse-loader";
@@ -27,7 +30,7 @@ export type SuccessInstaxchangePaymentData = {
 interface InstaxchangeWidgetProps {
   txId: TransactionByIdWithRelations["id"];
   method: CreateSessionRequest["method"];
-  onSuccess: (data: SuccessInstaxchangePaymentData) => void;
+  // onSuccess: (data: SuccessInstaxchangePaymentData) => void;
   onError?: (error: string) => void;
   errorComponent?: React.ReactNode;
 }
@@ -39,9 +42,8 @@ interface InstaxchangeWidgetProps {
 const InstaxchangeWidgetComponent = ({
   txId,
   method,
-  onSuccess,
   onError,
-  errorComponent = null
+  errorComponent = null,
 }: InstaxchangeWidgetProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -59,13 +61,15 @@ const InstaxchangeWidgetComponent = ({
   const displayError = error;
 
   if (displayError && !sessionUrl) {
-    return (errorComponent ||
-      <div className="space-y-4 p-4">
-        <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
-          <h3 className="font-semibold text-destructive">Payment Error</h3>
-          <p className="text-sm text-destructive/80">{displayError}</p>
+    return (
+      errorComponent || (
+        <div className="space-y-4 p-4">
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
+            <h3 className="font-semibold text-destructive">Payment Error</h3>
+            <p className="text-sm text-destructive/80">{displayError}</p>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 
@@ -82,22 +86,7 @@ const InstaxchangeWidgetComponent = ({
     <StaggeredRevealAnimation isVisible={!!sessionUrl}>
       <div className="space-y-4">
         <div className="relative w-full">
-          {/* {isProcessing && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-              <div className="text-center">
-                <div className="mb-2 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-                <p className="text-sm font-medium">Processing payment...</p>
-              </div>
-            </div>
-          )} */}
-
           {sessionUrl && <Iframe src={sessionUrl} ref={iframeRef} />}
-
-          {/* {paymentError && (
-          <div className="mt-4 rounded-lg border border-destructive bg-destructive/10 p-4">
-            <p className="text-sm text-destructive">{paymentError}</p>
-          </div>
-        )} */}
         </div>
 
         <motion.div
@@ -105,9 +94,7 @@ const InstaxchangeWidgetComponent = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.6 }}
         >
-          <Alert
-            className='border-secondary-300'
-          >
+          <Alert className="border-secondary-300">
             <Icons.infoCircle className="stroke-secondary-300" />
             <AlertDescription className="text-foreground">
               Your payment is processed securely by our partner's. We take care
@@ -120,11 +107,8 @@ const InstaxchangeWidgetComponent = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.9, duration: 0.6 }}
         >
-          <Alert
-            className='border-secondary-300'
-          >
+          <Alert className="border-secondary-300">
             <AlertTriangle className="stroke-destructive" />
-            {/* <AlertTitle className="text-secondary-300">Notice: Accuracy of Information Required</AlertTitle> */}
             <AlertDescription className="text-foreground">
               Avoid changing the recipient address after the payment is
               initiated, this could result in your transaction being cancelled
@@ -138,12 +122,6 @@ const InstaxchangeWidgetComponent = ({
   );
 };
 
-import { Icons } from "@mjs/ui/components/icons";
-import { StaggeredRevealAnimation } from "@mjs/ui/components/motion";
-import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
-import { AlertTriangle } from "lucide-react";
-import { memo } from "react";
-
 const Iframe = memo(function Iframe({
   src,
   ref,
@@ -151,10 +129,9 @@ const Iframe = memo(function Iframe({
   src: string;
   ref: React.RefObject<HTMLIFrameElement | null>;
 }) {
-
   const handleIframeMessage = useCallback(
     (event: unknown) => {
-      console.debug('EVENT:', event);
+      console.debug("EVENT:", event);
     },
     [ref?.current],
   );
@@ -204,7 +181,7 @@ export const Instaxchange = InstaxchangeWidgetComponent;
  */
 export const InstaxchangeWidget = ({
   txId,
-  onSuccess,
+  // onSuccess,
   onError,
 }: Omit<InstaxchangeWidgetProps, "method">) => {
   const [paymentProcessor, setPaymentProcessor] =
@@ -234,7 +211,7 @@ export const InstaxchangeWidget = ({
     <Instaxchange
       method={paymentProcessor}
       txId={txId}
-      onSuccess={onSuccess}
+      // onSuccess={onSuccess}
       onError={onError}
     />
   );

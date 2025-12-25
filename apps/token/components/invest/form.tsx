@@ -26,8 +26,7 @@ import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
 import { formatCurrency } from "@mjs/utils/client";
 import { Prisma } from "@prisma/client";
-import { FileText, Shield } from "lucide-react";
-import Link from "next/link";
+import { FileText, Info, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { InferSafeActionFnResult } from "next-safe-action";
@@ -45,13 +44,13 @@ import { createTransaction } from "@/lib/actions";
 import {
   useInputOptions,
   usePendingTransactionsForSale,
-  useSaleBanks,
   useSaleInvestInfo,
   useUser,
   useUserKyc,
 } from "@/lib/services/api";
 import calculator from "@/lib/services/pricefeeds";
 import { getQueryClient } from "@/lib/services/query";
+import { PaymentLimitsDialog } from "../buy/payment-limits-kyc-dialog";
 import { FiatPaymentSelector } from "./fiat-payment";
 import { InvestFormSchema } from "./schemas";
 import { PurchaseSummary } from "./summary";
@@ -83,20 +82,15 @@ export const InvestForm = ({
     chainId,
   });
 
-
   const { data: pendingTransactions } = usePendingTransactionsForSale(
     props.sale.id,
   );
 
   const { data, isLoading } = useSaleInvestInfo(props.sale.id);
-  const { data: banks } = useSaleBanks(
-    props.sale.id,
-  );
 
   const [isPending, startTransition] = useTransition();
   const action = useActionListener(useAction(createTransaction), {
     onSuccess: (d) => {
-
       const result = d as unknown as InferSafeActionFnResult<
         typeof createTransaction
       >["data"];
@@ -117,7 +111,6 @@ export const InvestForm = ({
     validators: { onSubmit: InvestFormSchema },
     defaultValues: getDefaultValues(props.sale, activeAccount),
     onSubmit: ({ value }) => {
-
       // Create transaction in API, book amount of tokens etc etc...
       // has KYC, ask user to upload documents, etc etc...
       // if
@@ -139,7 +132,6 @@ export const InvestForm = ({
         return;
       }
 
-
       // @ts-expect-error fixme
       action.execute(value);
     },
@@ -157,7 +149,6 @@ export const InvestForm = ({
       return;
     }
     try {
-
       const { amount, fees } = await calculator.calculateAmountToPay({
         currency: form.state.values.paid.currency,
         quantity: v,
@@ -167,14 +158,11 @@ export const InvestForm = ({
         addFee: !!process.env.NEXT_PUBLIC_FEE_BPS,
       });
 
-
-
       if (!amount) {
         throw new Error(
           "Error calculating amount, please refresh and try again",
         );
       }
-
 
       form.setFieldValue("paid.amount", amount);
       if (fees) {
@@ -215,7 +203,12 @@ export const InvestForm = ({
       try {
         invariant(q, "Quantity is required");
         // @ts-expect-error fop exists in the form below in the tree
-        form.setFieldValue("fop", FIAT_CURRENCIES.includes(v) ? FOPSchema.enum.CARD : FOPSchema.enum.CRYPTO);
+        form.setFieldValue(
+          "fop",
+          FIAT_CURRENCIES.includes(v)
+            ? FOPSchema.enum.CARD
+            : FOPSchema.enum.CRYPTO,
+        );
         // Change to original currency
         if (v === sale?.currency) {
           resetCurrencyAndPPU(q);
@@ -228,7 +221,6 @@ export const InvestForm = ({
         invariant(q, "Quantity is required");
         invariant(currency, "Currency is required");
         invariant(decimals, "Decimals are required");
-
 
         const { pricePerUnit, amount, fees } =
           await calculator.calculateAmountToPay({
@@ -244,7 +236,6 @@ export const InvestForm = ({
         form.setFieldValue("paid.currency", currency);
         form.setFieldValue("paid.quantity", q);
         form.setFieldValue("paid.fees", fees);
-
       } catch (e) {
         const message = e instanceof Error ? e.message : "Unknown error";
         toast.error(message);
@@ -300,16 +291,17 @@ export const InvestForm = ({
 
   const shouldPulse = hash === "#invest-component";
 
-  const hasBanks = banks?.banks && banks?.banks?.length > 0;
-
   return (
     <form.AppForm>
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <form.AppField name="paid.fees" >
+        <form.AppField name="paid.fees">
           {(field) => (
-            <field.FormItem
-            >
-              <input type="hidden" name={field.name} value={field.state.value as string} />
+            <field.FormItem>
+              <input
+                type="hidden"
+                name={field.name}
+                value={field.state.value as string}
+              />
             </field.FormItem>
           )}
         </form.AppField>
@@ -368,7 +360,7 @@ export const InvestForm = ({
             <FormInput
               className="flex-1"
               name="paid.amount"
-              label="To pay"
+              label={"To pay"}
               type="currency"
               inputProps={{
                 loading: isPending,
@@ -383,7 +375,9 @@ export const InvestForm = ({
                     paidCurrency && FIAT_CURRENCIES.includes(paidCurrency)
                       ? paidCurrency
                       : undefined,
-                  maximumFractionDigits: paidCurrency ? calculator.getPrecision(paidCurrency) : 8,
+                  maximumFractionDigits: paidCurrency
+                    ? calculator.getPrecision(paidCurrency)
+                    : 8,
                   minimumFractionDigits: 3,
                 },
               }}
@@ -408,12 +402,25 @@ export const InvestForm = ({
                 ],
                 groupBy: "type",
                 withImage: true,
-
               }}
             />
           </div>
 
           {children}
+
+          <PaymentLimitsDialog
+            method="all"
+            trigger={
+              <Button
+                variant="link"
+                size="sm"
+                className="!h-fit text-secondary-300 underlined !p-0 shrink-0 text-sm w-full text-center mb-2"
+              >
+                <Info className="h-4 w-4" />
+                View options & limits
+              </Button>
+            }
+          />
 
           {hasPendingTransaction ? (
             <Button
@@ -455,7 +462,6 @@ export const InvestForm = ({
               <SubmitButton
                 form={form}
                 onSubmit={handleSubmit}
-                hasBanks={!!hasBanks}
                 isPending={action.isPending}
               />
             </PurchaseButton>
@@ -463,18 +469,7 @@ export const InvestForm = ({
         </div>
         <SecurityNotice />
 
-        {process.env.NODE_ENV === "development" && (
-          <div className="flex gap-2 justify-between">
-            <Button onClick={() => console.debug(form.state.values)}>
-              checkvalue
-            </Button>
-            <Link href={`/dashboard/buy`}>
-              <Button onClick={() => console.debug(form.getAllErrors())}>
-                Check errors
-              </Button>
-            </Link>
-          </div>
-        )}
+
       </form>
     </form.AppForm>
   );
@@ -483,12 +478,10 @@ export const InvestForm = ({
 const SubmitButton = ({
   form,
   onSubmit,
-  hasBanks,
   isPending,
 }: {
   form: unknown;
   onSubmit: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  hasBanks: boolean;
   isPending: boolean;
 }) => {
   return (
@@ -501,7 +494,7 @@ const SubmitButton = ({
           isSubmitting: state.isSubmitting || isPending,
           isFiatPayment:
             state.values.paid.currency &&
-            FIAT_CURRENCIES.includes(state.values.paid.currency)
+            FIAT_CURRENCIES.includes(state.values.paid.currency),
         };
       }}
     >
@@ -512,17 +505,18 @@ const SubmitButton = ({
             onClick={onSubmit}
             disabled={!isValid}
             loading={isSubmitting}
-            hasBanks={hasBanks}
           />
         ) : (
-          <Button
-            type={"button"}
-            onClick={onSubmit}
-            disabled={!isValid}
-            loading={isSubmitting || isPending}
-          >
-            Proceed
-          </Button>
+          <>
+            <Button
+              type={"button"}
+              onClick={onSubmit}
+              disabled={!isValid}
+              loading={isSubmitting || isPending}
+            >
+              Proceed
+            </Button>
+          </>
         )
       }
       {/* @ts-expect-error fixme */}
@@ -589,16 +583,14 @@ const SecurityNotice = () => {
         <div className="text-xs text-yellow-400">
           <p className="font-medium">Security Notice</p>
           <p className="text-yellow-400/80">
-            Verify the receiving wallet address is correct and never share your private
-            keys with anyone.
+            Verify the receiving wallet address is correct and never share your
+            private keys with anyone.
           </p>
         </div>
       </div>
     </div>
   );
 };
-
-
 
 const getDefaultValues = (
   sale: SaleWithToken,

@@ -2,7 +2,7 @@
 
 import { cn } from "@mjs/ui/lib/utils";
 import { isObject } from "motion/react";
-import { ComponentProps } from "react";
+import { ComponentProps, ReactNode } from "react";
 import { Checkbox } from "../checkbox";
 import { UseAppForm } from "../form";
 import { useFormContext } from "../form/tanstack-form";
@@ -32,8 +32,8 @@ type InputUnionProps =
 export type FormInputProps = {
   id?: string;
   name: string;
-  label?: string;
-  description?: string;
+  label?: ReactNode;
+  description?: ReactNode;
   message?: true | null;
   className?: string;
   descriptionClassName?: string;
@@ -165,7 +165,7 @@ export function FormInput({
               />
             </field.FormControl>
           </div>
-          {description && (
+          {description && typeof description === 'string' ? (
             <field.FormDescription
               className={cn(
                 "overflow-x-auto scrollbar-hidden whitespace-nowrap",
@@ -174,7 +174,7 @@ export function FormInput({
             >
               {description}
             </field.FormDescription>
-          )}
+          ) : description}
           {message && <field.FormMessage className="text-secondary-100" />}
         </field.FormItem>
       )}
