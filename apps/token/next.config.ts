@@ -27,7 +27,7 @@ const HELIO_ASSETS = `https://helio-assets.s3.eu-west-1.amazonaws.com/`;
 const MAIN_DOMAIN =
 	process.env.NODE_ENV === "production"
 		? `https://*.thetilescompany.io ${publicUrl}`
-		: `https://*.thetilescompany.io https://*.vercel.app http://localhost:3000 http://localhost:8080 http://127.0.0.1:7242`;
+		: `https://*.thetilescompany.io https://*.vercel.app http://localhost:3000 http://localhost:8080 http://127.0.0.1:7242`
 const E_SIGN_DOMAIN = `https://*.documenso.com/`;
 
 const UPGRADE_INSECURE_REQUESTS =
@@ -39,13 +39,13 @@ const INSTAXCHANGE_CONNECT = `https://instaxchange.com https://api.instaxchange.
 
 const cspHeader = `
     default-src 'self' ${MAIN_DOMAIN};
-    connect-src 'self' ${INSTAXCHANGE_CONNECT} ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io ${VERCEL_LIVE_CSP};
+    connect-src 'self' ${INSTAXCHANGE_CONNECT} ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io ${VERCEL_LIVE_CSP} https://*.google.com https://google.com/pay https://apple.com https://www.apple.com;
     frame-src 'self' ${INSTAXCHANGE_FRAME} https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.thirdweb.com/;
     script-src 'self' 'unsafe-eval' 'unsafe-inline' ${ANALYTICS_PROVIDERS} ${GOOGLE_CSP} ${E_SIGN_DOMAIN} ${VERCEL_LIVE_CSP} ${HELIO_SCRIPT};
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${HELIO_STYLES};
     font-src 'self' https://fonts.gstatic.com;
-    img-src 'self' data: blob: ${MAIN_DOMAIN} https://rainbowme-res.cloudinary.com/ https://*.ipfscdn.io https://*.walletconnect.org https://*.walletconnect.com https://storage.googleapis.com https://i.ibb.co ${HELIO_SCRIPT} ${HELIO_ASSETS};
+    img-src 'self' data: blob: ${MAIN_DOMAIN} https://*.gstatic.com https://pay.google.com https://rainbowme-res.cloudinary.com/ https://*.ipfscdn.io https://*.walletconnect.org https://*.walletconnect.com https://storage.googleapis.com https://i.ibb.co ${HELIO_SCRIPT} ${HELIO_ASSETS};
     object-src 'none';
     base-uri 'self';
     form-action 'self';
@@ -71,6 +71,10 @@ const config: NextConfig = () => {
 						{
 							key: "Content-Security-Policy",
 							value: cspHeader.replace(/\n/g, ""),
+						},
+						{
+							key: "Permissions-Policy",
+							value: `payment=(self "https://instaxchange.banxa.com" "https://instaxchange.com" "https://*.instaxchange.com")`,
 						},
 					],
 				},

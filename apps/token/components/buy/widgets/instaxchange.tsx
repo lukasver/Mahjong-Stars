@@ -90,7 +90,6 @@ const InstaxchangeWidgetComponent = ({
         <div className="relative w-full">
           {sessionUrl && <Iframe src={sessionUrl} ref={iframeRef} />}
         </div>
-
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -99,8 +98,8 @@ const InstaxchangeWidgetComponent = ({
           <Alert className="border-secondary-300">
             <Icons.infoCircle className="stroke-secondary-300" />
             <AlertDescription className="text-foreground">
-              Your payment is processed securely by our partner's. We take care
-              of the processing fees for you 😉
+              Your payment is processed securely by our partner's.  We take care
+              of the processing fees for you 😉. After successfully completing the payment your purchase will be confirmed via email.
             </AlertDescription>
           </Alert>
         </motion.div>

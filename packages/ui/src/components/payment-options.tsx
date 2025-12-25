@@ -10,7 +10,8 @@ import {
 } from "@mjs/ui/primitives/card";
 import { CheckCircle2, CreditCard } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePaymentMethods } from "../hooks/use-payment-methods";
 import { cn } from "../lib/utils";
 import { Button } from "../primitives/button";
 
@@ -269,11 +270,34 @@ export default function PaymentMethodSelector<T extends readonly string[]>({
   allowedMethods,
   defaultMethod = "card",
   asCard = false,
-  header
+  header,
 }: PaymentMethodSelectorProps<T>) {
-  const availableMethods = allowedMethods
-    ? paymentMethods.filter((m) => allowedMethods.includes(m.id))
-    : paymentMethods;
+  const { applePay, googlePay, isLoading } = usePaymentMethods();
+
+  // Filter payment methods based on availability and allowed methods
+  const availableMethods = useMemo(() => {
+    let methods = allowedMethods
+      ? paymentMethods.filter((m) => allowedMethods.includes(m.id))
+      : paymentMethods;
+
+    // Filter based on payment method availability
+    // Only show Apple Pay if it's available (on Apple devices with Apple Pay enabled)
+    // Google Pay can be shown on both mobile and desktop (Chrome supports it)
+    if (!isLoading) {
+      methods = methods.filter((method) => {
+        if (method.id === "apple-pay") {
+          return applePay;
+        }
+        if (method.id === "google-pay") {
+          return googlePay;
+        }
+        // Show all other methods (card, ideal, bancontact, etc.)
+        return true;
+      });
+    }
+
+    return methods;
+  }, [allowedMethods, applePay, googlePay, isLoading]);
 
   const initialMethod =
     allowedMethods && !allowedMethods.includes(defaultMethod)
@@ -282,6 +306,20 @@ export default function PaymentMethodSelector<T extends readonly string[]>({
 
   const [selectedMethod, setSelectedMethod] =
     useState<T[number]>(initialMethod);
+
+  // Update selected method if it's no longer available after loading
+  useEffect(() => {
+    if (!isLoading && availableMethods.length > 0) {
+      const isCurrentMethodAvailable = availableMethods.some(
+        (m) => m.id === selectedMethod,
+      );
+      if (!isCurrentMethodAvailable) {
+        // If current method is not available, select the first available method
+        const newMethod = availableMethods[0]?.id ?? defaultMethod;
+        setSelectedMethod(newMethod as T[number]);
+      }
+    }
+  }, [isLoading, availableMethods, selectedMethod, defaultMethod]);
 
   const handleProceed = () => {
     onSelect(selectedMethod);
@@ -313,10 +351,11 @@ export default function PaymentMethodSelector<T extends readonly string[]>({
 
       {/* Payment Methods Grid */}
       <div className={cn("mb-8", className)}>
-
-        {header || <h3 className="text-white text-sm font-semibold mb-4">
-          Select Payment Method
-        </h3>}
+        {header || (
+          <h3 className="text-white text-sm font-semibold mb-4">
+            Select Payment Method
+          </h3>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {availableMethods.map((method) => (
@@ -379,37 +418,42 @@ const CardWrapper = ({
   );
 };
 
+export const PaymentMethodSelectorSkeleton = ({
+  count = 4,
+}: {
+  count?: number;
+}) => {
+  return (
+    <div className="w-full mx-auto p-6 bg-gradient-to-br from-zinc-900 via-red-950/20 to-zinc-900 rounded-2xl border border-red-900/30 shadow-2xl">
+      {/* Title skeleton */}
+      {/* <div className="h-8 w-48 bg-zinc-800/50 rounded-lg mb-2 animate-pulse" /> */}
 
-export const PaymentMethodSelectorSkeleton = ({ count = 3 }: { count?: number }) => {
-  return (<div className="w-full mx-auto p-6 bg-gradient-to-br from-zinc-900 via-red-950/20 to-zinc-900 rounded-2xl border border-red-900/30 shadow-2xl">
-    {/* Title skeleton */}
-    {/* <div className="h-8 w-48 bg-zinc-800/50 rounded-lg mb-2 animate-pulse" /> */}
+      {/* Subtitle skeleton */}
+      {/* <div className="h-4 w-64 bg-zinc-800/50 rounded mb-8 animate-pulse" /> */}
 
-    {/* Subtitle skeleton */}
-    {/* <div className="h-4 w-64 bg-zinc-800/50 rounded mb-8 animate-pulse" /> */}
+      {/* Payment options grid */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+        {Array.from({ length: count }).map((_, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-4 p-4 bg-zinc-900/40 border border-zinc-800/50 rounded-xl animate-pulse"
+          >
+            {/* Icon skeleton */}
+            <div className="w-12 h-12 bg-zinc-800/50 rounded-lg flex-shrink-0" />
 
-    {/* Payment options grid */}
-    <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-      {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={index}
-          className="flex items-center gap-4 p-4 bg-zinc-900/40 border border-zinc-800/50 rounded-xl animate-pulse"
-        >
-          {/* Icon skeleton */}
-          <div className="w-12 h-12 bg-zinc-800/50 rounded-lg flex-shrink-0" />
+            {/* Text skeleton */}
+            <div className="flex-1">
+              <div className="h-5 w-24 bg-zinc-800/50 rounded" />
+            </div>
 
-          {/* Text skeleton */}
-          <div className="flex-1">
-            <div className="h-5 w-24 bg-zinc-800/50 rounded" />
+            {/* Radio button skeleton */}
+            <div className="w-5 h-5 bg-zinc-800/50 rounded-full flex-shrink-0" />
           </div>
+        ))}
+      </div>
 
-          {/* Radio button skeleton */}
-          <div className="w-5 h-5 bg-zinc-800/50 rounded-full flex-shrink-0" />
-        </div>
-      ))}
+      {/* Button skeleton */}
+      <div className="h-14 w-full bg-white/20 rounded-xl animate-pulse" />
     </div>
-
-    {/* Button skeleton */}
-    <div className="h-14 w-full bg-white/20 rounded-xl animate-pulse" />
-  </div>)
-}
+  );
+};
