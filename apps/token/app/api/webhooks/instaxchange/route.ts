@@ -417,10 +417,10 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
           const confirmationPayload = {
             formOfPayment: FOP.CARD,
             amountPaid: payload.data.amountInCrypto.toString(),
-            paidCurrency:
-              payload.data.cryptoCurrency === "USDC_POLYGON"
-                ? "USDC"
-                : payload.data.cryptoCurrency,
+            paidCurrency: "USDC" as const,
+            // payload.data.cryptoCurrency === "USDC_POLYGON"
+            //   ? "USDC"
+            //   : payload.data.cryptoCurrency,
             paymentDate: payload.data.createdAt
               ? new Date(payload.data.createdAt)
               : new Date(),

@@ -1733,8 +1733,10 @@ export class TransactionsController {
 				| null = null;
 
 			if (tx.metadata && typeof tx.metadata === 'object') {
-				const instaxchangeMetadata = (tx.metadata as any)['instaxchange'] as Record<string, unknown>;
+				// biome-ignore lint/suspicious/noExplicitAny: todo
+				const instaxchangeMetadata = (tx.metadata as Record<string, unknown>)['instaxchange'] as Record<string, unknown>;
 				if (instaxchangeMetadata && instaxchangeMetadata?.lastWebhookEvent) {
+					// biome-ignore lint/suspicious/noExplicitAny: todo
 					const payload = (instaxchangeMetadata.lastWebhookEvent as any)?.payload as string;
 					const lastWebhookEvent = JSON.parse(payload) as InstaxchangeWebhookResponse;
 					providerStatus = lastWebhookEvent?.data?.status || null
