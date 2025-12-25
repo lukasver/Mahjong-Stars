@@ -338,7 +338,7 @@ export const createMockSaleWithToken = async (
             chainId: tob.chainId,
           },
           create: {
-            name: chain.name || "Unknown chain",
+            name: chain.name || getChainNameById(chain.id),
             rpcUrl: chain.rpc,
             explorerUrl: chain.blockExplorers?.[0]?.url,
             isTestnet: chain.testnet,
@@ -590,4 +590,22 @@ export const mockCreateTransactionDto = (
     }),
     ...data,
   } satisfies CreateTransactionDto;
+};
+
+const getChainNameById = (chainId: number) => {
+  let name: string | undefined = defineChain(chainId).name;
+  if (!name) {
+    switch (chainId) {
+      case 1:
+        name = "Ethereum Mainnet";
+        break;
+      case 137:
+        name = "Polygon";
+        break;
+      default:
+        name = "Unknown chain";
+        break;
+    }
+  }
+  return name;
 };

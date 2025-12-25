@@ -171,9 +171,11 @@ export async function POST(req: NextRequest) {
     // Reply fast but keep processing in the background
     // Pass the span context to maintain trace continuity
     const spanContext = trace.setSpan(context.active(), span);
+    console.debug('Processing webhook event in background');
     waitUntil(
-      context.with(spanContext, () => processWebhookEvent(payload)),
+      context.with(spanContext, async () => await processWebhookEvent(payload)),
     );
+    console.debug('Webhook event processed in background');
 
     span.setStatus({ code: SpanStatusCode.OK });
     span.end();
@@ -204,6 +206,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
     .startSpan("process-webhook-event");
 
   try {
+    console.time('processWebhookEvent');
     const txId = payload.reference?.split("-")[0];
     invariant(txId, "Transaction ID not found");
 
@@ -250,6 +253,8 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
     const existingMetadata = (tx.metadata as Record<string, unknown>) || {};
     const instaxchangeMetadata =
       (existingMetadata.instaxchange as Record<string, unknown>) || {};
+
+
     const webhookEvents =
       (instaxchangeMetadata.webhookEvents as Array<{
         webhookId: string;
@@ -262,12 +267,14 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
       (e) => e.webhookId === payload.webhookId,
     );
 
+
     idempotencySpan.setAttributes({
       "webhook.idempotency.is_duplicate": isDuplicate,
       "webhook.events.count": webhookEvents.length,
     });
 
-    if (isDuplicate) {
+    const SKIP_DUPLICATE_WEBHOOK = false;
+    if (isDuplicate && SKIP_DUPLICATE_WEBHOOK) {
       idempotencySpan.addEvent("webhook.duplicate.detected", {
         webhookId: payload.webhookId,
         sessionId: payload.data.sessionId,
@@ -305,9 +312,11 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
       },
     });
 
+    console.log("🚀 ~ route.ts:316 ~ updatedMetadata:", !!updatedMetadata);
+
     // Validate wallet address
     if (tx.sale.toWalletsAddress.toLowerCase() !== payload.data.walletAddress?.toLowerCase()) {
-      console.debug('Processed case ==> WALLET ADDRESS MISMATCH')
+      console.debug('Processed case ==> WALLET ADDRESS MISMATCH', tx.sale.toWalletsAddress, payload.data.walletAddress);
       const walletValidationSpan = trace
         .getTracer("instaxchange-webhook")
         .startSpan("validate-wallet-address");
@@ -391,6 +400,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
 
     // Handle different event types
     // According to Instaxchange docs, check data.status and invoiceData.Deposit_tx_status
+    console.time('switch (payload.data.status): ' + payload.data.status);
     switch (payload.data.status) {
       case "completed": {
         console.debug('Processed case ==> COMPLETED')
@@ -417,6 +427,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
           const confirmationPayload = {
             formOfPayment: FOP.CARD,
             amountPaid: payload.data.amountInCrypto.toString(),
+            // Currently only processing USDC for payments
             paidCurrency: "USDC" as const,
             // payload.data.cryptoCurrency === "USDC_POLYGON"
             //   ? "USDC"
@@ -424,7 +435,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
             paymentDate: payload.data.createdAt
               ? new Date(payload.data.createdAt)
               : new Date(),
-            paymentEvidenceId: payload.transactionId ?? undefined,
+            txHash: payload.transactionId ?? undefined,
             metadata: {
               ...updatedMetadata,
               instaxchange: {
@@ -654,7 +665,9 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
       code: SpanStatusCode.ERROR,
       message: "Error processing webhook event",
     });
-    span.end();
     throw error;
+  } finally {
+    console.timeEnd('processWebhookEvent');
+    span.end();
   }
 }
