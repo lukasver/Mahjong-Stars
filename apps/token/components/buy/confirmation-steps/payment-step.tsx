@@ -161,7 +161,7 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
           </CardDescription>
         </CardHeader>
       </motion.div>
-      <CardContent className={cn(paymentMethod === "CARD" ? "p-0 md:p-6" : "")}>
+      <CardContent className={cn(paymentMethod === "CARD" ? "p-0 md:p-6 md:pt-0" : "")}>
         {paymentMethod !== "CRYPTO" ? (
           <FiatPayment
             tx={tx.transaction}

@@ -1,4 +1,5 @@
-import { FOP } from '@prisma/client';
+import { FOP, Prisma } from "@prisma/client";
+import { InstaxchangeWebhookResponse } from "@/lib/services/instaxchange/types";
 
 export type ConfirmTransactionDto = {
   id: string;
@@ -23,4 +24,18 @@ export type RejectTransactionDto = {
   reason?: string;
   metadata?: Record<string, unknown>;
   status?: "REJECTED" | "CANCELLED";
+};
+
+export type GetTransactionStatusDto = {
+  id: string;
+};
+
+export type GetTransactionStatusRes = Prisma.SaleTransactionsGetPayload<{
+  select: {
+    id: true;
+    status: true;
+    formOfPayment: true;
+  };
+}> & {
+  providerStatus: InstaxchangeWebhookResponse["data"]["status"] | null;
 };

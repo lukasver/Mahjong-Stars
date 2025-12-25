@@ -112,8 +112,6 @@ export class InstaxchangeService {
       country: opts?.country,
     };
 
-    console.log("🚀 ~ index.ts:115 ~ payload:", payload);
-
 
     return this.executeWithRetry(async () => {
       const response = await fetch(`${this.apiUrl}/session`, {

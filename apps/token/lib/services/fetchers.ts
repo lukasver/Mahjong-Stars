@@ -5,7 +5,7 @@ import {
 	FOP,
 	KycVerification,
 	Token,
-	TokensOnBlockchains,
+	TokensOnBlockchains
 } from "@prisma/client";
 import { cache } from "react";
 import { ONE_DAY, ONE_MINUTE, ROLES } from "@/common/config/constants";
@@ -15,11 +15,12 @@ import { Failure, Success } from "@/common/schemas/dtos/utils";
 import {
 	Blockchain,
 	Currency,
-	Document, SaftContract,
+	Document,
+	SaftContract,
 	Sale,
 	SaleTransactions,
 	TransactionStatusSchema,
-	User
+	User,
 } from "@/common/schemas/generated";
 import { SaleInvestInfo, SaleWithToken } from "@/common/types/sales";
 import { TokenWithRelations } from "@/common/types/tokens";
@@ -27,8 +28,9 @@ import {
 	TransactionByIdWithRelations,
 	TransactionWithRelations,
 } from "@/common/types/transactions";
-import { GetTransactionByIdRes } from '../types/fetchers';
-import { CreateSessionResponse } from './instaxchange/types';
+import { GetTransactionStatusRes } from "../repositories/transactions/dtos";
+import { GetTransactionByIdRes } from "../types/fetchers";
+import { CreateSessionResponse } from "./instaxchange/types";
 
 export type FetcherOptions = Omit<RequestInit, "body"> & {
 	baseUrl?: string;
@@ -234,8 +236,6 @@ export const getExchangeRate = async (from: string, to: string) => {
 	}
 };
 
-
-
 export const getCurrencies = async () => {
 	try {
 		const data = await fetcher<{
@@ -299,6 +299,17 @@ export const getSaleSaftForTransaction = async (txId: string) => {
 			content: string;
 			missingVariables: string[];
 		}>(`/transactions/${txId}/saft`);
+		return { data, error: null };
+	} catch (e) {
+		return { data: null, error: e };
+	}
+};
+
+export const getTransactionStatus = async (id: string) => {
+	try {
+		const data = await fetcher<GetTransactionStatusRes>(
+			`/transactions/${id}/status`,
+		);
 		return { data, error: null };
 	} catch (e) {
 		return { data: null, error: e };
@@ -465,14 +476,18 @@ export const getCardProviderAvailability = async () => {
  * Get card payment provider availability
  * Checks if card payment provider is configured and available
  */
-export const createPaymentSession = async (body: { method: string, transactionId: string }) => {
+export const createPaymentSession = async (body: {
+	method: string;
+	transactionId: string;
+}) => {
 	try {
-		const data = await fetcher<CreateSessionResponse & { iframeUrl: string }>(`/transactions/checkout/session`, {
-			method: "POST",
-			body: JSON.stringify(body),
-		});
-
-		console.log("🚀 ~ fetchers.ts:475 ~ data:", data);
+		const data = await fetcher<CreateSessionResponse & { iframeUrl: string }>(
+			`/transactions/checkout/session`,
+			{
+				method: "POST",
+				body: JSON.stringify(body),
+			},
+		);
 
 		return { data, error: null };
 	} catch (e) {
@@ -495,7 +510,7 @@ export const getDocumentById = async (id: string | string[]) => {
 				name: string;
 				url: {
 					bucket: string;
-					url: string
+					url: string;
 				};
 			}[];
 		}>(`/admin/documents${queryParams}`, {

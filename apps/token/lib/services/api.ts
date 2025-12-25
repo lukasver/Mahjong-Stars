@@ -36,6 +36,7 @@ import {
 	getSaleSaftForTransaction,
 	getSales,
 	getTokens,
+	getTransactionStatus,
 	getUserPendingTransactionsForSale,
 	getUsers,
 	getUserTransactions,
@@ -53,9 +54,10 @@ const getError = (data: any, error: any): string | null => {
 };
 
 export const useInputOptions = (qParams?: { chainId?: number }) => {
-
 	const { data, error, ...rest } = useQuery({
-		queryKey: ["input", "options",
+		queryKey: [
+			"input",
+			"options",
 			...(qParams ? [JSON.stringify(qParams)] : []),
 		],
 		queryFn: () => getInputOptions(qParams),
@@ -170,8 +172,25 @@ export const useTransactionAvailabilityForSale = (
 ) => {
 	const { data, status, error, isLoading } = useQuery({
 		queryKey: ["transactions", id, "availability"],
-		//TODO should move to fetcher instead of server action?, we don't want to cache this so for now should be ok
 		queryFn: () => getTransactionAvailabilityForSale({ id }),
+		staleTime: DEFAULT_STALE_TIME,
+		...opts,
+	});
+	const e = getError(data, error);
+	return { data: data?.data, error: e, status, isLoading };
+};
+
+export const useTransactionStatus = (
+	id: string,
+	opts: {
+		refetchInterval?: number;
+		staleTime?: number;
+		enabled?: boolean;
+	} = {},
+) => {
+	const { data, status, error, isLoading } = useQuery({
+		queryKey: ["transactions", id, "status"],
+		queryFn: () => getTransactionStatus(id),
 		staleTime: DEFAULT_STALE_TIME,
 		...opts,
 	});
@@ -457,4 +476,3 @@ export const useCardProviderAvailability = () => {
 		isLoading,
 	};
 };
-

@@ -260,6 +260,7 @@ type PaymentMethodSelectorProps<
   defaultMethod?: T[number];
   asCard?: boolean;
   className?: string;
+  header?: React.ReactNode;
 };
 
 export default function PaymentMethodSelector<T extends readonly string[]>({
@@ -268,6 +269,7 @@ export default function PaymentMethodSelector<T extends readonly string[]>({
   allowedMethods,
   defaultMethod = "card",
   asCard = false,
+  header
 }: PaymentMethodSelectorProps<T>) {
   const availableMethods = allowedMethods
     ? paymentMethods.filter((m) => allowedMethods.includes(m.id))
@@ -311,9 +313,11 @@ export default function PaymentMethodSelector<T extends readonly string[]>({
 
       {/* Payment Methods Grid */}
       <div className={cn("mb-8", className)}>
-        <h2 className="text-white text-sm font-semibold mb-4">
+
+        {header || <h3 className="text-white text-sm font-semibold mb-4">
           Select Payment Method
-        </h2>
+        </h3>}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {availableMethods.map((method) => (
             <button

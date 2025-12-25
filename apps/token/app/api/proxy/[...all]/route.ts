@@ -112,6 +112,11 @@ export const GET = withAuth(async (req, context, auth) => {
 
 			case "transactions": {
 				if (identifier) {
+					if (subIdentifier === "status") {
+						const data = await transactions.getTransactionStatus({ id: identifier },
+							{ address: auth.address, isAdmin: auth.isAdmin, userId: auth.userId },);
+						return NextResponse.json(data);
+					}
 					if (subIdentifier === "saft") {
 						const data = await transactions.getSaleSaftForTransaction(
 							{ txId: identifier },

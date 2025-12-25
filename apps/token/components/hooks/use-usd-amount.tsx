@@ -86,9 +86,6 @@ export function useUsdAmount({
           precision: 8,
         });
 
-        console.log("🚀 ~ use-usd-amount.tsx:89 ~ conversion:", conversion);
-
-
         setUsdAmount(new Decimal(conversion.amount));
       } catch (err) {
         const errorMessage =

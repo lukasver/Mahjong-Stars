@@ -74,9 +74,6 @@ export function useInstaxchangeSession({
         method,
       });
 
-      console.log("🚀 ~ use-instaxchange-session.tsx:77 ~ res:", res);
-
-
 
       if (res.error) {
         const msg = res.error instanceof Error ? res.error.message : "Failed to create payment session";

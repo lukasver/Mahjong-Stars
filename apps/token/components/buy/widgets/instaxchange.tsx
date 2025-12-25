@@ -6,12 +6,14 @@ import PaymentMethodSelector, {
   PaymentMethodSelectorSkeleton,
 } from "@mjs/ui/components/payment-options";
 import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
+import { Button } from "@mjs/ui/primitives/button";
 import { AlertTriangle } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { useInstaxchangeSession } from "@/components/hooks/use-instaxchange-session";
 import { PulseLoader } from "@/components/pulse-loader";
 import { CreateSessionRequest } from "@/lib/services/instaxchange/types";
+import { PaymentLimitsDialog } from "../payment-limits-kyc-dialog";
 
 export type SuccessInstaxchangePaymentData = {
   id: string;
@@ -190,6 +192,25 @@ export const InstaxchangeWidget = ({
   if (!paymentProcessor) {
     return (
       <PaymentMethodSelector
+        header={
+          <div className="flex items-center justify-between w-full">
+            <h3 className="text-lg font-semibold text-white flex-1">
+              Select Payment Method
+            </h3>
+            <PaymentLimitsDialog
+              method="CARD"
+              trigger={
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="!h-fit text-secondary-300 underlined !p-0 shrink-0 text-sm text-center mb-2"
+                >
+                  View limits
+                </Button>
+              }
+            />
+          </div>
+        }
         className="p-6 md:p-0 pt-0"
         onSelect={(method) => {
           if (

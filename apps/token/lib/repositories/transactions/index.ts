@@ -48,13 +48,21 @@ import {
 } from "@/common/types/transactions";
 import { prisma } from "@/db";
 import { InstaxchangeService } from "@/lib/services/instaxchange";
-import { PaymentMethod } from "@/lib/services/instaxchange/types";
+import {
+	InstaxchangeWebhookResponse,
+	PaymentMethod,
+} from "@/lib/services/instaxchange/types";
 import logger from "@/lib/services/logger.server";
 import documentsController from "../documents";
 import rates from "../feeds/rates";
 import notificatorService, { Notificator } from "../notifications";
 import { emailEventHelpers } from "../notifications/email-events";
-import { ConfirmTransactionDto, RejectTransactionDto } from "./dtos";
+import {
+	ConfirmTransactionDto,
+	GetTransactionStatusDto,
+	GetTransactionStatusRes,
+	RejectTransactionDto,
+} from "./dtos";
 import { PaymentsService } from "./payments";
 import { TransactionValidator } from "./validator";
 
@@ -1123,10 +1131,11 @@ export class TransactionsController {
 			invariant(dto.id, "Transaction ID is required");
 
 			// Determine target status (default to REJECTED)
-			const targetStatus =
-				(dto.status === "CANCELLED"
+			const targetStatus = (
+				dto.status === "CANCELLED"
 					? TransactionStatus.CANCELLED
-					: TransactionStatus.REJECTED) as TransactionStatus;
+					: TransactionStatus.REJECTED
+			) as TransactionStatus;
 
 			// Fetch transaction with necessary relations
 			const tx = await this.db.saleTransactions.findUniqueOrThrow({
@@ -1229,7 +1238,9 @@ export class TransactionsController {
 				const isCancelled = targetStatus === TransactionStatus.CANCELLED;
 
 				await this.notificator.send({
-					template: isCancelled ? "transactionCancelled" : "transactionRejected",
+					template: isCancelled
+						? "transactionCancelled"
+						: "transactionRejected",
 					to: {
 						email: tx.user.email,
 						name: userName,
@@ -1659,11 +1670,7 @@ export class TransactionsController {
 				tx: tx.data.transaction,
 				method: dto.method,
 				geo: ctx.geo,
-
 			});
-
-			console.log("🚀 ~ index.ts:1665 ~ session:", session);
-
 
 			waitUntil(
 				// Update transaction metadata
@@ -1672,7 +1679,13 @@ export class TransactionsController {
 					data: {
 						totalAmount: session.from_amount,
 						totalAmountCurrency: session.from_currency,
-						amountPaidCurrency: { connect: { symbol: session.to_currency?.includes('USDC') ? 'USDC' : session.to_currency } },
+						amountPaidCurrency: {
+							connect: {
+								symbol: session.to_currency?.includes("USDC")
+									? "USDC"
+									: session.to_currency,
+							},
+						},
 						amountPaid: session.to_amount.toString(),
 						metadata: metadata as Prisma.InputJsonValue,
 						...(fee
@@ -1690,6 +1703,52 @@ export class TransactionsController {
 		} catch (e) {
 			logger(e);
 			return Failure(e, e instanceof InvariantError ? 400 : 500);
+		}
+	}
+
+	async getTransactionStatus(dto: GetTransactionStatusDto, ctx: ActionCtx) {
+		try {
+			const tx = await this.db.saleTransactions.findUniqueOrThrow({
+				where: {
+					id: dto.id,
+					// If admin, don't check for user wallet address
+					...(ctx.isAdmin
+						? {}
+						: {
+							user: {
+								walletAddress: ctx.address,
+							},
+						}),
+				},
+				select: {
+					id: true,
+					status: true,
+					formOfPayment: true,
+					metadata: true,
+				},
+			});
+
+			let providerStatus:
+				| InstaxchangeWebhookResponse["data"]["status"]
+				| null = null;
+
+			if (tx.metadata && typeof tx.metadata === 'object') {
+				const instaxchangeMetadata = (tx.metadata as any)['instaxchange'] as Record<string, unknown>;
+				if (instaxchangeMetadata && instaxchangeMetadata?.lastWebhookEvent) {
+					const payload = (instaxchangeMetadata.lastWebhookEvent as any)?.payload as string;
+					const lastWebhookEvent = JSON.parse(payload) as InstaxchangeWebhookResponse;
+					providerStatus = lastWebhookEvent?.data?.status || null
+				}
+			}
+			return Success({
+				id: tx.id,
+				status: tx.status,
+				formOfPayment: tx.formOfPayment,
+				providerStatus
+			} satisfies GetTransactionStatusRes);
+		} catch (e) {
+			logger(e);
+			return Failure(e);
 		}
 	}
 

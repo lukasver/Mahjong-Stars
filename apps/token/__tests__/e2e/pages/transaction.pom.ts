@@ -631,10 +631,7 @@ export class TransactionPage extends BasePage {
 			const response = await route.fetch();
 			const responseBody = await response.json();
 
-			console.debug(
-				"🚀 ~ transaction-page.ts:598 ~ responseBody:",
-				responseBody,
-			);
+
 			expect(responseBody).toBeDefined();
 
 			await route.fulfill({

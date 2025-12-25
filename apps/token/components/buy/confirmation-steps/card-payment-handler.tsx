@@ -3,14 +3,20 @@
 import { motion } from "@mjs/ui/components/motion";
 import { PaymentMethodSelectorSkeleton } from "@mjs/ui/components/payment-options";
 import { toast } from "@mjs/ui/primitives/sonner";
+import { TransactionStatus } from "@prisma/client";
 import Decimal from "decimal.js";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ONE_MINUTE } from "@/common/config/constants";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
 import { useUsdAmount } from "@/components/hooks/use-usd-amount";
 import { PulseLoader } from "@/components/pulse-loader";
-import { useCardProviderAvailability } from "@/lib/services/api";
-import type { SuccessInstaxchangePaymentData } from "../widgets/instaxchange";
+import { GetTransactionStatusRes } from "@/lib/repositories/transactions/dtos";
+import {
+  useCardProviderAvailability,
+  useTransactionStatus,
+} from "@/lib/services/api";
 import { SuccessCryptoPaymentData } from "../widgets/transaction";
 import { WithErrorHandler } from "../widgets/utils";
 import { CardPaymentNotice } from "./card-payment-notice";
@@ -31,7 +37,7 @@ const InstaxchangeWidget = dynamic(
 
 interface CardPaymentHandlerProps {
   transaction: TransactionByIdWithRelations;
-  onSuccessInstaxchange: (d: SuccessInstaxchangePaymentData) => void;
+  // onSuccessInstaxchange: (d: SuccessInstaxchangePaymentData) => void;
   onSuccessCrypto: (d: SuccessCryptoPaymentData) => void;
 }
 
@@ -43,7 +49,7 @@ const INSTAXCHANGE_MAX_AMOUNT = new Decimal(100_000);
  */
 export function CardPaymentHandler({
   transaction: tx,
-  onSuccessInstaxchange,
+  // onSuccessInstaxchange,
   onSuccessCrypto,
 }: CardPaymentHandlerProps) {
   const { data: availabilityData, isLoading: isCheckingAvailability } =
@@ -90,14 +96,16 @@ export function CardPaymentHandler({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <InstaxchangeWidget
-          txId={tx?.id}
-          onError={(error) => {
-            toast.error("Payment Error", {
-              description: error,
-            });
-          }}
-        />
+        <TransactionStatusGuard transactionId={tx.id}>
+          <InstaxchangeWidget
+            txId={tx?.id}
+            onError={(error) => {
+              toast.error("Payment Error", {
+                description: error,
+              });
+            }}
+          />
+        </TransactionStatusGuard>
       </motion.div>
     );
   }
@@ -144,3 +152,57 @@ export function CardPaymentHandler({
     </motion.div>
   );
 }
+
+const TransactionStatusGuard = ({
+  transactionId,
+  children,
+}: {
+  transactionId: string;
+  children: React.ReactNode;
+}) => {
+  const { data } = useTransactionStatus(transactionId as string, {
+    refetchInterval: ONE_MINUTE,
+    enabled: !!transactionId,
+    staleTime: ONE_MINUTE,
+  });
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (data?.status) {
+      handleTransactionStatusChange(data, router);
+    }
+  }, [data?.status]);
+
+  return children;
+};
+
+const handleTransactionStatusChange = (
+  tx: GetTransactionStatusRes,
+  router: ReturnType<typeof useRouter>,
+) => {
+  if (tx.providerStatus === "completed") {
+    router.push(`/dashboard/buy/${tx.id}/success`);
+  }
+  if (tx.providerStatus === "failed") {
+    router.push(`/dashboard/buy/${tx.id}/failure`);
+  }
+  if (tx.status === TransactionStatus.CANCELLED) {
+    router.push(`/dashboard/buy/${tx.id}/failure`);
+  }
+  if (tx.status === TransactionStatus.REJECTED) {
+    router.push(`/dashboard/buy/${tx.id}/failure`);
+  }
+  if (tx.status === TransactionStatus.REFUNDED) {
+    router.push(`/dashboard/buy/${tx.id}/failure`);
+  }
+  if (tx.status === TransactionStatus.COMPLETED) {
+    router.push(`/dashboard/buy/${tx.id}/success`);
+  }
+  if (tx.status === TransactionStatus.PAYMENT_VERIFIED) {
+    router.push(`/dashboard/buy/${tx.id}/success`);
+  }
+  if (tx.status === TransactionStatus.PAYMENT_SUBMITTED) {
+    router.push(`/dashboard/buy/${tx.id}/success`);
+  }
+};

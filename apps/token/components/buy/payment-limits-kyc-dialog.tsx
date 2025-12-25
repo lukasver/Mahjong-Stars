@@ -1,11 +1,11 @@
 "use client";
 
+import { Icons } from "@mjs/ui/components/icons";
 import {
   AnimatedIcon,
   AnimatedText,
   FadeAnimation,
 } from "@mjs/ui/components/motion";
-import { Icons } from "@mjs/ui/components/icons";
 import { cn } from "@mjs/ui/lib/utils";
 import { Badge } from "@mjs/ui/primitives/badge";
 import { Button } from "@mjs/ui/primitives/button";
@@ -62,7 +62,8 @@ const paymentMethodsData: PaymentMethodsData = {
     description:
       "Bank transfer solutions including SEPA, ACH, and other regional methods",
     limits: [
-      { amount: "$500", requirement: "No KYC required (per transaction)" },
+      { amount: "Minimum amount:", requirement: "$100" },
+      { amount: "$500 (per transaction)", requirement: "No KYC required" },
       { amount: "Up to $1,000/day", requirement: "No KYC required" },
       {
         amount: "Up to $2,500/day",
@@ -82,6 +83,7 @@ const paymentMethodsData: PaymentMethodsData = {
         description: "Credit and debit card payments",
         icon: <Icons.creditCard className="size-4" />,
         limits: [
+          { amount: "Minimum amount:", requirement: "$100" },
           {
             amount: "Up to €250",
             requirement: "Lite KYC",
@@ -101,6 +103,8 @@ const paymentMethodsData: PaymentMethodsData = {
         description: "Digital wallet payment via Apple Pay",
         icon: <Icons.applePay />,
         limits: [
+          { amount: "Minimum amount:", requirement: "$100" },
+
           {
             amount: "Up to €250",
             requirement: "Lite KYC",
@@ -123,6 +127,8 @@ const paymentMethodsData: PaymentMethodsData = {
         description: "Digital wallet payment via Google Pay",
         icon: <Icons.googlePay className="-mr-2!" />,
         limits: [
+          { amount: "Minimum amount:", requirement: "$100" },
+
           {
             amount: "Up to €250",
             requirement: "Lite KYC",
@@ -148,6 +154,7 @@ const paymentMethodsData: PaymentMethodsData = {
     description: "Cryptocurrency payments",
     icon: <Icons.ether className="size-4" />,
     limits: [
+      { amount: "Minimum amount:", requirement: "N/A" },
       {
         amount: "No limits on direct crypto payments",
         requirement: "No KYC required",
@@ -165,7 +172,6 @@ export function PaymentLimitsDialog({
   method,
   trigger,
 }: PaymentLimitsDialogProps) {
-
   const allFopMethods = FOPSchema.options;
 
   const displayMethods = (() => {
@@ -177,7 +183,6 @@ export function PaymentLimitsDialog({
     }
     return [];
   })();
-
 
   return (
     <Dialog>
@@ -223,9 +228,14 @@ export function PaymentLimitsDialog({
                   scale
                 >
                   <div>
-                    <AnimatedText delay={0.3 + methodIndex * 0.1} duration={0.3}>
+                    <AnimatedText
+                      delay={0.3 + methodIndex * 0.1}
+                      duration={0.3}
+                    >
                       <div className="pb-2">
-                        <h3 className="font-semibold text-lg">{methodData.name}</h3>
+                        <h3 className="font-semibold text-lg">
+                          {methodData.name}
+                        </h3>
                         <p className="text-sm text-secondary">
                           {methodData.description}
                         </p>
@@ -233,10 +243,15 @@ export function PaymentLimitsDialog({
                     </AnimatedText>
                     <div className="space-y-2">
                       {methodData.methods.map(
-                        (subMethod: PaymentMethodData, subMethodIndex: number) => (
+                        (
+                          subMethod: PaymentMethodData,
+                          subMethodIndex: number,
+                        ) => (
                           <FadeAnimation
                             key={subMethod.name}
-                            delay={0.35 + methodIndex * 0.1 + subMethodIndex * 0.08}
+                            delay={
+                              0.35 + methodIndex * 0.1 + subMethodIndex * 0.08
+                            }
                             duration={0.3}
                             scale
                           >
@@ -244,7 +259,11 @@ export function PaymentLimitsDialog({
                               <CardHeader className="flex items-start justify-between">
                                 <div className="flex w-full items-start justify-between gap-2">
                                   <AnimatedText
-                                    delay={0.4 + methodIndex * 0.1 + subMethodIndex * 0.08}
+                                    delay={
+                                      0.4 +
+                                      methodIndex * 0.1 +
+                                      subMethodIndex * 0.08
+                                    }
                                     duration={0.3}
                                     className="flex-1"
                                   >
@@ -252,20 +271,32 @@ export function PaymentLimitsDialog({
                                       {subMethod.name}
                                     </CardTitle>
                                   </AnimatedText>
-                                  {subMethod.name === 'Apple Pay' || subMethod.name === 'Google Pay' ? (
+                                  {subMethod.name === "Apple Pay" ||
+                                    subMethod.name === "Google Pay" ? (
                                     <AnimatedIcon
-                                      delay={0.45 + methodIndex * 0.1 + subMethodIndex * 0.08}
+                                      delay={
+                                        0.45 +
+                                        methodIndex * 0.1 +
+                                        subMethodIndex * 0.08
+                                      }
                                       duration={0.3}
                                     >
                                       {subMethod.icon}
                                     </AnimatedIcon>
                                   ) : (
                                     <AnimatedIcon
-                                      delay={0.45 + methodIndex * 0.1 + subMethodIndex * 0.08}
+                                      delay={
+                                        0.45 +
+                                        methodIndex * 0.1 +
+                                        subMethodIndex * 0.08
+                                      }
                                       duration={0.3}
                                     >
                                       <Badge
-                                        className={cn(subMethod.color, "w-fit shrink-0")}
+                                        className={cn(
+                                          subMethod.color,
+                                          "w-fit shrink-0",
+                                        )}
                                       >
                                         {subMethod.icon}
                                       </Badge>
@@ -273,7 +304,11 @@ export function PaymentLimitsDialog({
                                   )}
                                 </div>
                                 <AnimatedText
-                                  delay={0.5 + methodIndex * 0.1 + subMethodIndex * 0.08}
+                                  delay={
+                                    0.5 +
+                                    methodIndex * 0.1 +
+                                    subMethodIndex * 0.08
+                                  }
                                   duration={0.3}
                                 >
                                   <CardDescription className="text-sm text-secondary">
@@ -285,12 +320,20 @@ export function PaymentLimitsDialog({
                               <CardContent className="space-y-2">
                                 {subMethod.limits.map(
                                   (
-                                    limit: { amount: string; requirement: string },
+                                    limit: {
+                                      amount: string;
+                                      requirement: string;
+                                    },
                                     limitIndex: number,
                                   ) => (
                                     <FadeAnimation
                                       key={limitIndex}
-                                      delay={0.55 + methodIndex * 0.1 + subMethodIndex * 0.08 + limitIndex * 0.05}
+                                      delay={
+                                        0.55 +
+                                        methodIndex * 0.1 +
+                                        subMethodIndex * 0.08 +
+                                        limitIndex * 0.05
+                                      }
                                       duration={0.2}
                                     >
                                       <div className="flex items-start gap-3 text-sm">
@@ -344,7 +387,10 @@ export function PaymentLimitsDialog({
                         duration={0.3}
                       >
                         <Badge
-                          className={cn(standardMethodData.color, "w-fit shrink-0")}
+                          className={cn(
+                            standardMethodData.color,
+                            "w-fit shrink-0",
+                          )}
                         >
                           {standardMethodData.icon}
                         </Badge>
@@ -373,7 +419,9 @@ export function PaymentLimitsDialog({
                         >
                           <div className="flex items-start gap-3 text-sm">
                             <div className="min-w-0 flex-1">
-                              <span className="font-medium">{limit.amount}:</span>
+                              <span className="font-medium">
+                                {limit.amount}:
+                              </span>
                               <span className="text-secondary-400 ml-2">
                                 {limit.requirement}
                               </span>
