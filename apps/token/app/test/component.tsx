@@ -31,9 +31,7 @@ export const TestClientComponent = () => {
       <div className="max-w-4xl w-full">
         <InstaxchangeWidget
           txId={tx}
-          onSuccess={(d) => {
-            console.log("success---", d);
-          }}
+
           onError={(error) => {
             console.error("ERROR---", error);
           }}

@@ -202,8 +202,8 @@ export const InvestForm = ({
       const q = form.getFieldValue("paid.quantity") || 1;
       try {
         invariant(q, "Quantity is required");
-        // @ts-expect-error fop exists in the form below in the tree
         form.setFieldValue(
+          // @ts-expect-error fop exists in the form below in the tree
           "fop",
           FIAT_CURRENCIES.includes(v)
             ? FOPSchema.enum.CARD

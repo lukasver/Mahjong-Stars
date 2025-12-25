@@ -92,7 +92,6 @@ export function CardPaymentHandler({
       >
         <InstaxchangeWidget
           txId={tx?.id}
-          onSuccess={onSuccessInstaxchange}
           onError={(error) => {
             toast.error("Payment Error", {
               description: error,
