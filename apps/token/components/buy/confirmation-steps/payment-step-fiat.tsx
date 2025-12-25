@@ -29,7 +29,7 @@ export const FiatPayment = ({
     return (
       <CardPaymentHandler
         transaction={tx}
-        onSuccessInstaxchange={onSuccessInstaxchange}
+        // onSuccessInstaxchange={onSuccessInstaxchange}
         onSuccessCrypto={onSuccessCrypto}
       />
     );
@@ -44,7 +44,7 @@ export const FiatPayment = ({
           <TabsContent value={FOPSchema.enum.CARD}>
             <CardPaymentHandler
               transaction={tx}
-              onSuccessInstaxchange={onSuccessInstaxchange}
+              // onSuccessInstaxchange={onSuccessInstaxchange}
               onSuccessCrypto={onSuccessCrypto}
             />
           </TabsContent>
