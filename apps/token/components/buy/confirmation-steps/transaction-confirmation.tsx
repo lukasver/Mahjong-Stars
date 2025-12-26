@@ -97,9 +97,13 @@ export function TransactionConfirmation({
                   data-testid="saft-document-container"
                 >
                   <SaftReviewStep
-                    onSuccess={() =>
+                    onSuccess={() => {
                       setStep(steps.find((s) => s.name === "Payment")!)
-                    }
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      });
+                    }}
                   />
                 </motion.div>
               )}
