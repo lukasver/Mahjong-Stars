@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 		console.debug("DEBUG", JSON.stringify(body));
 
 		const found = await prisma.documentRecipient.findFirst({
-			where: { externalId: body.payload.id },
+			where: { 'OR': [{ externalId: body.payload.id }, { id: body.payload.externalId }] },
 			select: {
 				id: true,
 			},
