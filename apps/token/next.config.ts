@@ -19,7 +19,6 @@ const EXTERNAL_PROVIDERS = `min-api.cryptocompare.com`;
 const ANALYTICS_PROVIDERS = `https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.posthog.com`;
 const GOOGLE_CSP = `https://fonts.googleapis.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha https://www.google.com/recaptcha/enterprise.js https://www.gstatic.com/recaptcha/releases/`;
 const STORAGE_CSP = `https://storage.googleapis.com`;
-const VERCEL_LIVE_CSP = `https://vercel.live`;
 const HELIO_SCRIPT = `https://embed.hel.io/assets/index-v1.js`;
 const HELIO_STYLES = `https://embed.hel.io/assets/index-v1.css`;
 const HELIO_API = `https://api.hel.io/v1/ https://tiplink.io/api/wallet_adapter_ancestors/ https://quaint-convincing-choice.base-mainnet.quiknode.pro/c2ba2df1f23952da94da9e0cd0a5f8d8d028a91a/`;
@@ -39,13 +38,13 @@ const INSTAXCHANGE_CONNECT = `https://instaxchange.com https://api.instaxchange.
 
 const cspHeader = `
     default-src 'self' ${MAIN_DOMAIN};
-    connect-src 'self' ${INSTAXCHANGE_CONNECT} ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io ${VERCEL_LIVE_CSP} https://*.google.com https://google.com/pay https://apple.com https://www.apple.com;
+    connect-src 'self' ${INSTAXCHANGE_CONNECT} ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io https://vercel.live wss://ws-us3.pusher.com https://*.google.com https://google.com/pay https://apple.com https://www.apple.com;
     frame-src 'self' ${INSTAXCHANGE_FRAME} https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.thirdweb.com/ https://vercel.live/;
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' ${ANALYTICS_PROVIDERS} ${GOOGLE_CSP} ${E_SIGN_DOMAIN} ${VERCEL_LIVE_CSP} ${HELIO_SCRIPT};
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' ${ANALYTICS_PROVIDERS} ${GOOGLE_CSP} ${E_SIGN_DOMAIN} ${HELIO_SCRIPT} https://vercel.live;
     worker-src 'self' blob:;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${HELIO_STYLES};
-    font-src 'self' https://fonts.gstatic.com;
-    img-src 'self' data: blob: ${MAIN_DOMAIN} https://*.gstatic.com https://pay.google.com https://rainbowme-res.cloudinary.com/ https://*.ipfscdn.io https://*.walletconnect.org https://*.walletconnect.com https://storage.googleapis.com https://i.ibb.co ${HELIO_SCRIPT} ${HELIO_ASSETS};
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://vercel.live ${HELIO_STYLES};
+    font-src 'self' https://fonts.gstatic.com https://vercel.live https://assets.vercel.com;
+    img-src 'self' data: blob: ${MAIN_DOMAIN} https://*.gstatic.com https://pay.google.com https://rainbowme-res.cloudinary.com/ https://*.ipfscdn.io https://*.walletconnect.org https://*.walletconnect.com https://storage.googleapis.com https://i.ibb.co https://vercel.live https://vercel.com ${HELIO_SCRIPT} ${HELIO_ASSETS};
     object-src 'none';
     base-uri 'self';
     form-action 'self';
