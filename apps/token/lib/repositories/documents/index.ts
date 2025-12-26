@@ -118,14 +118,14 @@ class DocumentsController {
 						},
 						...(approver
 							? {
-									approver: {
-										create: {
-											email: approver.email,
-											fullname: approver.fullname,
-											role: approver.role,
-										},
+								approver: {
+									create: {
+										email: approver.email,
+										fullname: approver.fullname,
+										role: approver.role,
 									},
-								}
+								},
+							}
 							: {}),
 						variables,
 					},
@@ -230,6 +230,7 @@ class DocumentsController {
 	}
 
 	async generatePDF(args: {
+		transactionId?: string;
 		content: string;
 		title: string;
 		recipients: Array<{
@@ -237,6 +238,7 @@ class DocumentsController {
 			name?: string;
 		}>;
 		reference: string;
+		redirectUrl?: string;
 	}) {
 		const res = await fetch(env.PDF_SERVICE_URL, {
 			method: "POST",

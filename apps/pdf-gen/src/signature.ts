@@ -32,6 +32,8 @@ export class DocumensoService {
 		file,
 		pageSize,
 		reference,
+		redirectUrl,
+		transactionId,
 	}: {
 		title: string;
 		recipients: { email: string; name?: string; role: DocumentRole }[];
@@ -39,6 +41,8 @@ export class DocumensoService {
 		file: Buffer;
 		pageSize: number;
 		reference: string;
+		redirectUrl?: string;
+		transactionId?: string;
 	}) {
 		const signingOrder = DocumentSigningOrder.Sequential;
 		try {
@@ -74,12 +78,17 @@ export class DocumensoService {
 			}
 
 			const companyName = process.env.COMPANY_NAME || "The Tiles Company";
+			const redirectTo = redirectUrl || ((process.env.PDF_REDIRECT_BASE_URL && transactionId) ? `${process.env.PDF_REDIRECT_BASE_URL}/dashboard/buy/${transactionId}` : undefined);
+
+			console.log("🚀 ~ signature.ts:83 ~ redirectTo:", redirectTo);
+
 
 			const res = await this.sdk.documents.createV0({
 				title,
 				recipients: rec,
 				externalId: reference,
 				meta: {
+					...(redirectTo && { redirectUrl: redirectTo }),
 					timezone: meta?.timezone || "Europe/Zurich",
 					dateFormat: "dd/MM/yyyy hh:mm a",
 					language: meta?.language || "en",

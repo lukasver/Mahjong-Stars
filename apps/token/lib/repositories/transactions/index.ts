@@ -1001,6 +1001,7 @@ export class TransactionsController {
 						title: `Token Agreement | ${dto.transactionId} | ${user.email}`,
 						recipients,
 						reference: recipient.id,
+						transactionId: dto.transactionId,
 					})
 					.catch(async (e) => {
 						await this.db.documentRecipient.update({

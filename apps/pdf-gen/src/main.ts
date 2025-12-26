@@ -16,6 +16,8 @@ const bodySchema = z.object({
 		}),
 	),
 	reference: z.string(),
+	redirectUrl: z.optional(z.string()),
+	transactionId: z.optional(z.string()),
 });
 
 /**
@@ -100,6 +102,8 @@ async function main(req: IncomingMessage, res: ServerResponse) {
 			file: buffer,
 			pageSize: pageCount,
 			reference: body.reference,
+			transactionId: body.transactionId,
+			redirectUrl: body.redirectUrl,
 		});
 		console.timeEnd(`document-creation`);
 		if (!document.documentId) {

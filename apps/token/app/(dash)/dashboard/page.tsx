@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { metadata } from "@/common/config/site";
 import {
   DashboardCardLoading,
   RemainingTokensCard,
@@ -21,6 +22,7 @@ import {
 } from "@/components/dashboard/loading-components";
 import { RecentTransactionsSSR } from "@/components/dashboard/recent-transactions";
 import { FeatureCards } from "@/components/feature-cards";
+import { WelcomeBanner } from "@/components/welcome-component";
 import {
   getActiveSale,
   getUserFromSession,
@@ -47,7 +49,9 @@ export default async function DashboardPage(_props: PageProps<"/dashboard">) {
     <ErrorBoundary
       fallback={
         <div className="py-6">
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Please connect your wallet</h1>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+            Please connect your wallet
+          </h1>
         </div>
       }
     >
@@ -61,7 +65,11 @@ export default async function DashboardPage(_props: PageProps<"/dashboard">) {
           {/* <Suspense fallback={null}>
         <TokenDetails />
       </Suspense> */}
-
+          <WelcomeBanner
+            storageKey="welcome-banner-dismissed"
+            title={`Welcome to ${metadata.businessName} ICO dashboard`}
+            description="Get started with your purchase journey"
+          />
           <ErrorBoundary
             fallback={
               <div className="py-6">
@@ -71,7 +79,10 @@ export default async function DashboardPage(_props: PageProps<"/dashboard">) {
           >
             {/* <Suspense fallback={<FundraisingProgressLoading />}> */}
             <FundraisingProgress>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4" data-testid="token-cards">
+              <div
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4"
+                data-testid="token-cards"
+              >
                 <Suspense fallback={<DashboardCardLoading />}>
                   <UserTokensCard />
                 </Suspense>

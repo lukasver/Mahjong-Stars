@@ -65,7 +65,7 @@ export function ContractDialogConfirmSignature({
       <AlertDialogHeader>
         <AlertDialogTitle>Contract sent to your email</AlertDialogTitle>
         <AlertDialogDescription className="text-secondary">
-          Please review and sign the agreement on your email to proceed.
+          Please review and sign the agreement on your email. <br />After signature, come back to this page to confirm the signature.
         </AlertDialogDescription>
       </AlertDialogHeader>
       <DialogFooter>
