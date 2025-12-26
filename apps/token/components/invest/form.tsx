@@ -24,9 +24,9 @@ import { FormInput } from "@mjs/ui/primitives/form-input";
 import { Input } from "@mjs/ui/primitives/input";
 import { Skeleton } from "@mjs/ui/primitives/skeleton";
 import { toast } from "@mjs/ui/primitives/sonner";
-import { formatCurrency } from "@mjs/utils/client";
+import { copyToClipboard, formatCurrency } from "@mjs/utils/client";
 import { Prisma } from "@prisma/client";
-import { FileText, Info, Shield } from "lucide-react";
+import { Copy, FileText, Info, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { InferSafeActionFnResult } from "next-safe-action";
@@ -51,6 +51,7 @@ import {
 import calculator from "@/lib/services/pricefeeds";
 import { getQueryClient } from "@/lib/services/query";
 import { PaymentLimitsDialog } from "../buy/payment-limits-kyc-dialog";
+import PaymentInfoTooltip from "../buy/widgets/payment-info";
 import { FiatPaymentSelector } from "./fiat-payment";
 import { InvestFormSchema } from "./schemas";
 import { PurchaseSummary } from "./summary";
@@ -309,7 +310,52 @@ export const InvestForm = ({
         <FormInput
           name="receivingWallet"
           type="text"
-          label="Receiving wallet address"
+          label={
+            <div className="flex items-center gap-2">
+              <span>Receiving wallet address</span>
+              <PaymentInfoTooltip size="small">
+                <div className="bg-[#1a0a0a] border-2 border-[#8B1E1E]/70 rounded-lg p-4 shadow-xl">
+                  <h4 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Info className="w-4 h-4 text-[#DC143C]" />
+                    What is this?
+                  </h4>
+
+                  <ul className="space-y-2.5 text-xs text-red-200/90 leading-relaxed">
+                    <p>This is the wallet address where tokens will be sent after release.</p>
+                    <li className="flex gap-2">
+                      <span className="text-[#DC143C] font-bold flex-shrink-0">•</span>
+                      <span>
+                        Ensure you provide an <strong className="text-red-100">EVM compatible</strong> wallet address.
+                      </span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-[#DC143C] font-bold flex-shrink-0">•</span>
+                      <span>
+                        If unsure which wallet to use, you can use the default one linked to your account: <br />
+                        {activeAccount?.address && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!activeAccount?.address) {
+                                toast.error("No wallet address found, please connect your wallet first");
+                                return;
+                              }
+                              copyToClipboard(activeAccount.address);
+                              toast.success("Wallet address copied to clipboard");
+                            }}
+                            className="inline-flex items-center gap-1.5 text-red-100 hover:text-red-200 transition-colors group mt-1"
+                          >
+                            <strong className="text-xs break-all">{activeAccount.address}</strong>
+                            <Copy className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                          </button>
+                        )}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </PaymentInfoTooltip>
+            </div>
+          }
           inputProps={{
             placeholder: "0x1234567890",
           }}
@@ -472,7 +518,7 @@ export const InvestForm = ({
 
       </form>
     </form.AppForm>
-  );
+  )
 };
 
 const SubmitButton = ({

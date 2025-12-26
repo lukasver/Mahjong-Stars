@@ -16,6 +16,7 @@ import { useInstaxchangeSession } from "@/components/hooks/use-instaxchange-sess
 import { PulseLoader } from "@/components/pulse-loader";
 import { CreateSessionRequest } from "@/lib/services/instaxchange/types";
 import { PaymentLimitsDialog } from "../payment-limits-kyc-dialog";
+import PaymentInfoTooltip from './payment-info';
 
 export type SuccessInstaxchangePaymentData = {
   id: string;
@@ -89,6 +90,12 @@ const InstaxchangeWidgetComponent = ({
     // <Activity mode={!sessionUrl ? "visible" : "hidden"}>
     <StaggeredRevealAnimation isVisible={!!sessionUrl}>
       <div className="space-y-4">
+        <div className='w-full flex justify-center'>
+          <PaymentInfoTooltip
+            text="Have questions?"
+            showSupport
+          />
+        </div>
         <div className="relative w-full">
           {sessionUrl && method === "apple-pay" ? (
             <ApplePayHandler src={sessionUrl} txId={txId} />

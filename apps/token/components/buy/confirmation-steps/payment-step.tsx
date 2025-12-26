@@ -21,6 +21,7 @@ import {
 } from "@/lib/actions";
 import { useTransactionById } from "@/lib/services/api";
 import { SuccessInstaxchangePaymentData } from "../widgets/instaxchange";
+import PaymentInfoTooltip from "../widgets/payment-info";
 import { SuccessCryptoPaymentData } from "../widgets/transaction";
 import { CryptoPayment } from "./payment-step-crypto";
 import { FiatPayment } from "./payment-step-fiat";
@@ -155,13 +156,18 @@ export function PaymentStep({ onSuccess }: PaymentStepProps) {
         data-testid="payment-step-container"
       >
         <CardHeader>
-          <CardTitle className="font-head">Payment</CardTitle>
+          <div className={cn(paymentMethod !== "CRYPTO" && "flex items-center gap-2 justify-between")}>
+            <CardTitle className="font-head">Payment</CardTitle>
+            {paymentMethod !== "CRYPTO" && <PaymentInfoTooltip size="small" />}
+          </div>
           <CardDescription>
             Please follow the instructions below to complete your payment.
           </CardDescription>
         </CardHeader>
       </motion.div>
-      <CardContent className={cn(paymentMethod === "CARD" ? "p-0 md:p-6 md:pt-0" : "")}>
+      <CardContent
+        className={cn(paymentMethod === "CARD" ? "p-0 md:p-6 md:pt-0" : "")}
+      >
         {paymentMethod !== "CRYPTO" ? (
           <FiatPayment
             tx={tx.transaction}
