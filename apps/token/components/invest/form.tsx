@@ -313,7 +313,7 @@ export const InvestForm = ({
           inputProps={{
             placeholder: "0x1234567890",
           }}
-          description="The address where tokens will be sent after release"
+          description="EVM compatible wallet address where tokens will be sent after release"
           descriptionClassName="text-secondary scroll scrollbar-hidden "
         />
 
