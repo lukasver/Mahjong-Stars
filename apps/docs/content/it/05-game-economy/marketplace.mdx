@@ -1,0 +1,397 @@
+---
+title: "Marketplace"
+description: "Meccaniche di scambio, AI-as-a-Service, collezionabili fisici e funzionalità del marketplace"
+tags: ["marketplace", "trading", "nft", "ai-marketplace", "collectibles"]
+date: "2025-12-26"
+---
+
+import { Callout } from 'nextra/components';
+
+# Marketplace
+
+Il marketplace in-game è dove i giocatori comprano e vendono personaggi, charm, studi e moduli AI. Le funzionalità includono scambi peer-to-peer, AI-as-a-Service e persino lo scambio di collezionabili fisici.
+
+<Callout type="info">
+**Funzionalità Opzionale**: Il marketplace richiede l'integrazione blockchain. I giocatori che preferiscono il gaming tradizionale possono ignorarlo completamente: tutti gli asset funzionano perfettamente come oggetti standard in-game.
+</Callout>
+
+---
+
+## Scambi e Liquidità
+
+Il marketplace offre una piattaforma sicura e trasparente per lo scambio di asset.
+
+### Strumenti di Annuncio
+
+I venditori hanno opzioni flessibili per mettere in vendita i propri asset:
+
+**Annunci a Prezzo Fisso**:
+- Stabilisci il tuo prezzo in token
+- Vendita istantanea quando l'acquirente accetta
+- Nessun limite di tempo (finché non viene annullato o venduto)
+- Ideale per oggetti comuni con prezzi stabiliti
+- Rischio più basso, risultato prevedibile
+
+**Annunci d'Asta**:
+- **Asta Inglese (Ascendente)**:
+  - Stabilisci il prezzo di partenza e il prezzo di riserva
+  - Gli acquirenti fanno offerte tra loro
+  - L'offerta più alta vince alla fine dell'asta
+  - Durata tipica di 24-72 ore
+  - Ideale per oggetti rari e di alto valore
+
+- **Asta Olandese (Discendente)**:
+  - Inizia da un prezzo elevato, che diminuisce nel tempo
+  - Il primo acquirente che accetta il prezzo corrente vince
+  - Il prezzo scende secondo un programma (es. ogni ora)
+  - Crea urgenza per gli acquirenti
+  - Utile per smaltire rapidamente l'inventario
+
+**Annunci in Bundle**:
+- Vendi più oggetti insieme
+- Offri pacchetti
+- Miglior valore per gli acquirenti
+- Vendita rapida di oggetti correlati
+- Prezzi personalizzati per i bundle
+
+**Commissioni di Annuncio**:
+- Piccola commissione fissa per l'annuncio (0.5-1% del valore, max 100 token)
+- Rimborsata se l'oggetto non viene venduto (opzione)
+- Previene annunci spam
+- Commissioni ridotte per gli staker
+
+<Callout type="success">
+**Barriere Basse**: Commissioni minime di annuncio garantiscono che chiunque possa partecipare all'economia del marketplace.
+</Callout>
+
+### Ricerca e Filtri
+
+Gli acquirenti possono trovare facilmente ciò che cercano:
+
+**Funzionalità di Ricerca**:
+- **Ricerca Testuale**: Cerca per nome, descrizione, tratti
+- **Filtri Avanzati**:
+  - Tipo di asset (Personaggio, Charm, Studio, Modulo AI)
+  - Livello di rarità (Comune a Leggendario)
+  - Intervallo di livello
+  - Intervallo di prezzo
+  - Valutazione venditore
+  - Tipo di annuncio (asta vs. fisso)
+  - Data di inserzione (più recenti per primi, ecc.)
+- **Opzioni di Ordinamento**:
+  - Prezzo (dal più basso al più alto, dal più alto al più basso)
+  - Popolarità (più visti)
+  - Scadenza a breve (aste)
+  - Inseriti di recente
+  - Migliori offerte (valutazione del valore)
+
+**Filtri Intelligenti**:
+- Oggetti consigliati dall'AI basati sulla tua collezione
+- Oggetti simili (quando si visualizza un annuncio)
+- Cronologia e tendenze dei prezzi
+- Strumenti di analisi comparativa
+- Avvisi per gli oggetti osservati
+
+**Sezione Tendenze**:
+- Oggetti più scambiati questa settimana
+- Asset in aumento di valore
+- Ricerche popolari
+- Preferiti dalla community
+- Evidenziazioni stagionali
+
+### Deposito Sicuro
+
+Tutte le transazioni sono elaborate tramite smart contract, garantendo la sicurezza:
+
+**Sicurezza delle Transazioni**:
+1. L'acquirente invia il pagamento al contratto di deposito
+2. Il venditore trasferisce l'asset al deposito
+3. Lo smart contract verifica entrambe le parti
+4. Scambio simultaneo eseguito
+5. Entrambe le parti ricevono i loro oggetti atomicamente
+
+**Funzionalità di Protezione**:
+- **Nessuna Truffa**: Impossibile prendere soldi senza dare l'oggetto
+- **Nessun Chargeback**: Le transazioni blockchain sono definitive
+- **Risoluzione delle Controversie**: Mediazione della piattaforma per i problemi
+- **Sistema di Valutazione**: Costruisci la reputazione di venditore/acquirente
+- **Protezione Acquirente**: Verifica gli asset prima di finalizzare
+
+**Vantaggi degli Smart Contract**:
+- Transazioni trustless
+- Codice trasparente
+- Sicurezza verificata
+- Commissioni minime (solo gas)
+- Regolamento istantaneo
+
+### Dashboard di Analisi
+
+Decisioni di scambio basate sui dati:
+
+**Prezzi Storici**:
+- Grafici dei prezzi per ogni oggetto
+- Monitoraggio dei volumi
+- Prezzi medi di vendita
+- Prezzi minimi (i più bassi disponibili)
+- Prezzi massimi (i più alti venduti)
+
+**Tendenze di Mercato**:
+- Indicatori di domanda e offerta
+- Momentum dei prezzi
+- Velocità di scambio
+- Distribuzione dei possessori
+- Moltiplicatori di rarità
+
+**Monitoraggio del Portafoglio**:
+- Valore attuale della tua collezione
+- Prezzi di acquisto vs. valore attuale
+- Calcoli di profitto/perdita
+- Performance migliori
+- Analisi degli investimenti
+
+**Avvisi**:
+- Notifiche di calo prezzi
+- Avvisi di inserzione per oggetti desiderati
+- Notifiche di superamento offerte
+- Promemoria fine asta
+- Variazioni del valore del portafoglio
+
+<Callout type="warning">
+**Intelligenza di Mercato**: Utilizza l'analisi per prendere decisioni di scambio informate, non scommesse speculative. Concentrati sugli oggetti che utilizzerai e apprezzerai.
+</Callout>
+
+---
+
+## Oggetti Cosmetici e Asset Virtuali
+
+Oltre agli asset di gioco, il marketplace offre oggetti puramente cosmetici.
+
+### Categorie Cosmetiche
+
+**Personalizzazione Visiva**:
+- **Skin Tavolo**: Disegni e materiali personalizzati per il tavolo
+- **Set di Mattonelle**: Aspetti unici delle mattonelle
+- **Sfondi**: Temi ambientali del gioco
+- **Cornici Avatar**: Bordi per l'immagine del profilo
+- **Emote e Sticker**: Pacchetti di espressioni
+- **Animazioni Vittoria**: Effetti di celebrazione
+
+**Personalizzazione Audio**:
+- **Pacchetti Musicali**: Colonne sonore di sottofondo
+- **Effetti Sonori**: Suoni personalizzati per le mattonelle
+- **Pacchetti Vocali**: Opzioni di dialogo per i personaggi
+- **Suoni Ambientali**: Audio ambientale
+
+**Edizioni Limitate**:
+- **Oggetti Stagionali**: Esclusivi per festività ed eventi
+- **Oggetti Collaborativi**: Partnership con brand
+- **Serie d'Artista**: Edizioni limitate da artisti
+- **Oggetti Commemorativi**: Memorabilia di eventi speciali
+- **Oggetti Fondatori**: Esclusivi per i primi sostenitori
+
+### Modello di Vendita Cosmetico
+
+**Vendite Primarie**:
+- Nuovi cosmetici rilasciati regolarmente
+- Quantità limitate per oggetti rari
+- Prezzi fissi dalla piattaforma
+- Parte delle vendite supporta lo sviluppo
+
+**Mercato Secondario**:
+- I giocatori rivendono i cosmetici
+- Prezzi determinati da domanda e offerta
+- La piattaforma trattiene una piccola commissione
+- I creatori originali potrebbero ricevere royalty (opzionale)
+
+**Rilasci Stagionali**:
+- Collezioni a tema trimestrali
+- Disponibilità a tempo limitato
+- La scarsità post-stagione guida il valore
+- Appeal per i collezionisti
+
+---
+
+## AI-as-a-Service e Potenziale di Monetizzazione
+
+Una funzionalità rivoluzionaria unica di Mahjong Stars: il marketplace AI.
+
+### Noleggio AI
+
+I giocatori con companion AI ben addestrati possono noleggiarli ad altri:
+
+**Meccaniche di Noleggio**:
+- **Noleggi Orari**: 10-100 token/ora (impostati dal proprietario)
+- **Noleggi Giornalieri**: 100-1.000 token/giorno
+- **Basati su Partita**: 50-500 token per partita
+- **Abbonamento**: Pacchetti di noleggio settimanali/mensili
+
+**Funzionalità di Noleggio**:
+- Il noleggiatore utilizza l'AI nelle partite
+- I guadagni vanno al noleggiatore (il proprietario dell'AI riceve la tariffa di noleggio)
+- Le prestazioni dell'AI vengono tracciate
+- Sistema di valutazione per la qualità dell'AI
+- Politiche di cancellazione
+
+**Vantaggi Proprietario**:
+- Reddito passivo dall'investimento nell'addestramento
+- La piattaforma trattiene una commissione del 5-10%
+- Costruisci la reputazione di addestratore AI
+- Maggiore domanda = prezzi più alti
+- Noleggi multipli simultanei (se consentito)
+
+**Garanzie di Performance**:
+- Le percentuali di vittoria pubblicizzate devono essere accurate
+- Rimborsi per AI sottoperformanti
+- Sistema di verifica
+- Recensioni della community
+- Risoluzione delle controversie
+
+<Callout type="success">
+**Economia Innovativa**: Le AI ben addestrate diventano asset preziosi che generano reddito continuo per i loro addestratori.
+</Callout>
+
+### Servizi di Coaching AI
+
+Giocatori esperti possono offrire coaching uno a uno utilizzando i loro modelli AI:
+
+**Opzioni di Coaching**:
+- **Sessioni Strategiche**: Analizza replay con insight AI (500-5.000 token/ora)
+- **Piani di Allenamento**: Roadmap personalizzate di addestramento AI (1.000-10.000 token)
+- **Coaching Live**: Osserva e consiglia durante le partite (1.000-10.000 token/sessione)
+- **Ottimizzazione AI**: Modifica le impostazioni AI per le prestazioni (500-5.000 token)
+
+**Sistema di Prenotazione**:
+- Pianifica tramite il marketplace
+- Deposito protegge entrambe le parti
+- Sistema di valutazione e recensione
+- Politiche di cancellazione
+- Registrazioni delle sessioni (con permesso)
+
+**Vantaggi Coach**:
+- Monetizza l'esperienza
+- Costruisci il tuo marchio personale
+- Fai crescere la tua attività di coaching
+- Promozione della piattaforma (i migliori coach in evidenza)
+- Riconoscimento della community
+
+### Moduli e Template AI
+
+Gli sviluppatori possono creare template AI specializzati in strategie particolari:
+
+**Prodotti AI**:
+- **Specialisti Varianti**: AI ottimizzate per specifici set di regole (1.000-10.000 token)
+- **Moduli Strategici**: Stili difensivi, aggressivi, bilanciati (500-5.000 token)
+- **Acceleratori di Addestramento**: Set di dati per un apprendimento più rapido (250-2.500 token)
+- **Strumenti di Analisi**: Analisi post-partita potenziate (500-5.000 token)
+- **Moduli Ibridi**: Strategie miste umano-AI (1.000-10.000 token)
+
+**Economia degli Sviluppatori**:
+- Stabilisci i tuoi prezzi
+- Commissione della piattaforma (10-15%)
+- Aggiornamenti automatici (opzionale)
+- Responsabilità del supporto clienti
+- Dashboard di monitoraggio delle entrate
+
+**Controllo Qualità**:
+- Test della piattaforma prima dell'approvazione
+- Valutazioni e recensioni degli utenti
+- Benchmark di performance
+- Politiche di rimborso
+- Programma sviluppatori in evidenza
+
+---
+
+## Scambio Collezionabili Fisici
+
+Unico di Mahjong Stars: scambia oggetti fisici legati all'economia digitale.
+
+### Collezionabili Fisici
+
+Merchandise fisico in edizione limitata rilasciato occasionalmente:
+
+**Tipi di Oggetti**:
+- **Tazze a Tema**: Disegni di personaggi, edizioni limitate
+- **Stampe d'Arte**: Opere d'arte della piattaforma, edizioni firmate
+- **Abbigliamento**: T-shirt, felpe con design esclusivi
+- **Set Mahjong**: Set di mattonelle fisiche con design speciali
+- **Oggetti Commemorativi**: Memorabilia di eventi
+- **Oggetti Fondatori**: Esclusivi per i primi sostenitori
+
+**Acquisizione**:
+- Acquisto con valuta soft dal negozio in-game
+- Quantità limitate
+- Primo arrivato, primo servito
+- Potrebbe richiedere un livello account minimo
+- Spedito a indirizzo verificato
+
+<Callout type="info">
+**Ponte Digitale-Fisico**: I collezionabili fisici creano un legame tangibile con la piattaforma digitale, migliorando l'engagement della community.
+</Callout>
+
+### Meccaniche di Scambio
+
+I giocatori possono rimettere in vendita oggetti fisici che hanno acquisito:
+
+**Processo di Annuncio**:
+1. Possiedi il collezionabile fisico (spedito a te)
+2. Mettilo in vendita sulla borsa dedicata per oggetti fisici
+3. Stabilisci il tuo prezzo richiesto (valuta soft o token)
+4. Altri utenti fanno offerte
+5. L'asta termina, vince l'offerente più alto
+6. Il vincitore paga, tu spedisci l'oggetto
+7. La conferma di consegna rilascia il pagamento
+
+**Formato Asta**:
+- Requisiti di offerta minima
+- Durata dell'asta (tipicamente 7-14 giorni)
+- Prezzo di riserva opzionale
+- Opzione "Compralo subito"
+- Trasparenza dei costi di spedizione
+
+**Funzionalità di Sicurezza**:
+- Indirizzi verificati
+- Tracciamento richiesto
+- Deposito fino a conferma consegna
+- Risoluzione delle controversie
+- Valutazioni del venditore cruciali
+
+**Ruolo Piattaforma**:
+- Ospita gli annunci (nessuna commissione sugli oggetti fisici)
+- Media le controversie
+- Verifica l'autenticità
+- Fornisce linee guida
+- Polizia della community
+
+---
+
+## Commissioni del Marketplace
+
+Per mantenere la piattaforma e fornire valore:
+
+**Commissioni di Transazione**:
+- **Asset Digitali**: Commissione base del 10%
+- **Sconti Staker**: Riduzione commissione del 10-60% (vedi livelli Staking)
+- **Noleggio AI**: Commissione del 5-10%
+- **Prodotti AI**: Commissione del 10-15%
+- **Oggetti Fisici**: Commissione 0% (guidato dalla community)
+
+**Distribuzione Commissioni**:
+- 40% bruciato (deflazionistico)
+- 30% agli staker (ricompense)
+- 20% al fondo di sviluppo
+- 10% ai fornitori di liquidità
+
+**Commissioni Gas**:
+- Costi di transazione blockchain (a carico dell'utente)
+- Tipicamente piccoli (centesimi a dollari)
+- Dinamici in base alla congestione della rete
+- Programmi di sussidio per nuovi utenti (prime transazioni gratuite)
+
+---
+
+## Prossimi Passi
+
+- Scopri il [Modello di Entrate](/05-game-economy/revenue-model) per la sostenibilità della piattaforma
+- Rivedi la [Tokenomics](/05-game-economy/tokenomics) per un quadro economico completo
+- Esplora l'[Integrazione AI](/03-product-overview/ai-integration) per la creazione di AI
+- Controlla [Collezionabili](/03-product-overview/collectibles) per i dettagli degli asset

@@ -1,0 +1,396 @@
+---
+title: "Marketplace"
+description: "Mecânica de negociação, AI-as-a-Service, colecionáveis físicos e funcionalidades do marketplace"
+tags: ["marketplace", "trading", "nft", "ai-marketplace", "collectibles"]
+date: "2025-12-26"
+---
+
+import { Callout } from 'nextra/components';
+
+# Marketplace
+
+O marketplace dentro do jogo é onde os jogadores compram e vendem personagens, amuletos, estúdios e módulos de IA. As funcionalidades incluem negociação peer-to-peer, AI-as-a-Service e até mesmo troca de colecionáveis físicos.
+
+<Callout type="info">
+**Funcionalidade Opcional**: O marketplace requer integração com blockchain. Jogadores que preferem jogos tradicionais podem ignorar isso completamente — todos os ativos funcionam perfeitamente como itens padrão do jogo.
+</Callout>
+
+---
+
+## Negociação e Liquidez
+
+O marketplace oferece uma plataforma segura e transparente para negociação de ativos.
+
+### Ferramentas de Listagem
+
+Os vendedores têm opções flexíveis para listar seus ativos:
+
+**Listagens de Preço Fixo**:
+- Defina seu preço em tokens
+- Venda instantânea quando o comprador aceitar
+- Sem limite de tempo (até ser cancelado ou vendido)
+- Ideal para itens comuns com preços estabelecidos
+- Risco mais baixo, resultado previsível
+
+**Listagens de Leilão**:
+- **Leilão Inglês (Ascendente)**:
+  - Defina o lance inicial e o preço de reserva
+  - Compradores dão lances uns contra os outros
+  - O maior lance vence no final do leilão
+  - Duração típica de 24-72 horas
+  - Ideal para itens raros e de alto valor
+
+- **Leilão Holandês (Descendente)**:
+  - Começa com um preço alto, que diminui ao longo do tempo
+  - O primeiro comprador a aceitar o preço atual vence
+  - O preço cai em intervalos programados (ex: a cada hora)
+  - Cria urgência para os compradores
+  - Bom para vender estoque rapidamente
+
+**Listagens de Pacotes**:
+- Venda vários itens juntos
+- Ofereça pacotes
+- Melhor valor para os compradores
+- Venda rápida de itens relacionados
+- Preços personalizados para pacotes
+
+**Taxas de Listagem**:
+- Pequena taxa fixa para listar (0,5-1% do valor, máximo de 100 tokens)
+- Reembolsada se o item não for vendido (opcional)
+- Previne listagens de spam
+- Taxas reduzidas para stakers
+
+<Callout type="success">
+**Baixas Barreiras**: Taxas de listagem mínimas garantem que qualquer pessoa possa participar da economia do marketplace.
+</Callout>
+
+### Pesquisa e Filtros
+
+Os compradores podem encontrar facilmente o que procuram:
+
+**Funcionalidades de Pesquisa**:
+- **Pesquisa de Texto**: Pesquise por nome, descrição, características
+- **Filtros Avançados**:
+  - Tipo de ativo (Personagem, Amuleto, Estúdio, Módulo de IA)
+  - Nível de raridade (Comum a Lendário)
+  - Faixa de nível
+  - Faixa de preço
+  - Classificação do vendedor
+  - Tipo de listagem (leilão vs. preço fixo)
+  - Data de listagem (mais recentes primeiro, etc.)
+- **Opções de Classificação**:
+  - Preço (do menor para o maior, do maior para o menor)
+  - Popularidade (mais visualizados)
+  - Finalizando em breve (leilões)
+  - Listados recentemente
+  - Melhores ofertas (classificação de valor)
+
+**Filtros Inteligentes**:
+- Itens recomendados por IA com base na sua coleção
+- Itens semelhantes (ao visualizar uma listagem)
+- Histórico de preços e tendências
+- Ferramentas de análise comparativa
+- Alertas de itens monitorados
+
+**Seção de Tendências**:
+- Itens mais negociados esta semana
+- Ativos em ascensão de valor
+- Pesquisas populares
+- Favoritos da comunidade
+- Destaques sazonais
+
+### Escrow Seguro
+
+Todas as transações são processadas via smart contracts, garantindo segurança:
+
+**Segurança da Transação**:
+1. Comprador envia pagamento para o contrato de escrow
+2. Vendedor transfere o ativo para o escrow
+3. Smart contract verifica ambos os lados
+4. Troca simultânea executada
+5. Ambas as partes recebem seus itens atomicamente
+
+**Funcionalidades de Proteção**:
+- **Sem Golpes**: Não é possível pegar dinheiro sem entregar o item
+- **Sem Estornos**: Transações de blockchain são finais
+- **Resolução de Disputas**: Mediação da plataforma para problemas
+- **Sistema de Classificação**: Construa reputação de vendedor/comprador
+- **Proteção ao Comprador**: Verifique os ativos antes de finalizar
+
+**Benefícios do Smart Contract**:
+- Transações confiáveis (trustless)
+- Código transparente
+- Segurança auditada
+- Taxas mínimas (apenas gás)
+- Liquidação instantânea
+
+### Painel de Análise
+
+Decisões de negociação baseadas em dados:
+
+**Preços Históricos**:
+- Gráficos de preços para cada item
+- Rastreamento de volume
+- Preços médios de venda
+- Preços de piso (o mais baixo disponível)
+- Preços de teto (o mais alto vendido)
+
+**Tendências de Mercado**:
+- Indicadores de oferta e demanda
+- Momento do preço
+- Velocidade de negociação
+- Distribuição de detentores
+- Multiplicadores de raridade
+
+**Rastreamento de Portfólio**:
+- Valor atual da sua coleção
+- Preços de compra vs. valor atual
+- Cálculos de lucro/prejuízo
+- Melhores desempenhos
+- Análises de investimento
+
+**Alertas**:
+- Notificações de queda de preço
+- Alertas de listagem para itens desejados
+- Notificações de lance superado
+- Lembretes de finalização de leilão
+- Alterações no valor do portfólio
+
+<Callout type="warning">
+**Inteligência de Mercado**: Use análises para tomar decisões de negociação informadas, não apostas especulativas. Concentre-se em itens que você usará e apreciará.
+</Callout>
+
+---
+
+## Itens Cosméticos e Ativos Virtuais
+
+Além dos ativos de jogabilidade, o marketplace oferece itens puramente cosméticos.
+
+### Categorias Cosméticas
+
+**Personalização Visual**:
+- **Skins de Mesa**: Designs e materiais personalizados de mesa
+- **Conjuntos de Peças**: Aparências únicas de peças
+- **Planos de Fundo**: Temas de ambiente do jogo
+- **Molduras de Avatar**: Bordas de foto de perfil
+- **Emotes e Adesivos**: Pacotes de expressão
+- **Animações de Vitória**: Efeitos de celebração
+
+**Personalização de Áudio**:
+- **Pacotes de Música**: Trilhas sonoras de fundo
+- **Efeitos Sonoros**: Sons de peças personalizados
+- **Pacotes de Voz**: Opções de diálogo de personagem
+- **Sons Ambiente**: Áudio do ambiente
+
+**Edições Limitadas**:
+- **Itens Sazonais**: Exclusivos de feriados e eventos
+- **Itens de Colaboração**: Parcerias de marca
+- **Série de Artistas**: Edições limitadas de artistas
+- **Itens Comemorativos**: Memorabilia de eventos especiais
+- **Itens de Fundador**: Exclusivos para apoiadores iniciais
+
+### Modelo de Venda Cosmética
+
+**Vendas Primárias**:
+- Novos cosméticos lançados regularmente
+- Quantidades limitadas para itens raros
+- Preços fixos definidos pela plataforma
+- Parte das vendas apoia o desenvolvimento
+
+**Mercado Secundário**:
+- Jogadores revendem cosméticos
+- Preços determinados pela oferta e demanda
+- Plataforma cobra uma pequena comissão
+- Criadores originais podem receber royalties (opcional)
+
+**Lançamentos Sazonais**:
+- Coleções temáticas trimestrais
+- Disponibilidade por tempo limitado
+- Escassez pós-temporada impulsiona o valor
+- Apelo para colecionadores
+
+---
+
+## AI-as-a-Service e Potencial de Monetização
+
+Uma funcionalidade revolucionária exclusiva de Mahjong Stars: marketplace de IA.
+
+### Aluguel de IA
+
+Jogadores com companheiros de IA bem treinados podem alugá-los para outros:
+
+**Mecânicas de Aluguel**:
+- **Aluguéis por Hora**: 10-100 tokens/hora (definido pelo proprietário)
+- **Aluguéis por Dia**: 100-1.000 tokens/dia
+- **Por Partida**: 50-500 tokens por partida
+- **Assinatura**: Pacotes de aluguel semanais/mensais
+
+**Funcionalidades de Aluguel**:
+- O locatário usa a IA em partidas
+- Ganhos vão para o locatário (proprietário da IA recebe a taxa de aluguel)
+- Desempenho da IA rastreado
+- Sistema de classificação para qualidade da IA
+- Políticas de cancelamento
+
+**Benefícios do Proprietário**:
+- Renda passiva do investimento em treinamento
+- Plataforma cobra comissão de 5-10%
+- Construir reputação como treinador de IA
+- Maior demanda = preços mais altos
+- Múltiplos aluguéis simultâneos (se permitido)
+
+**Garantias de Desempenho**:
+- Taxas de vitória anunciadas devem ser precisas
+- Reembolsos para IAs com desempenho inferior
+- Sistema de verificação
+- Avaliações da comunidade
+- Resolução de disputas
+
+<Callout type="success">
+**Economia Inovadora**: IAs bem treinadas se tornam ativos valiosos gerando renda contínua para seus treinadores.
+</Callout>
+
+### Serviços de Coaching de IA
+
+Jogadores habilidosos podem oferecer coaching individual usando seus modelos de IA:
+
+**Opções de Coaching**:
+- **Sessões de Estratégia**: Analise replays com insights de IA (500-5.000 tokens/hora)
+- **Planos de Treinamento**: Roteiros personalizados de treinamento de IA (1.000-10.000 tokens)
+- **Coaching ao Vivo**: Assista e aconselhe durante os jogos (1.000-10.000 tokens/sessão)
+- **Otimização de IA**: Ajuste as configurações da IA para desempenho (500-5.000 tokens)
+
+**Sistema de Reserva**:
+- Agende através do marketplace
+- Escrow protege ambas as partes
+- Sistema de classificação e avaliação
+- Políticas de cancelamento
+- Gravações de sessões (com permissão)
+
+**Benefícios do Coach**:
+- Monetize a expertise
+- Construa marca pessoal
+- Cresça seu negócio de coaching
+- Promoção da plataforma (melhores coaches em destaque)
+- Reconhecimento da comunidade
+
+### Templates e Módulos de IA
+
+Desenvolvedores podem criar templates de IA especializados em estratégias particulares:
+
+**Produtos de IA**:
+- **Especialistas em Variantes**: IAs otimizadas para conjuntos de regras específicos (1.000-10.000 tokens)
+- **Módulos de Estratégia**: Estilos defensivos, agressivos, equilibrados (500-5.000 tokens)
+- **Aceleradores de Treinamento**: Conjuntos de dados para aprendizado mais rápido (250-2.500 tokens)
+- **Ferramentas de Análise**: Análise aprimorada pós-jogo (500-5.000 tokens)
+- **Módulos Híbridos**: Estratégias combinadas humano-IA (1.000-10.000 tokens)
+
+**Economia do Desenvolvedor**:
+- Defina seu próprio preço
+- Comissão da plataforma (10-15%)
+- Atualizações automáticas (opcional)
+- Responsabilidade pelo suporte ao cliente
+- Painel de acompanhamento de receita
+
+**Controle de Qualidade**:
+- Testes da plataforma antes da aprovação
+- Avaliações e feedback dos usuários
+- Benchmarks de desempenho
+- Políticas de reembolso
+- Programa de desenvolvedor em destaque
+
+---
+
+## Troca de Colecionáveis Físicos
+
+Exclusivo de Mahjong Stars: troque itens físicos vinculados à economia digital.
+
+### Colecionáveis Físicos
+
+Mercadorias físicas de edição limitada lançadas ocasionalmente:
+
+**Tipos de Item**:
+- **Canecas Temáticas**: Designs de personagens, edições limitadas
+- **Impressões de Arte**: Arte da plataforma, edições assinadas
+- **Vestuário**: Camisetas, moletons com designs exclusivos
+- **Conjuntos de Mahjong**: Conjuntos físicos de peças com designs especiais
+- **Itens Comemorativos**: Memorabilia de eventos
+
+**Aquisição**:
+- Compre com moeda soft da loja do jogo
+- Quantidades limitadas
+- Primeiro a chegar, primeiro a ser servido
+- Pode exigir nível mínimo de conta
+- Enviado para endereço verificado
+
+<Callout type="info">
+**Ponte Digital-Física**: Colecionáveis físicos criam uma conexão tangível com a plataforma digital, aprimorando o engajamento da comunidade.
+</Callout>
+
+### Mecânicas de Troca
+
+Jogadores podem relistar itens físicos que adquiriram:
+
+**Processo de Listagem**:
+1. Possua o colecionável físico (enviado para você)
+2. Liste na bolsa dedicada de itens físicos
+3. Defina seu preço de venda (moeda soft ou tokens)
+4. Outros usuários fazem lances
+5. O leilão termina, o maior lance vence
+6. O vencedor paga, você envia o item
+7. A confirmação de entrega libera o pagamento
+
+**Formato do Leilão**:
+- Requisitos de lance mínimo
+- Duração do leilão (típica de 7-14 dias)
+- Preço de reserva opcional
+- Opção de "compre agora"
+- Transparência nos custos de envio
+
+**Recursos de Segurança**:
+- Endereços verificados
+- Rastreamento exigido
+- Escrow até a confirmação da entrega
+- Resolução de disputas
+- Classificações de vendedor cruciais
+
+**Papel da Plataforma**:
+- Hospedar listagens (sem comissão sobre itens físicos)
+- Mediar disputas
+- Verificar autenticidade
+- Fornecer diretrizes
+- Polícia da comunidade
+
+---
+
+## Taxas do Marketplace
+
+Para manter a plataforma e fornecer valor:
+
+**Taxas de Transação**:
+- **Ativos Digitais**: Comissão base de 10%
+- **Descontos para Stakers**: Redução de taxa de 10-60% (ver Níveis de Staking)
+- **Aluguéis de IA**: Comissão de 5-10%
+- **Produtos de IA**: Comissão de 10-15%
+- **Itens Físicos**: Comissão de 0% (impulsionado pela comunidade)
+
+**Distribuição de Taxas**:
+- 40% queimados (deflacionário)
+- 30% para stakers (recompensas)
+- 20% para fundo de desenvolvimento
+- 10% para provedores de liquidez
+
+**Taxas de Gás**:
+- Custos de transação de blockchain (pagos pelo usuário)
+- Geralmente pequenas (centavos a dólares)
+- Dinâmicas com base na congestão da rede
+- Programas de subsídio para novos usuários (primeiras transações grátis)
+
+---
+
+## Próximos Passos
+
+- Saiba mais sobre o [Modelo de Receita](/05-game-economy/revenue-model) para a sustentabilidade da plataforma
+- Revise a [Tokenomics](/05-game-economy/tokenomics) para um quadro econômico completo
+- Explore a [Integração de IA](/03-product-overview/ai-integration) para criação de IA
+- Verifique os [Colecionáveis](/03-product-overview/collectibles) para detalhes dos ativos

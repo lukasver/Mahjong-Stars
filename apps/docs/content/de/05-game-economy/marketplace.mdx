@@ -1,0 +1,395 @@
+---
+title: "Marktplatz"
+description: "Handelsmechanismen, AI-as-a-Service, physische Sammlerstücke und Marktplatzfunktionen"
+tags: ["Marktplatz", "Handel", "NFT", "KI-Marktplatz", "Sammlerstücke"]
+date: "2025-12-26"
+---
+
+import { Callout } from 'nextra/components';
+
+# Marktplatz
+
+Der In-Game-Marktplatz ist der Ort, an dem Spieler Charaktere, Talismane, Studios und KI-Module kaufen und verkaufen. Zu den Funktionen gehören Peer-to-Peer-Handel, AI-as-a-Service und sogar der Austausch von physischen Sammlerstücken.
+
+<Callout type="info">
+**Optionale Funktion**: Der Marktplatz erfordert eine Blockchain-Integration. Spieler, die traditionelle Spiele bevorzugen, können dies vollständig ignorieren – alle Assets funktionieren einwandfrei als Standard-In-Game-Gegenstände.
+</Callout>
+
+---
+
+## Handel und Liquidität
+
+Der Marktplatz bietet eine sichere, transparente Plattform für den Handel mit Assets.
+
+### Listungs-Tools
+
+Verkäufer haben flexible Optionen für die Listung ihrer Assets:
+
+**Festpreisangebote**:
+- Legen Sie Ihren Preis in Token fest
+- Sofortiger Verkauf, wenn der Käufer akzeptiert
+- Keine Zeitbegrenzung (bis storniert oder verkauft)
+- Am besten für gängige Artikel mit etablierten Preisen
+- Geringstes Risiko, vorhersehbares Ergebnis
+
+**Auktionen**:
+- **Englische Auktion (Aufsteigend)**:
+  - Startgebot und Mindestpreis festlegen
+  - Käufer bieten gegeneinander
+  - Höchstes Gebot gewinnt am Ende der Auktion
+  - Typischerweise 24-72 Stunden Dauer
+  - Am besten für seltene, hochwertige Artikel
+
+- **Holländische Auktion (Absteigend)**:
+  - Beginnt bei hohem Preis, sinkt mit der Zeit
+  - Erster Käufer, der den aktuellen Preis akzeptiert, gewinnt
+  - Preis sinkt nach Zeitplan (z. B. jede Stunde)
+  - Schafft Dringlichkeit für Käufer
+  - Gut, um den Lagerbestand schnell umzusetzen
+
+**Bundle-Angebote**:
+- Mehrere Artikel zusammen verkaufen
+- Paketangebote anbieten
+- Besseres Preis-Leistungs-Verhältnis für Käufer
+- Schneller Verkauf von verwandten Artikeln
+- Benutzerdefinierte Bundle-Preise
+
+**Listungsgebühren**:
+- Kleine Pauschalgebühr für die Listung (0,5-1% des Wertes, max. 100 Token)
+- Rückerstattet, wenn der Artikel nicht verkauft wird (Option)
+- Verhindert Spam-Listungen
+- Reduzierte Gebühren für Staker
+
+<Callout type="success">
+**Niedrige Hürden**: Minimale Listungsgebühren stellen sicher, dass jeder an der Marktplatzwirtschaft teilnehmen kann.
+</Callout>
+
+### Suche und Filter
+
+Käufer können leicht finden, wonach sie suchen:
+
+**Suchfunktionen**:
+- **Textsuche**: Suche nach Name, Beschreibung, Eigenschaften
+- **Erweiterte Filter**:
+  - Asset-Typ (Charakter, Talisman, Studio, KI-Modul)
+  - Seltenheitsstufe (Häufig bis Legendär)
+  - Stufenbereich
+  - Preisspanne
+  - Verkäuferbewertung
+  - Listungsart (Auktion vs. Festpreis)
+  - Auflistungsdatum (neueste zuerst usw.)
+- **Sortieroptionen**:
+  - Preis (niedrig bis hoch, hoch bis niedrig)
+  - Beliebtheit (meistgesehen)
+  - Endet bald (Auktionen)
+  - Kürzlich gelistet
+  - Beste Angebote (Wertbewertung)
+
+**Intelligente Filter**:
+- KI-empfohlene Artikel basierend auf Ihrer Sammlung
+- Ähnliche Artikel (beim Anzeigen einer Listung)
+- Preisverlauf und Trends
+- Vergleichende Analysetools
+- Beobachtete Artikelerinnerungen
+
+**Trendbereich**:
+- Am häufigsten gehandelte Artikel dieser Woche
+- Im Wert steigende Assets
+- Beliebte Suchanfragen
+- Community-Favoriten
+- Saisonale Highlights
+
+### Sichere Treuhand (Escrow)
+
+Alle Transaktionen werden über Smart Contracts abgewickelt, um Sicherheit zu gewährleisten:
+
+**Transaktionssicherheit**:
+1. Käufer sendet Zahlung an Treuhand-Smart-Contract
+2. Verkäufer überträgt Asset an Treuhand
+3. Smart-Contract verifiziert beide Seiten
+4. Gleichzeitiger Austausch wird ausgeführt
+5. Beide Parteien erhalten ihre Artikel atomar
+
+**Schutzfunktionen**:
+- **Keine Betrügereien**: Kein Geld nehmen, ohne Artikel zu geben
+- **Keine Rückbuchungen**: Blockchain-Transaktionen sind endgültig
+- **Streitbeilegung**: Plattformmediation bei Problemen
+- **Bewertungssystem**: Aufbau von Verkäufer-/Käuferreputation
+- **Käuferschutz**: Assets vor Abschluss verifizieren
+
+**Vorteile von Smart Contracts**:
+- Vertrauenslose Transaktionen
+- Transparenter Code
+- Geprüfte Sicherheit
+- Minimale Gebühren (nur Gas)
+- Sofortige Abwicklung
+
+### Analyse-Dashboard
+
+Datengetriebene Handelsentscheidungen:
+
+**Historische Preise**:
+- Preischarts für jeden Artikel
+- Volumenverfolgung
+- Durchschnittliche Verkaufspreise
+- Bodenpreise (niedrigste verfügbar)
+- Deckenpreise (höchste verkauft)
+
+**Markttrends**:
+- Angebots- und Nachfrageindikatoren
+- Preisdynamik
+- Handelsgeschwindigkeit
+- Halterverteilung
+- Seltenheitsmultiplikatoren
+
+**Portfolio-Tracking**:
+- Aktueller Wert Ihrer Sammlung
+- Kaufpreise vs. aktueller Wert
+- Gewinn-/Verlustberechnungen
+- Beste Performer
+- Investitionsanalysen
+
+**Benachrichtigungen**:
+- Benachrichtigungen bei Preisverfall
+- Listungsbenachrichtigungen für gewünschte Artikel
+- Benachrichtigungen über überbotene Gebote
+- Erinnerungen an Auktionsende
+- Änderungen des Portfoliowerts
+
+<Callout type="warning">
+**Marktintelligenz**: Nutzen Sie Analysen, um fundierte Handelsentscheidungen zu treffen, nicht spekulative Glücksspiele. Konzentrieren Sie sich auf Artikel, die Sie nutzen und genießen werden.
+</Callout>
+
+---
+
+## Kosmetische Artikel und virtuelle Assets
+
+Neben Gameplay-Assets bietet der Marktplatz rein kosmetische Artikel.
+
+### Kosmetische Kategorien
+
+**Visuelle Anpassung**:
+- **Tisch-Skins**: Benutzerdefinierte Tischdesigns und Materialien
+- **Kachel-Sets**: Einzigartige Kachelanzeigen
+- **Hintergründe**: Spielumgebungsthemen
+- **Avatar-Rahmen**: Profilbild-Rahmen
+- **Emotes & Sticker**: Ausdruckspakete
+- **Siegesanimationen**: Jubel-Effekte
+
+**Audio-Anpassung**:
+- **Musik-Pakete**: Hintergrund-Soundtracks
+- **Soundeffekte**: Benutzerdefinierte Kachelgeräusche
+- **Sprachpakete**: Charakterdialogoptionen
+- **Umgebungsgeräusche**: Umgebungsgeräusche
+
+**Limitierte Auflagen**:
+- **Saisonale Artikel**: Exklusive Artikel für Feiertage und Events
+- **Kollaborationsartikel**: Markenpartnerschaften
+- **Künstler-Serien**: Limitierte Auflagen von Künstlern
+- **Gedenkartikel**: Erinnerungsstücke an spezielle Events
+- **Gründerartikel**: Exklusiv für frühe Unterstützer
+
+### Verkaufsmodell für Kosmetika
+
+**Erstverkäufe**:
+- Regelmäßig neue Kosmetika veröffentlicht
+- Limitierte Mengen für seltene Artikel
+- Festpreise von der Plattform
+- Ein Teil des Umsatzes unterstützt die Entwicklung
+
+**Zweitmarkt**:
+- Spieler verkaufen Kosmetika weiter
+- Preise bestimmt durch Angebot und Nachfrage
+- Plattform erhebt eine kleine Provision
+- Ursprüngliche Schöpfer erhalten möglicherweise Lizenzgebühren (optional)
+
+**Saisonale Veröffentlichungen**:
+- Vierteljährliche thematische Kollektionen
+- Zeitlich begrenzte Verfügbarkeit
+- Knappheit nach der Saison treibt den Wert an
+- Reiz für Sammler
+
+---
+
+## AI-as-a-Service und Monetarisierungspotenzial
+
+Eine revolutionäre Funktion, einzigartig bei Mahjong Stars: der KI-Marktplatz.
+
+### KI-Vermietung
+
+Spieler mit gut trainierten KI-Begleitern können diese an andere vermieten:
+
+**Vermietungsmechanismen**:
+- **Stundenweise Vermietung**: 10-100 Token/Stunde (vom Besitzer festgelegt)
+- **Tägliche Vermietung**: 100-1.000 Token/Tag
+- **Spielbasiert**: 50-500 Token pro Spiel
+- **Abonnement**: Wöchentliche/monatliche Mietpakete
+
+**Vermietungsfunktionen**:
+- Mieter nutzt KI in Spielen
+- Einnahmen gehen an den Mieter (KI-Besitzer erhält Mietgebühr)
+- KI-Leistung wird verfolgt
+- Bewertungssystem für KI-Qualität
+- Stornierungsrichtlinien
+
+**Vorteile für den Besitzer**:
+- Passives Einkommen aus Trainingsinvestitionen
+- Plattform nimmt 5-10% Provision
+- Aufbau einer Reputation als KI-Trainer
+- Höhere Nachfrage = höhere Preise
+- Mehrere gleichzeitige Vermietungen (falls erlaubt)
+
+**Leistungsgarantien**:
+- Beworbene Gewinnraten müssen korrekt sein
+- Rückerstattungen für leistungsschwache KIs
+- Verifizierungssystem
+- Community-Bewertungen
+- Streitbeilegung
+
+<Callout type="success">
+**Innovative Wirtschaft**: Gut trainierte KIs werden zu wertvollen Assets, die ihren Trainern kontinuierliche Einnahmen generieren.
+</Callout>
+
+### KI-Coaching-Services
+
+Erfahrene Spieler können Einzelcoaching mit ihren KI-Modellen anbieten:
+
+**Coaching-Optionen**:
+- **Strategie-Sitzungen**: Analysieren Sie Replays mit KI-Einblicken (500-5.000 Token/Stunde)
+- **Trainingspläne**: Benutzerdefinierte KI-Trainings-Roadmaps (1.000-10.000 Token)
+- **Live-Coaching**: Beobachten und beraten während des Spiels (1.000-10.000 Token/Sitzung)
+- **KI-Optimierung**: KI-Einstellungen zur Leistungssteigerung optimieren (500-5.000 Token)
+
+**Buchungssystem**:
+- Terminplanung über den Marktplatz
+- Treuhand schützt beide Parteien
+- Bewertungs- und Rezensionssystem
+- Stornierungsrichtlinien
+- Sitzungsaufzeichnungen (mit Erlaubnis)
+
+**Vorteile für Trainer**:
+- Monetarisieren Sie Expertise
+- Bauen Sie eine persönliche Marke auf
+- Erweitern Sie Ihr Coaching-Geschäft
+- Plattform-Werbung (Top-Trainer werden vorgestellt)
+- Anerkennung in der Community
+
+### KI-Vorlagen und -Module
+
+Entwickler können KI-Vorlagen erstellen, die sich auf bestimmte Strategien spezialisieren:
+
+**KI-Produkte**:
+- **Varianten-Spezialisten**: KIs optimiert für spezifische Regelwerke (1.000-10.000 Token)
+- **Strategie-Module**: Defensive, aggressive, ausgewogene Stile (500-5.000 Token)
+- **Trainingsbeschleuniger**: Datensätze für schnelleres Lernen (250-2.500 Token)
+- **Analyse-Tools**: Verbesserte Analyse nach dem Spiel (500-5.000 Token)
+- **Hybrid-Module**: Kombinierte Mensch-KI-Strategien (1.000-10.000 Token)
+
+**Entwicklerökonomie**:
+- Legen Sie Ihre eigenen Preise fest
+- Plattform-Provision (10-15%)
+- Automatische Updates (optional)
+- Verantwortung für Kundensupport
+- Umsatzverfolgungs-Dashboard
+
+**Qualitätskontrolle**:
+- Plattformtests vor Genehmigung
+- Benutzerbewertungen und Rezensionen
+- Leistungsbenchmarks
+- Rückerstattungsrichtlinien
+- Programm für vorgestellte Entwickler
+
+---
+
+## Austausch physischer Sammlerstücke
+
+Einzigartig bei Mahjong Stars: Handel mit physischen Gegenständen, die mit der digitalen Wirtschaft verbunden sind.
+
+### Physische Sammlerstücke
+
+Gelegentlich veröffentlichte, limitierte physische Merchandise-Artikel:
+
+**Artikeltypen**:
+- **Themenbezogene Tassen**: Charakterdesigns, limitierte Auflagen
+- **Kunstdrucke**: Plattform-Kunstwerke, signierte Ausgaben
+- **Bekleidung**: T-Shirts, Hoodies mit exklusiven Designs
+- **Mahjong-Sets**: Physische Kachel-Sets mit Sonderdesigns
+- **Gedenkartikel**: Erinnerungsstücke an Events
+
+**Erwerb**:
+- Kauf mit weicher Währung im In-Game-Shop
+- Limitierte Mengen
+- Wer zuerst kommt, mahlt zuerst
+- Kann ein minimales Account-Level erfordern
+- Versand an verifizierte Adresse
+
+<Callout type="info">
+**Digitale-Physische Brücke**: Physische Sammlerstücke schaffen eine greifbare Verbindung zur digitalen Plattform und fördern das Engagement der Community.
+</Callout>
+
+### Austauschmechanismen
+
+Spieler können erworbene physische Artikel erneut listen:
+
+**Listing-Prozess**:
+1. Physisches Sammlerstück besitzen (wird Ihnen zugeschickt)
+2. Auf dediziertem physischem Austausch listen
+3. Legen Sie Ihren Wunschpreis fest (weiche Währung oder Token)
+4. Andere Benutzer geben Gebote ab
+5. Auktion endet, Höchstbietender gewinnt
+6. Gewinner zahlt, Sie versenden den Artikel
+7. Lieferung bestätigt, Zahlung wird freigegeben
+
+**Auktionsformat**:
+- Mindestgebotsanforderungen
+- Auktionsdauer (typischerweise 7-14 Tage)
+- Mindestpreis optional
+- Sofortkauf-Option
+- Transparenz der Versandkosten
+
+**Sicherheitsfunktionen**:
+- Verifizierte Adressen
+- Sendungsverfolgung erforderlich
+- Treuhand bis zur Lieferbestätigung
+- Streitbeilegung
+- Verkäuferbewertungen entscheidend
+
+**Rolle der Plattform**:
+- Listungen hosten (keine Provision für physische Artikel)
+- Streitigkeiten schlichten
+- Echtheit prüfen
+- Richtlinien bereitstellen
+- Community-Überwachung
+
+---
+
+## Marktplatzgebühren
+
+Zur Aufrechterhaltung der Plattform und zur Wertschöpfung:
+
+**Transaktionsgebühren**:
+- **Digitale Assets**: 10% Grundprovision
+- **Rabatte für Staker**: 10-60% Gebührenreduzierung (siehe Staker-Ränge)
+- **KI-Vermietung**: 5-10% Provision
+- **KI-Produkte**: 10-15% Provision
+- **Physische Artikel**: 0% Provision (Community-gesteuert)
+
+**Gebührenverteilung**:
+- 40% verbrannt (deflationär)
+- 30% an Staker (Belohnungen)
+- 20% an den Entwicklungsfonds
+- 10% an Liquiditätsanbieter
+
+**Gasgebühren**:
+- Kosten für Blockchain-Transaktionen (vom Benutzer zu zahlen)
+- Typischerweise gering (wenige Cent bis Dollar)
+- Dynamisch basierend auf Netzwerkauslastung
+- Subventionsprogramme für neue Benutzer (erste Transaktionen kostenlos)
+
+---
+
+## Nächste Schritte
+
+- Erfahren Sie mehr über das [Umsatzmodell](/05-game-economy/revenue-model) für die Nachhaltigkeit der Plattform
+- Überprüfen Sie die [Tokenomics](/05-game-economy/tokenomics) für ein vollständiges wirtschaftliches Bild
+- Erkunden Sie die [KI-Integration](/03-product-overview/ai-integration) für die KI-Erstellung

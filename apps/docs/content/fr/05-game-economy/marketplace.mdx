@@ -1,0 +1,396 @@
+---
+title: "Marketplace"
+description: "Mécanismes de trading, AI-as-a-Service, objets de collection physiques et fonctionnalités du marché"
+tags: ["marketplace", "trading", "nft", "ai-marketplace", "collectibles"]
+date: "2025-12-26"
+---
+
+import { Callout } from 'nextra/components';
+
+# Marketplace
+
+La place de marché en jeu est l'endroit où les joueurs achètent et vendent des personnages, des charmes, des studios et des modules d'IA. Les fonctionnalités incluent le trading peer-to-peer, l'IA en tant que service, et même l'échange d'objets de collection physiques.
+
+<Callout type="info">
+**Fonctionnalité Optionnelle** : La place de marché nécessite une intégration blockchain. Les joueurs qui préfèrent le jeu traditionnel peuvent l'ignorer entièrement - tous les actifs fonctionnent parfaitement en tant qu'objets de jeu standard.
+</Callout>
+
+---
+
+## Trading et Liquidité
+
+La place de marché offre une plateforme sécurisée et transparente pour le trading d'actifs.
+
+### Outils de Mise en Vente
+
+Les vendeurs disposent d'options flexibles pour lister leurs actifs :
+
+**Mises en Vente à Prix Fixe** :
+- Définissez votre prix en jetons
+- Vente instantanée lorsque l'acheteur accepte
+- Pas de limite de temps (jusqu'à annulation ou vente)
+- Idéal pour les objets courants avec des prix établis
+- Risque le plus faible, résultat prévisible
+
+**Mises en Vente aux Enchères** :
+- **Enchère Anglaise (Ascendante)** :
+  - Définissez le prix de départ et le prix de réserve
+  - Les acheteurs enchérissent les uns contre les autres
+  - L'offre la plus élevée gagne à la fin de l'enchère
+  - Durée typique de 24-72 heures
+  - Idéal pour les objets rares et de grande valeur
+
+- **Enchère Hollandaise (Descendante)** :
+  - Commence à un prix élevé, diminue avec le temps
+  - Le premier acheteur à accepter le prix actuel gagne
+  - Le prix baisse selon un calendrier (par exemple, chaque heure)
+  - Crée une urgence pour les acheteurs
+  - Bon pour écouler rapidement les stocks
+
+**Mises en Vente en Lot** :
+- Vendez plusieurs articles ensemble
+- Offrez des lots groupés
+- Meilleure valeur pour les acheteurs
+- Vente rapide d'articles liés
+- Prix personnalisés pour les lots
+
+**Frais de Mise en Vente** :
+- Petit frais fixe pour la mise en vente (0,5-1 % de la valeur, max 100 jetons)
+- Remboursé si l'article ne se vend pas (option)
+- Empêche les mises en vente de spam
+- Frais réduits pour les stakers
+
+<Callout type="success">
+**Barrières Minimales** : Les frais de mise en vente minimes garantissent que chacun peut participer à l'économie de la place de marché.
+</Callout>
+
+### Recherche et Filtres
+
+Les acheteurs peuvent facilement trouver ce qu'ils recherchent :
+
+**Fonctionnalités de Recherche** :
+- **Recherche Textuelle** : Recherchez par nom, description, traits
+- **Filtres Avancés** :
+  - Type d'actif (Personnage, Charme, Studio, Module IA)
+  - Niveau de rareté (Commun à Légendaire)
+  - Plage de niveaux
+  - Plage de prix
+  - Note du vendeur
+  - Type de mise en vente (enchère vs prix fixe)
+  - Date de mise en vente (du plus récent au plus ancien, etc.)
+- **Options de Tri** :
+  - Prix (du plus bas au plus élevé, du plus élevé au plus bas)
+  - Popularité (le plus vu)
+  - Enchères se terminant bientôt
+  - Récemment listé
+  - Meilleures affaires (note de valeur)
+
+**Filtres Intelligents** :
+- Articles recommandés par l'IA en fonction de votre collection
+- Articles similaires (lorsque vous consultez une mise en vente)
+- Historique et tendances des prix
+- Outils d'analyse comparative
+- Alertes sur les articles suivis
+
+**Section Tendances** :
+- Articles les plus échangés cette semaine
+- Actifs dont la valeur augmente
+- Recherches populaires
+- Favoris de la communauté
+- Points forts saisonniers
+
+### Sécurisation par Consignation
+
+Toutes les transactions sont traitées via des contrats intelligents, garantissant la sécurité :
+
+**Sécurité des Transactions** :
+1. L'acheteur envoie le paiement au contrat de consignation
+2. Le vendeur transfère l'actif à la consignation
+3. Le contrat intelligent vérifie les deux parties
+4. Échange simultané exécuté
+5. Les deux parties reçoivent leurs articles atomiquement
+
+**Fonctionnalités de Protection** :
+- **Pas d'Arnaques** : Impossible de prendre de l'argent sans donner d'objet
+- **Pas de Rétrofacturation** : Les transactions blockchain sont définitives
+- **Résolution des Litiges** : Médiation de la plateforme pour les problèmes
+- **Système de Notation** : Construire une réputation de vendeur/acheteur
+- **Protection de l'Acheteur** : Vérifier les actifs avant de finaliser
+
+**Avantages des Contrats Intelligents** :
+- Transactions sans confiance
+- Code transparent
+- Sécurité auditée
+- Frais minimaux (gaz uniquement)
+- Règlement instantané
+
+### Tableau de Bord Analytique
+
+Décisions de trading basées sur les données :
+
+**Prix Historiques** :
+- Graphiques de prix pour chaque article
+- Suivi du volume
+- Prix de vente moyens
+- Prix planchers (le plus bas disponible)
+- Prix plafonds (le plus élevé vendu)
+
+**Tendances du Marché** :
+- Indicateurs d'offre et de demande
+- Momentum des prix
+- Vélocité du trading
+- Distribution des détenteurs
+- Multiplicateurs de rareté
+
+**Suivi de Portefeuille** :
+- Valeur actuelle de votre collection
+- Prix d'achat vs valeur actuelle
+- Calculs de profits/pertes
+- Meilleures performances
+- Analyse des investissements
+
+**Alertes** :
+- Notifications de baisse de prix
+- Alertes de mise en vente pour les articles recherchés
+- Notifications de surenchère
+- Rappels de fin d'enchère
+- Changements de valeur du portefeuille
+
+<Callout type="warning">
+**Intelligence Marché** : Utilisez les analyses pour prendre des décisions de trading éclairées, pas des paris spéculatifs. Concentrez-vous sur les articles que vous utiliserez et apprécierez.
+</Callout>
+
+---
+
+## Articles Cosmétiques et Actifs Virtuels
+
+Au-delà des actifs de jeu, la place de marché propose des articles purement cosmétiques.
+
+### Catégories Cosmétiques
+
+**Personnalisation Visuelle** :
+- **Skins de Table** : Designs et matériaux de table personnalisés
+- **Sets de Tuiles** : Apparences de tuiles uniques
+- **Arrière-plans** : Thèmes d'environnement de jeu
+- **Cadres d'Avatar** : Bordures de photos de profil
+- **Émoticônes et Autocollants** : Packs d'expression
+- **Animations de Victoire** : Effets de célébration
+
+**Personnalisation Audio** :
+- **Packs de Musique** : Bandes sonores d'ambiance
+- **Effets Sonores** : Sons de tuiles personnalisés
+- **Packs Vocaux** : Options de dialogue de personnage
+- **Sons d'Ambiance** : Audio environnemental
+
+**Éditions Limitées** :
+- **Articles Saisonniers** : Exclusivités de fêtes et d'événements
+- **Articles de Collaboration** : Partenariats de marque
+- **Séries d'Artistes** : Éditions limitées d'artistes
+- **Articles Commémoratifs** : Souvenirs d'événements spéciaux
+- **Articles Fondateurs** : Exclusivités des premiers supporters
+
+### Modèle de Vente Cosmétique
+
+**Ventes Primaires** :
+- Nouveaux cosmétiques régulièrement mis en vente
+- Quantités limitées pour les articles rares
+- Prix fixe de la plateforme
+- Une partie des ventes soutient le développement
+
+**Marché Secondaire** :
+- Les joueurs revendent les cosmétiques
+- Prix déterminés par l'offre et la demande
+- La plateforme prend une petite commission
+- Les créateurs originaux peuvent recevoir des redevances (optionnel)
+
+**Sorties Saisonnières** :
+- Collections thématiques trimestrielles
+- Disponibilité limitée dans le temps
+- La rareté post-saison entraîne la valeur
+- Attrait pour les collectionneurs
+
+---
+
+## IA en tant que Service et Potentiel de Monétisation
+
+Une fonctionnalité révolutionnaire unique à Mahjong Stars : le marché de l'IA.
+
+### Locations d'IA
+
+Les joueurs possédant des compagnons IA bien entraînés peuvent les louer à d'autres :
+
+**Mécanismes de Location** :
+- **Locations à l'Heure** : 10-100 jetons/heure (défini par le propriétaire)
+- **Locations à la Journée** : 100-1 000 jetons/jour
+- **Basé sur le Match** : 50-500 jetons par match
+- **Abonnement** : Forfaits de location hebdomadaires/mensuels
+
+**Fonctionnalités de Location** :
+- Le locataire utilise l'IA dans les matchs
+- Les gains vont au locataire (le propriétaire de l'IA reçoit les frais de location)
+- Les performances de l'IA sont suivies
+- Système de notation pour la qualité de l'IA
+- Politiques d'annulation
+
+**Avantages pour le Propriétaire** :
+- Revenus passifs de l'investissement d'entraînement
+- La plateforme prend une commission de 5-10 %
+- Construire une réputation en tant qu'entraîneur d'IA
+- Demande plus élevée = prix plus élevés
+- Plusieurs locations simultanées (si autorisé)
+
+**Garanties de Performance** :
+- Les taux de victoire annoncés doivent être exacts
+- Remboursements pour les IA sous-performantes
+- Système de vérification
+- Avis de la communauté
+- Résolution des litiges
+
+<Callout type="success">
+**Économie Innovante** : Les IA bien entraînées deviennent des actifs précieux générant des revenus continus pour leurs entraîneurs.
+</Callout>
+
+### Services de Coaching IA
+
+Les joueurs expérimentés peuvent proposer du coaching individuel en utilisant leurs modèles d'IA :
+
+**Options de Coaching** :
+- **Sessions Stratégiques** : Analyser les replays avec des aperçus IA (500-5 000 jetons/heure)
+- **Plans d'Entraînement** : Feuilles de route personnalisées d'entraînement IA (1 000-10 000 jetons)
+- **Coaching en Direct** : Observer et conseiller pendant les parties (1 000-10 000 jetons/session)
+- **Optimisation IA** : Ajuster les paramètres de l'IA pour la performance (500-5 000 jetons)
+
+**Système de Réservation** :
+- Planifier via la place de marché
+- Consignation protège les deux parties
+- Système de notation et d'avis
+- Politiques d'annulation
+- Enregistrements de session (avec permission)
+
+**Avantages pour le Coach** :
+- Monétiser son expertise
+- Construire sa marque personnelle
+- Développer son activité de coaching
+- Promotion de la plateforme (les meilleurs coachs sont mis en avant)
+- Reconnaissance de la communauté
+
+### Modèles et Modules IA
+
+Les développeurs peuvent créer des modèles d'IA spécialisés dans des stratégies particulières :
+
+**Produits IA** :
+- **Spécialistes de Variantes** : IA optimisées pour des ensembles de règles spécifiques (1 000-10 000 jetons)
+- **Modules Stratégiques** : Styles défensifs, agressifs, équilibrés (500-5 000 jetons)
+- **Accélérateurs d'Entraînement** : Ensembles de données pour un apprentissage plus rapide (250-2 500 jetons)
+- **Outils d'Analyse** : Analyse post-partie améliorée (500-5 000 jetons)
+- **Modules Hybrides** : Stratégies homme-IA combinées (1 000-10 000 jetons)
+
+**Économie des Développeurs** :
+- Définir son propre prix
+- Commission de la plateforme (10-15 %)
+- Mises à jour automatiques (optionnel)
+- Responsabilité du support client
+- Tableau de bord de suivi des revenus
+
+**Contrôle Qualité** :
+- Tests de la plateforme avant approbation
+- Notes et avis des utilisateurs
+- Barèmes de performance
+- Politiques de remboursement
+- Programme de développeurs mis en avant
+
+---
+
+## Échange d'Objets de Collection Physiques
+
+Unique à Mahjong Stars : échange d'objets physiques liés à l'économie numérique.
+
+### Objets de Collection Physiques
+
+Merchandise physique en édition limitée publié occasionnellement :
+
+**Types d'Articles** :
+- **Mugs Thématiques** : Designs de personnages, éditions limitées
+- **Impressions d'Art** : Œuvres d'art de la plateforme, éditions signées
+- **Vêtements** : T-shirts, sweats à capuche avec des designs exclusifs
+- **Sets de Mahjong** : Sets de tuiles physiques avec des designs spéciaux
+- **Articles Commémoratifs** : Souvenirs d'événements
+
+**Acquisition** :
+- Achat avec de la monnaie virtuelle de la boutique en jeu
+- Quantités limitées
+- Premier arrivé, premier servi
+- Peut nécessiter un niveau de compte minimum
+- Expédié à une adresse vérifiée
+
+<Callout type="info">
+**Pont Numérique-Physique** : Les objets de collection physiques créent un lien tangible avec la plateforme numérique, améliorant l'engagement de la communauté.
+</Callout>
+
+### Mécanismes d'Échange
+
+Les joueurs peuvent remettre en vente des articles physiques qu'ils ont acquis :
+
+**Processus de Mise en Vente** :
+1. Posséder un objet de collection physique (qui vous a été expédié)
+2. Le mettre en vente sur l'échange physique dédié
+3. Définir votre prix demandé (monnaie virtuelle ou jetons)
+4. D'autres utilisateurs placent des enchères
+5. L'enchère se termine, le plus offrant gagne
+6. Le gagnant paie, vous expédiez l'article
+7. La confirmation de livraison libère le paiement
+
+**Format des Enchères** :
+- Exigences de mise minimale
+- Durée de l'enchère (7-14 jours typique)
+- Prix de réserve optionnel
+- Option "Acheter maintenant"
+- Transparence des frais d'expédition
+
+**Fonctionnalités de Sécurité** :
+- Adresses vérifiées
+- Suivi requis
+- Consignation jusqu'à confirmation de livraison
+- Résolution des litiges
+- Notes du vendeur cruciales
+
+**Rôle de la Plateforme** :
+- Héberger les annonces (aucune commission sur le physique)
+- Mèdier les litiges
+- Vérifier l'authenticité
+- Fournir des directives
+- Police communautaire
+
+---
+
+## Frais de Place de Marché
+
+Pour maintenir la plateforme et fournir de la valeur :
+
+**Frais de Transaction** :
+- **Actifs Numériques** : Commission de base de 10 %
+- **Réductions Staker** : Réduction des frais de 10-60 % (voir les niveaux de Staking)
+- **Locations IA** : Commission de 5-10 %
+- **Produits IA** : Commission de 10-15 %
+- **Articles Physiques** : 0 % de commission (piloté par la communauté)
+
+**Distribution des Frais** :
+- 40 % brûlés (déflationniste)
+- 30 % aux stakers (récompenses)
+- 20 % au fonds de développement
+- 10 % aux fournisseurs de liquidité
+
+**Frais de Gas** :
+- Coûts des transactions blockchain (payés par l'utilisateur)
+- Généralement faibles (quelques centimes à quelques dollars)
+- Dynamique en fonction de la congestion du réseau
+- Programmes de subvention pour les nouveaux utilisateurs (premières transactions gratuites)
+
+---
+
+## Prochaines Étapes
+
+- En savoir plus sur le [Modèle de Revenus](/05-game-economy/revenue-model) pour la durabilité de la plateforme
+- Examiner la [Tokenomics](/05-game-economy/tokenomics) pour une image économique complète
+- Explorer l'[Intégration IA](/03-product-overview/ai-integration) pour la création d'IA
+- Consulter les [Objets de Collection](/03-product-overview/collectibles) pour les détails des actifs
