@@ -160,7 +160,7 @@ const InstaxchangeIframe = memo(function Iframe({
       title="Instaxchange Payment"
       className="h-full w-full rounded-lg border border-border min-h-[90vh] md:min-h-screen]"
       allow="clipboard-read; clipboard-write; fullscreen; payment"
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       referrerPolicy="strict-origin-when-cross-origin"
       style={{
         width: "100%",
