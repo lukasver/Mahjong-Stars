@@ -337,7 +337,7 @@
       "home": "Startseite",
       "docs": "Dokumentation",
       "whoWeAre": "Über uns",
-      "termsAndConditions": "Nutzungsbedingungen",
+      "termsAndConditions": "Allgemeine Geschäftsbedingungen",
       "privacyPolicy": "Datenschutzrichtlinie",
       "contact": "Kontakt"
     },
@@ -347,11 +347,17 @@
     "soon": "Bald verfügbar",
     "search": "Suchen...",
     "subscribe": "Jetzt abonnieren",
-    "subscribePlaceholder": "E-Mail-Adresse eingeben",
+    "subscribePlaceholder": "Ihre E-Mail-Adresse eingeben",
     "contact": "Kontaktieren Sie uns",
     "banner": {
-      "title": "$TILE Token kommt bald 🚀"
-    }
+      "title": ""
+    },
+    "website": "Webseite",
+    "ico": "ICO",
+    "support": "Support",
+    "whitePaper": "Whitepaper",
+    "company": "Unternehmen",
+    "catchPhrase": "MJS mit Web3 stärken"
   },
   "Metadata": {
     "title": "Mahjong Stars",

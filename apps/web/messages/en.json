@@ -371,6 +371,12 @@
     "contact": "Contact us",
     "banner": {
       "title": ""
-    }
+    },
+    "website": "Website",
+    "ico": "ICO",
+    "support": "Support",
+    "whitePaper": "White Paper",
+    "company": "Company",
+    "catchPhrase": "Empowering MJS with Web3"
   }
 }

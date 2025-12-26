@@ -335,10 +335,10 @@
   "Footer": {
     "links": {
       "home": "Home",
-      "docs": "Documenti",
+      "docs": "Documentazione",
       "whoWeAre": "Chi Siamo",
       "termsAndConditions": "Termini e Condizioni",
-      "privacyPolicy": "Informativa sulla Privacy",
+      "privacyPolicy": "Politica sulla Privacy",
       "contact": "Contatti"
     },
     "copyright": "©{year} WASABI GAMES DMCC"
@@ -350,8 +350,14 @@
     "subscribePlaceholder": "Inserisci la tua email",
     "contact": "Contattaci",
     "banner": {
-      "title": "Il token $TILE è in arrivo 🚀"
-    }
+      "title": ""
+    },
+    "website": "Sito Web",
+    "ico": "ICO",
+    "support": "Supporto",
+    "whitePaper": "White Paper",
+    "company": "Azienda",
+    "catchPhrase": "Potenziare il Mahjong con Web3"
   },
   "Metadata": {
     "title": "Mahjong Stars",

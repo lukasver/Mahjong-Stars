@@ -132,7 +132,7 @@ export default async function Image() {
 					style={{
 						fontSize: 60,
 						fontWeight: 700,
-						color: "white",
+						color: "#4a0000",
 						marginBottom: 0,
 						textAlign: "center",
 						fontFamily: "TeachersTitle",
@@ -144,7 +144,7 @@ export default async function Image() {
 					style={{
 						marginTop: 12,
 						fontSize: 32,
-						color: "white",
+						color: "#4a0000",
 						fontWeight: 400,
 						textAlign: "center",
 						fontFamily: "TeachersDescription",

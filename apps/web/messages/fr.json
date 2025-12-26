@@ -336,8 +336,8 @@
     "links": {
       "home": "Accueil",
       "docs": "Docs",
-      "whoWeAre": "Qui sommes-nous ?",
-      "termsAndConditions": "Conditions générales d'utilisation",
+      "whoWeAre": "Qui sommes-nous",
+      "termsAndConditions": "Termes et Conditions",
       "privacyPolicy": "Politique de confidentialité",
       "contact": "Contact"
     },
@@ -350,8 +350,14 @@
     "subscribePlaceholder": "Entrez votre email",
     "contact": "Contactez-nous",
     "banner": {
-      "title": "Le jeton $TILE arrive bientôt 🚀"
-    }
+      "title": ""
+    },
+    "website": "Site Web",
+    "ico": "ICO",
+    "support": "Support",
+    "whitePaper": "White Paper",
+    "company": "Entreprise",
+    "catchPhrase": "Propulser le MJS avec Web3"
   },
   "Metadata": {
     "title": "Mahjong Stars",

@@ -346,12 +346,18 @@
   "Global": {
     "soon": "近日公開",
     "search": "検索...",
-    "subscribe": "今すぐ登録",
+    "subscribe": "今すぐ購読",
     "subscribePlaceholder": "メールアドレスを入力",
     "contact": "お問い合わせ",
     "banner": {
-      "title": "$MJSトークンは近日公開🚀"
-    }
+      "title": ""
+    },
+    "website": "ウェブサイト",
+    "ico": "ICO",
+    "support": "サポート",
+    "whitePaper": "ホワイトペーパー",
+    "company": "会社",
+    "catchPhrase": "Web3でMJSを強化する"
   },
   "Metadata": {
     "title": "Mahjong Stars",

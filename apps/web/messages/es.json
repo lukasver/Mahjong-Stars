@@ -336,10 +336,10 @@
   "Footer": {
     "links": {
       "home": "Inicio",
-      "docs": "Documentación",
-      "whoWeAre": "Quiénes Somos",
-      "termsAndConditions": "Términos y Condiciones",
-      "privacyPolicy": "Política de Privacidad",
+      "docs": "Documentos",
+      "whoWeAre": "Quiénes somos",
+      "termsAndConditions": "Términos y condiciones",
+      "privacyPolicy": "Política de privacidad",
       "contact": "Contacto"
     },
     "copyright": "©{year} WASABI GAMES DMCC"
@@ -351,8 +351,14 @@
     "subscribePlaceholder": "Introduce tu correo electrónico",
     "contact": "Contáctanos",
     "banner": {
-      "title": "El token $TILE llega pronto 🚀"
-    }
+      "title": ""
+    },
+    "website": "Sitio web",
+    "ico": "ICO",
+    "support": "Soporte",
+    "whitePaper": "White Paper",
+    "company": "Empresa",
+    "catchPhrase": "Potenciando el MJS con Web3"
   },
   "Metadata": {
     "title": "Mahjong Stars",
