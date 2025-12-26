@@ -63,7 +63,7 @@ const getSteps = (
   ]);
 };
 
-export default async function TransactionConfiramationPage({
+export default async function TransactionConfirmationPage({
   params,
 }: PageProps<'/dashboard/buy/[tx]'>) {
   const queryClient = new QueryClient();

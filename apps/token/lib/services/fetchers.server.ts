@@ -256,3 +256,17 @@ export const checkUserAndVerifyEmail = async (address: string) => {
 	}
 	return email || null;
 };
+
+
+export const getTransactionStatus = cache(async (id: string) => {
+	const user = await getUserFromSession();
+	const result = await transactions.getTransactionStatus({ id }, {
+		address: user.walletAddress,
+		userId: user.id,
+	});
+	if (result.success) {
+		return { data: result.data, error: null };
+	} else {
+		return { data: null, error: result };
+	}
+});

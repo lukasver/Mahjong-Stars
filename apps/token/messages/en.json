@@ -120,8 +120,17 @@
 			"button": "Back to your Dashboard"
 		},
 		"pending": {
-			"title": "Transaction Confirmed! ⏳",
-			"text": "Your transaction has been confirmed and is now under review by the {projectName} team. You will receive an email with further information once approved. Thank you for your patience!",
+			"title": "Transaction Pending",
+			"text": "Your transaction for {projectName} is currently in PENDING status. Please complete the remaining steps to finish your transaction. If you have been redirected here after a succesfull payment, please wait a few seconds until the transaction is fully processed.",
+			"transactionLink": "View transaction details",
+			"contactButton": "Get in Touch",
+			"backToTransaction": "Finish Transaction",
+			"button": "Back to your Dashboard",
+			"supportText": "If you have any questions, please contact us at"
+		},
+		"processing": {
+			"title": "Transaction being processed! ⏳",
+			"text": "Your transaction is now under review by the {projectName} team. You will receive an email with further information once approved. Thank you for your patience!",
 			"transactionLink": "View transaction details",
 			"contactButton": "Get in Touch",
 			"button": "Back to your Dashboard",
