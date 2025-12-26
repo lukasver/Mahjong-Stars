@@ -23,7 +23,7 @@ export async function GET() {
       (value) => value !== undefined && value !== null && value !== "" && value !== false,
     );
 
-    return NextResponse.json({ available });
+    return NextResponse.json({ available, minAmount: (available && env.MIN_AMOUNT_TO_PURCHASE) ? env.MIN_AMOUNT_TO_PURCHASE : null });
   } catch (_e) {
     // If there's an error accessing env vars, provider is not available
     return NextResponse.json({ available: false });

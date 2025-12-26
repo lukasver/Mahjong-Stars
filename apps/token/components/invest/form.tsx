@@ -311,7 +311,7 @@ export const InvestForm = ({
           name="receivingWallet"
           type="text"
           label={
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2 w-full">
               <span>Receiving wallet address</span>
               <PaymentInfoTooltip size="small">
                 <div className="bg-[#1a0a0a] border-2 border-[#8B1E1E]/70 rounded-lg p-4 shadow-xl">
@@ -359,7 +359,7 @@ export const InvestForm = ({
           inputProps={{
             placeholder: "0x1234567890",
           }}
-          description="EVM compatible wallet address where tokens will be sent after release"
+          description="Wallet address to receive tokens after release"
           descriptionClassName="text-secondary scroll scrollbar-hidden "
         />
 
@@ -380,7 +380,7 @@ export const InvestForm = ({
                   invalid_type_error: "Invalid quantity",
                 })
                 .int({ message: "Quantity must be a round number" })
-                .gte(0, "You must be 13 to make an account")
+                .gte(0, "You must buy at least 1 token")
                 .min(
                   sale.minimumTokenBuyPerUser,
                   "You must buy at least the minimum",

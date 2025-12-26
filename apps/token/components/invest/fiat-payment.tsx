@@ -5,23 +5,47 @@ import { DialogClose } from "@mjs/ui/primitives/dialog";
 import { UseAppForm, useFormContext } from "@mjs/ui/primitives/form";
 import { Label } from "@mjs/ui/primitives/label";
 import { RadioGroup, RadioGroupItem } from "@mjs/ui/primitives/radio-group";
+import Decimal from "decimal.js";
 import { Banknote, CreditCard } from "lucide-react";
+import { toast } from "node_modules/@mjs/ui/src/primitives/sonner";
 import { useEffect } from "react";
 import { z } from "zod";
 import { FOPSchema } from "@/common/schemas/generated";
+import { useCardProviderAvailability } from "@/lib/services/api";
 import { PaymentLimitsDialog } from "../buy/payment-limits-kyc-dialog";
 import { InvestFormSchema } from "./schemas";
+
+const getIsMinAmountMet = (
+  minAmount: Decimal | null,
+  values: z.infer<typeof InvestFormSchema>,
+) => {
+  console.log("🚀 ~ fiat-payment.tsx:19 ~ values:", values);
+  console.log("🚀 ~ fiat-payment.tsx:19 ~ minAmount:", minAmount);
+
+  if (!minAmount) return true;
+  // The min amount in USD
+  return new Decimal(values.base.ppu).mul(values.paid.quantity).gte(minAmount);
+};
 
 export function FiatPaymentSelector({
   onClick,
   disabled,
-  loading,
+  loading: _loading,
 }: {
   disabled: boolean;
   loading: boolean;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   const form = useFormContext() as unknown as UseAppForm;
+  const { data: availabilityData, isLoading: isCheckingAvailability } =
+    useCardProviderAvailability();
+  const minAmount =
+    (availabilityData?.minAmount && new Decimal(availabilityData.minAmount)) ||
+    null;
+  const isMinAmountMet = getIsMinAmountMet(
+    minAmount,
+    form.state.values as unknown as z.infer<typeof InvestFormSchema>,
+  );
 
   // set default value on mount
   useEffect(() => {
@@ -33,6 +57,16 @@ export function FiatPaymentSelector({
       form.setFieldValue("fop", FOPSchema.enum.CARD);
     }
   }, []);
+
+  const loading = isCheckingAvailability || _loading;
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isMinAmountMet) {
+      toast.error("Minimum amount for current payment method is not met, please adjust your purchase amount");
+      return;
+    }
+    onClick(e);
+  };
 
   return (
     <>
@@ -69,15 +103,16 @@ export function FiatPaymentSelector({
               >
                 <div className="space-y-3">
                   {/* Card Option */}
-                  <div className="flex items-center space-x-3 p-4 border border-red-700 rounded-lg hover:bg-red-800/30 transition-colors cursor-pointer group">
+                  <div className={`flex items-center space-x-3 p-4 border border-red-700 rounded-lg hover:bg-red-800/30 transition-colors cursor-pointer group shadow-sm hover:shadow-lg ${!isMinAmountMet ? "opacity-50 !cursor-not-allowed" : ""}`} >
                     <RadioGroupItem
                       value={FOPSchema.enum.CARD}
                       id="CARD"
-                      className="border-secondary-500 text-secondary-500"
+                      disabled={!isMinAmountMet}
+                      className={`border-secondary-500 text-secondary-500`}
                     />
                     <Label
                       htmlFor="CARD"
-                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                      className={`flex items-center gap-3 flex-1 ${!isMinAmountMet ? "opacity-50 !cursor-not-allowed" : "cursor-pointer"}`}
                     >
                       <CreditCard className="w-5 h-5 text-secondary-300" />
                       <div className="flex-1">
@@ -87,20 +122,26 @@ export function FiatPaymentSelector({
                         <p className="text-sm text-secondary-100">
                           Visa, Mastercard, Apple Pay, Google Pay, etc.
                         </p>
+                        {!isMinAmountMet && (
+                          <p className="text-sm text-destructive font-bold">
+                            Minimum amount is {minAmount?.toString()} USD or equivalent
+                          </p>
+                        )}
                       </div>
                     </Label>
                   </div>
 
                   {/* Transfer Option */}
-                  <div className="flex items-center space-x-3 p-4 border border-red-700 rounded-lg hover:bg-red-800/30 transition-colors cursor-pointer group">
+                  <div className={`flex items-center space-x-3 p-4 border border-red-700 rounded-lg hover:bg-red-800/30 transition-colors cursor-pointer group shadow-sm hover:shadow-lg ${!isMinAmountMet ? "opacity-50 !cursor-not-allowed" : ""}`}>
                     <RadioGroupItem
                       value={FOPSchema.enum.TRANSFER}
                       id="TRANSFER"
-                      className="border-secondary-500 text-secondary-500"
+                      disabled={!isMinAmountMet}
+                      className={`border-secondary-500 text-secondary-500`}
                     />
                     <Label
                       htmlFor="TRANSFER"
-                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                      className={`flex items-center gap-3 flex-1 ${!isMinAmountMet ? "opacity-50 !cursor-not-allowed" : "cursor-pointer"}`}
                     >
                       <Banknote className="w-5 h-5 text-secondary-300" />
                       <div className="flex-1">
@@ -110,6 +151,11 @@ export function FiatPaymentSelector({
                         <p className="text-sm text-secondary-100">
                           SEPA / OpenBanking / Direct Transfer
                         </p>
+                        {!isMinAmountMet && (
+                          <p className="text-sm text-destructive font-bold">
+                            Minimum amount is {minAmount?.toString()} USD or equivalent
+                          </p>
+                        )}
                       </div>
                     </Label>
                   </div>
@@ -142,7 +188,7 @@ export function FiatPaymentSelector({
                 type="button"
                 className="flex-1 font-semibold"
                 disabled={!fop || disabled}
-                onClick={onClick}
+                onClick={handleClick}
                 loading={loading}
               >
                 Continue with{" "}

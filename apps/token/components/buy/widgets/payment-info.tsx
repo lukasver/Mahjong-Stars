@@ -131,7 +131,7 @@ export default function PaymentInfoTooltip({
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <button className={buttonClasses} aria-label="Payment information">
+          <button className={buttonClasses} aria-label="Payment information" type="button">
             {buttonContent}
           </button>
         </DialogTrigger>
@@ -152,7 +152,7 @@ export default function PaymentInfoTooltip({
         content: "bg-transparent border-0 p-0 shadow-none w-auto",
       }}
     >
-      <button aria-label="Payment information">{buttonContent}</button>
+      <button aria-label="Payment information" type="button">{buttonContent}</button>
     </Tooltip>
   );
 }

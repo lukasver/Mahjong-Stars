@@ -83,7 +83,7 @@ const paymentMethodsData: PaymentMethodsData = {
         description: "Credit and debit card payments",
         icon: <Icons.creditCard className="size-4" />,
         limits: [
-          { amount: "Minimum amount", requirement: "$10" },
+          { amount: "Minimum amount", requirement: "$100" },
           {
             amount: "Up to €250",
             requirement: "Lite KYC",

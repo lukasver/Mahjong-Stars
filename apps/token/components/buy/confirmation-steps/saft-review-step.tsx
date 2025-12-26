@@ -196,8 +196,8 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
           <CardTitle>SAFT Review</CardTitle>
           <CardDescription>
             Please review the contract and fill in the required information
-            below. This is a preview; signature document will be send to your
-            email.
+            below. This is a preview. <br />The document to sign will be sent to your
+            email via <span className="font-bold text-foreground">Documenso</span>.
           </CardDescription>
         </CardHeader>
       </motion.div>

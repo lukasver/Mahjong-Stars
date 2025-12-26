@@ -466,7 +466,7 @@ export const getCardProviderAvailability = async () => {
 			throw new Error("Failed to check card provider availability");
 		}
 		const data = await response.json();
-		return { data: data as { available: boolean }, error: null };
+		return { data: data as { available: boolean, minAmount: string | null }, error: null };
 	} catch (e) {
 		return { data: null, error: e };
 	}

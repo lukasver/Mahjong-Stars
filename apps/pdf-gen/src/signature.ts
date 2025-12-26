@@ -73,6 +73,8 @@ export class DocumensoService {
 				});
 			}
 
+			const companyName = process.env.COMPANY_NAME || "The Tiles Company";
+
 			const res = await this.sdk.documents.createV0({
 				title,
 				recipients: rec,
@@ -81,7 +83,7 @@ export class DocumensoService {
 					timezone: meta?.timezone || "Europe/Zurich",
 					dateFormat: "dd/MM/yyyy hh:mm a",
 					language: meta?.language || "en",
-					subject: `Mahjong Stars signature request`,
+					subject: `${companyName} signature request`,
 					message: `Please sign the document: ${title} by clicking on the link below`,
 					emailSettings: {
 						recipientRemoved: false,
