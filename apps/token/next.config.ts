@@ -40,7 +40,7 @@ const INSTAXCHANGE_CONNECT = `https://instaxchange.com https://api.instaxchange.
 const cspHeader = `
     default-src 'self' ${MAIN_DOMAIN};
     connect-src 'self' ${INSTAXCHANGE_CONNECT} ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io ${VERCEL_LIVE_CSP} https://*.google.com https://google.com/pay https://apple.com https://www.apple.com;
-    frame-src 'self' ${INSTAXCHANGE_FRAME} https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.thirdweb.com/;
+    frame-src 'self' ${INSTAXCHANGE_FRAME} https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.thirdweb.com/ https://vercel.live/;
     script-src 'self' 'unsafe-eval' 'unsafe-inline' ${ANALYTICS_PROVIDERS} ${GOOGLE_CSP} ${E_SIGN_DOMAIN} ${VERCEL_LIVE_CSP} ${HELIO_SCRIPT};
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${HELIO_STYLES};

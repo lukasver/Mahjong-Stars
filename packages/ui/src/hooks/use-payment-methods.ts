@@ -1,35 +1,20 @@
 import * as React from "react";
 
 /**
- * Detects if the current device is an Apple device (iPhone/iPad)
- */
-function isAppleDevice(): boolean {
-  if (typeof window === "undefined" || !window.navigator) {
-    return false;
-  }
-
-  const userAgent = window.navigator.userAgent.toLowerCase();
-  const platform = window.navigator.platform?.toLowerCase() || "";
-
-  return (
-    /iphone|ipad|ipod/.test(userAgent) ||
-    (platform.includes("mac") && "ontouchend" in document) ||
-    platform.includes("iphone") ||
-    platform.includes("ipad")
-  );
-}
-
-/**
  * Checks if Apple Pay is available on the device
  * Uses the Payment Request API to detect Apple Pay support
+ * 
+ * Apple Pay is supported on:
+ * - Safari on macOS (desktop)
+ * - Safari on iOS/iPadOS (iPhone/iPad)
+ * 
+ * The Payment Request API will return true if:
+ * - User is on Safari (macOS or iOS/iPadOS)
+ * - User has Apple Pay set up and configured
+ * - Page is served over HTTPS (or localhost)
  */
 async function isApplePayAvailable(): Promise<boolean> {
   if (typeof window === "undefined") {
-    return false;
-  }
-
-  // First check if it's an Apple device
-  if (!isAppleDevice()) {
     return false;
   }
 
@@ -64,8 +49,8 @@ async function isApplePayAvailable(): Promise<boolean> {
 
     // Check if Apple Pay method is available
     // This will return true if:
-    // 1. Device is Apple (iPhone/iPad)
-    // 2. User has Apple Pay set up
+    // 1. User is on Safari (macOS or iOS/iPadOS)
+    // 2. User has Apple Pay set up and configured
     // 3. Page is served over HTTPS (or localhost)
     const canMakePayment = await paymentRequest.canMakePayment();
     return canMakePayment === true;
@@ -141,7 +126,7 @@ interface PaymentMethodAvailability {
 
 /**
  * Hook to detect payment method availability
- * - Apple Pay: Only available on Apple devices (iPhone/iPad) with Apple Pay enabled
+ * - Apple Pay: Available on Safari (macOS and iOS/iPadOS) with Apple Pay enabled
  * - Google Pay: Available on both mobile and desktop (Chrome supports it)
  */
 export function usePaymentMethods(): PaymentMethodAvailability {
