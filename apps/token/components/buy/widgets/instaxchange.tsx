@@ -5,8 +5,10 @@ import { motion, StaggeredRevealAnimation } from "@mjs/ui/components/motion";
 import PaymentMethodSelector, {
   PaymentMethodSelectorSkeleton,
 } from "@mjs/ui/components/payment-options";
+import { cn } from "@mjs/ui/lib/utils";
 import { Alert, AlertDescription } from "@mjs/ui/primitives/alert";
 import { Button } from "@mjs/ui/primitives/button";
+import { toast } from "@mjs/ui/primitives/sonner";
 import { AlertTriangle } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { TransactionByIdWithRelations } from "@/common/types/transactions";
@@ -88,7 +90,11 @@ const InstaxchangeWidgetComponent = ({
     <StaggeredRevealAnimation isVisible={!!sessionUrl}>
       <div className="space-y-4">
         <div className="relative w-full">
-          {sessionUrl && <Iframe src={sessionUrl} ref={iframeRef} />}
+          {sessionUrl && method === "apple-pay" ? (
+            <ApplePayHandler src={sessionUrl} txId={txId} />
+          ) : (
+            <InstaxchangeIframe src={sessionUrl} ref={iframeRef} />
+          )}
         </div>
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -98,8 +104,9 @@ const InstaxchangeWidgetComponent = ({
           <Alert className="border-secondary-300">
             <Icons.infoCircle className="stroke-secondary-300" />
             <AlertDescription className="text-foreground">
-              Your payment is processed securely by our partner's.  We take care
-              of the processing fees for you 😉. After successfully completing the payment your purchase will be confirmed via email.
+              Your payment is processed securely by our partner's. We take care
+              of the processing fees for you 😉. After successfully completing
+              the payment your purchase will be confirmed via email.
             </AlertDescription>
           </Alert>
         </motion.div>
@@ -123,19 +130,16 @@ const InstaxchangeWidgetComponent = ({
   );
 };
 
-const Iframe = memo(function Iframe({
+const InstaxchangeIframe = memo(function Iframe({
   src,
   ref,
 }: {
   src: string;
   ref: React.RefObject<HTMLIFrameElement | null>;
 }) {
-  const handleIframeMessage = useCallback(
-    (event: unknown) => {
-      console.debug("EVENT:", event);
-    },
-    [ref?.current],
-  );
+  const handleIframeMessage = useCallback((event: unknown) => {
+    console.debug("EVENT:", event);
+  }, []);
 
   /**
    * Set up postMessage listener for iframe communication
@@ -164,8 +168,6 @@ const Iframe = memo(function Iframe({
         border: "0",
       }}
       allowFullScreen
-    // onError={handleIframeError}
-    // onLoad={handleIframeLoad}
     />
   );
 });
@@ -236,3 +238,92 @@ export const InstaxchangeWidget = ({
     />
   );
 };
+
+/**
+ * Handles Apple Pay payment by opening a new window and monitoring transaction status
+ */
+const ApplePayHandler = memo(function ApplePayHandler({
+  src,
+  txId,
+}: {
+  src: string;
+  txId: string;
+}) {
+  const [isWindowOpen, setIsWindowOpen] = useState(false);
+  const [openButton, setOpenButton] = useState(false);
+
+  const handleOpenPaymentWindow = () => {
+    window.open(src, "_blank", "noopener,noreferrer");
+    setIsWindowOpen(true);
+  };
+
+  /**
+   * Open payment window when component mounts or src changes
+   */
+  useEffect(() => {
+    if (!src || isWindowOpen) return;
+
+    try {
+      handleOpenPaymentWindow();
+    } catch (_e) {
+      toast.error("Payment window could not be opened. Please try again.");
+      setOpenButton(true);
+    }
+  }, [src, isWindowOpen]);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (isWindowOpen) {
+      timer = setTimeout(() => setOpenButton(true), 5000);
+    } else {
+      setOpenButton(false);
+    }
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [isWindowOpen]);
+
+  return (
+    <div className="space-y-4 p-6 !rounded-lg border border-secondary bg-card glassy">
+      <div className="flex items-center gap-3">
+        <div className="flex-shrink-0">
+          <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center">
+            <Icons.infoCircle className="w-6 h-6 text-secondary-300" />
+          </div>
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-foreground mb-1">
+            Payment Window Opened
+          </h3>
+          <p className="text-sm text-foreground">
+            {isWindowOpen
+              ? "Please complete your payment in the new window. This page will automatically update when payment is confirmed."
+              : "The payment window has been closed. If you haven't completed the payment, please refresh this page to open it again."}
+          </p>
+        </div>
+      </div>
+      <div className="flex gap-4 justify-between">
+        <Button
+          onClick={() => {
+            window.location.reload();
+          }}
+          variant="outline"
+          className={cn("flex-1", !isWindowOpen && "hidden")}
+        >
+          Restart payment process
+        </Button>
+        <Button
+          onClick={() => {
+            handleOpenPaymentWindow();
+            setOpenButton(false);
+          }}
+          variant="default"
+          disabled={!openButton}
+          className="flex-1"
+        >
+          Open payment window
+        </Button>
+      </div>
+    </div>
+  );
+});

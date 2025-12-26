@@ -5,15 +5,15 @@ import { publicUrl } from "./common/config/env";
 
 const BUNDLE_ANALIZER_ON = process.env.ANALYZE === "true";
 
-const CRYPTO_NODES = {
-	mainnet: `wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com`,
-	sepolia: `wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com`,
-	goerli: `wss://eth-goerli.g.alchemy.com https://eth-goerli.g.alchemy.com`,
-	polygon: `wss://polygon-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com`,
-	mumbai: `wss://polygon-mumbai.g.alchemy.com https://polygon-mumbai.g.alchemy.com`,
-};
+// const CRYPTO_NODES = {
+// 	mainnet: `wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com`,
+// 	sepolia: `wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com`,
+// 	goerli: `wss://eth-goerli.g.alchemy.com https://eth-goerli.g.alchemy.com`,
+// 	polygon: `wss://polygon-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com`,
+// 	mumbai: `wss://polygon-mumbai.g.alchemy.com https://polygon-mumbai.g.alchemy.com`,
+// };
 
-const CRYPTO_NODES_CSP = Object.values(CRYPTO_NODES).join(" ");
+// const CRYPTO_NODES_CSP = Object.values(CRYPTO_NODES).join(" ");
 const WALLETS_CSP = `wss://*.walletconnect.org wss://*.walletconnect.com https://*.walletconnect.org https://*.walletconnect.com https://*.thirdweb.com`;
 const EXTERNAL_PROVIDERS = `min-api.cryptocompare.com`;
 const ANALYTICS_PROVIDERS = `https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.posthog.com`;
@@ -38,7 +38,7 @@ const INSTAXCHANGE_CONNECT = `https://instaxchange.com https://api.instaxchange.
 
 const cspHeader = `
     default-src 'self' ${MAIN_DOMAIN};
-    connect-src 'self' ${INSTAXCHANGE_CONNECT} ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${CRYPTO_NODES_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io https://vercel.live wss://ws-us3.pusher.com https://*.google.com https://google.com/pay https://apple.com https://www.apple.com;
+    connect-src 'self' ${INSTAXCHANGE_CONNECT} ${HELIO_API} ${MAIN_DOMAIN} ${ANALYTICS_PROVIDERS} ${EXTERNAL_PROVIDERS} ${WALLETS_CSP} ${E_SIGN_DOMAIN} ${STORAGE_CSP} https://ipfscdn.io https://*.ipfscdn.io https://vercel.live wss://ws-us3.pusher.com https://*.google.com https://google.com/pay https://apple.com https://www.apple.com;
     frame-src 'self' ${INSTAXCHANGE_FRAME} https://*.walletconnect.org https://*.walletconnect.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha https://*.thirdweb.com/ https://vercel.live/;
     script-src 'self' 'unsafe-eval' 'unsafe-inline' ${ANALYTICS_PROVIDERS} ${GOOGLE_CSP} ${E_SIGN_DOMAIN} ${HELIO_SCRIPT} https://vercel.live;
     worker-src 'self' blob:;

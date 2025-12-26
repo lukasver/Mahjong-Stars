@@ -426,7 +426,7 @@ export const InvestForm = ({
             <Button
               onClick={() => openModal(TransactionModalTypes.PendingTx)}
               className={cn(
-                "w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50",
+                "w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 !h-10 min-h-10 max-h-10 flex-shrink-0",
                 shouldPulse && "animate-pulse",
               )}
               type="button"
@@ -553,7 +553,7 @@ const PurchaseButton = ({
               disabled={!isConnected || props.disabled}
               // || !amount || !paymentMethod}
               className={cn(
-                "w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50",
+                "w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 !h-10 min-h-10 max-h-10 flex-shrink-0 inline-block",
                 pulse && "animate-pulse",
               )}
               type="button"
