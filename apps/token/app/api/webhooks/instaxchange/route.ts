@@ -273,7 +273,7 @@ const processWebhookEvent = async (payload: InstaxchangeWebhookPayload) => {
       "webhook.events.count": webhookEvents.length,
     });
 
-    const SKIP_DUPLICATE_WEBHOOK = false;
+    const SKIP_DUPLICATE_WEBHOOK = process.env.INSTAXCHANGE_WEBHOOK_SKIP_DUPLICATE === "true";
     if (isDuplicate && SKIP_DUPLICATE_WEBHOOK) {
       idempotencySpan.addEvent("webhook.duplicate.detected", {
         webhookId: payload.webhookId,
