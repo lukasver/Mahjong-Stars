@@ -208,7 +208,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.4 }}
-              className="grid grid-cols-2 gap-4"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               {variables.map((v, index) => {
                 return (
@@ -243,7 +243,7 @@ export function SaftReviewStep({ onSuccess }: SaftReviewStepProps) {
               >
                 <div
                   data-testid="saft-document"
-                  className="border rounded p-3 prose w-full max-w-none! max-h-96 sm:max-h-svh overflow-y-auto bg-white"
+                  className="border rounded p-3 prose w-full max-w-[300px] md:max-w-none! max-h-96 sm:max-h-svh overflow-y-auto bg-white"
                   dangerouslySetInnerHTML={{
                     __html: template,
                   }}

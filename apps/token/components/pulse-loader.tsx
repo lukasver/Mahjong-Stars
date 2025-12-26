@@ -24,7 +24,7 @@ export function PulseLoader({
         />
       </span>
       {children || (
-        <AnimatedText className="text-lg sm:text-xl font-bold font-head">
+        <AnimatedText className="text-base md:text-lg sm:text-xl font-bold font-head">
           {text}
         </AnimatedText>
       )}

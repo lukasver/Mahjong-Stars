@@ -5,7 +5,7 @@ import { MetricCardsLoading } from '@/components/skeletons/metric-cards-loading'
 
 function Loading() {
   return (
-    <div className='flex-1 p-8 space-y-8'>
+    <div className='flex-1 p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 md:space-y-8'>
       <FundraisingProgressLoading />
       <MetricCardsLoading />
       <LargeCardsLoading />

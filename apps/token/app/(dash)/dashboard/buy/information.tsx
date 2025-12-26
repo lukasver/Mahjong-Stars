@@ -51,6 +51,8 @@ export const ProjectInformation = ({
 }) => {
   const { data: docs, isLoading } = useSaleDocuments(sale.id);
 
+  const hasDocuments = (docs?.documents?.length ?? 0) > 0;
+  const hasImages = (docs?.images?.length ?? 0) > 0;
   return (
     <Card>
       {children}
@@ -62,7 +64,11 @@ export const ProjectInformation = ({
       </VisuallyHidden>
       <CardContent className={cn("pt-6")}>
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-700/50">
+          <TabsList className={cn("grid w-full bg-slate-700/50", {
+            "grid-cols-3": hasDocuments && hasImages,
+            "grid-cols-2": hasDocuments || hasImages,
+            "grid-cols-1": !hasDocuments && !hasImages,
+          })}>
             <TabsTrigger
               value="info"
               className="data-[state=active]:bg-slate-600"
@@ -72,7 +78,7 @@ export const ProjectInformation = ({
             </TabsTrigger>
             <TabsTrigger
               value="documents"
-              className="data-[state=active]:bg-slate-600"
+              className={cn("data-[state=active]:bg-slate-600", !hasDocuments && "hidden")}
             >
               <FileText className="w-4 h-4 mr-2" />
               Documents (
@@ -85,7 +91,7 @@ export const ProjectInformation = ({
             </TabsTrigger>
             <TabsTrigger
               value="gallery"
-              className="data-[state=active]:bg-slate-600"
+              className={cn("data-[state=active]:bg-slate-600", !hasImages && "hidden")}
             >
               <ImageIcon className="w-4 h-4 mr-2" />
               Gallery (

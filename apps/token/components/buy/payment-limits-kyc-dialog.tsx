@@ -62,7 +62,7 @@ const paymentMethodsData: PaymentMethodsData = {
     description:
       "Bank transfer solutions including SEPA, ACH, and other regional methods",
     limits: [
-      { amount: "Minimum amount:", requirement: "$100" },
+      { amount: "Minimum amount", requirement: "$100" },
       { amount: "$500 (per transaction)", requirement: "No KYC required" },
       { amount: "Up to $1,000/day", requirement: "No KYC required" },
       {
@@ -83,7 +83,7 @@ const paymentMethodsData: PaymentMethodsData = {
         description: "Credit and debit card payments",
         icon: <Icons.creditCard className="size-4" />,
         limits: [
-          { amount: "Minimum amount:", requirement: "$100" },
+          { amount: "Minimum amount", requirement: "$10" },
           {
             amount: "Up to €250",
             requirement: "Lite KYC",
@@ -103,7 +103,7 @@ const paymentMethodsData: PaymentMethodsData = {
         description: "Digital wallet payment via Apple Pay",
         icon: <Icons.applePay />,
         limits: [
-          { amount: "Minimum amount:", requirement: "$100" },
+          { amount: "Minimum amount", requirement: "$100" },
 
           {
             amount: "Up to €250",
@@ -127,7 +127,7 @@ const paymentMethodsData: PaymentMethodsData = {
         description: "Digital wallet payment via Google Pay",
         icon: <Icons.googlePay className="-mr-2!" />,
         limits: [
-          { amount: "Minimum amount:", requirement: "$100" },
+          { amount: "Minimum amount", requirement: "$100" },
 
           {
             amount: "Up to €250",
@@ -154,7 +154,7 @@ const paymentMethodsData: PaymentMethodsData = {
     description: "Cryptocurrency payments",
     icon: <Icons.ether className="size-4" />,
     limits: [
-      { amount: "Minimum amount:", requirement: "N/A" },
+      { amount: "Minimum amount", requirement: "N/A" },
       {
         amount: "No limits on direct crypto payments",
         requirement: "No KYC required",

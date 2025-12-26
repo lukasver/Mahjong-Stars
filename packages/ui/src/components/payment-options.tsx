@@ -420,11 +420,15 @@ const CardWrapper = ({
 
 export const PaymentMethodSelectorSkeleton = ({
   count = 4,
+  withBackground = false,
 }: {
   count?: number;
+  withBackground?: boolean;
 }) => {
   return (
-    <div className="w-full mx-auto p-6 bg-gradient-to-br from-zinc-900 via-red-950/20 to-zinc-900 rounded-2xl border border-red-900/30 shadow-2xl">
+    <div className={cn("w-full mx-auto p-6", {
+      'bg-gradient-to-br from-zinc-900 via-red-950/20 to-zinc-900 rounded-2xl border border-red-900/30 shadow-2xl': withBackground,
+    })}>
       {/* Title skeleton */}
       {/* <div className="h-8 w-48 bg-zinc-800/50 rounded-lg mb-2 animate-pulse" /> */}
 
